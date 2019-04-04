@@ -2,3 +2,4 @@
 target/
 .idea/
 classes/
+*.swagger.json
