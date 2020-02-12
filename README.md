@@ -231,8 +231,25 @@ RESOScript files contain zero or more Settings, Parameters, and Requests. For ex
    </OutputScript>
 ```
 
+## Docker
 
+A [Dockerfile](./Dockerfile) has been provided to dockerize the application. This can be used for CI/CD environments such as Jenkins or TravisCI. The following command will build an image for you:
 
+```
+docker build -t darnjo/web-api-command .
+```
+
+The usage for the docker containeris the same for `web-api-commander.jar` presented above.
+
+```
+docker run -it darnjo/web-api-commander --help
+```
+
+If you have input files you may need to mount your filesystem into the docker container
+
+```
+docker run -it -v $PWD:/app darnjo/web-api-commander --validateMetadata --inputFile <pathInContainer>
+```
 
 ---
 
