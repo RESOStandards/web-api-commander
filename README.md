@@ -10,29 +10,32 @@ the Apache Olingo library to provide the following functionality:
 * Get Entity data from a Web API URL
 * Save raw responses from a WEB API URL
 * Convert EDMX to Swagger / OpenAPI format
+* Run RESOScript Files
 
 The Web API Commander currently supports Bearer Tokens for authentication. 
 Additional methods of authentication will be added through subsequent updates.
 
-Help is available from the command line by passing `--help`, which displays
-the following information:
+Help is available from the command line by passing `--help` OR just passing no arguments. 
+Doing so displays the following information:
 
 ```
+/path/to/web-api-commander$ java -jar out/web-api-commander.jar
+
 usage: java -jar web-api-commander
     --bearerToken <b>       Bearer token to be used with the request.
     --contentType <t>       Results format: JSON (default),
                             JSON_NO_METADATA, JSON_FULL_METADATA, XML.
-    --convertEDMXtoOAI      converts EDMX in <inputFile> to OAI, saving it
+    --convertEDMXtoOAI      Converts EDMX in <inputFile> to OAI, saving it
                             in <inputFile>.swagger.json
     --entityName <n>        The name of the entity to fetch, e.g.
                             Property.
-    --getEntities           executes GET on <uri> using the given
+    --getEntities           Executes GET on <uri> using the given
                             <bearerToken> and optional <serviceRoot> when
                             --useEdmEnabledClient is specified. Optionally
                             takes a <limit>, which will fetch that number
                             of results. Pass --limit -1 to fetch all
                             results.
-    --getMetadata           fetches metadata from <serviceRoot> using
+    --getMetadata           Fetches metadata from <serviceRoot> using
                             <bearerToken> and saves results in
                             <outputFile>.
     --help                  print help
@@ -40,14 +43,18 @@ usage: java -jar web-api-commander
     --limit <l>             The number of records to fetch, or -1 to fetch
                             all.
     --outputFile <o>        Path to output file.
-    --saveRawGetRequest     performs GET from <requestURI> using the given
+    --runRESOScript         Runs commands in RESOScript file given as
+                            <inputFile>.
+    --saveRawGetRequest     Performs GET from <requestURI> using the given
                             <bearerToken> and saves output to
                             <outputFile>.
     --serviceRoot <s>       Service root URL on the host.
-    --uri <u>               URI for raw request. Use 'single quotes' to enclose.
+    --uri <u>               URI for raw request. Use 'single quotes' to
+                            enclose.
     --useEdmEnabledClient   present if an EdmEnabledClient should be used.
-    --validateMetadata      validates previously-fetched metadata in the
+    --validateMetadata      Validates previously-fetched metadata in the
                             <inputFile> path.
+
 ```
 
 ## Usage
@@ -156,7 +163,7 @@ OpenAPI / Swagger 2.0 format. This gives servers an alternative
 representation besides the OData-specific representation used by EDMX. 
 
 It's worth mentioning that translation from EDMX to OpenAPI/Swagger is 
-_lossy_, meaning that some EDMX elements will not be translated. This 
+*lossy*, meaning that some EDMX elements will not be translated. This 
 is due to the fact that EDMX is more specific than OpenAPI, for instance with type 
 representations like Integers.
 
@@ -168,6 +175,64 @@ java -jar web-api-commander.jar --convertEDMXtoOAI --inputFile <i>
 
 Any errors will be displayed, and the output file is automatically created by appending `.swagger.json` to
 the given EDMX `inputFile` name.
+
+
+## 6. Running RESOScript Files
+The Web API Commander is able to run RESO's XML-based scripting format, otherwise known as a RESOScript.
+
+In order to run an RESOScript file, use a command similar to the following:
+
+```/path/to/web-api-commander$ java -jar out/web-api-commander.jar --runRESOScript --i /path/to/your/inputFile --useEdmEnabledClient```
+
+Notice that the EDM Enabled client has been requested in the above command. This turns on strict OData checking, which 
+performs additional validation on query strings as well as schema validation on responses, among other things. 
+This feature is optional when using the `--runRESOScript` option, and may be omitted. The recommendation is to use it.
+
+When executing the Web API Commander, a results directory will be created as a sibling
+to the RESOScript file being run, with the directory name being generated from the RESOScript filename
+and the current timestamp. 
+
+Within this directory will be a file for each RESOScript request that was run,
+and those that generated errors will have ".ERROR" appended to them. Error files contain the request that 
+was made as well as the Java exception that was thrown, which most frequently comes from the underlying
+OLingo library and provides a sufficient amount of information to determine what occurred with the query.
+
+For those wanting more information, a `log4j.properties` file may be created (as shown below), or you may 
+use the DEBUG build of the application located in `/build/libs/` identified by `-DEBUG` in the Commander jar's file name.
+
+RESOScript files contain zero or more Settings, Parameters, and Requests. For example:
+```
+<?xml version="1.0" encoding="utf-8" ?>
+   <OutputScript>
+     <ClientSettings>
+       <ServerName></ServerName>
+       <ServerId></ServerId>
+       <WebAPIURI></WebAPIURI>
+       <AuthorizationURI></AuthorizationURI>
+       <TokenURI></TokenURI>
+       <RedirectURI></RedirectURI>
+       <AuthenticationType></AuthenticationType>
+       <BearerToken></BearerToken>
+       <ClientIdentification></ClientIdentification>
+       <ClientSecret></ClientSecret>
+       <UserName></UserName>
+       <Password></Password>
+       <ClientScope></ClientScope>
+       <Version></Version>
+       <Preauthenticate></Preauthenticate>
+     </ClientSettings>
+     <Parameters>
+       <Parameter Name="EndpointMetadata" Value="https://yourserver.com/api/$metadata" />
+     </Parameters>
+     <Requests>
+       <Request OutputFile="myTestOutputFile.json"         Url="*Parameter_EndpointMetadata*" />
+       <!-- ... additional requests -->    
+     </Requests>
+   </OutputScript>
+```
+
+
+
 
 ---
 

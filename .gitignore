@@ -1,5 +1,17 @@
-*.iml
-target/
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+gradle/
+
+build/tmp
+build/classes
+build/distributions
+build/generated
+build/reports
+build/resources
+build/scripts
+build/test-results
 .idea/
-classes/
-*.swagger.json
+*.log
+*.iml
