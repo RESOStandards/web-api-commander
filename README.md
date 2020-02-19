@@ -1,6 +1,6 @@
 # RESO Web API Commander
 
-[![CodeFactor](https://www.codefactor.io/repository/github/darnjo/web-api-commander/badge)](https://www.codefactor.io/repository/github/darnjo/web-api-commander)
+[![CodeFactor](https://www.codefactor.io/repository/github/resostandards/web-api-commander/badge)](https://www.codefactor.io/repository/github/resostandards/web-api-commander)
 
 The RESO Web API Commander is a command line Java application that uses
 the Apache Olingo library to provide the following functionality:
