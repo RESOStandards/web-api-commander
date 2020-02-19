@@ -75,7 +75,7 @@ public class Request {
     }
 
     public long getElapsedTimeMillis() {
-        return endDate.getTime() - startDate.getTime();
+        return endDate != null && startDate != null ? endDate.getTime() - startDate.getTime() : 0L;
     }
 
     public void setFailedRequestException(Exception failedRequestException) {
@@ -124,7 +124,7 @@ public class Request {
             NodeList nodes = (NodeList) xPath.compile(expression).evaluate(xmlDocument, XPathConstants.NODESET);
             Node node;
             String name, outputFile, url, testDescription, requirementId, metallicLevel, capability, webApiReference,
-                    assertResponseCode;
+                assertResponseCode;
             Request request;
 
             for (int i = 0; i < nodes.getLength(); i++) {
@@ -152,6 +152,13 @@ public class Request {
             e.printStackTrace();
         }
         return requests;
+    }
+
+    private int deserializeTests(Node node) {
+        int numTests = 0;
+
+
+        return numTests;
     }
 
     public String getRequirementId() {

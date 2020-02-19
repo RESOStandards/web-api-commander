@@ -1,21 +1,25 @@
 package org.reso.commander;
 
-import com.fasterxml.jackson.databind.ser.std.ByteArraySerializer;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.commons.io.output.WriterOutputStream;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
+import org.apache.olingo.client.api.edm.xml.Edmx;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.client.core.ODataClientFactory;
 import org.apache.olingo.client.core.domain.ClientEntitySetImpl;
-import org.apache.olingo.client.core.edm.xml.ClientCsdlEdmx;
+import org.apache.olingo.client.core.edm.ClientCsdlXMLMetadata;
+import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.auth.OAuth2HttpClientFactory;
@@ -36,6 +40,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * URI
  * Most of the work done by the WebAPI commander is done by this class. Its public methods are, therefore,
@@ -43,7 +49,7 @@ import java.util.function.Function;
  */
 public class Commander {
   //one instance of client per Commander. See Builder
-  private static ODataClient client;
+  private ODataClient client;
   private boolean useEdmEnabledClient;
 
   String serviceRoot, bearerToken, clientId, clientSecret, authorizationUri, tokenUri, redirectUri, scope;
@@ -54,6 +60,14 @@ public class Commander {
   //TODO move to utils class
   public static final int OK = 0;
   public static final int NOT_OK = 1;
+
+  public ODataClient getClient() {
+    return this.client;
+  }
+
+  public void setClient(ODataClient client) {
+    this.client = client;
+  }
 
   /**
    * Builder pattern for creating Commander instances.
@@ -125,26 +139,26 @@ public class Commander {
 
       //items required for OAuth client
       commander.isOAuthClient =
-            clientId != null && clientId.length() > 0 &&
-            clientSecret != null && clientSecret.length() > 0 &&
-            authorizationUri != null && authorizationUri.length() > 0 &&
-            tokenUri != null && tokenUri.length() > 0;
+          clientId != null && clientId.length() > 0 &&
+              clientSecret != null && clientSecret.length() > 0 &&
+              authorizationUri != null && authorizationUri.length() > 0 &&
+              tokenUri != null && tokenUri.length() > 0;
 
       //items required for token client
       commander.isTokenClient = bearerToken != null && bearerToken.length() > 0;
 
       LOG.debug("\nUsing EdmEnabledClient: " + useEdmEnabledClient + "...");
       if (useEdmEnabledClient) {
-        client = ODataClientFactory.getEdmEnabledClient(serviceRoot);
+        commander.setClient(ODataClientFactory.getEdmEnabledClient(serviceRoot));
       } else {
-        client = ODataClientFactory.getClient();
+        commander.setClient(ODataClientFactory.getClient());
       }
 
       if (commander.isOAuthClient) {
-        client.getConfiguration().setHttpClientFactory(new OAuth2HttpClientFactory(
-                clientId, clientSecret, authorizationUri, tokenUri, redirectUri, scope));
+        commander.getClient().getConfiguration().setHttpClientFactory(new OAuth2HttpClientFactory(
+            clientId, clientSecret, authorizationUri, tokenUri, redirectUri, scope));
       } else if (commander.isTokenClient) {
-        client.getConfiguration().setHttpClientFactory(new TokenHttpClientFactory(bearerToken));
+        commander.getClient().getConfiguration().setHttpClientFactory(new TokenHttpClientFactory(bearerToken));
       }
       return commander;
     }
@@ -239,6 +253,19 @@ public class Commander {
     return false;
   }
 
+  public boolean validateMetadata(InputStream inputStream) {
+    try {
+      // deserialize metadata from given file
+      XMLMetadata metadata =
+          client.getDeserializer(ContentType.APPLICATION_XML).toMetadata(inputStream);
+      return validateMetadata(metadata);
+
+    } catch (Exception ex) {
+      LOG.error("ERROR in validateMetadata! " + ex.toString() );
+    }
+    return false;
+  }
+
   /**
    * Validates the given metadata contained in the given file path.
    *
@@ -246,46 +273,37 @@ public class Commander {
    * @return true if the metadata is valid and false otherwise.
    */
   public boolean validateMetadata(String pathToEdmx) {
-    boolean isValid = false;
     try {
-      if (validateXML(pathToEdmx)) {
-        // deserialize metadata from given file
-        XMLMetadata metadata =
-            client.getDeserializer(ContentType.APPLICATION_XML).toMetadata(new FileInputStream(pathToEdmx));
-
-        isValid = validateMetadata(metadata);
-      }
-
+      // deserialize metadata from given file
+      return validateMetadata(new FileInputStream(pathToEdmx));
     } catch (Exception ex) {
       LOG.error("Error occurred while validating metadata.\nPath was:" + pathToEdmx);
       LOG.error(ex.getMessage());
     }
-    return isValid;
+    return false;
   }
 
-  /**
-   * Uses XML parser (SAX) to validate the given filename.
-   * @param filename the filename containing the XML to validate.
-   * @return true if the XML could be parsed, false otherwise.
-   */
-  private static boolean validateXML(String filename) {
-    boolean isValid = false;
+  public static boolean validateXML(String xmlString) {
+    return validateXML(new ByteArrayInputStream(xmlString.getBytes(UTF_8)));
+  }
 
+  public static boolean validateXML(InputStream inputStream) {
     SAXParserFactory factory = SAXParserFactory.newInstance();
     factory.setValidating(false);
     factory.setNamespaceAware(true);
 
     try {
       SAXParser parser = factory.newSAXParser();
-
       XMLReader reader = parser.getXMLReader();
       reader.setErrorHandler(new SimpleErrorHandler());
-      reader.parse(new InputSource(filename));
-      isValid = true;
+      InputSource inputSource = new InputSource();
+      inputSource.setByteStream(inputStream);
+      reader.parse(inputSource);
+      return true;
     } catch (Exception ex) {
       LOG.error(ex);
     }
-    return isValid;
+    return false;
   }
 
   public static class SimpleErrorHandler implements ErrorHandler {
@@ -305,16 +323,16 @@ public class Commander {
   /**
    * Prepares a URI for an OData request
    */
-  private URI prepareURI(String uriString) {
+  public static URI prepareURI(String uriString) {
     try {
-        URL url = new URL(uriString);
-        URIBuilder uriBuilder = new URIBuilder();
-        uriBuilder.setScheme(url.getProtocol());
+      URL url = new URL(uriString);
+      URIBuilder uriBuilder = new URIBuilder();
+      uriBuilder.setScheme(url.getProtocol());
 
-        uriBuilder.setHost(url.getHost());
-        if (url.getPath() != null) uriBuilder.setPath(url.getPath());
-        if (url.getQuery() != null) uriBuilder.setCustomQuery(url.getQuery());
-        return uriBuilder.build();
+      uriBuilder.setHost(url.getHost());
+      if (url.getPath() != null) uriBuilder.setPath(url.getPath());
+      if (url.getQuery() != null) uriBuilder.setCustomQuery(url.getQuery());
+      return uriBuilder.build();
     } catch (Exception ex) {
       LOG.error("ERROR in prepareURI: " + ex.toString());
     }

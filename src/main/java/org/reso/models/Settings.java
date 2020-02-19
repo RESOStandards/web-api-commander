@@ -1,8 +1,7 @@
 package org.reso.models;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * The settings class contains all the settings a server can have, which currently means the following:
@@ -13,12 +12,12 @@ import java.util.List;
 public class  Settings {
   private ClientSettings clientSettings;
   private Parameters parameters;
-  private List<Request> requests;
+  private Map<String, Request> requests;
 
   public Settings() {
     clientSettings = new ClientSettings();
     parameters = new Parameters();
-    requests = new ArrayList<Request>();
+    requests = new LinkedHashMap<>();
   }
 
   /**
@@ -47,11 +46,8 @@ public class  Settings {
     return settings;
   }
 
-
   static final String CLIENT_SETTING_PREFIX = "ClientSettings_";
   static final String PARAMETER_PREFIX = "Parameter_";
-
-
 
   /**
    * Resolves the parameters in request with parameters.
@@ -134,19 +130,28 @@ public class  Settings {
 
   /**
    * Requests getter.
-   *
-   * @return Observable List of Requests for this Settings instance.
+   * @return The request map that was loaded, indexed by request name.
    */
-  public List<Request> getRequests() {
+  public Map<String, Request> getRequests() {
     return requests;
+  }
+
+  /**
+   * Requests getter.
+   *
+   * @return returns server requests as a list
+   */
+  public List<Request> getRequestsAsList() {
+    return new ArrayList<>(requests.values());
   }
 
   /**
    * Requests setter.
    *
-   * @param requests sets local requests ObservableList to given requests.
+   * @param requests a list of requests to create the request map from
    */
   private void setRequests(List<Request> requests) {
-    this.requests = requests;
+    this.requests = new LinkedHashMap<String, Request>();
+    requests.forEach(request -> this.requests.put(request.getRequirementId(), request));
   }
 }

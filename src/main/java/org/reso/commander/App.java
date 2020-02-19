@@ -1,18 +1,26 @@
 package org.reso.commander;
 
+//import io.cucumber.core.cli.Main;
+
 import org.apache.commons.cli.*;
-import org.apache.logging.log4j.Logger;
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
-import org.reso.models.*;
+import org.reso.models.ClientSettings;
+import org.reso.models.Request;
+import org.reso.models.Settings;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 
 import static org.reso.commander.Commander.NOT_OK;
@@ -141,8 +149,8 @@ public class App {
         //put in local directory rather than relative to where the input file is
         String directoryName = System.getProperty(OUTPUT_DIR),
             outputPath = inputFilename
-            .substring(inputFilename.lastIndexOf(File.separator), inputFilename.length())
-            .replace(RESOSCRIPT_EXTENSION, "") + "-" + getTimestamp(new Date());
+                .substring(inputFilename.contains(File.separator) ? inputFilename.lastIndexOf(File.separator) : 0, inputFilename.length())
+                .replace(RESOSCRIPT_EXTENSION, "") + "-" + getTimestamp(new Date());
 
         String resolvedUrl = null;
 
@@ -158,16 +166,16 @@ public class App {
 
         for (int i = 0; i < numRequests; i++) {
           try {
-            request = settings.getRequests().get(i);
+            request = settings.getRequestsAsList().get(i);
 
             //TODO: create dynamic JUnit (or similar) test runner
             LOG.info(SMALL_DIVIDER);
-            LOG.info("Test: #" + (i + 1));
+            LOG.info("Assertion: #" + (i + 1));
             LOG.info(SMALL_DIVIDER);
-            LOG.info("Test Name:         " + request.getName());
+            LOG.info("Assertion Name:         " + request.getName());
 
             //TODO: function-ize the property test
-            LOG.info("Test Description:  " + (request.getTestDescription().length() > 0 ? request.getTestDescription() : "Not Specified"));
+            LOG.info("Assertion Description:  " + (request.getTestDescription().length() > 0 ? request.getTestDescription() : "Not Specified"));
             LOG.info("Requirement Id:    " + (request.getRequirementId().length() > 0 ? request.getRequirementId() : "Not Specified"));
             LOG.info("Metallic Level:    " + (request.getMetallicLevel().length() > 0 ? request.getMetallicLevel() : "Not Specified"));
             LOG.info("Capability:        " + (request.getCapability().length() > 0 ? request.getCapability() : "Not Specified"));
@@ -185,10 +193,17 @@ public class App {
 
               //get the response code from the request
               responseCode = commander.saveGetRequest(resolvedUrl, outputFilePath);
+              request.setHttpResponseCode(responseCode);
 
-              STATS.updateRequest(request, Request.Status.SUCCEEDED);
+              LOG.info("Response Code: " + responseCode);
+
+
+              if (responseCode == HttpStatus.SC_OK) {
+                STATS.updateRequest(request, Request.Status.SUCCEEDED);
+              }
 
               if (request.getOutputFile().toLowerCase().contains(EDMX_EXTENSION.toLowerCase())) {
+                //Main.main(new String[]{"-g", "org.reso.certification.stepdefs#WebAPIServer_1_0_2", "/home/jdarnell/work/reso/github/web-api-commander/src/main/java/org/reso/certification/features/web-api-server-1.0.2.feature"});
                 if (validateMetadata(commander, outputFilePath)) {
                   metadata = commander.getMetadata(outputFilePath);
                 } else {
@@ -199,11 +214,11 @@ public class App {
                 if (responseCode == Integer.parseInt(request.getAssertResponseCode())) {
                   LOG.info("Assert Response Code " + request.getAssertResponseCode() + " passed!");
                 } else {
-                  //the response was already marked as successful, so if the assert has failed,
-                  //fall through to here and update the status
+                  LOG.error("Request " + request.getName() + " Failed!");
                   STATS.updateRequest(request, Request.Status.FAILED);
                 }
               }
+
             } else {
               STATS.updateRequest(request, Request.Status.SKIPPED);
             }
@@ -214,7 +229,6 @@ public class App {
             Arrays.stream(ex.getStackTrace()).forEach(stackTraceElement -> LOG.error(stackTraceElement.toString()));
           } finally {
             if (request != null && STATS.getRequests().size() > 0) {
-                request.setHttpResponseCode(responseCode);
               LOG.info("Request " + STATS.getRequests().get(request).getStatus().toString().toLowerCase() + "!");
             }
 
@@ -385,10 +399,10 @@ public class App {
           reportBuilder.append("\n\n\tType Definition:").append(a.getName()));
 
       schema.getEntityTypes().forEach(a -> {
-          reportBuilder.append("\n\n\tEntity Type: ").append(a.getName());
-          a.getKeyPropertyRefs().forEach(ref ->
-              reportBuilder.append("\n\t\tKey Field: ").append(ref.getName()));
-          a.getPropertyNames().forEach(n -> reportBuilder.append("\n\t\tName: ").append(n));
+        reportBuilder.append("\n\n\tEntity Type: ").append(a.getName());
+        a.getKeyPropertyRefs().forEach(ref ->
+            reportBuilder.append("\n\t\tKey Field: ").append(ref.getName()));
+        a.getPropertyNames().forEach(n -> reportBuilder.append("\n\t\tName: ").append(n));
       });
 
       schema.getEnumTypes().forEach(a -> {
@@ -429,7 +443,7 @@ public class App {
     numIncomplete = stats.getRequestCount(Request.Status.STARTED);
 
     reportBuilder.append("\n\n" + DIVIDER);
-    reportBuilder.append("\nTest Statistics");
+    reportBuilder.append("\nAssertion Statistics");
     reportBuilder.append("\n" + DIVIDER);
 
     reportBuilder.append(generateTotalsReport(stats.totalRequestCount(), numSucceeded, numFailed, numSkipped, numIncomplete));
@@ -448,7 +462,7 @@ public class App {
       numSkipped = stats.filterByMetallicCertification(metallicKey, stats.filterByStatus(Request.Status.SKIPPED)).size();
       numIncomplete = stats.filterByMetallicCertification(metallicKey, stats.filterByStatus(Request.Status.STARTED)).size();
 
-      reportBuilder.append("\n\n").append(metallicKey).append(numSucceeded > 0 && numSucceeded == (requestCount - numSkipped) ? " - PASSED!" : "");
+      reportBuilder.append("\n\n").append(metallicKey).append(numSucceeded > 0 && numSucceeded == (requestCount - numSkipped) ? " - REQUESTS SUCCEEDED!" : "");
       reportBuilder.append(generateTotalsReport(requestCount, numSucceeded, numFailed, numSkipped, numIncomplete));
     }
 
@@ -463,7 +477,7 @@ public class App {
       numSkipped = stats.filterByCapability(capabilityKey, stats.filterByStatus(Request.Status.SKIPPED)).size();
       numIncomplete = stats.filterByCapability(capabilityKey, stats.filterByStatus(Request.Status.STARTED)).size();
 
-      reportBuilder.append("\n\n").append(capabilityKey).append(numSucceeded > 0 && numSucceeded == (requestCount - numSkipped) ? " - PASSED!" : "");
+      reportBuilder.append("\n\n").append(capabilityKey).append(numSucceeded > 0 && numSucceeded == (requestCount - numSkipped) ? " - REQUESTS SUCCEEDED!" : "");
       reportBuilder.append(generateTotalsReport(requestCount, numSucceeded, numFailed, numSkipped, numIncomplete));
     }
     reportBuilder.append("\n" + DIVIDER + "\n");
@@ -520,7 +534,7 @@ public class App {
      *               <p>
      *               If the given action doesn't validate, then an error message will be printed and the application will exit.
      */
-     static void validateAction(CommandLine cmd, String action) {
+    static void validateAction(CommandLine cmd, String action) {
       String validationResponse = null;
 
       if (action.matches(ACTIONS.RUN_RESOSCRIPT)) {
@@ -627,7 +641,7 @@ public class App {
           .addOption(Option.builder().argName("g").longOpt(ACTIONS.GET_ENTITIES)
               .desc("Executes GET on <uri> using the given <bearerToken> and optional <serviceRoot> when " +
                   "--useEdmEnabledClient is specified. Optionally takes a <limit>, which will fetch that number " +
-                      "of results. Pass --limit -1 to fetch all results.").build())
+                  "of results. Pass --limit -1 to fetch all results.").build())
           .addOption(Option.builder().argName("v").longOpt(ACTIONS.VALIDATE_METADATA)
               .desc("Validates previously-fetched metadata in the <inputFile> path.").build())
           .addOption(Option.builder().argName("w").longOpt(ACTIONS.SAVE_RAW_GET_REQUEST)
