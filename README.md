@@ -31,7 +31,7 @@ Your operating system probably already has Java 1.8.0 or greater.
 To check, type: 
 
 ```shell script
-$ java --version
+$ java -version
 ```
 
 in your operating system's terminal and you will see something similar to the following: 
