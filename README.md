@@ -5,13 +5,22 @@
 The RESO Web API Commander is a command line Java application that uses
 the Apache Olingo library to provide the following functionality:
 
-* Get Metadata
-* Validate Metadata
-* Get Entity data from a Web API URL
-* Save raw responses from a WEB API URL
-* Convert EDMX to Swagger / OpenAPI format
-* Run RESOScript Files
-* Automated Web API Testing (beta)
+- [Getting Metadata](#getting-metadata)
+- [Validating Metadata stored in an EDMX file](#validating-metadata-stored-in-an-edmx-file)
+- [Getting results from a given `uri`](#getting-results-from-a-given-uri)
+- [Getting raw results from a given `uri`](#getting-raw-results-from-a-given-uri)
+- [Converting metadata to Open API 2 format](#converting-metadata-to-open-api-2-format)
+- [Running RESOScript Files](#running-resoscript-files)
+- [Automated Web API Testing (beta)](#automated-web-api-testing-beta)
+  * [Cucumber Feature Specifications](#cucumber-feature-specifications)
+  * [Testing Environment](#testing-environment)
+  * [Web API Usage](#web-api-usage)
+  * [Web API Program Output](#web-api-program-output)
+  * [Gradle Commands](#gradle-commands)
+- [Docker](#docker)
+- [Logging](#logging)
+- [Coming Soon](#coming-soon)
+
 
 The Web API Commander currently supports Bearer Tokens for authentication. 
 Additional methods of authentication will be added through subsequent updates.
@@ -58,10 +67,8 @@ usage: java -jar web-api-commander
 
 ```
 
-## Usage
 
 ## Getting Metadata
-
 To get metadata, use the `--getMetadata` argument with the following 
 options:
 
@@ -131,7 +138,7 @@ an auto-resume feature will be added so that if something happens
 during transfer, the process will resume from the last record consumed.
  
 
-## Getting raw results from a given `uri` using `saveRawGetRequest`
+## Getting raw results from a given `uri`
 
 If additional processing using the OData Olingo library is not needed, 
 raw requests may be issued against the server instead.
@@ -139,8 +146,6 @@ raw requests may be issued against the server instead.
 The `--saveRawGetRequest` action writes the raw response from a GET 
 request to the given `--uri` from the Web API server directly to the 
 given `--outputFile`.
-
-Usage:
 
 ```
 java -jar web-api-commander.jar --saveRawGetRequest --uri <u> --bearerToken <b> --outputFile <o>
@@ -157,7 +162,7 @@ Note: this option is currently being rolled into `--getEntities` with
 been made.
   
 
-## Converting metadata from EDMX format to Open API / Swagger 2.0 format
+## Converting metadata to Open API 2 format
 
 The WebAPI Commander also supports converting files in EDMX format to 
 OpenAPI / Swagger 2.0 format. This gives servers an alternative 
@@ -278,7 +283,7 @@ programmers.
 
 Testing output during runtime has been designed to be easy to read and during each step, the relevant 
 output for the step will be displayed in the terminal or in an IDE if you have chosen to use the testing tool 
-there. This can often be useful if debugging tests as a developer can step through backing test code as its running
+there. This can often be useful if debugging tests as a developer can step through backing test code as it's running
 and inspect requests and responses in a controlled manner. 
 
 ### Testing Environment
@@ -290,9 +295,9 @@ Circle CI, Travis, or similar, and emit standard system codes during regression 
 It also provides pleasing command line interaction, and plays well with Cucumber by supporting the 
 ability to run individual or multiple tests using tags.
 
-### Usage
+### Web API Usage
 
- Once [Gradle is installed](https://gradle.org/install/), the Commander may be run in automated testing mode for a Web API 1.0.2 certification using
+Once [Gradle is installed](https://gradle.org/install/), the Commander may be run in automated testing mode for a Web API 1.0.2 certification using
  a terminal. A command similar to the following would be issued (adjust to your specific needs):
 
 ```shell script
@@ -315,16 +320,17 @@ This would run only the tests marked as `@core` in the
 There is still some "glue code" to back the [test descriptions 
 in `.feature` files](./src/main/java/org/reso/certification/features), but it is greatly optimized by the use 
 of [cucumber-jvm](https://github.com/cucumber/cucumber-jvm), which has support for the reuse of backing Java 
-code to cut down on copypasta test development. This library is bundled with the Commander and there is no need to install it.
+code to cut down on copypasta test development.
+
 The backing test code is done using [JUnit5](https://junit.org/junit5/). Normally, only those who are contributing 
-test code should need to know about the implementation details of how tests are run.
+test code should need to know about the implementation details of how tests are run. Libraries necessary for the Commander to run are included in the [`web-api-commander.jar`](https://github.com/RESOStandards/web-api-commander/blob/master/build/libs/web-api-commander.jar) file, aside from Gradle, which may either be installed on the local machine, or used within a Docker container (coming soon).
 
 *Note*: tests are currently tagged with their Web API version being 1.0.3, such as `@REQ-WA103-END3`, 
 but the tests currently being run on the server for Web API 1.0.2 is the backwards-compatible subset of 
 Web API 1.0.3 tests. Tags are still a work in progress, and are being added for Web API 1.0.2 tests as well. 
 Please feel free to suggest additional tags that might be useful.   
 
-### Program Output
+### Web API Program Output
 
 A sample of the runtime terminal output follows:
 
@@ -360,6 +366,21 @@ This shows configuration parameters, requests, and responses in a lightweight-ma
 
 Detailed information will be added to a local `./commander.log` file at runtime.
 
+### Gradle Commands
+
+The list of available gradle commands can be shown by typing the following in the console: 
+
+```
+$ gradle --help
+```
+
+These commands should not be necessary for the normal use of the Commander. There are a handful that are, however, 
+
+* `--continue                Continue task execution after a task failure.`
+* `-S, --full-stacktrace     Print out the full (very verbose) stacktrace for all exceptions.`
+* `-s, --stacktrace          Print out the stacktrace for all exceptions.`
+* `-t, --continuous          Enables continuous build. Gradle does not exit and will re-execute tasks when task file inputs change. [incubating]`
+
 
 ## Docker
 
@@ -386,31 +407,17 @@ docker run -it -v $PWD:/app darnjo/web-api-commander --validateMetadata --inputF
 
 ## Logging
 
-In the current release of the Commander, the default logging level has been set to `INFO` rather than `ALL` or `DEBUG`. 
+In the current version of the Commander, two logs are produced. One is outputted in the terminal at `INFO` level during runtime through `stdout`. A detailed log called `commander.log` will be outputted at runtime and will contain details down to the wire requests. 
 
-For instance, to log output to a file rather than piping the output of what's on the console to a file, the path to your custom settings file can be specified by passing a command line arg. There's more information about log4j.properties file [here](https://logging.apache.org/log4j/2.x/manual/configuration.html).
+Log4j 2 is being used under the hood for logging, and a configuration file may be found [here](https://github.com/RESOStandards/web-api-commander/blob/master/src/main/resources/log4j2.xml). Multiple outputs may be used, including posting to collectors or sending emails. [See Log4j 2 docs for more info](https://logging.apache.org/log4j/2.x/manual/index.html). 
 
-In this case, you'd want a log4j.properties file (name is arbitrary) similar to the following:
-
-```
-log4j.rootLogger=ALL, Console
-log4j.appender.Console=org.apache.log4j.ConsoleAppender
-log4j.appender.Console.layout=org.apache.log4j.PatternLayout
-log4j.appender.Console.layout.conversionPattern=%m%n
-```
-which you can then pass to the Commander as follows:
-
-```
- java -Dlog4j.configuration=file:/path/to/your/log4j.properties -jar web-api-commander.jar <... remaining arguments>
-```
-
-It's important to note that `-Dlog4j.configuration=file:/path/to/your/log4j.properties` _must_ contain a path to the file. In the case above, the file was in the same directory as the Java executable, but you'll need to change that if you're using a different directory.
+Gradle may be debugged as well, and additional gradle commands such as turning on full gradle step logging are discussed in [Gradle Commands](#gradle-commands).
 
 ---
 
 Please contact [josh@reso.org](mailto:josh@reso.org) with any questions, bug reports, or feature requests.
 
-**Coming Soon**: 
+## Coming Soon
 * Fully-automated Data Dictionary certification (in-progress)
 * Support for authentication options in addition to Bearer tokens (Client Credentials in beta, please email for more info).
 * Parallel fetch for replication
