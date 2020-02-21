@@ -1,6 +1,6 @@
 # RESO Web API Commander
 
-[![CodeFactor](https://www.codefactor.io/repository/github/resostandards/web-api-commander/badge)](https://www.codefactor.io/repository/github/resostandards/web-api-commander)
+[![CodeFactor](https://www.codefactor.io/repository/github/darnjo/web-api-commander/badge)](https://www.codefactor.io/repository/github/darnjo/web-api-commander)
 
 The RESO Web API Commander is a command line Java application that uses
 the Apache Olingo library to provide the following functionality:
@@ -11,6 +11,7 @@ the Apache Olingo library to provide the following functionality:
 * Save raw responses from a WEB API URL
 * Convert EDMX to Swagger / OpenAPI format
 * Run RESOScript Files
+* Automated Web API Testing (beta)
 
 The Web API Commander currently supports Bearer Tokens for authentication. 
 Additional methods of authentication will be added through subsequent updates.
@@ -59,7 +60,7 @@ usage: java -jar web-api-commander
 
 ## Usage
 
-## 1. Getting Metadata
+## Getting Metadata
 
 To get metadata, use the `--getMetadata` argument with the following 
 options:
@@ -81,7 +82,7 @@ Library we're using to validate with can be pretty cryptic. Please
 open an issue if you find things that need better explanations. 
 
 
-## 2. Validating Metadata stored in an EDMX file
+## Validating Metadata stored in an EDMX file
 Sometimes it's useful to validate an already-downloaded EDMX file. 
 
 Since parsing EDMX is an incremental process, validation terminates 
@@ -99,7 +100,7 @@ java -jar web-api-commander.jar --validateMetadata --inputFile <i>
 where `inputFile` is the path to your EDMX file. Errors will be logged 
 according to the `log4j.properties` file used at runtime. 
 
-## 3. Getting results from a given `uri`
+## Getting results from a given `uri`
 
 OData offers additional options for requesting data from a WebAPI server 
 beyond just receiving the raw server response (shown in the next example).
@@ -130,7 +131,7 @@ an auto-resume feature will be added so that if something happens
 during transfer, the process will resume from the last record consumed.
  
 
-## 4. Getting raw results from a given `uri` using `saveRawGetRequest`
+## Getting raw results from a given `uri` using `saveRawGetRequest`
 
 If additional processing using the OData Olingo library is not needed, 
 raw requests may be issued against the server instead.
@@ -156,7 +157,7 @@ Note: this option is currently being rolled into `--getEntities` with
 been made.
   
 
-## 5. Converting metadata from EDMX format to Open API / Swagger 2.0 format
+## Converting metadata from EDMX format to Open API / Swagger 2.0 format
 
 The WebAPI Commander also supports converting files in EDMX format to 
 OpenAPI / Swagger 2.0 format. This gives servers an alternative 
@@ -177,7 +178,7 @@ Any errors will be displayed, and the output file is automatically created by ap
 the given EDMX `inputFile` name.
 
 
-## 6. Running RESOScript Files
+## Running RESOScript Files
 The Web API Commander is able to run RESO's XML-based scripting format, otherwise known as a RESOScript.
 
 In order to run an RESOScript file, use a command similar to the following:
@@ -231,15 +232,145 @@ RESOScript files contain zero or more Settings, Parameters, and Requests. For ex
    </OutputScript>
 ```
 
+The XML DTD for this schema is as follows:
+
+```dtd
+<!DOCTYPE OutputScript [
+  <!ELEMENT OutputScript (ClientSettings|Parameters|Requests)*>
+  <!ELEMENT ClientSettings (WebAPIURI|AuthenticationType|BearerToken|ClientScope|Version|Preauthenticate)*>
+  <!ELEMENT WebAPIURI (#PCDATA)>
+  <!ELEMENT AuthenticationType (#PCDATA)>
+  <!ELEMENT BearerToken (#PCDATA)>
+  <!ELEMENT ClientScope (#PCDATA)>
+  <!ELEMENT Version (#PCDATA)>
+  <!ELEMENT Preauthenticate (#PCDATA)>
+  <!ELEMENT Parameters (Parameter)*>
+  <!ELEMENT Parameter (#PCDATA)>
+  <!ATTLIST Parameter
+    Name CDATA #REQUIRED
+    Value CDATA #REQUIRED>
+  <!ELEMENT Requests (Request)*>
+  <!ELEMENT Request (#PCDATA)*>
+  <!ATTLIST Request
+    AssertResponseCode CDATA #IMPLIED
+    Capability CDATA #REQUIRED
+    MetallicLevel CDATA #REQUIRED
+    OutputFile CDATA #REQUIRED
+    RequirementId CDATA #REQUIRED
+    TestDescription CDATA #REQUIRED
+    Url CDATA #REQUIRED
+    WebAPIReference CDATA #REQUIRED>
+  ]>
+```
+
+## Automated Web API Testing (beta)
+
+Currently in development is the ability for the Commander to be able to perform fully-automated Web API testing, 
+upon being provided a valid RESOScript file with parameters for the given server. 
+See [the generic RESOScript template for more info](./generic.resoscript).
+
+### Cucumber Feature Specifications
+
+[Cucumber](https://cucumber.io) is being used to describe acceptance criteria in a higher-level DSL
+rather than encapsulating all of the test logic code. Cucumber's DSL is called [Gherkin](https://cucumber.io/docs/gherkin/) 
+and essentially allows backing test code to be organized in a logical manner that makes sense to analysts as well as 
+programmers.
+
+Testing output during runtime has been designed to be easy to read and during each step, the relevant 
+output for the step will be displayed in the terminal or in an IDE if you have chosen to use the testing tool 
+there. This can often be useful if debugging tests as a developer can step through backing test code as its running
+and inspect requests and responses in a controlled manner. 
+
+### Testing Environment
+
+Under the hood, [Gradle](https://gradle.org/) is being used for automation. It works across multiple platforms 
+and is friendly with both Docker and Cucumber so that tests may be automated on CI/CD platforms such as Jenkins, 
+Circle CI, Travis, or similar, and emit standard system codes during regression testing. 
+ 
+It also provides pleasing command line interaction, and plays well with Cucumber by supporting the 
+ability to run individual or multiple tests using tags.
+
+### Usage
+
+ Once [Gradle is installed](https://gradle.org/install/), the Commander may be run in automated testing mode for a Web API 1.0.2 certification using
+ a terminal. A command similar to the following would be issued (adjust to your specific needs):
+
+```shell script
+$ gradle testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript
+```
+
+This will run the entirety of the tests against the Web API server provided as `WebAPIURI` in `your.resoscript` file.
+
+
+To filter by tags, a command similar to the following would be used:
+
+```shell script
+$ gradle testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript -Dcucumber.filter.tags="@core"
+```
+
+This would run only the tests marked as `@core` in the 
+[Web API Server 1.0.2 `.feature` file](./src/main/java/org/reso/certification/features/web-api-server-1.0.2.feature).
+
+
+There is still some "glue code" to back the [test descriptions 
+in `.feature` files](./src/main/java/org/reso/certification/features), but it is greatly optimized by the use 
+of [cucumber-jvm](https://github.com/cucumber/cucumber-jvm), which has support for the reuse of backing Java 
+code to cut down on copypasta test development. This library is bundled with the Commander and there is no need to install it.
+The backing test code is done using [JUnit5](https://junit.org/junit5/). Normally, only those who are contributing 
+test code should need to know about the implementation details of how tests are run.
+
+*Note*: tests are currently tagged with their Web API version being 1.0.3, such as `@REQ-WA103-END3`, 
+but the tests currently being run on the server for Web API 1.0.2 is the backwards-compatible subset of 
+Web API 1.0.3 tests. Tags are still a work in progress, and are being added for Web API 1.0.2 tests as well. 
+Please feel free to suggest additional tags that might be useful.   
+
+### Program Output
+
+A sample of the runtime terminal output follows:
+
+```
+    @REQ-WA103-END3 @core @x.y.z @core-support-endorsement
+    Scenario: REQ-WA103-END3 - CORE - Request and Validate Server Metadata   
+    
+    Using RESOScript: /path/to/your.resoscript
+      Given a RESOScript file was provided                                   
+    
+    RESOScript loaded successfully!
+      And Client Settings and Parameters were read from the file             
+    
+    Bearer token loaded... first 4 characters: abcd
+    Service root is: https://api.server.com/serviceRoot
+      And an OData client was successfully created from the given RESOScript 
+    
+    Request URI: https://api.server.com/serviceRoot/$metadata?$format=application/xml
+    Request succeeded...185032 bytes received.
+      When a GET request is made to the resolved Url in "REQ-WA103-END3"     
+    
+    Response code is: 200
+      Then the server responds with a status code of 200                     
+    
+    Response is valid XML!
+      And the response is valid XML                                          
+    
+    Metadata is valid!
+      And the metadata returned is valid   
+```
+
+This shows configuration parameters, requests, and responses in a lightweight-manner. 
+
+Detailed information will be added to a local `./commander.log` file at runtime.
+
+
 ## Docker
 
-A [Dockerfile](./Dockerfile) has been provided to dockerize the application. This can be used for CI/CD environments such as Jenkins or TravisCI. The following command will build an image for you:
+A [Dockerfile](./Dockerfile) has been provided to dockerize the application. 
+This can be used for CI/CD environments such as Jenkins or TravisCI. The following command will build an image for you:
 
 ```
 docker build -t darnjo/web-api-command .
 ```
 
-The usage for the docker containeris the same for `web-api-commander.jar` presented above.
+The usage for the docker container is the same for `web-api-commander.jar` presented above.
 
 ```
 docker run -it darnjo/web-api-commander --help
@@ -280,7 +411,8 @@ It's important to note that `-Dlog4j.configuration=file:/path/to/your/log4j.prop
 Please contact [josh@reso.org](mailto:josh@reso.org) with any questions, bug reports, or feature requests.
 
 **Coming Soon**: 
-* Support for authentication options in addition to Bearer tokens
-* Parallel fetch
+* Fully-automated Data Dictionary certification (in-progress)
+* Support for authentication options in addition to Bearer tokens (Client Credentials in beta, please email for more info).
+* Parallel fetch for replication
 * Job Scheduling
 * Excel export
