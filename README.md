@@ -5,6 +5,9 @@
 The RESO Web API Commander is a command line Java application that uses
 the Apache Olingo library to provide the following functionality:
 
+- [Getting Started](#getting-started)
+- [Display Help](#display-help)
+- [Authentication](#authentication)
 - [Getting Metadata](#getting-metadata)
 - [Validating Metadata stored in an EDMX file](#validating-metadata-stored-in-an-edmx-file)
 - [Getting results from a given `uri`](#getting-results-from-a-given-uri)
@@ -21,16 +24,43 @@ the Apache Olingo library to provide the following functionality:
 - [Logging](#logging)
 - [Coming Soon](#coming-soon)
 
+## Getting Started
+### [Download Commander JAR (Java 1.8.0+)](https://github.com/RESOStandards/web-api-commander/tree/master/build/libs)
+Your operating system probably already has Java 1.8.0 or greater. 
 
-The Web API Commander currently supports Bearer Tokens for authentication. 
-Additional methods of authentication will be added through subsequent updates.
+To check, type: 
 
-Help is available from the command line by passing `--help` OR just passing no arguments. 
+```shell script
+$ java -version
+```
+
+in your operating system's terminal and you will see something similar to the following: 
+
+```
+$ java -version
+openjdk version "1.8.0_242"
+OpenJDK Runtime Environment (build 1.8.0_242-8u242-b08-0ubuntu3~19.10-b08)
+OpenJDK 64-Bit Server VM (build 25.242-b08, mixed mode)
+```
+
+If you don't see something similar to this, with 1.8.0 or greater, or an error, you may have to download a Java Runtime Environment. 
+
+[Open JDK is recommended](https://openjdk.java.net/install/index.html).
+
+[Oracle's SE Development kit may also be used](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html), but there may be additional licensing terms to accept.
+
+
+## Display Help
+
+Assuming [you have downloaded `web-api-commander.jar`](https://github.com/RESOStandards/web-api-commander/tree/master/build/libs) at this point, help is available from the command line by passing `--help` OR just passing no arguments. 
+
+```
+/path/to/web-api-commander$ java -jar web-api-commander.jar
+```
+
 Doing so displays the following information:
 
 ```
-/path/to/web-api-commander$ java -jar out/web-api-commander.jar
-
 usage: java -jar web-api-commander
     --bearerToken <b>       Bearer token to be used with the request.
     --contentType <t>       Results format: JSON (default),
@@ -67,13 +97,20 @@ usage: java -jar web-api-commander
 
 ```
 
+When using commands, if arguments aren't provided, feedback will be displayed in the terminal, as well as the help screen, which will show how to pass each required argument. 
+
+## Authentication
+When using the Commader from the terminal, bearer tokens are the currently-supported authentication mechanism. Please see subsequent sections for how to use bearer tokens to accomplish tasks other than fully-automated testing, [discussed elsewhere in this README](#automated-web-api-testing-beta).
+
+Client credentials (OAuth2) are supported in RESOScript files. Please contact josh@reso.org if you are wanting certification using this mechanism. See [generic.resoscript](https://github.com/RESOStandards/web-api-commander/blob/master/generic.resoscript) for client credentials parameters. Note that this has not been tested extensively and is in pre-alpha.
+
 
 ## Getting Metadata
 To get metadata, use the `--getMetadata` argument with the following 
 options:
 
 ```
-java -jar web-api-commander.jar --getMetadata --serviceRoot <s> --bearerToken <b> --outputFile <o>
+  $ java -jar web-api-commander.jar --getMetadata --serviceRoot <s> --bearerToken <b> --outputFile <o>
 ```
 
 where `serviceRoot` is the path to the root of the OData WebAPI server.
@@ -101,7 +138,7 @@ To validate metadata that's already been downloaded, call the Web API
 Commander with the following options:
 
 ```
-java -jar web-api-commander.jar --validateMetadata --inputFile <i>
+  $ java -jar web-api-commander.jar --validateMetadata --inputFile <i>
 ```
 
 where `inputFile` is the path to your EDMX file. Errors will be logged 
@@ -116,7 +153,7 @@ In this case, the appropriate action is: `--getEntities`, which can be
 called as follows:
 
 ```
-java -jar web-api-commander.jar --getEntities --uri <u> --bearerToken <b> --outputFile <o>
+  $ java -jar web-api-commander.jar --getEntities --uri <u> --bearerToken <b> --outputFile <o>
 ``` 
 
 Make sure that any `uri` containing spaces or special characters is 
@@ -148,7 +185,7 @@ request to the given `--uri` from the Web API server directly to the
 given `--outputFile`.
 
 ```
-java -jar web-api-commander.jar --saveRawGetRequest --uri <u> --bearerToken <b> --outputFile <o>
+$ java -jar web-api-commander.jar --saveRawGetRequest --uri <u> --bearerToken <b> --outputFile <o>
 ```
 
 Results are not checked against Server Metadata and are not written in 
@@ -176,7 +213,7 @@ representations like Integers.
 The EDMX converter may be called as follows:
 
 ```
-java -jar web-api-commander.jar --convertEDMXtoOAI --inputFile <i>
+  $ java -jar web-api-commander.jar --convertEDMXtoOAI --inputFile <i>
 ``` 
 
 Any errors will be displayed, and the output file is automatically created by appending `.swagger.json` to
@@ -188,7 +225,9 @@ The Web API Commander is able to run RESO's XML-based scripting format, otherwis
 
 In order to run an RESOScript file, use a command similar to the following:
 
-```/path/to/web-api-commander$ java -jar out/web-api-commander.jar --runRESOScript --i /path/to/your/inputFile --useEdmEnabledClient```
+```
+$ java -jar out/web-api-commander.jar --runRESOScript --i /path/to/your/inputFile --useEdmEnabledClient
+```
 
 Notice that the EDM Enabled client has been requested in the above command. This turns on strict OData checking, which 
 performs additional validation on query strings as well as schema validation on responses, among other things. 
