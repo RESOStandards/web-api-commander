@@ -336,19 +336,32 @@ ability to run individual or multiple tests using tags.
 
 ### Web API Usage
 
-Once [Gradle is installed](https://gradle.org/install/), the Commander may be run in automated testing mode for a Web API 1.0.2 certification using
- a terminal. A command similar to the following would be issued (adjust to your specific needs):
+The Commander may be run in automated testing mode for a Web API 1.0.2 certification using a terminal. You do not need to use the Commander JAR file mentioned elsewhere in this step. Instead, you will run the tests using Gradle for automation against a clean copy of the latest Commander code.
 
-```shell script
+Once [Gradle is installed](https://gradle.org/install/), you will need to download the source code so you can run Gradle in the root of the directory. This assumes that you also have Java 8 (1.8.0) or above installed, as mentioned elsewhere in this [`README`](#getting-started).
+
+First, change into the directory you want to work in and clone the Commander repository. You will need to have Git installed. Chances are you already do, to check, open a command line and type `git` and if it's present, it will print some info about the app. If not, [there are instructions here](https://git-scm.com/downloads).
+
+```
+  $ git clone https://github.com/RESOStandards/web-api-commander.git
+```
+
+This will clone the repository into a directory called web-api-commander, which means you will have a fresh copy of the latest code to execute. To refresh the code after you have downloaded it, issue the command `$ git pull` in the root of the directory that was just created. 
+ 
+After you have cloned the repository, a command similar to the following would be issued (adjust to your specific needs):
+
+```
 $ gradle testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript
 ```
 
 This will run the entirety of the tests against the Web API server provided as `WebAPIURI` in `your.resoscript` file.
 
+Note that the first time you run this command, it will take some time to complete as Gradle will download all dependencies and compile the application before running the test suite. *Note: this step will be Dockerized so it can be run with a single command in a Docker container in upcoming versions of the Commander.*
+
 
 To filter by tags, a command similar to the following would be used:
 
-```shell script
+```
 $ gradle testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript -Dcucumber.filter.tags="@core"
 ```
 
