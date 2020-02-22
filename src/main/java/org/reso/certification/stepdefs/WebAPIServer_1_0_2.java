@@ -20,12 +20,10 @@ import org.reso.models.Settings;
 
 import java.io.*;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
@@ -43,27 +41,82 @@ public class WebAPIServer_1_0_2 implements En {
 
   private static final String JSON_VALUE_PATH = "value";
 
+  //container to hold retrieved metadata for later comparisons
+  private static AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
+
   public WebAPIServer_1_0_2() {
 
     //TODO: split into separate test files and parallelize to remove the need for Atomic "globals"
     AtomicReference<Commander> commander = new AtomicReference<>();
     AtomicReference<ODataRawResponse> oDataRawResponse = new AtomicReference<>();
     AtomicReference<Request> request = new AtomicReference<>();
+    AtomicReference<Integer> responseCode = new AtomicReference<>();
     AtomicReference<String> responseData = new AtomicReference<>();
     AtomicReference<String> initialResponseData = new AtomicReference<>(); //used if two result sets need to be compared
     AtomicReference<ODataRawRequest> rawRequest = new AtomicReference<>();
-    AtomicReference<ODataClientErrorException> oDataClientErrorException = new AtomicReference<>();
-    AtomicReference<String> serverODataHeaderVersion = new AtomicReference<>();
 
-    //container to hold retrieved metadata for later comparisons
-    AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
+    AtomicReference<ODataClientErrorException> oDataClientErrorException = new AtomicReference<>();
+    AtomicReference<Boolean> oDataClientErrorExceptionHandled = new AtomicReference<>();
+
+    AtomicReference<String> serverODataHeaderVersion = new AtomicReference<>();
+    AtomicReference<Boolean> testAppliesToServerODataHeaderVersion = new AtomicReference<>();
 
     final String HEADER_ODATA_VERSION = "OData-Version";
+
+    /*
+     * Instance Utility Methods - must precede usage
+     */
+
+    /*
+     * Resets the local instance state used during test time. TODO: refactor into collection of AtomicReference<T>
+     */
+    Runnable resetState = () -> {
+      commander.set(null);
+      oDataRawResponse.set(null);
+      request.set(null);
+      responseCode.set(null);
+      responseData.set(null);
+      initialResponseData.set(null);
+      rawRequest.set(null);
+      oDataClientErrorException.set(null);
+      serverODataHeaderVersion.set(null);
+      oDataClientErrorExceptionHandled.set(false);
+      testAppliesToServerODataHeaderVersion.set(false);
+    };
+
+
+    /*
+     * Executes HTTP GET request and sets the expected local variables.
+     * Handles exceptions and sets response codes.
+     */
+    Function<URI, Void> executeGetRequest = (URI requestUri) -> {
+      LOG.info("Request URI: " + requestUri);
+      try {
+        rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(requestUri));
+        oDataRawResponse.set(rawRequest.get().execute());
+        responseData.set(convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
+        serverODataHeaderVersion.set(oDataRawResponse.get().getHeader(HEADER_ODATA_VERSION).toString());
+        LOG.info("Request succeeded..." + responseData.get().getBytes().length + " bytes received.");
+      } catch (ODataClientErrorException cex) {
+        LOG.debug("OData Client Error Exception caught. Check subsequent test output for asserted conditions...");
+        oDataClientErrorException.set(cex);
+        serverODataHeaderVersion.set(Utils.getHeaderData(HEADER_ODATA_VERSION, cex.getHeaderInfo()));
+        responseCode.set(cex.getStatusLine().getStatusCode());
+        oDataClientErrorExceptionHandled.set(true);
+      }
+      return null;
+    };
+
 
     /*
      * Background
      */
     Given("^a RESOScript file was provided$", () -> {
+      /*  NOTE: this item is the first step in the Background */
+
+      //Reset ALL local state variables prior to each run.
+      resetState.run();
+
       if (pathToRESOScript == null) {
         pathToRESOScript = System.getProperty("pathToRESOScript");
       }
@@ -212,9 +265,8 @@ public class WebAPIServer_1_0_2 implements En {
       URI requestUri = Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl() + "&$skip=" + skipCount);
       LOG.info("Request URI: " + (requestUri != null ? requestUri.toString() : ""));
 
-      rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(requestUri));
-      oDataRawResponse.set(rawRequest.get().execute());
-      responseData.set(convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
+      executeGetRequest.apply(requestUri);
+
     });
     And("^data in the \"([^\"]*)\" fields are different in the second request than in the first$", (String parameterUniqueId) -> {
       ObjectMapper mapper = new ObjectMapper();
@@ -224,7 +276,6 @@ public class WebAPIServer_1_0_2 implements En {
       assertFalse(l1.containsAll(l2));
     });
 
-
     //==================================================================================================================
     // Common Methods
     //==================================================================================================================
@@ -233,49 +284,20 @@ public class WebAPIServer_1_0_2 implements En {
      * GET request by requirementId (see generic.resoscript)
      */
     When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", (String requirementId) -> {
-
-      //clear any outstanding exceptions
-      oDataClientErrorException.set(null);
-
       URI requestUri = Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl());
-      LOG.info("Request URI: " + requestUri);
-
-      try {
-        rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(requestUri));
-        oDataRawResponse.set(rawRequest.get().execute());
-        responseData.set(convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
-        serverODataHeaderVersion.set(oDataRawResponse.get().getHeader(HEADER_ODATA_VERSION).toString());
-        LOG.info("Request succeeded..." + responseData.get().getBytes().length + " bytes received.");
-      } catch (ODataClientErrorException cex) {
-        LOG.info("OData Client Error Exception caught. Check subsequent test output for asserted conditions...");
-        oDataClientErrorException.set(cex);
-        serverODataHeaderVersion.set(Utils.getHeaderData(HEADER_ODATA_VERSION, cex.getHeaderInfo()));
-      }
-    });
-
-    /*
-     * GET request by requirementId with an additional Uri fragment for the base Uri
-     */
-    When("^a GET request is made to the resolved Url in \"([^\"]*)\" with \"([^\"]*)\"$", (String requirementId, String parameterTopCount) -> {
-      request.set(Settings.resolveParameters(settings.getRequests().get(requirementId), settings));
-      LOG.info("Request URL: " + request.get().getUrl());
-
-      rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(Commander.prepareURI(request.get().getUrl())));
-      oDataRawResponse.set(rawRequest.get().execute());
-      responseData.set(convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
-      LOG.info("Request succeeded..." + responseData.get().getBytes().length + " bytes received.");
+      executeGetRequest.apply(requestUri);
     });
 
     /*
      * Assert response code
      */
     Then("^the server responds with a status code of (\\d+)$", (Integer assertedResponseCode) -> {
-      int responseCode = oDataClientErrorException.get() != null
+      responseCode.set(oDataClientErrorException.get() != null
           ? oDataClientErrorException.get().getStatusLine().getStatusCode()
-          : oDataRawResponse.get().getStatusCode();
+          : oDataRawResponse.get().getStatusCode());
 
-      LOG.info("Asserted Response Code: " + assertedResponseCode + ", " + "Server Response Code:" + responseCode);
-      assertEquals(assertedResponseCode.intValue(), responseCode);
+      LOG.info("Asserted Response Code: " + assertedResponseCode + ", " + "Server Response Code: " + responseCode);
+      assertEquals(responseCode.get().intValue(), assertedResponseCode.intValue());
     });
 
     /*
@@ -314,16 +336,25 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * Assert OData version
      */
-    And("^the OData version is \"([^\"]*)\"$", (String assertODataVersion) -> {
+    And("^the server reports OData version \"([^\"]*)\"$", (String assertODataVersion) -> {
       LOG.info("Asserted version: " + assertODataVersion + ", Reported OData Version: " + serverODataHeaderVersion.get()); ;
       assertEquals(serverODataHeaderVersion.get(), assertODataVersion);
+    });
+
+    /*
+     * Assert HTTP Response Code given asserted OData version
+     */
+    Then("^the server responds with a status code of (\\d+) if the server reports OData version \"([^\"]*)\"$",
+        (Integer assertedHttpResponseCode, String assertedODataVersion) -> {
+      assertEquals(responseCode.get().intValue(), assertedHttpResponseCode.intValue());
+      assertEquals(serverODataHeaderVersion.get(), assertedODataVersion);
     });
   }
 
   private static class Utils {
     /**
      * Tests the given string to see if it's valid JSON
-     * @param jsonString
+     * @param jsonString the JSON string to test the validity of
      * @return true if valid, false otherwise. Throws {@link IOException}
      */
     private static boolean isValidJson(String jsonString) {

@@ -53,7 +53,6 @@ Feature: Web API Server 1.0.2 Certification
     And data in the "Parameter_UniqueId" fields are different in the second request than in the first
 
   @REQ-WA103-QO1 @core @2.4.4 @filterability-endorsement @OData-4.0
-  Scenario: Query Support: Case-sensitivity of $filter
+  Scenario: Query Support: Case-sensitivity of $filter for OData 4.0
     When a GET request is made to the resolved Url in "REQ-WA103-QO1"
-    And the OData version is "4.0"
-    Then the server responds with a status code of 400
+    Then the server responds with a status code of 400 if the server reports OData version "4.0"
