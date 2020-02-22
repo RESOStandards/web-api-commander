@@ -1,13 +1,14 @@
 package org.reso.certification.stepdefs;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java8.En;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
+import org.apache.http.Header;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
@@ -40,6 +41,8 @@ public class WebAPIServer_1_0_2 implements En {
   private String serviceRoot, bearerToken, clientId, clientSecret, authorizationUri, tokenUri, redirectUri, scope;
   private String pathToRESOScript;
 
+  private static final String JSON_VALUE_PATH = "value";
+
   public WebAPIServer_1_0_2() {
 
     //TODO: split into separate test files and parallelize to remove the need for Atomic "globals"
@@ -49,9 +52,13 @@ public class WebAPIServer_1_0_2 implements En {
     AtomicReference<String> responseData = new AtomicReference<>();
     AtomicReference<String> initialResponseData = new AtomicReference<>(); //used if two result sets need to be compared
     AtomicReference<ODataRawRequest> rawRequest = new AtomicReference<>();
+    AtomicReference<ODataClientErrorException> oDataClientErrorException = new AtomicReference<>();
+    AtomicReference<String> serverODataHeaderVersion = new AtomicReference<>();
 
     //container to hold retrieved metadata for later comparisons
     AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
+
+    final String HEADER_ODATA_VERSION = "OData-Version";
 
     /*
      * Background
@@ -156,7 +163,7 @@ public class WebAPIServer_1_0_2 implements En {
       AtomicInteger numResults = new AtomicInteger();
 
       //iterate over the items and count the number of fields with data to determine whether there are data present
-      from(responseData.get()).getList("value", HashMap.class).forEach(item -> {
+      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
         if (item != null) {
           numResults.getAndIncrement();
           fieldList.forEach(field -> {
@@ -180,7 +187,7 @@ public class WebAPIServer_1_0_2 implements En {
      * $top=*Parameter_TopCount*
      */
     And("^the results contain at most \"([^\"]*)\" records$", (String parameterTopCount) -> {
-      List<String> items = from(responseData.get()).getList("value");
+      List<String> items = from(responseData.get()).getList(JSON_VALUE_PATH);
       AtomicInteger numResults = new AtomicInteger(items.size());
 
       int topCount = Integer.parseInt(Utils.resolveValue(parameterTopCount, settings));
@@ -204,16 +211,17 @@ public class WebAPIServer_1_0_2 implements En {
       //TODO: convert to OData filter factory
       URI requestUri = Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl() + "&$skip=" + skipCount);
       LOG.info("Request URI: " + (requestUri != null ? requestUri.toString() : ""));
+
       rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(requestUri));
       oDataRawResponse.set(rawRequest.get().execute());
       responseData.set(convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
     });
     And("^data in the \"([^\"]*)\" fields are different in the second request than in the first$", (String parameterUniqueId) -> {
       ObjectMapper mapper = new ObjectMapper();
-      JsonNode n1 = mapper.readTree(initialResponseData.get());
-      JsonNode n2 = mapper.readTree(responseData.get());
+      List<Object> l1 = from(initialResponseData.get()).getList(JSON_VALUE_PATH);
+      List<Object> l2 = from(responseData.get()).getList(JSON_VALUE_PATH);
 
-      assertFalse(n1.equals(n2));
+      assertFalse(l1.containsAll(l2));
     });
 
 
@@ -225,14 +233,24 @@ public class WebAPIServer_1_0_2 implements En {
      * GET request by requirementId (see generic.resoscript)
      */
     When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", (String requirementId) -> {
+
+      //clear any outstanding exceptions
+      oDataClientErrorException.set(null);
+
       URI requestUri = Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl());
       LOG.info("Request URI: " + requestUri);
 
-      rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(requestUri));
-      oDataRawResponse.set(rawRequest.get().execute());
-      responseData.set(convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
-
-      LOG.info("Request succeeded..." + responseData.get().getBytes().length + " bytes received.");
+      try {
+        rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(requestUri));
+        oDataRawResponse.set(rawRequest.get().execute());
+        responseData.set(convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
+        serverODataHeaderVersion.set(oDataRawResponse.get().getHeader(HEADER_ODATA_VERSION).toString());
+        LOG.info("Request succeeded..." + responseData.get().getBytes().length + " bytes received.");
+      } catch (ODataClientErrorException cex) {
+        LOG.info("OData Client Error Exception caught. Check subsequent test output for asserted conditions...");
+        oDataClientErrorException.set(cex);
+        serverODataHeaderVersion.set(Utils.getHeaderData(HEADER_ODATA_VERSION, cex.getHeaderInfo()));
+      }
     });
 
     /*
@@ -240,23 +258,24 @@ public class WebAPIServer_1_0_2 implements En {
      */
     When("^a GET request is made to the resolved Url in \"([^\"]*)\" with \"([^\"]*)\"$", (String requirementId, String parameterTopCount) -> {
       request.set(Settings.resolveParameters(settings.getRequests().get(requirementId), settings));
-
       LOG.info("Request URL: " + request.get().getUrl());
 
       rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(Commander.prepareURI(request.get().getUrl())));
       oDataRawResponse.set(rawRequest.get().execute());
       responseData.set(convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
-
       LOG.info("Request succeeded..." + responseData.get().getBytes().length + " bytes received.");
     });
 
     /*
      * Assert response code
      */
-    Then("^the server responds with a status code of (\\d+)$", (Integer code) -> {
-      int responseCode = oDataRawResponse.get().getStatusCode();
-      LOG.info("Response code is: " + responseCode);
-      assertEquals(code.intValue(), responseCode);
+    Then("^the server responds with a status code of (\\d+)$", (Integer assertedResponseCode) -> {
+      int responseCode = oDataClientErrorException.get() != null
+          ? oDataClientErrorException.get().getStatusLine().getStatusCode()
+          : oDataRawResponse.get().getStatusCode();
+
+      LOG.info("Asserted Response Code: " + assertedResponseCode + ", " + "Server Response Code:" + responseCode);
+      assertEquals(assertedResponseCode.intValue(), responseCode);
     });
 
     /*
@@ -265,9 +284,9 @@ public class WebAPIServer_1_0_2 implements En {
      * TODO: add general op expression parameter rather than creating individual comparators
      */
     And("^data in \"([^\"]*)\" are greater than \"([^\"]*)\"$", (String lValFromItem, String rValFromSetting) -> {
-      from(responseData.get()).getList("value", HashMap.class).forEach(item -> {
-        Integer lVal = new Integer(item.get(Utils.resolveValue(lValFromItem, settings)).toString()),
-                rVal = new Integer(Utils.resolveValue(rValFromSetting, settings));
+      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        Integer lVal = Integer.getInteger(item.get(Utils.resolveValue(lValFromItem, settings)).toString()),
+                rVal = Integer.getInteger(Utils.resolveValue(rValFromSetting, settings));
 
         assertTrue( lVal > rVal );
       });
@@ -291,6 +310,14 @@ public class WebAPIServer_1_0_2 implements En {
 
       LOG.info("Response is valid JSON!");
     });
+
+    /*
+     * Assert OData version
+     */
+    And("^the OData version is \"([^\"]*)\"$", (String assertODataVersion) -> {
+      LOG.info("Asserted version: " + assertODataVersion + ", Reported OData Version: " + serverODataHeaderVersion.get()); ;
+      assertEquals(serverODataHeaderVersion.get(), assertODataVersion);
+    });
   }
 
   private static class Utils {
@@ -308,6 +335,7 @@ public class WebAPIServer_1_0_2 implements En {
         return false;
       }
     }
+
 
     /**
      * Resolves the given item into a value
@@ -334,16 +362,16 @@ public class WebAPIServer_1_0_2 implements En {
     private static String getResponseData(ODataRawResponse oDataRawResponse) {
       return convertInputStreamToString(oDataRawResponse.getRawResponse());
     }
-  }
 
-  /**
-   * These are now passed dynamically but we may want to verify the choices. Leave in for now.
-   */
-  private static class REQUESTS {
-    private static class WEB_API_1_0_2 {
-      private static final String REQ_WA_103_END_3 = "REQ-WA103-END3";
-      private static final String REQ_WA_103_QR_3 = "REQ-WA103-QR3";
-      private static final String REQ_WA103_END2 = "REQ-WA103-END2";
+    private static String getHeaderData(String key, Header[] headers) {
+      String data = null;
+
+      for(Header header : headers) {
+        if (header.getName().toLowerCase().contains(key.toLowerCase())) {
+          data = header.getValue();
+        }
+      }
+      return data;
     }
   }
 

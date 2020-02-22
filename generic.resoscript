@@ -25,7 +25,7 @@
     Name CDATA #REQUIRED
     Value CDATA #REQUIRED>
   <!ELEMENT Requests (Request)*>
-  <!ELEMENT Request (Assertions)*>
+  <!ELEMENT Request (#PCDATA)*>
   <!ATTLIST Request
     AssertResponseCode CDATA #IMPLIED
     Capability CDATA #REQUIRED
@@ -35,12 +35,6 @@
     TestDescription CDATA #REQUIRED
     Url CDATA #REQUIRED
     WebAPIReference CDATA #REQUIRED>
-  <!ELEMENT Assertions (AssertPresent|AssertBinaryOpComparison)*>
-  <!ELEMENT AssertPresent (#PCDATA)>
-  <!ELEMENT AssertBinaryOpComparison (LVal|Op|RVal)*>
-  <!ELEMENT LVal (#PCDATA)>
-  <!ELEMENT Op (#PCDATA)>
-  <!ELEMENT RVal (#PCDATA)>
   ]>
 
 <OutputScript>
@@ -274,7 +268,6 @@
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO1-1_Select_Case.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$SeLeCt=*Parameter_SelectList*&amp;$filter=*Parameter_FilterNumericField* eq *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*"
-          AssertResponseCode="400"
         />
 
         <Request

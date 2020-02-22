@@ -277,8 +277,8 @@ See [the generic RESOScript template for more info](./generic.resoscript).
 ### Cucumber Feature Specifications
 
 [Cucumber](https://cucumber.io) is being used to describe acceptance criteria in a higher-level DSL
-rather than encapsulating all of the test logic code. Cucumber's DSL is called [Gherkin](https://cucumber.io/docs/gherkin/) 
-and essentially allows backing test code to be organized in a logical manner that makes sense to analysts as well as 
+rather than encapsulating all of the test logic in code. Cucumber's DSL, called [Gherkin](https://cucumber.io/docs/gherkin/), 
+allows backing test code to be organized and executed in a logical manner that makes sense to analysts as well as 
 programmers.
 
 Testing output during runtime has been designed to be easy to read and during each step, the relevant 
@@ -300,7 +300,7 @@ ability to run individual or multiple tests using tags.
 Once [Gradle is installed](https://gradle.org/install/), the Commander may be run in automated testing mode for a Web API 1.0.2 certification using
  a terminal. A command similar to the following would be issued (adjust to your specific needs):
 
-```shell script
+```
 $ gradle testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript
 ```
 
@@ -309,7 +309,7 @@ This will run the entirety of the tests against the Web API server provided as `
 
 To filter by tags, a command similar to the following would be used:
 
-```shell script
+```
 $ gradle testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript -Dcucumber.filter.tags="@core"
 ```
 
@@ -335,6 +335,10 @@ Please feel free to suggest additional tags that might be useful.
 A sample of the runtime terminal output follows:
 
 ```
+  $ gradle testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript -Dcucumber.filter.tags="@core"
+
+    ...
+
     @REQ-WA103-END3 @core @x.y.z @core-support-endorsement
     Scenario: REQ-WA103-END3 - CORE - Request and Validate Server Metadata   
     
@@ -359,7 +363,10 @@ A sample of the runtime terminal output follows:
       And the response is valid XML                                          
     
     Metadata is valid!
-      And the metadata returned is valid   
+      And the metadata returned is valid  
+
+    ...
+ 
 ```
 
 This shows configuration parameters, requests, and responses in a lightweight-manner. 
@@ -371,7 +378,7 @@ Detailed information will be added to a local `./commander.log` file at runtime.
 The list of available gradle commands can be shown by typing the following in the console: 
 
 ```
-$ gradle --help
+  $ gradle --help
 ```
 
 These commands should not be necessary for the normal use of the Commander. There are a handful that are, however, 
@@ -388,19 +395,19 @@ A [Dockerfile](./Dockerfile) has been provided to dockerize the application.
 This can be used for CI/CD environments such as Jenkins or TravisCI. The following command will build an image for you:
 
 ```
-docker build -t darnjo/web-api-command .
+  $ docker build -t darnjo/web-api-command .
 ```
 
 The usage for the docker container is the same for `web-api-commander.jar` presented above.
 
 ```
-docker run -it darnjo/web-api-commander --help
+  $ docker run -it darnjo/web-api-commander --help
 ```
 
 If you have input files you may need to mount your filesystem into the docker container
 
 ```
-docker run -it -v $PWD:/app darnjo/web-api-commander --validateMetadata --inputFile <pathInContainer>
+  $ docker run -it -v $PWD:/app darnjo/web-api-commander --validateMetadata --inputFile <pathInContainer>
 ```
 
 ---
