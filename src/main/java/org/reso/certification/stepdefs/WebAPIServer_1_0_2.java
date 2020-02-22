@@ -346,8 +346,12 @@ public class WebAPIServer_1_0_2 implements En {
      */
     Then("^the server responds with a status code of (\\d+) if the server reports OData version \"([^\"]*)\"$",
         (Integer assertedHttpResponseCode, String assertedODataVersion) -> {
-      assertEquals(responseCode.get().intValue(), assertedHttpResponseCode.intValue());
-      assertEquals(serverODataHeaderVersion.get(), assertedODataVersion);
+      boolean versionsMatch = responseCode.get().intValue() == assertedHttpResponseCode.intValue(),
+              responseCodesMatch = serverODataHeaderVersion.get().equals(assertedODataVersion);
+
+      if (versionsMatch) {
+        assertTrue(responseCodesMatch);
+      }
     });
   }
 

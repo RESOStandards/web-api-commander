@@ -30,7 +30,7 @@ Your operating system probably already has Java 1.8.0 or greater.
 
 To check, type: 
 
-```shell script
+```
 $ java -version
 ```
 
@@ -110,7 +110,7 @@ To get metadata, use the `--getMetadata` argument with the following
 options:
 
 ```
-  $ java -jar web-api-commander.jar --getMetadata --serviceRoot <s> --bearerToken <b> --outputFile <o>
+$ java -jar web-api-commander.jar --getMetadata --serviceRoot <s> --bearerToken <b> --outputFile <o>
 ```
 
 where `serviceRoot` is the path to the root of the OData WebAPI server.
@@ -138,7 +138,7 @@ To validate metadata that's already been downloaded, call the Web API
 Commander with the following options:
 
 ```
-  $ java -jar web-api-commander.jar --validateMetadata --inputFile <i>
+$ java -jar web-api-commander.jar --validateMetadata --inputFile <i>
 ```
 
 where `inputFile` is the path to your EDMX file. Errors will be logged 
@@ -153,7 +153,7 @@ In this case, the appropriate action is: `--getEntities`, which can be
 called as follows:
 
 ```
-  $ java -jar web-api-commander.jar --getEntities --uri <u> --bearerToken <b> --outputFile <o>
+$ java -jar web-api-commander.jar --getEntities --uri <u> --bearerToken <b> --outputFile <o>
 ``` 
 
 Make sure that any `uri` containing spaces or special characters is 
@@ -213,7 +213,7 @@ representations like Integers.
 The EDMX converter may be called as follows:
 
 ```
-  $ java -jar web-api-commander.jar --convertEDMXtoOAI --inputFile <i>
+$ java -jar web-api-commander.jar --convertEDMXtoOAI --inputFile <i>
 ``` 
 
 Any errors will be displayed, and the output file is automatically created by appending `.swagger.json` to
@@ -267,10 +267,10 @@ RESOScript files contain zero or more Settings, Parameters, and Requests. For ex
        <Preauthenticate></Preauthenticate>
      </ClientSettings>
      <Parameters>
-       <Parameter Name="EndpointMetadata" Value="https://yourserver.com/api/$metadata" />
+       <Parameter Name="YourEndpointUrl" Value="https://yourserver.com/api?$filter=..." />
      </Parameters>
      <Requests>
-       <Request OutputFile="myTestOutputFile.json"         Url="*Parameter_EndpointMetadata*" />
+       <Request OutputFile="yourEndpointUrlResponse.json"         Url="*Parameter_YourEndpointUrl*" />
        <!-- ... additional requests -->    
      </Requests>
    </OutputScript>
@@ -316,8 +316,8 @@ See [the generic RESOScript template for more info](./generic.resoscript).
 ### Cucumber Feature Specifications
 
 [Cucumber](https://cucumber.io) is being used to describe acceptance criteria in a higher-level DSL
-rather than encapsulating all of the test logic in code. Cucumber's DSL, called [Gherkin](https://cucumber.io/docs/gherkin/), 
-allows backing test code to be organized and executed in a logical manner that makes sense to analysts as well as 
+rather than encapsulating all of the test logic code. Cucumber's DSL is called [Gherkin](https://cucumber.io/docs/gherkin/) 
+and essentially allows backing test code to be organized in a logical manner that makes sense to analysts as well as 
 programmers.
 
 Testing output during runtime has been designed to be easy to read and during each step, the relevant 
@@ -336,14 +336,27 @@ ability to run individual or multiple tests using tags.
 
 ### Web API Usage
 
-Once [Gradle is installed](https://gradle.org/install/), the Commander may be run in automated testing mode for a Web API 1.0.2 certification using
- a terminal. A command similar to the following would be issued (adjust to your specific needs):
+The Commander may be run in automated testing mode for a Web API 1.0.2 certification using a terminal. You do not need to use the Commander JAR file mentioned elsewhere in this step. Instead, you will run the tests using Gradle for automation against a clean copy of the latest Commander code.
+
+Once [Gradle is installed](https://gradle.org/install/), you will need to download the source code so you can run Gradle in the root of the directory. This assumes that you also have Java 8 (1.8.0) or above installed, as mentioned elsewhere in this [`README`](#getting-started).
+
+First, change into the directory you want to work in and clone the Commander repository. You will need to have Git installed. Chances are you already do, to check, open a command line and type `git` and if it's present, it will print some info about the app. If not, [there are instructions here](https://git-scm.com/downloads).
+
+```
+$ git clone https://github.com/RESOStandards/web-api-commander.git
+```
+
+This will clone the repository into a directory called web-api-commander, which means you will have a fresh copy of the latest code to execute. To refresh the code after you have downloaded it, issue the command `$ git pull` in the root of the directory that was just created. 
+ 
+After you have cloned the repository, a command similar to the following would be issued (adjust to your specific needs):
 
 ```
 $ gradle testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript
 ```
 
 This will run the entirety of the tests against the Web API server provided as `WebAPIURI` in `your.resoscript` file.
+
+Note that the first time you run this command, it will take some time to complete as Gradle will download all dependencies and compile the application before running the test suite. *Note: this step will be Dockerized so it can be run with a single command in a Docker container in upcoming versions of the Commander.*
 
 
 To filter by tags, a command similar to the following would be used:
@@ -374,10 +387,6 @@ Please feel free to suggest additional tags that might be useful.
 A sample of the runtime terminal output follows:
 
 ```
-  $ gradle testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript -Dcucumber.filter.tags="@core"
-
-    ...
-
     @REQ-WA103-END3 @core @x.y.z @core-support-endorsement
     Scenario: REQ-WA103-END3 - CORE - Request and Validate Server Metadata   
     
@@ -402,10 +411,7 @@ A sample of the runtime terminal output follows:
       And the response is valid XML                                          
     
     Metadata is valid!
-      And the metadata returned is valid  
-
-    ...
- 
+      And the metadata returned is valid   
 ```
 
 This shows configuration parameters, requests, and responses in a lightweight-manner. 
@@ -417,7 +423,7 @@ Detailed information will be added to a local `./commander.log` file at runtime.
 The list of available gradle commands can be shown by typing the following in the console: 
 
 ```
-  $ gradle --help
+$ gradle --help
 ```
 
 These commands should not be necessary for the normal use of the Commander. There are a handful that are, however, 
@@ -434,19 +440,19 @@ A [Dockerfile](./Dockerfile) has been provided to dockerize the application.
 This can be used for CI/CD environments such as Jenkins or TravisCI. The following command will build an image for you:
 
 ```
-  $ docker build -t darnjo/web-api-command .
+$ docker build -t darnjo/web-api-command .
 ```
 
 The usage for the docker container is the same for `web-api-commander.jar` presented above.
 
 ```
-  $ docker run -it darnjo/web-api-commander --help
+$ docker run -it darnjo/web-api-commander --help
 ```
 
 If you have input files you may need to mount your filesystem into the docker container
 
 ```
-  $ docker run -it -v $PWD:/app darnjo/web-api-commander --validateMetadata --inputFile <pathInContainer>
+$ docker run -it -v $PWD:/app darnjo/web-api-commander --validateMetadata --inputFile <pathInContainer>
 ```
 
 ---
