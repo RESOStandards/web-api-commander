@@ -343,8 +343,10 @@ public class WebAPIServer_1_0_2 implements En {
 
     /*
      * Assert HTTP Response Code given asserted OData version
+     *
+     * TODO: make a general Header assertion function
      */
-    Then("^the server responds with a status code of (\\d+) if the server reports OData version \"([^\"]*)\"$",
+    Then("^the server responds with a status code of (\\d+) if the server headers report OData version \"([^\"]*)\"$",
         (Integer assertedHttpResponseCode, String assertedODataVersion) -> {
       boolean versionsMatch = responseCode.get().intValue() == assertedHttpResponseCode.intValue(),
               responseCodesMatch = serverODataHeaderVersion.get().equals(assertedODataVersion);
