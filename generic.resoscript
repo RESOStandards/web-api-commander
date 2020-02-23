@@ -83,7 +83,7 @@
         <!-- REQUIRED: OData $select list - adapt this for your system and then adjust the remaining queries accordingly -->
         <Parameter Name="SelectList" Value="ListingKey,BedroomsTotal,StreetName,PropertyType,ModificationTimestamp" />
 
-        <!-- REQUIRED: Substitute key name from your EndpointMetadata here, either ListingKey or ListingKeyNumeric,
+        <!-- REQUIRED: Substitute key name from your EndpointMetadata here, either ListingKey or ListingKeyInteger,
         which requires rewriting some of the queries that follow... -->
         <Parameter Name="UniqueID" Value="ListingKey" />
 
@@ -94,14 +94,14 @@
         <Parameter Name="TopCount" Value="5" />
         <Parameter Name="SortCount" Value="20" />
 
-        <!-- Numeric Field for eq, ne, gt, ge, lt, le testing -->
+        <!-- Integer Field for eq, ne, gt, ge, lt, le testing -->
         <!-- Type="Edm.Int16" or Type="Edm.Int32" or Type="Edm.Int64" for non-lookup fields -->
-        <Parameter Name="FilterNumericField" Value="BedroomsTotal" />
-        <Parameter Name="FilterNumericValueLow" Value="9" />
-        <Parameter Name="FilterNumericValueHigh" Value="15" />
-        <Parameter Name="FilterNumericNotFound" Value="-1" />
+        <Parameter Name="FilterIntegerField" Value="BedroomsTotal" />
+        <Parameter Name="FilterIntegerValueLow" Value="9" />
+        <Parameter Name="FilterIntegerValueHigh" Value="15" />
+        <Parameter Name="FilterIntegerNotFound" Value="-1" />
 
-        <!-- Numeric Field for "not" testing -->
+        <!-- Integer Field for "not" testing -->
         <Parameter Name="FilterNotField" Value="BedroomsTotal" />
         <Parameter Name="FilterNotValue" Value="-1" />
 
@@ -120,11 +120,11 @@
         <Parameter Name="ExpandField" Value="ListAgent" />
 
         <!-- For Geo-spatial Testing -->
-        <Parameter Name="GeospatialLatitudeField" Value="Latitude" />
-        <Parameter Name="GeospatialLongitudeField" Value="Longitude" />
-        <Parameter Name="GeospatialField" Value="Coordinates" />
-        <Parameter Name="GeospatialValue" Value="REQUIRED: YOUR COORDINATES GO HERE in 'Longitude Latitude' format" /> <!-- "Longitude Latitude" -->
-        <Parameter Name="GeospatialDistanceValue" Value="100" />
+        <Parameter Name="GeoSpatialLatitudeField" Value="Latitude" />
+        <Parameter Name="GeoSpatialLongitudeField" Value="Longitude" />
+        <Parameter Name="GeoSpatialField" Value="Coordinates" />
+        <Parameter Name="GeoSpatialValue" Value="REQUIRED: YOUR COORDINATES GO HERE in 'Longitude Latitude' format" /> <!-- "Longitude Latitude" -->
+        <Parameter Name="GeoSpatialDistanceValue" Value="100" />
 
         <!--String Fields for testing -->
         <!-- Type="Edm.String" -->
@@ -214,7 +214,7 @@
           Capability="Query functions"
           WebAPIReference="2.4.2"
           OutputFile="REQ-WA103-QR3.select.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterNumericField* gt *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -224,7 +224,7 @@
           Capability="Client paging ($top, $skip)"
           WebAPIReference="2.4.2"
           OutputFile="REQ-WA103-QR4.top.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterNumericField* gt *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -234,7 +234,7 @@
           Capability="Client pageability ($top, $skip)"
           WebAPIReference="2.4.2"
           OutputFile="REQ-WA103-QR5.skip.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterNumericField* gt *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -244,7 +244,7 @@
           Capability="Core"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO1.select.case.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$SeLeCt=*Parameter_SelectList*&amp;$filter=*Parameter_FilterNumericField* eq *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$SeLeCt=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
           AssertResponseCode="400"
         />
 
@@ -255,7 +255,7 @@
           Capability="Core"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO1.filter.case.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$FiLtEr=*Parameter_FilterNumericField* eq *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$FiLtEr=*Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
           AssertResponseCode="400"
         />
 
@@ -266,7 +266,7 @@
           Capability="Core"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO1.orderby.asc.case.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterNumericField*&amp;$filter=*Parameter_FilterNumericField* gt *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*&amp;$OrDeRbY=*Parameter_FilterNumericField* asc"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*&amp;$OrDeRbY=*Parameter_FilterIntegerField* asc"
           AssertResponseCode="400"
         />
 
@@ -277,68 +277,68 @@
           Capability="Core"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO1.orderby.desc.case.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterNumericField*&amp;$filter=*Parameter_FilterNumericField* gt *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*&amp;$oRdErBy=*Parameter_FilterNumericField* desc"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*&amp;$oRdErBy=*Parameter_FilterIntegerField* desc"
           AssertResponseCode="400"
         />
 
         <Request
-          TestDescription="Query Support: $filter - Comparison: eq (equal)"
-          RequirementId="REQ-WA103-QO2"
+          TestDescription="Query Support: $filter - Integer Comparison: eq (equal)"
+          RequirementId="REQ-WA103-QO2.filter.compare.int.eq"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO2_filter_eq.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterNumericField* eq *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*"
+          OutputFile="REQ-WA103-QO2.filter.compare.int.eq.json"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
-          TestDescription="Query Support: $filter - Comparison: ne (not equal)"
-          RequirementId="REQ-WA103-QO3"
+          TestDescription="Query Support: $filter - Integer Comparison: ne (not equal)"
+          RequirementId="REQ-WA103-QO3.filter.compare.int.ne"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO3_filter_ne.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterNumericField* ne *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*"
+          OutputFile="REQ-WA103-QO3.filter.compare.int.ne.json"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
-          TestDescription="Query Support: $filter - Comparison: gt (greater than)"
-          RequirementId="REQ-WA103-QO4"
+          TestDescription="Query Support: $filter - Integer Comparison: gt (greater than)"
+          RequirementId="REQ-WA103-QO4.filter.compare.int.gt"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO4_filter_gt.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterNumericField* gt *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*"
+          OutputFile="REQ-WA103-QO4.filter.compare.int.gt.json"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
-          TestDescription="Query Support: $filter - Comparison: ge (greater or equal)"
-          RequirementId="REQ-WA103-QO5"
+          TestDescription="Query Support: $filter - Integer Comparison: ge (greater or equal)"
+          RequirementId="REQ-WA103-QO5.filter.compare.int.ge"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO5_filter_ge.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterNumericField* ge *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*"
+          OutputFile="REQ-WA103-QO5.filter.compare.int.ge.json"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ge *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
-          TestDescription="Query Support: $filter - Comparison: lt (less than)"
-          RequirementId="REQ-WA103-QO6"
+          TestDescription="Query Support: $filter - Integer Comparison: lt (less than)"
+          RequirementId="REQ-WA103-QO6.filter.compare.int.lt"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO6_filter_lt.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterNumericField* lt *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*"
+          OutputFile="REQ-WA103-QO6.filter.compare.int.lt.json"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
-          TestDescription="Query Support: $filter - Comparison: le (less or equal)"
-          RequirementId="REQ-WA103-QO7"
+          TestDescription="Query Support: $filter - Integer Comparison: le (less or equal)"
+          RequirementId="REQ-WA103-QO7.filter.compare.int.le"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO7_filter_le.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterNumericField* le *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*"
+          OutputFile="REQ-WA103-QO7.filter.compare.int.le.json"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* le *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -348,7 +348,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO9_filter_and.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterNumericField* gt *Parameter_FilterNumericValueLow* and *Parameter_FilterNumericField* lt *Parameter_FilterNumericValueHigh**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow* and *Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueHigh**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -358,7 +358,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO10_filter_or.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterNumericField* gt *Parameter_FilterNumericValueHigh* or *Parameter_FilterNumericField* lt *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueHigh* or *Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -468,7 +468,7 @@
           Capability="Sortability ($orderby)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO28_OrderByAscFiltered.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterNumericField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc&amp;$filter=*Parameter_FilterNumericField* gt *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -478,7 +478,7 @@
           Capability="Sortability ($orderby)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO28_OrderByAscNoFilter.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterNumericField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc"
         />
 
         <Request
@@ -488,7 +488,7 @@
           Capability="Sortability ($orderby)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO28_OrderByDescFiltered.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterNumericField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc&amp;$filter=*Parameter_FilterNumericField* gt *Parameter_FilterNumericValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -498,7 +498,7 @@
           Capability="Sortability ($orderby)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO28_OrderByDescNoFilter.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterNumericField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc"
         />
 
         <Request
@@ -672,23 +672,23 @@
         />
 
         <Request
-          TestDescription="Support Geospatial Search Implementation"
+          TestDescription="Support GeoSpatial Search Implementation"
           RequirementId="REQ-WA103-QM5"
           MetallicLevel="Platinum"
           Capability="Query functions"
           WebAPIReference="2.4.7"
-          OutputFile="REQ-WA103-QM5_GeospatialLongLat_PointGeo.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=geo.distance(*Parameter_GeospatialField*, geography'POINT(*Parameter_GeospatialValue*)') le *Parameter_GeospatialDistanceValue*"
+          OutputFile="REQ-WA103-QM5_GeoSpatialLongLat_PointGeo.json"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=geo.distance(*Parameter_GeoSpatialField*, geography'POINT(*Parameter_GeoSpatialValue*)') le *Parameter_GeoSpatialDistanceValue*"
         />
 
         <Request
-          TestDescription="Support Geospatial Search Implementation"
+          TestDescription="Support GeoSpatial Search Implementation"
           RequirementId="REQ-WA103-QM5"
           MetallicLevel="Platinum"
           Capability="Query functions"
           WebAPIReference="2.4.7"
-          OutputFile="REQ-WA103-QM5_GeospatialLongLat_LatGT1_PointGeo.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=geo.distance(*Parameter_GeospatialField*, geography'POINT(*Parameter_GeospatialValue*)') le *Parameter_GeospatialDistanceValue* and *Parameter_GeospatialLatitudeField* gt 1"
+          OutputFile="REQ-WA103-QM5_GeoSpatialLongLat_LatGT1_PointGeo.json"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=geo.distance(*Parameter_GeoSpatialField*, geography'POINT(*Parameter_GeoSpatialValue*)') le *Parameter_GeoSpatialDistanceValue* and *Parameter_GeoSpatialLatitudeField* gt 1"
         />
 
         <Request
@@ -698,7 +698,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO12_Grouping.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=(*Parameter_FilterNumericField* eq *Parameter_FilterNumericValueLow*) and (*Parameter_FilterNumericField* le *Parameter_FilterNumericValueHigh* and *Parameter_FilterNumericField* ge *Parameter_FilterNumericValueLow*)*Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=(*Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow*) and (*Parameter_FilterIntegerField* le *Parameter_FilterIntegerValueHigh* and *Parameter_FilterIntegerField* ge *Parameter_FilterIntegerValueLow*)*Parameter_RequiredParameters*"
         />
 
         <Request

@@ -71,3 +71,45 @@ Feature: Web API Server 1.0.2 Certification
   Scenario: Query Support: $orderby desc case-sensitivity for OData 4.0
     When a GET request is made to the resolved Url in "REQ-WA103-QO1.orderby.desc.case"
     Then the server responds with a status code of 400 if the server headers report OData version "4.0"
+
+  @REQ-WA103-QO2 @REQ-WA103-QO2.filter.compare.int.eq @core @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter - Integer Comparison: eq
+    When a GET request is made to the resolved Url in "REQ-WA103-QO2.filter.compare.int.eq"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And Integer data in "Parameter_FilterIntegerField" "eq" the value in "Parameter_FilterIntegerValueLow"
+
+  @REQ-WA103-QO3 @REQ-WA103-QO3.filter.compare.int.ne @core @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter - Integer Comparison: ne
+    When a GET request is made to the resolved Url in "REQ-WA103-QO3.filter.compare.int.ne"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And Integer data in "Parameter_FilterIntegerField" "ne" the value in "Parameter_FilterIntegerValueLow"
+
+  @REQ-WA103-QO4 @REQ-WA103-QO4.filter.compare.int.gt @core @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter - Integer Comparison: gt
+    When a GET request is made to the resolved Url in "REQ-WA103-QO4.filter.compare.int.gt"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And Integer data in "Parameter_FilterIntegerField" "gt" the value in "Parameter_FilterIntegerValueLow"
+
+  @REQ-WA103-QO5 @REQ-WA103-QO5.filter.compare.int.ge @core @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter - Integer Comparison: ge
+    When a GET request is made to the resolved Url in "REQ-WA103-QO5.filter.compare.int.ge"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And Integer data in "Parameter_FilterIntegerField" "ge" the value in "Parameter_FilterIntegerValueLow"
+
+  @REQ-WA103-QO6 @REQ-WA103-QO6.filter.compare.int.lt @core @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter - Integer Comparison: lt
+    When a GET request is made to the resolved Url in "REQ-WA103-QO6.filter.compare.int.lt"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And Integer data in "Parameter_FilterIntegerField" "lt" the value in "Parameter_FilterIntegerValueLow"
+
+  @REQ-WA103-QO7 @REQ-WA103-QO7.filter.compare.int.le @core @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter - Integer Comparison: le
+    When a GET request is made to the resolved Url in "REQ-WA103-QO7.filter.compare.int.le"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And Integer data in "Parameter_FilterIntegerField" "le" the value in "Parameter_FilterIntegerValueLow"

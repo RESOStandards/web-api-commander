@@ -20,7 +20,10 @@ import org.reso.models.Settings;
 
 import java.io.*;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -354,6 +357,34 @@ public class WebAPIServer_1_0_2 implements En {
       if (versionsMatch) {
         assertTrue(responseCodesMatch);
       }
+    });
+
+    /*
+     * Compares field data (LHS) to a given parameter value (RHS). The operator is passed as a string,
+     * and is used to select among the supported comparisons.
+     */
+    And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" the value in \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
+      LOG.info("Parameter_FieldName: " + parameterFieldName + ", op: " + op + ", Parameter_Value: " + parameterAssertedValue);
+      String fieldName = Utils.resolveValue(parameterFieldName, settings);
+      int assertedValue = Integer.parseInt(Utils.resolveValue(parameterAssertedValue, settings));
+
+      //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
+      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        if (op.equals("eq")) {
+          assertEquals(Integer.parseInt(item.get(fieldName).toString()), assertedValue);
+        } else if (op.equals("ne")) {
+          assertTrue(Integer.parseInt(item.get(fieldName).toString()) != assertedValue);
+        } else if (op.equals("gt")) {
+          assertTrue(Integer.parseInt(item.get(fieldName).toString()) > assertedValue);
+        } else if (op.equals("ge")) {
+          assertTrue(Integer.parseInt(item.get(fieldName).toString()) >= assertedValue);
+        } else if (op.equals("lt")) {
+          assertTrue(Integer.parseInt(item.get(fieldName).toString()) < assertedValue);
+        } else if (op.equals("le")) {
+          assertTrue(Integer.parseInt(item.get(fieldName).toString()) <= assertedValue);
+        }
+      });
+
     });
   }
 
