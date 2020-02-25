@@ -342,8 +342,14 @@ Once [Gradle is installed](https://gradle.org/install/), you will need to downlo
 
 First, change into the directory you want to work in and clone the Commander repository. You will need to have Git installed. Chances are you already do, to check, open a command line and type `git` and if it's present, it will print some info about the app. If not, [there are instructions here](https://git-scm.com/downloads).
 
+**MacOS or Linux**
 ```
 $ git clone https://github.com/RESOStandards/web-api-commander.git
+```
+
+**Windows**
+```
+C:\> git clone https://github.com/RESOStandards/web-api-commander.git
 ```
 
 This will clone the repository into a directory called web-api-commander, which means you will have a fresh copy of the latest code to execute. To refresh the code after you have downloaded it, issue the command `$ git pull` in the root of the directory that was just created. 
@@ -357,7 +363,7 @@ $ ./gradlew testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript
 
 **Windows**
 ```
-C:\path\to\web-api-commander> gradlew.bat testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript
+C:\path\to\web-api-commander> gradlew.bat testWebAPIServer_1_0_2 -DpathToRESOScript=C:\path\to\your.resoscript
 ```
 
 This will run the entirety of the tests against the Web API server provided as `WebAPIURI` in `your.resoscript` file. You can pass tags to filter on in order to run one or more tests matching the given tag.
@@ -374,7 +380,7 @@ $ gradle testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript -Dcu
 
 **Windows**
 ```
-C:\path\to\web-api-commander> gradlew.bat testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript -Dcucumber.filter.tags="@core"
+C:\path\to\web-api-commander> gradlew.bat testWebAPIServer_1_0_2 -DpathToRESOScript=C:\path\to\your.resoscript -Dcucumber.filter.tags="@core"
 ```
 
 This would run only the tests marked as `@core` in the 
