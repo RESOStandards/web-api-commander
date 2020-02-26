@@ -282,93 +282,93 @@
         />
 
         <Request
-          TestDescription="Query Support: $filter - Integer Arithmetic Comparison: eq (equal)"
-          RequirementId="REQ-WA103-QO2.filter.arithmetic.compare.int.eq"
+          TestDescription="Query Support: $filter - Integer Comparison: eq (equal)"
+          RequirementId="REQ-WA103-QO2.filter.int.compare.eq"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO2.filter.arithmetic.compare.int.eq.json"
+          OutputFile="REQ-WA103-QO2.filter.int.compare.eq.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
-          TestDescription="Query Support: $filter - Integer Arithmetic Comparison: ne (not equal)"
-          RequirementId="REQ-WA103-QO3.filter.arithmetic.compare.int.ne"
+          TestDescription="Query Support: $filter - Integer Comparison: ne (not equal)"
+          RequirementId="REQ-WA103-QO3.filter.int.compare.ne"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO3.filter.arithmetic.compare.int.ne.json"
+          OutputFile="REQ-WA103-QO3.filter.int.compare.ne.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
-          TestDescription="Query Support: $filter - Integer Arithmetic Comparison: gt (greater than)"
-          RequirementId="REQ-WA103-QO4.filter.arithmetic.compare.int.gt"
+          TestDescription="Query Support: $filter - Integer Comparison: gt (greater than)"
+          RequirementId="REQ-WA103-QO4.filter.int.compare.gt"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO4.filter.arithmetic.compare.int.gt.json"
+          OutputFile="REQ-WA103-QO4.filter.int.compare.gt.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
-          TestDescription="Query Support: $filter - Integer Arithmetic Comparison: ge (greater or equal)"
-          RequirementId="REQ-WA103-QO5.filter.arithmetic.compare.int.ge"
+          TestDescription="Query Support: $filter - Integer Comparison: ge (greater or equal)"
+          RequirementId="REQ-WA103-QO5.filter.int.compare.ge"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO5.filter.arithmetic.compare.int.ge.json"
+          OutputFile="REQ-WA103-QO5.filter.int.compare.ge.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ge *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
-          TestDescription="Query Support: $filter - Integer Arithmetic Comparison: lt (less than)"
-          RequirementId="REQ-WA103-QO6.filter.arithmetic.compare.int.lt"
+          TestDescription="Query Support: $filter - Integer Comparison: lt (less than)"
+          RequirementId="REQ-WA103-QO6.filter.int.compare.lt"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO6.filter.compare.int.lt.json"
+          OutputFile="REQ-WA103-QO6.filter.int.compare.lt.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
-          TestDescription="Query Support: $filter - Integer Arithmetic Comparison: le (less or equal)"
-          RequirementId="REQ-WA103-QO7.filter.arithmetic.compare.int.le"
+          TestDescription="Query Support: $filter - Integer Comparison: le (less or equal)"
+          RequirementId="REQ-WA103-QO7.filter.int.compare.le"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO7.filter.arithmetic.compare.int.le.json"
+          OutputFile="REQ-WA103-QO7.filter.int.compare.le.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* le *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
-          TestDescription="Query Support: $filter - Integer Logical Comparison: and"
-          RequirementId="REQ-WA103-QO9.filter.logical.compare.int.and"
+          TestDescription="Query Support: $filter - Integer Comparison: and"
+          RequirementId="REQ-WA103-QO9.filter.int.compare.and"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO9.filter.logical.compare.int.and.json"
+          OutputFile="REQ-WA103-QO9.filter.int.compare.and.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow* and *Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueHigh**Parameter_RequiredParameters*"
         />
 
         <Request
-          TestDescription="Query Support: $filter - Integer Logical Comparison: or"
-          RequirementId="REQ-WA103-QO10.filter.logical.compare.int.or"
+          TestDescription="Query Support: $filter - Integer Comparison: or"
+          RequirementId="REQ-WA103-QO10.filter.int.compare.or"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO10.filter.logical.compare.int.or.json"
+          OutputFile="REQ-WA103-QO10.filter.int.compare.or.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueHigh* or *Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
-          TestDescription="Query Support: $filter - Integer Logical: not"
-          RequirementId="REQ-WA103-QO11"
+          TestDescription="Query Support: $filter - Integer: not operator"
+          RequirementId="REQ-WA103-QO11.filter.int.compare.not.operator"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO11_filter_not.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=not (*Parameter_FilterNotField* le *Parameter_FilterNotValue*)*Parameter_RequiredParameters*"
+          OutputFile="REQ-WA103-QO11.filter.int.compare.not.operator.json"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=not(*Parameter_FilterNotField* le *Parameter_FilterNotValue*)*Parameter_RequiredParameters*"
         />
 
         <Request

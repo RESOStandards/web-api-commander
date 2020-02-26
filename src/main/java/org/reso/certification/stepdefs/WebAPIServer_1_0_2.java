@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -109,7 +110,6 @@ public class WebAPIServer_1_0_2 implements En {
       }
       return null;
     };
-
 
     /*
      * Background
@@ -304,20 +304,6 @@ public class WebAPIServer_1_0_2 implements En {
     });
 
     /*
-     * Assert greater than: lValFromItem > rValFromSetting
-     *
-     * TODO: add general op expression parameter rather than creating individual comparators
-     */
-    And("^data in \"([^\"]*)\" are greater than \"([^\"]*)\"$", (String lValFromItem, String rValFromSetting) -> {
-      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-        Integer lVal = Integer.getInteger(item.get(Utils.resolveValue(lValFromItem, settings)).toString()),
-                rVal = Integer.getInteger(Utils.resolveValue(rValFromSetting, settings));
-
-        assertTrue( lVal > rVal );
-      });
-    });
-
-    /*
      * validate XML wrapper
      */
     And("^the response is valid XML$", () -> {
@@ -363,35 +349,150 @@ public class WebAPIServer_1_0_2 implements En {
      * Compares field data (LHS) to a given parameter value (RHS). The operator is passed as a string,
      * and is used to select among the supported comparisons.
      */
-    And("^Integer data in \"([^\"]*)\" is \"([^\"]*)\" the value in \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
+    And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
       LOG.info("Parameter_FieldName: " + parameterFieldName + ", op: " + op + ", Parameter_Value: " + parameterAssertedValue);
       String fieldName = Utils.resolveValue(parameterFieldName, settings);
       int assertedValue = Integer.parseInt(Utils.resolveValue(parameterAssertedValue, settings));
+
+      //subsequent value comparisons are and-ed together while iterating over the list of items, so init to true
+      AtomicBoolean result = new AtomicBoolean(true);
 
       AtomicReference<Integer> fieldValue = new AtomicReference<>();
 
       //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
       from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
         fieldValue.set(Integer.parseInt(item.get(fieldName).toString()));
-        if (op.equals("eq")) {
-          assertEquals(fieldValue.get().intValue(), assertedValue);
-        } else if (op.equals("ne")) {
-          assertTrue(fieldValue.get() != assertedValue);
-        } else if (op.equals("gt")) {
-          assertTrue(fieldValue.get() > assertedValue);
-        } else if (op.equals("ge")) {
-          assertTrue(fieldValue.get() >= assertedValue);
-        } else if (op.equals("lt")) {
-          assertTrue(fieldValue.get() < assertedValue);
-        } else if (op.equals("le")) {
-          assertTrue(fieldValue.get() <= assertedValue);
-        }
+        result.set(result.get() && Utils.compare(fieldValue.get(), op, assertedValue));
+        LOG.info("Compare: " + fieldValue.get() + " " + op + " " + assertedValue + " is " + result.get());
       });
+
+      assertTrue(result.get());
+    });
+
+    /*
+     * True if response has results, meaning value.length > 0
+     */
+    And("^the response has results$", () -> {
+      int count = from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).size();
+      LOG.info("Results count is: " + count);
+      assertTrue(count > 0);
+    });
+
+    /*
+     * True if data are present in the response.
+     */
+    And("^the response has singleton results in the \"([^\"]*)\" field$", (String parameterFieldName) -> {
+      String value = Utils.resolveValue(parameterFieldName, settings);
+      boolean isPresent = from(responseData.get()).get() != null && value != null;
+      LOG.info("Response value is: " + value);
+      LOG.info("IsPresent: " + isPresent);
+      assertTrue(isPresent);
+    });
+
+    /*
+     * True if results count less than or equal to limit
+     */
+    And("^the number of results is less than or equal to \"([^\"]*)\"$", (String limitField) -> {
+      int count = from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).size(),
+          limit = Integer.parseInt(Utils.resolveValue(limitField, settings));
+      LOG.info("Results count is: " + count + ", Limit is: " + limit);
+      assertTrue(count <= limit);
+    });
+
+    /*
+     * True if data in
+     */
+    And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$",
+        (String parameterFieldName, String opLhs, String parameterAssertedLhsValue, String andOrOp, String opRhs, String parameterAssertedRhsValue) -> {
+          String fieldName = Utils.resolveValue(parameterFieldName, settings);
+          Integer assertedLhsValue = Integer.parseInt(Utils.resolveValue(parameterAssertedLhsValue, settings)),
+                  assertedRhsValue = Integer.parseInt(Utils.resolveValue(parameterAssertedRhsValue, settings));
+
+          String op = andOrOp.toLowerCase();
+          boolean isAndOp = op.contains(Operators.AND);
+
+          //these should default to true when And and false when Or for the purpose of boolean comparisons
+          AtomicBoolean lhsResult = new AtomicBoolean(isAndOp);
+          AtomicBoolean rhsResult = new AtomicBoolean(isAndOp);
+          AtomicBoolean itemResult = new AtomicBoolean(isAndOp);
+
+          AtomicReference<Integer> lhsValue = new AtomicReference<>(),
+                                   rhsValue = new AtomicReference<>();
+
+          //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
+          from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+            lhsValue.set(Integer.parseInt(item.get(fieldName).toString()));
+            rhsValue.set(Integer.parseInt(item.get(fieldName).toString()));
+
+            LOG.info("LHS:");
+            lhsResult.set(Utils.compare(lhsValue.get(), opLhs, assertedLhsValue));
+
+            LOG.info("RHS:");
+            rhsResult.set(Utils.compare(rhsValue.get(), opRhs, assertedRhsValue));
+          });
+
+          if (op.contentEquals(Operators.AND)) {
+            itemResult.set(lhsResult.get() && rhsResult.get());
+            LOG.info("assertTrue: " + lhsResult.get() + " AND " + rhsResult.get() + " ==> " + itemResult.get());
+            assertTrue(itemResult.get());
+          } else if (op.contentEquals(Operators.OR)) {
+            itemResult.set(lhsResult.get() || rhsResult.get());
+            LOG.info("assertTrue: " + lhsResult.get() + " OR " + rhsResult.get() + " ==> " + itemResult.get());
+            assertTrue(itemResult.get());
+          }
     });
 
   }
 
+  private static class Operators {
+    private static final String
+      AND = "and",
+      OR = "or",
+      NE = "ne",
+      EQ = "eq",
+      GREATER_THAN = "gt",
+      GREATER_THAN_OR_EQUAL = "ge",
+      LESS_THAN = "lt",
+      LESS_THAN_OR_EQUAL = "le";
+  }
+
   private static class Utils {
+
+    /**
+     * Returns true if each item in the list is true
+     * @param lhs
+     * @param op
+     * @param rhs
+     * @return
+     */
+    private static boolean compare(Integer lhs, String op, Integer rhs) {
+      boolean result = false;
+
+      switch (op) {
+        case Operators.EQ:
+          result = lhs.equals(rhs);
+          break;
+        case Operators.NE:
+          result = !lhs.equals(rhs);
+          break;
+        case Operators.GREATER_THAN:
+          result = lhs > rhs;
+          break;
+        case Operators.GREATER_THAN_OR_EQUAL:
+          result = lhs >= rhs;
+          break;
+        case Operators.LESS_THAN:
+          result = lhs < rhs;
+          break;
+        case Operators.LESS_THAN_OR_EQUAL:
+          result = lhs <= rhs;
+          break;
+      }
+
+      LOG.info("Compare: " + lhs + " " + op + " " + rhs + " ==> " + result);
+      return result;
+    }
+
     /**
      * Tests the given string to see if it's valid JSON
      * @param jsonString the JSON string to test the validity of
