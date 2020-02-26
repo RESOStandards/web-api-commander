@@ -379,7 +379,7 @@ public class WebAPIServer_1_0_2 implements En {
     });
 
     /*
-     * True if data are present in the response.
+     * True if data are present in the response
      */
     And("^the response has singleton results in the \"([^\"]*)\" field$", (String parameterFieldName) -> {
       String value = Utils.resolveValue(parameterFieldName, settings);
@@ -400,36 +400,34 @@ public class WebAPIServer_1_0_2 implements En {
     });
 
     /*
-     * True if data in
+     * True if data in the lhs expression and rhs expressions pass the AND or OR condition given in andOrOp
      */
-    And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$",
-        (String parameterFieldName, String opLhs, String parameterAssertedLhsValue, String andOrOp, String opRhs, String parameterAssertedRhsValue) -> {
-          String fieldName = Utils.resolveValue(parameterFieldName, settings);
-          Integer assertedLhsValue = Integer.parseInt(Utils.resolveValue(parameterAssertedLhsValue, settings)),
-                  assertedRhsValue = Integer.parseInt(Utils.resolveValue(parameterAssertedRhsValue, settings));
+    And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String opLhs, String parameterAssertedLhsValue, String andOrOp, String opRhs, String parameterAssertedRhsValue) -> {
+        String fieldName = Utils.resolveValue(parameterFieldName, settings);
+        Integer assertedLhsValue = Integer.parseInt(Utils.resolveValue(parameterAssertedLhsValue, settings)),
+                assertedRhsValue = Integer.parseInt(Utils.resolveValue(parameterAssertedRhsValue, settings));
 
-          String op = andOrOp.toLowerCase();
-          boolean isAndOp = op.contains(Operators.AND);
+        String op = andOrOp.toLowerCase();
+        boolean isAndOp = op.contains(Operators.AND);
 
-          //these should default to true when And and false when Or for the purpose of boolean comparisons
-          AtomicBoolean lhsResult = new AtomicBoolean(isAndOp);
-          AtomicBoolean rhsResult = new AtomicBoolean(isAndOp);
-          AtomicBoolean itemResult = new AtomicBoolean(isAndOp);
+        //these should default to true when And and false when Or for the purpose of boolean comparisons
+        AtomicBoolean lhsResult = new AtomicBoolean(isAndOp);
+        AtomicBoolean rhsResult = new AtomicBoolean(isAndOp);
+        AtomicBoolean itemResult = new AtomicBoolean(isAndOp);
 
-          AtomicReference<Integer> lhsValue = new AtomicReference<>(),
-                                   rhsValue = new AtomicReference<>();
+        AtomicReference<Integer> lhsValue = new AtomicReference<>(),
+                                 rhsValue = new AtomicReference<>();
 
-          //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
-          from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-            lhsValue.set(Integer.parseInt(item.get(fieldName).toString()));
-            rhsValue.set(Integer.parseInt(item.get(fieldName).toString()));
+        //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
+        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+          lhsValue.set(Integer.parseInt(item.get(fieldName).toString()));
+          rhsValue.set(Integer.parseInt(item.get(fieldName).toString()));
 
-            LOG.info("LHS:");
-            lhsResult.set(Utils.compare(lhsValue.get(), opLhs, assertedLhsValue));
+          LOG.info("Checking LHS");
+          lhsResult.set(Utils.compare(lhsValue.get(), opLhs, assertedLhsValue));
 
-            LOG.info("RHS:");
-            rhsResult.set(Utils.compare(rhsValue.get(), opRhs, assertedRhsValue));
-          });
+          LOG.info("Checking RHS");
+          rhsResult.set(Utils.compare(rhsValue.get(), opRhs, assertedRhsValue));
 
           if (op.contentEquals(Operators.AND)) {
             itemResult.set(lhsResult.get() && rhsResult.get());
@@ -440,10 +438,14 @@ public class WebAPIServer_1_0_2 implements En {
             LOG.info("assertTrue: " + lhsResult.get() + " OR " + rhsResult.get() + " ==> " + itemResult.get());
             assertTrue(itemResult.get());
           }
+        });
     });
 
   }
 
+  /**
+   * Contains the list of supported operators for use in query expressions.
+   */
   private static class Operators {
     private static final String
       AND = "and",
@@ -460,10 +462,10 @@ public class WebAPIServer_1_0_2 implements En {
 
     /**
      * Returns true if each item in the list is true
-     * @param lhs
-     * @param op
-     * @param rhs
-     * @return
+     * @param lhs left hand value
+     * @param op a binary operator for use in comparsions
+     * @param rhs right hand value
+     * @return true if lhs op rhs produces true, false otherwise
      */
     private static boolean compare(Integer lhs, String op, Integer rhs) {
       boolean result = false;

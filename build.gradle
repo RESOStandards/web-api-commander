@@ -8,6 +8,7 @@ plugins {
 
 // Define the main class for the application
 mainClassName = 'org.reso.commander.Main'
+version = "0.1.1"
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
