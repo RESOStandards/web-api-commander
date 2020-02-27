@@ -59,7 +59,7 @@ public class  Settings {
   public static Request resolveParameters(Request request, Settings settings) {
     //calls to resolve nested parameters
     return new Request(request.getRequirementId(), request.getOutputFile(), resolveParametersString(request.getUrl(), settings), request.getTestDescription(),
-        request.getMetallicLevel(), request.getCapability(), request.getWebApiReference(), request.getAssertResponseCode());
+        request.getMetallicLevel(), request.getCapability(), request.getWebApiReference());
   }
 
   /**

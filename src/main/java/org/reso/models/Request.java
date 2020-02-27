@@ -24,7 +24,6 @@ public class Request {
     private String metallicLevel;
     private String capability;
     private String webApiReference;
-    private String assertResponseCode;
 
     private Request request;
     private Status status;
@@ -41,7 +40,7 @@ public class Request {
      * @param url
      */
     public Request(String requirementId, String outputFile, String url, String testDescription, String metallicLevel,
-                   String capability, String webApiReference, String assertResponseCode) {
+                   String capability, String webApiReference) {
 
         //TODO: add Builder
         setRequirementId(requirementId);
@@ -51,7 +50,6 @@ public class Request {
         setMetallicLevel(metallicLevel);
         setCapability(capability);
         setWebApiReference(webApiReference);
-        setAssertResponseCode(assertResponseCode);
     }
 
 
@@ -123,8 +121,7 @@ public class Request {
             String expression = "/OutputScript/" + REQUESTS_KEY + "/node()";
             NodeList nodes = (NodeList) xPath.compile(expression).evaluate(xmlDocument, XPathConstants.NODESET);
             Node node;
-            String name, outputFile, url, testDescription, requirementId, metallicLevel, capability, webApiReference,
-                assertResponseCode;
+            String name, outputFile, url, testDescription, requirementId, metallicLevel, capability, webApiReference;
             Request request;
 
             for (int i = 0; i < nodes.getLength(); i++) {
@@ -138,9 +135,8 @@ public class Request {
                     metallicLevel = safeGetNamedItem(FIELDS.METALLIC_LEVEL, node);
                     capability = safeGetNamedItem(FIELDS.CAPABILITY, node);
                     webApiReference = safeGetNamedItem(FIELDS.WEB_API_REFERENCE, node);
-                    assertResponseCode = safeGetNamedItem(FIELDS.ASSERT_RESPONSE_CODE, node);
 
-                    request = new Request(requirementId, outputFile, url, testDescription, metallicLevel, capability, webApiReference, assertResponseCode);
+                    request = new Request(requirementId, outputFile, url, testDescription, metallicLevel, capability, webApiReference);
 
                     name = safeGetNamedItem(FIELDS.NAME, node);
                     request.setName(name == null ? outputFile : name);
@@ -249,14 +245,6 @@ public class Request {
         this.webApiReference = webApiReference;
     }
 
-    public String getAssertResponseCode() {
-        return assertResponseCode;
-    }
-
-    public void setAssertResponseCode(String assertResponseCode) {
-        this.assertResponseCode = assertResponseCode;
-    }
-
     private static final class FIELDS {
         static final String NAME = "Name";
         static final String OUTPUT_FILE = "OutputFile";
@@ -266,6 +254,5 @@ public class Request {
         static final String METALLIC_LEVEL = "MetallicLevel";
         static final String CAPABILITY = "Capability";
         static final String WEB_API_REFERENCE = "WebAPIReference";
-        static final String ASSERT_RESPONSE_CODE = "AssertResponseCode";
     }
 }

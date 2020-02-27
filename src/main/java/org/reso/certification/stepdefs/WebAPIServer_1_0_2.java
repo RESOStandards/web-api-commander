@@ -1,13 +1,14 @@
 package org.reso.certification.stepdefs;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java8.En;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
+import org.apache.http.Header;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
@@ -23,8 +24,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
@@ -40,23 +43,83 @@ public class WebAPIServer_1_0_2 implements En {
   private String serviceRoot, bearerToken, clientId, clientSecret, authorizationUri, tokenUri, redirectUri, scope;
   private String pathToRESOScript;
 
+  private static final String JSON_VALUE_PATH = "value";
+
+  //container to hold retrieved metadata for later comparisons
+  private static AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
+
   public WebAPIServer_1_0_2() {
 
     //TODO: split into separate test files and parallelize to remove the need for Atomic "globals"
     AtomicReference<Commander> commander = new AtomicReference<>();
     AtomicReference<ODataRawResponse> oDataRawResponse = new AtomicReference<>();
     AtomicReference<Request> request = new AtomicReference<>();
+    AtomicReference<Integer> responseCode = new AtomicReference<>();
     AtomicReference<String> responseData = new AtomicReference<>();
     AtomicReference<String> initialResponseData = new AtomicReference<>(); //used if two result sets need to be compared
     AtomicReference<ODataRawRequest> rawRequest = new AtomicReference<>();
 
-    //container to hold retrieved metadata for later comparisons
-    AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
+    AtomicReference<ODataClientErrorException> oDataClientErrorException = new AtomicReference<>();
+    AtomicReference<Boolean> oDataClientErrorExceptionHandled = new AtomicReference<>();
+
+    AtomicReference<String> serverODataHeaderVersion = new AtomicReference<>();
+    AtomicReference<Boolean> testAppliesToServerODataHeaderVersion = new AtomicReference<>();
+
+    final String HEADER_ODATA_VERSION = "OData-Version";
+
+    /*
+     * Instance Utility Methods - must precede usage
+     */
+
+    /*
+     * Resets the local instance state used during test time. TODO: refactor into collection of AtomicReference<T>
+     */
+    Runnable resetState = () -> {
+      commander.set(null);
+      oDataRawResponse.set(null);
+      request.set(null);
+      responseCode.set(null);
+      responseData.set(null);
+      initialResponseData.set(null);
+      rawRequest.set(null);
+      oDataClientErrorException.set(null);
+      serverODataHeaderVersion.set(null);
+      oDataClientErrorExceptionHandled.set(false);
+      testAppliesToServerODataHeaderVersion.set(false);
+    };
+
+
+    /*
+     * Executes HTTP GET request and sets the expected local variables.
+     * Handles exceptions and sets response codes.
+     */
+    Function<URI, Void> executeGetRequest = (URI requestUri) -> {
+      LOG.info("Request URI: " + requestUri);
+      try {
+        rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(requestUri));
+        oDataRawResponse.set(rawRequest.get().execute());
+        responseData.set(convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
+        serverODataHeaderVersion.set(oDataRawResponse.get().getHeader(HEADER_ODATA_VERSION).toString());
+        LOG.info("Request succeeded..." + responseData.get().getBytes().length + " bytes received.");
+      } catch (ODataClientErrorException cex) {
+        LOG.debug("OData Client Error Exception caught. Check subsequent test output for asserted conditions...");
+        oDataClientErrorException.set(cex);
+        serverODataHeaderVersion.set(Utils.getHeaderData(HEADER_ODATA_VERSION, cex.getHeaderInfo()));
+        responseCode.set(cex.getStatusLine().getStatusCode());
+        oDataClientErrorExceptionHandled.set(true);
+      }
+      return null;
+    };
 
     /*
      * Background
      */
     Given("^a RESOScript file was provided$", () -> {
+      /*  NOTE: this item is the first step in the Background */
+
+      //Reset ALL local state variables prior to each run.
+      resetState.run();
+
       if (pathToRESOScript == null) {
         pathToRESOScript = System.getProperty("pathToRESOScript");
       }
@@ -156,7 +219,7 @@ public class WebAPIServer_1_0_2 implements En {
       AtomicInteger numResults = new AtomicInteger();
 
       //iterate over the items and count the number of fields with data to determine whether there are data present
-      from(responseData.get()).getList("value", HashMap.class).forEach(item -> {
+      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
         if (item != null) {
           numResults.getAndIncrement();
           fieldList.forEach(field -> {
@@ -180,7 +243,7 @@ public class WebAPIServer_1_0_2 implements En {
      * $top=*Parameter_TopCount*
      */
     And("^the results contain at most \"([^\"]*)\" records$", (String parameterTopCount) -> {
-      List<String> items = from(responseData.get()).getList("value");
+      List<String> items = from(responseData.get()).getList(JSON_VALUE_PATH);
       AtomicInteger numResults = new AtomicInteger(items.size());
 
       int topCount = Integer.parseInt(Utils.resolveValue(parameterTopCount, settings));
@@ -204,18 +267,17 @@ public class WebAPIServer_1_0_2 implements En {
       //TODO: convert to OData filter factory
       URI requestUri = Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl() + "&$skip=" + skipCount);
       LOG.info("Request URI: " + (requestUri != null ? requestUri.toString() : ""));
-      rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(requestUri));
-      oDataRawResponse.set(rawRequest.get().execute());
-      responseData.set(convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
+
+      executeGetRequest.apply(requestUri);
+
     });
     And("^data in the \"([^\"]*)\" fields are different in the second request than in the first$", (String parameterUniqueId) -> {
       ObjectMapper mapper = new ObjectMapper();
-      JsonNode n1 = mapper.readTree(initialResponseData.get());
-      JsonNode n2 = mapper.readTree(responseData.get());
+      List<Object> l1 = from(initialResponseData.get()).getList(JSON_VALUE_PATH);
+      List<Object> l2 = from(responseData.get()).getList(JSON_VALUE_PATH);
 
-      assertFalse(n1.equals(n2));
+      assertFalse(l1.containsAll(l2));
     });
-
 
     //==================================================================================================================
     // Common Methods
@@ -226,51 +288,19 @@ public class WebAPIServer_1_0_2 implements En {
      */
     When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", (String requirementId) -> {
       URI requestUri = Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl());
-      LOG.info("Request URI: " + requestUri);
-
-      rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(requestUri));
-      oDataRawResponse.set(rawRequest.get().execute());
-      responseData.set(convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
-
-      LOG.info("Request succeeded..." + responseData.get().getBytes().length + " bytes received.");
-    });
-
-    /*
-     * GET request by requirementId with an additional Uri fragment for the base Uri
-     */
-    When("^a GET request is made to the resolved Url in \"([^\"]*)\" with \"([^\"]*)\"$", (String requirementId, String parameterTopCount) -> {
-      request.set(Settings.resolveParameters(settings.getRequests().get(requirementId), settings));
-
-      LOG.info("Request URL: " + request.get().getUrl());
-
-      rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(Commander.prepareURI(request.get().getUrl())));
-      oDataRawResponse.set(rawRequest.get().execute());
-      responseData.set(convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
-
-      LOG.info("Request succeeded..." + responseData.get().getBytes().length + " bytes received.");
+      executeGetRequest.apply(requestUri);
     });
 
     /*
      * Assert response code
      */
-    Then("^the server responds with a status code of (\\d+)$", (Integer code) -> {
-      int responseCode = oDataRawResponse.get().getStatusCode();
-      LOG.info("Response code is: " + responseCode);
-      assertEquals(code.intValue(), responseCode);
-    });
+    Then("^the server responds with a status code of (\\d+)$", (Integer assertedResponseCode) -> {
+      responseCode.set(oDataClientErrorException.get() != null
+          ? oDataClientErrorException.get().getStatusLine().getStatusCode()
+          : oDataRawResponse.get().getStatusCode());
 
-    /*
-     * Assert greater than: lValFromItem > rValFromSetting
-     *
-     * TODO: add general op expression parameter rather than creating individual comparators
-     */
-    And("^data in \"([^\"]*)\" are greater than \"([^\"]*)\"$", (String lValFromItem, String rValFromSetting) -> {
-      from(responseData.get()).getList("value", HashMap.class).forEach(item -> {
-        Integer lVal = new Integer(item.get(Utils.resolveValue(lValFromItem, settings)).toString()),
-                rVal = new Integer(Utils.resolveValue(rValFromSetting, settings));
-
-        assertTrue( lVal > rVal );
-      });
+      LOG.info("Asserted Response Code: " + assertedResponseCode + ", " + "Server Response Code: " + responseCode);
+      assertEquals(responseCode.get().intValue(), assertedResponseCode.intValue());
     });
 
     /*
@@ -291,12 +321,183 @@ public class WebAPIServer_1_0_2 implements En {
 
       LOG.info("Response is valid JSON!");
     });
+
+    /*
+     * Assert OData version
+     */
+    And("^the server reports OData version \"([^\"]*)\"$", (String assertODataVersion) -> {
+      LOG.info("Asserted version: " + assertODataVersion + ", Reported OData Version: " + serverODataHeaderVersion.get()); ;
+      assertEquals(serverODataHeaderVersion.get(), assertODataVersion);
+    });
+
+    /*
+     * Assert HTTP Response Code given asserted OData version
+     *
+     * TODO: make a general Header assertion function
+     */
+    Then("^the server responds with a status code of (\\d+) if the server headers report OData version \"([^\"]*)\"$",
+        (Integer assertedHttpResponseCode, String assertedODataVersion) -> {
+      boolean versionsMatch = responseCode.get().intValue() == assertedHttpResponseCode.intValue(),
+              responseCodesMatch = serverODataHeaderVersion.get().equals(assertedODataVersion);
+
+      if (versionsMatch) {
+        assertTrue(responseCodesMatch);
+      }
+    });
+
+    /*
+     * Compares field data (LHS) to a given parameter value (RHS). The operator is passed as a string,
+     * and is used to select among the supported comparisons.
+     */
+    And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
+      LOG.info("Parameter_FieldName: " + parameterFieldName + ", op: " + op + ", Parameter_Value: " + parameterAssertedValue);
+      String fieldName = Utils.resolveValue(parameterFieldName, settings);
+      int assertedValue = Integer.parseInt(Utils.resolveValue(parameterAssertedValue, settings));
+
+      //subsequent value comparisons are and-ed together while iterating over the list of items, so init to true
+      AtomicBoolean result = new AtomicBoolean(true);
+
+      AtomicReference<Integer> fieldValue = new AtomicReference<>();
+
+      //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
+      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        fieldValue.set(Integer.parseInt(item.get(fieldName).toString()));
+        result.set(result.get() && Utils.compare(fieldValue.get(), op, assertedValue));
+        LOG.info("Compare: " + fieldValue.get() + " " + op + " " + assertedValue + " is " + result.get());
+      });
+
+      assertTrue(result.get());
+    });
+
+    /*
+     * True if response has results, meaning value.length > 0
+     */
+    And("^the response has results$", () -> {
+      int count = from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).size();
+      LOG.info("Results count is: " + count);
+      assertTrue(count > 0);
+    });
+
+    /*
+     * True if data are present in the response
+     */
+    And("^the response has singleton results in the \"([^\"]*)\" field$", (String parameterFieldName) -> {
+      String value = Utils.resolveValue(parameterFieldName, settings);
+      boolean isPresent = from(responseData.get()).get() != null && value != null;
+      LOG.info("Response value is: " + value);
+      LOG.info("IsPresent: " + isPresent);
+      assertTrue(isPresent);
+    });
+
+    /*
+     * True if results count less than or equal to limit
+     */
+    And("^the number of results is less than or equal to \"([^\"]*)\"$", (String limitField) -> {
+      int count = from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).size(),
+          limit = Integer.parseInt(Utils.resolveValue(limitField, settings));
+      LOG.info("Results count is: " + count + ", Limit is: " + limit);
+      assertTrue(count <= limit);
+    });
+
+    /*
+     * True if data in the lhs expression and rhs expressions pass the AND or OR condition given in andOrOp
+     */
+    And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String opLhs, String parameterAssertedLhsValue, String andOrOp, String opRhs, String parameterAssertedRhsValue) -> {
+        String fieldName = Utils.resolveValue(parameterFieldName, settings);
+        Integer assertedLhsValue = Integer.parseInt(Utils.resolveValue(parameterAssertedLhsValue, settings)),
+                assertedRhsValue = Integer.parseInt(Utils.resolveValue(parameterAssertedRhsValue, settings));
+
+        String op = andOrOp.toLowerCase();
+        boolean isAndOp = op.contains(Operators.AND);
+
+        //these should default to true when And and false when Or for the purpose of boolean comparisons
+        AtomicBoolean lhsResult = new AtomicBoolean(isAndOp);
+        AtomicBoolean rhsResult = new AtomicBoolean(isAndOp);
+        AtomicBoolean itemResult = new AtomicBoolean(isAndOp);
+
+        AtomicReference<Integer> lhsValue = new AtomicReference<>(),
+                                 rhsValue = new AtomicReference<>();
+
+        //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
+        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+          lhsValue.set(Integer.parseInt(item.get(fieldName).toString()));
+          rhsValue.set(Integer.parseInt(item.get(fieldName).toString()));
+
+          LOG.info("Checking LHS");
+          lhsResult.set(Utils.compare(lhsValue.get(), opLhs, assertedLhsValue));
+
+          LOG.info("Checking RHS");
+          rhsResult.set(Utils.compare(rhsValue.get(), opRhs, assertedRhsValue));
+
+          if (op.contentEquals(Operators.AND)) {
+            itemResult.set(lhsResult.get() && rhsResult.get());
+            LOG.info("assertTrue: " + lhsResult.get() + " AND " + rhsResult.get() + " ==> " + itemResult.get());
+            assertTrue(itemResult.get());
+          } else if (op.contentEquals(Operators.OR)) {
+            itemResult.set(lhsResult.get() || rhsResult.get());
+            LOG.info("assertTrue: " + lhsResult.get() + " OR " + rhsResult.get() + " ==> " + itemResult.get());
+            assertTrue(itemResult.get());
+          }
+        });
+    });
+
+  }
+
+  /**
+   * Contains the list of supported operators for use in query expressions.
+   */
+  private static class Operators {
+    private static final String
+      AND = "and",
+      OR = "or",
+      NE = "ne",
+      EQ = "eq",
+      GREATER_THAN = "gt",
+      GREATER_THAN_OR_EQUAL = "ge",
+      LESS_THAN = "lt",
+      LESS_THAN_OR_EQUAL = "le";
   }
 
   private static class Utils {
+
+    /**
+     * Returns true if each item in the list is true
+     * @param lhs left hand value
+     * @param op a binary operator for use in comparsions
+     * @param rhs right hand value
+     * @return true if lhs op rhs produces true, false otherwise
+     */
+    private static boolean compare(Integer lhs, String op, Integer rhs) {
+      boolean result = false;
+
+      switch (op) {
+        case Operators.EQ:
+          result = lhs.equals(rhs);
+          break;
+        case Operators.NE:
+          result = !lhs.equals(rhs);
+          break;
+        case Operators.GREATER_THAN:
+          result = lhs > rhs;
+          break;
+        case Operators.GREATER_THAN_OR_EQUAL:
+          result = lhs >= rhs;
+          break;
+        case Operators.LESS_THAN:
+          result = lhs < rhs;
+          break;
+        case Operators.LESS_THAN_OR_EQUAL:
+          result = lhs <= rhs;
+          break;
+      }
+
+      LOG.info("Compare: " + lhs + " " + op + " " + rhs + " ==> " + result);
+      return result;
+    }
+
     /**
      * Tests the given string to see if it's valid JSON
-     * @param jsonString
+     * @param jsonString the JSON string to test the validity of
      * @return true if valid, false otherwise. Throws {@link IOException}
      */
     private static boolean isValidJson(String jsonString) {
@@ -334,16 +535,16 @@ public class WebAPIServer_1_0_2 implements En {
     private static String getResponseData(ODataRawResponse oDataRawResponse) {
       return convertInputStreamToString(oDataRawResponse.getRawResponse());
     }
-  }
 
-  /**
-   * These are now passed dynamically but we may want to verify the choices. Leave in for now.
-   */
-  private static class REQUESTS {
-    private static class WEB_API_1_0_2 {
-      private static final String REQ_WA_103_END_3 = "REQ-WA103-END3";
-      private static final String REQ_WA_103_QR_3 = "REQ-WA103-QR3";
-      private static final String REQ_WA103_END2 = "REQ-WA103-END2";
+    private static String getHeaderData(String key, Header[] headers) {
+      String data = null;
+
+      for(Header header : headers) {
+        if (header.getName().toLowerCase().contains(key.toLowerCase())) {
+          data = header.getValue();
+        }
+      }
+      return data;
     }
   }
 
