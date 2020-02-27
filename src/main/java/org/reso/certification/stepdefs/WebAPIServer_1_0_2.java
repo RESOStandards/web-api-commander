@@ -12,7 +12,10 @@ import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.format.ContentType;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.reso.commander.Commander;
 import org.reso.models.ClientSettings;
 import org.reso.models.Request;
@@ -20,6 +23,7 @@ import org.reso.models.Settings;
 
 import java.io.*;
 import java.net.URI;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -233,7 +237,11 @@ public class WebAPIServer_1_0_2 implements En {
       LOG.info("Number of Results: " + numResults.get());
       LOG.info("Number of Fields: " + fieldList.size());
       LOG.info("Field with Data: " + numFieldsWithData.get());
-      LOG.info("Percent Fill: " + ((numResults.get() * fieldList.size()) / (1.0 * numFieldsWithData.get()) * 100) + "%");
+      if (numFieldsWithData.get() > 0) {
+        LOG.info("Percent Fill: " + ((numResults.get() * fieldList.size()) / (1.0 * numFieldsWithData.get()) * 100) + "%");
+      } else {
+        LOG.info("Percent Fill: 0% - no fields with data found!");
+      }
       assertTrue(numFieldsWithData.get() > 0);
     });
 
@@ -441,6 +449,26 @@ public class WebAPIServer_1_0_2 implements En {
         });
     });
 
+    /*
+     * Date Comparisons Function
+     */
+    And("^Date data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
+      String fieldName = Utils.resolveValue(parameterFieldName, settings);
+      AtomicReference<Timestamp> fieldValue = new AtomicReference<>();
+      AtomicReference<Timestamp> assertedValue = new AtomicReference<>();
+
+      assertedValue.set(Utils.parseTimestampFromEdmDateString(Utils.resolveValue(parameterAssertedValue, settings)));
+      LOG.info("Asserted date is: " + assertedValue.get().toString());
+
+      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        try {
+          fieldValue.set(Utils.parseTimestampFromEdmDateTimeOffset(item.get(fieldName).toString()));
+          assertTrue(Utils.compare(fieldValue.get(), op, assertedValue.get()));
+        } catch (Exception ex){
+          LOG.error(ex.toString());
+        }
+      });
+    });
   }
 
   /**
@@ -468,9 +496,10 @@ public class WebAPIServer_1_0_2 implements En {
      * @return true if lhs op rhs produces true, false otherwise
      */
     private static boolean compare(Integer lhs, String op, Integer rhs) {
+      String operator = op.toLowerCase();
       boolean result = false;
 
-      switch (op) {
+      switch (operator) {
         case Operators.EQ:
           result = lhs.equals(rhs);
           break;
@@ -489,9 +518,30 @@ public class WebAPIServer_1_0_2 implements En {
         case Operators.LESS_THAN_OR_EQUAL:
           result = lhs <= rhs;
           break;
+        default: break;
       }
 
-      LOG.info("Compare: " + lhs + " " + op + " " + rhs + " ==> " + result);
+      LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
+      return result;
+    }
+
+    private static boolean compare(Timestamp lhs, String op, Timestamp rhs) {
+      String operator = op.toLowerCase();
+      boolean result = false;
+
+      if (operator.contentEquals(Operators.GREATER_THAN)) {
+        result = lhs.after(rhs);
+      } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
+        result = lhs.after(rhs) || lhs.equals(rhs);
+      } else if (operator.contentEquals(Operators.EQ)) {
+        result = lhs.equals(rhs);
+      } else if (operator.contentEquals(Operators.LESS_THAN)) {
+        result = lhs.before(rhs);
+      } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
+        result = lhs.before(rhs) || lhs.equals(rhs);
+      }
+
+      LOG.info("Assertion: " + lhs + " " + operator + " " + rhs + " ==> " + result);
       return result;
     }
 
@@ -545,6 +595,34 @@ public class WebAPIServer_1_0_2 implements En {
         }
       }
       return data;
+    }
+
+    /**
+     * Parses the given edmDateTimeOffsetString into a Java Instant (the type expected by the Olingo type converter).
+     * @param edmDateTimeOffsetString string representation of an Edm DateTimeOffset to parse.
+     * @return the corresponding Instant value.
+     */
+    private static Timestamp parseTimestampFromEdmDateTimeOffset(String edmDateTimeOffsetString) {
+      try {
+        return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Timestamp.class);
+      } catch (EdmPrimitiveTypeException ex) {
+        LOG.error(ex.toString());
+        return null;
+      }
+    }
+
+    /**
+     * Parses the given edmDateString into a Java date (the type expected by the Olingo type converter).
+     * @param edmDateString the date string to convert.
+     * @return the corresponding Data value.
+     */
+    private static Timestamp parseTimestampFromEdmDateString(String edmDateString) {
+      try {
+        return EdmDate.getInstance().valueOfString(edmDateString, true, null, null, null, null, Timestamp.class);
+      } catch (EdmPrimitiveTypeException ex) {
+        LOG.error(ex.toString());
+        return null;
+      }
     }
   }
 

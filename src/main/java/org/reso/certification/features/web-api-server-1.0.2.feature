@@ -149,3 +149,11 @@ Feature: Web API Server 1.0.2 Certification
     And the response is valid JSON
     And the response has results
     And Integer data in "Parameter_FilterNotField" "ne" "Parameter_FilterNotValue"
+
+  @REQ-WA103-QO25 @core @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter: Date: Date gt date value
+    When a GET request is made to the resolved Url in "REQ-WA103-QO25.filter.date.gt.dateValue"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And Date data in "Parameter_TimestampField" "gt" "Parameter_DateValue"

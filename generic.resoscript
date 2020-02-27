@@ -366,12 +366,12 @@
         />
 
         <Request
-          TestDescription="Query Support: $filter: Date: Date"
-          RequirementId="REQ-WA103-QO25"
+          TestDescription="Query Support: $filter: Date: Date gt date value"
+          RequirementId="REQ-WA103-QO25.filter.date.gt.dateValue"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO25.json"
+          OutputFile="REQ-WA103-QO25.filter.date.gt.dateValue.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=date(*Parameter_TimestampField*) gt *Parameter_DateValue**Parameter_RequiredParameters*"
         />
 
