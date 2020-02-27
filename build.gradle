@@ -35,10 +35,10 @@ dependencies {
   compile 'io.rest-assured:json-path:4.2.0'
   compile 'io.rest-assured:json-schema-validator:4.2.0'
 
-  compile 'io.cucumber:cucumber-java8:5.2.0'
-  compile 'io.cucumber:cucumber-junit:5.2.0'
+  compile 'io.cucumber:cucumber-java8:5.4.0'
+  compile 'io.cucumber:cucumber-junit:5.4.0'
 
-  compile 'net.masterthought:cucumber-reporting:5.0.2'
+  compile 'net.masterthought:cucumber-reporting:5.1.1'
 }
 
 configurations {
@@ -79,7 +79,7 @@ task testWebApiServer_1_0_2() {
           '--plugin',
           'pretty',
           '--plugin',
-          'html:build/test-report',
+          'html:build/web-api-server-1.0.2-report',
           '--glue',
           'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
           'src/main/java/org/reso/certification/features'

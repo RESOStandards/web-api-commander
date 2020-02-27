@@ -26,6 +26,7 @@ import java.io.*;
 import java.net.URI;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -103,7 +104,7 @@ public class WebAPIServer_1_0_2 implements En {
       try {
         rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(requestUri));
         oDataRawResponse.set(rawRequest.get().execute());
-        responseData.set(convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
+        responseData.set(Utils.convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
         serverODataHeaderVersion.set(oDataRawResponse.get().getHeader(HEADER_ODATA_VERSION).toString());
         LOG.info("Request succeeded..." + responseData.get().getBytes().length + " bytes received.");
       } catch (ODataClientErrorException cex) {
@@ -459,7 +460,7 @@ public class WebAPIServer_1_0_2 implements En {
       AtomicReference<Date> assertedValue = new AtomicReference<>();
 
       assertedValue.set(Utils.parseDateFromEdmDateString(Utils.resolveValue(parameterAssertedValue, settings)));
-      LOG.info("Asserted date is: " + assertedValue.get().toString());
+      LOG.info("Asserted value is: " + assertedValue.get().toString());
 
       from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
         try {
@@ -480,7 +481,7 @@ public class WebAPIServer_1_0_2 implements En {
       AtomicReference<Time> assertedValue = new AtomicReference<>();
 
       assertedValue.set(Utils.parseTimeOfDayFromEdmTimeOfDayString(Utils.resolveValue(parameterAssertedValue, settings)));
-      LOG.info("Asserted time is: " + assertedValue.get().toString());
+      LOG.info("Asserted value is: " + assertedValue.get().toString());
 
       from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
         try {
@@ -496,20 +497,34 @@ public class WebAPIServer_1_0_2 implements En {
      * Timestamp comparison glue
      */
     And("^DateTimeOffset data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
-      String fieldName = Utils.resolveValue(parameterFieldName, settings);
-      AtomicReference<Timestamp> fieldValue = new AtomicReference<>();
-      AtomicReference<Timestamp> assertedValue = new AtomicReference<>();
+      Utils.assertDateTimeOffset(parameterFieldName, op, parameterAssertedValue, responseData.get());
+    });
 
-      assertedValue.set(Utils.parseTimestampFromEdmDateTimeOffsetString(Utils.resolveValue(parameterAssertedValue, settings)));
-      LOG.info("Asserted time is: " + assertedValue.get().toString());
+    /*
+     * Timestamp comparison to now()
+     */
+    And("^DateTimeOffset data in \"([^\"]*)\" \"([^\"]*)\" now\\(\\)$", (String parameterFieldName, String op) -> {
+      Utils.assertDateTimeOffset(parameterFieldName, op, Timestamp.from(Instant.now()), responseData.get());
+    });
+
+    /*
+     * Lookups
+     */
+    And("^Data in \"([^\"]*)\" has \"([^\"]*)\"$", (String parameterFieldName, String parameterAssertedValue) -> {
+      String fieldName = Utils.resolveValue(parameterFieldName, settings);
+      AtomicReference<String> fieldValue = new AtomicReference<>();
+      AtomicReference<String> assertedValue = new AtomicReference<>();
+
+      AtomicBoolean result = new AtomicBoolean(false);
+
+      assertedValue.set(Utils.resolveValue(parameterAssertedValue, settings));
+      LOG.info("Asserted value is: " + assertedValue.get());
 
       from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-        try {
-          fieldValue.set(Utils.parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
-          assertTrue(Utils.compare(fieldValue.get(), op, assertedValue.get()));
-        } catch (Exception ex){
-          LOG.error(ex.toString());
-        }
+          fieldValue.set(item.get(fieldName).toString());
+          result.set(fieldValue.get().contentEquals(assertedValue.get()));
+          LOG.info("Assert True: " + fieldValue.get() + " equals " + assertedValue.get() + " ==> " + result.get());
+          assertTrue(result.get());
       });
     });
   }
@@ -532,10 +547,46 @@ public class WebAPIServer_1_0_2 implements En {
   private static class Utils {
 
     /**
+     * For each parameterFieldName value in responseData, assertTrue(value op timestamp)
+     * @param parameterFieldName the field name containing data
+     * @param op an OData binary operator to be used for comparsions
+     * @param parameterAssertedValue value to be used for comparisons
+     * @param responseData string containing JSON response data
+     */
+    private static void assertDateTimeOffset(String parameterFieldName, String op, String parameterAssertedValue, String responseData) {
+      AtomicReference<Timestamp> assertedValue = new AtomicReference<>();
+
+      assertedValue.set(parseTimestampFromEdmDateTimeOffsetString(resolveValue(parameterAssertedValue, settings)));
+      assertDateTimeOffset(parameterFieldName, op, assertedValue.get(), responseData);
+    }
+
+    /**
+     * For each parameterFieldName value in responseData, assertTrue(value op timestamp)
+     * @param parameterFieldName the field name containing data
+     * @param op an OData binary operator to be used for comparsions
+     * @param timestamp value to be used for comparisons
+     * @param responseData string containing JSON response data
+     */
+    private static void assertDateTimeOffset(String parameterFieldName, String op, Timestamp timestamp, String responseData) {
+      LOG.info("Asserted time is: " + timestamp);
+      String fieldName = resolveValue(parameterFieldName, settings);
+      AtomicReference<Timestamp> fieldValue = new AtomicReference<>();
+
+      from(responseData).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        try {
+          fieldValue.set(parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+          assertTrue(compare(fieldValue.get(), op, timestamp));
+        } catch (Exception ex) {
+          LOG.error(ex.toString());
+        }
+      });
+    }
+
+    /**
      * Returns true if each item in the list is true
-     * @param lhs left hand value
-     * @param op a binary operator for use in comparsions
-     * @param rhs right hand value
+     * @param lhs Integer value
+     * @param op an OData binary operator for use for comparisons
+     * @param rhs Integer value
      * @return true if lhs op rhs produces true, false otherwise
      */
     private static boolean compare(Integer lhs, String op, Integer rhs) {
@@ -560,6 +611,13 @@ public class WebAPIServer_1_0_2 implements En {
       return result;
     }
 
+    /**
+     * Timestamp Comparator
+     * @param lhs Timestamp to compare
+     * @param op an OData binary operator to use for comparisons
+     * @param rhs Timestamp to compare
+     * @return true if lhs op rhs, false otherwise
+     */
     private static boolean compare(Timestamp lhs, String op, Timestamp rhs) {
       String operator = op.toLowerCase();
       boolean result = false;
@@ -581,6 +639,13 @@ public class WebAPIServer_1_0_2 implements En {
       return result;
     }
 
+    /**
+     * Time Comparator
+     * @param lhs Time to compare
+     * @param op an OData binary operator to use for comparisons
+     * @param rhs Time to compare
+     * @return true if lhs op rhs, false otherwise
+     */
     private static boolean compare(Time lhs, String op, Time rhs) {
       String operator = op.toLowerCase();
       boolean result = false;
@@ -602,6 +667,13 @@ public class WebAPIServer_1_0_2 implements En {
       return result;
     }
 
+    /**
+     * Date Comparator
+     * @param lhs Date to compare
+     * @param op an OData binary operator to use for comparisons
+     * @param rhs Date to compare
+     * @return true if lhs op rhs, false otherwise
+     */
     private static boolean compare(Date lhs, String op, Date rhs) {
       String operator = op.toLowerCase();
       boolean result = false;
@@ -754,26 +826,26 @@ public class WebAPIServer_1_0_2 implements En {
         return null;
       }
     }
-  }
 
-  /**
-   * Converts the given inputStream to a string.
-   * @param inputStream the input stream to convert.
-   * @return the string value contained in the stream.
-   */
-  private static String convertInputStreamToString(InputStream inputStream) {
-    InputStreamReader isReader = new InputStreamReader(inputStream);
-    BufferedReader reader = new BufferedReader(isReader);
-    StringBuilder sb = new StringBuilder();
-    String str;
-    try {
-      while((str = reader.readLine())!= null){
-        sb.append(str);
+    /**
+     * Converts the given inputStream to a string.
+     * @param inputStream the input stream to convert.
+     * @return the string value contained in the stream.
+     */
+    private static String convertInputStreamToString(InputStream inputStream) {
+      InputStreamReader isReader = new InputStreamReader(inputStream);
+      BufferedReader reader = new BufferedReader(isReader);
+      StringBuilder sb = new StringBuilder();
+      String str;
+      try {
+        while((str = reader.readLine())!= null){
+          sb.append(str);
+        }
+        return sb.toString();
+      } catch (Exception ex) {
+        LOG.error("Error in convertInputStreamToString: " + ex);
       }
-      return sb.toString();
-    } catch (Exception ex) {
-      LOG.error("Error in convertInputStreamToString: " + ex);
+      return null;
     }
-    return null;
   }
 }
