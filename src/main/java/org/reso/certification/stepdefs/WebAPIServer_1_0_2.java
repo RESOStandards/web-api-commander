@@ -12,7 +12,11 @@ import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.format.ContentType;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmTimeOfDay;
 import org.reso.commander.Commander;
 import org.reso.models.ClientSettings;
 import org.reso.models.Request;
@@ -20,10 +24,10 @@ import org.reso.models.Settings;
 
 import java.io.*;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,6 +35,8 @@ import java.util.function.Function;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
+import static org.reso.models.Settings.CLIENT_SETTING_PREFIX;
+import static org.reso.models.Settings.PARAMETER_PREFIX;
 
 public class WebAPIServer_1_0_2 implements En {
   private static final Logger LOG = LogManager.getLogger(WebAPIServer_1_0_2.class);
@@ -98,7 +104,7 @@ public class WebAPIServer_1_0_2 implements En {
       try {
         rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(requestUri));
         oDataRawResponse.set(rawRequest.get().execute());
-        responseData.set(convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
+        responseData.set(Utils.convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
         serverODataHeaderVersion.set(oDataRawResponse.get().getHeader(HEADER_ODATA_VERSION).toString());
         LOG.info("Request succeeded..." + responseData.get().getBytes().length + " bytes received.");
       } catch (ODataClientErrorException cex) {
@@ -233,7 +239,11 @@ public class WebAPIServer_1_0_2 implements En {
       LOG.info("Number of Results: " + numResults.get());
       LOG.info("Number of Fields: " + fieldList.size());
       LOG.info("Field with Data: " + numFieldsWithData.get());
-      LOG.info("Percent Fill: " + ((numResults.get() * fieldList.size()) / (1.0 * numFieldsWithData.get()) * 100) + "%");
+      if (numFieldsWithData.get() > 0) {
+        LOG.info("Percent Fill: " + ((numResults.get() * fieldList.size()) / (1.0 * numFieldsWithData.get()) * 100) + "%");
+      } else {
+        LOG.info("Percent Fill: 0% - no fields with data found!");
+      }
       assertTrue(numFieldsWithData.get() > 0);
     });
 
@@ -431,16 +441,92 @@ public class WebAPIServer_1_0_2 implements En {
 
           if (op.contentEquals(Operators.AND)) {
             itemResult.set(lhsResult.get() && rhsResult.get());
-            LOG.info("assertTrue: " + lhsResult.get() + " AND " + rhsResult.get() + " ==> " + itemResult.get());
+            LOG.info("Assert True: " + lhsResult.get() + " AND " + rhsResult.get() + " ==> " + itemResult.get());
             assertTrue(itemResult.get());
           } else if (op.contentEquals(Operators.OR)) {
             itemResult.set(lhsResult.get() || rhsResult.get());
-            LOG.info("assertTrue: " + lhsResult.get() + " OR " + rhsResult.get() + " ==> " + itemResult.get());
+            LOG.info("Assert True: " + lhsResult.get() + " OR " + rhsResult.get() + " ==> " + itemResult.get());
             assertTrue(itemResult.get());
           }
         });
     });
 
+    /*
+     * Date Comparison glue
+     */
+    And("^Date data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
+      String fieldName = Utils.resolveValue(parameterFieldName, settings);
+      AtomicReference<Date> fieldValue = new AtomicReference<>();
+      AtomicReference<Date> assertedValue = new AtomicReference<>();
+
+      assertedValue.set(Utils.parseDateFromEdmDateString(Utils.resolveValue(parameterAssertedValue, settings)));
+      LOG.info("Asserted value is: " + assertedValue.get().toString());
+
+      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        try {
+          fieldValue.set(Utils.parseDateFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+          assertTrue(Utils.compare(fieldValue.get(), op, assertedValue.get()));
+        } catch (Exception ex){
+          LOG.error(ex.toString());
+        }
+      });
+    });
+
+    /*
+     * Time comparison glue
+     */
+    And("^TimeOfDay data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
+      String fieldName = Utils.resolveValue(parameterFieldName, settings);
+      AtomicReference<Time> fieldValue = new AtomicReference<>();
+      AtomicReference<Time> assertedValue = new AtomicReference<>();
+
+      assertedValue.set(Utils.parseTimeOfDayFromEdmTimeOfDayString(Utils.resolveValue(parameterAssertedValue, settings)));
+      LOG.info("Asserted value is: " + assertedValue.get().toString());
+
+      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        try {
+          fieldValue.set(Utils.parseTimeOfDayFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+          assertTrue(Utils.compare(fieldValue.get(), op, assertedValue.get()));
+        } catch (Exception ex){
+          LOG.error(ex.toString());
+        }
+      });
+    });
+
+    /*
+     * Timestamp comparison glue
+     */
+    And("^DateTimeOffset data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
+      Utils.assertDateTimeOffset(parameterFieldName, op, parameterAssertedValue, responseData.get());
+    });
+
+    /*
+     * Timestamp comparison to now()
+     */
+    And("^DateTimeOffset data in \"([^\"]*)\" \"([^\"]*)\" now\\(\\)$", (String parameterFieldName, String op) -> {
+      Utils.assertDateTimeOffset(parameterFieldName, op, Timestamp.from(Instant.now()), responseData.get());
+    });
+
+    /*
+     * Lookups
+     */
+    And("^Data in \"([^\"]*)\" has \"([^\"]*)\"$", (String parameterFieldName, String parameterAssertedValue) -> {
+      String fieldName = Utils.resolveValue(parameterFieldName, settings);
+      AtomicReference<String> fieldValue = new AtomicReference<>();
+      AtomicReference<String> assertedValue = new AtomicReference<>();
+
+      AtomicBoolean result = new AtomicBoolean(false);
+
+      assertedValue.set(Utils.resolveValue(parameterAssertedValue, settings));
+      LOG.info("Asserted value is: " + assertedValue.get());
+
+      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+          fieldValue.set(item.get(fieldName).toString());
+          result.set(fieldValue.get().contentEquals(assertedValue.get()));
+          LOG.info("Assert True: " + fieldValue.get() + " equals " + assertedValue.get() + " ==> " + result.get());
+          assertTrue(result.get());
+      });
+    });
   }
 
   /**
@@ -461,39 +547,154 @@ public class WebAPIServer_1_0_2 implements En {
   private static class Utils {
 
     /**
+     * For each parameterFieldName value in responseData, assertTrue(value op timestamp)
+     * @param parameterFieldName the field name containing data
+     * @param op an OData binary operator to be used for comparsions
+     * @param parameterAssertedValue value to be used for comparisons
+     * @param responseData string containing JSON response data
+     */
+    private static void assertDateTimeOffset(String parameterFieldName, String op, String parameterAssertedValue, String responseData) {
+      AtomicReference<Timestamp> assertedValue = new AtomicReference<>();
+
+      assertedValue.set(parseTimestampFromEdmDateTimeOffsetString(resolveValue(parameterAssertedValue, settings)));
+      assertDateTimeOffset(parameterFieldName, op, assertedValue.get(), responseData);
+    }
+
+    /**
+     * For each parameterFieldName value in responseData, assertTrue(value op timestamp)
+     * @param parameterFieldName the field name containing data
+     * @param op an OData binary operator to be used for comparsions
+     * @param timestamp value to be used for comparisons
+     * @param responseData string containing JSON response data
+     */
+    private static void assertDateTimeOffset(String parameterFieldName, String op, Timestamp timestamp, String responseData) {
+      LOG.info("Asserted time is: " + timestamp);
+      String fieldName = resolveValue(parameterFieldName, settings);
+      AtomicReference<Timestamp> fieldValue = new AtomicReference<>();
+
+      from(responseData).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        try {
+          fieldValue.set(parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+          assertTrue(compare(fieldValue.get(), op, timestamp));
+        } catch (Exception ex) {
+          LOG.error(ex.toString());
+        }
+      });
+    }
+
+    /**
      * Returns true if each item in the list is true
-     * @param lhs left hand value
-     * @param op a binary operator for use in comparsions
-     * @param rhs right hand value
+     * @param lhs Integer value
+     * @param op an OData binary operator for use for comparisons
+     * @param rhs Integer value
      * @return true if lhs op rhs produces true, false otherwise
      */
     private static boolean compare(Integer lhs, String op, Integer rhs) {
+      String operator = op.toLowerCase();
       boolean result = false;
 
-      switch (op) {
-        case Operators.EQ:
-          result = lhs.equals(rhs);
-          break;
-        case Operators.NE:
-          result = !lhs.equals(rhs);
-          break;
-        case Operators.GREATER_THAN:
-          result = lhs > rhs;
-          break;
-        case Operators.GREATER_THAN_OR_EQUAL:
-          result = lhs >= rhs;
-          break;
-        case Operators.LESS_THAN:
-          result = lhs < rhs;
-          break;
-        case Operators.LESS_THAN_OR_EQUAL:
-          result = lhs <= rhs;
-          break;
+      if (operator.contentEquals(Operators.GREATER_THAN)) {
+        result = lhs > rhs;
+      } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
+        result = lhs >= rhs;
+      } else if (operator.contentEquals(Operators.EQ)) {
+        result = lhs.equals(rhs);
+      } else if (operator.contentEquals(Operators.NE)) {
+        result = !lhs.equals(rhs);
+      } else if (operator.contentEquals(Operators.LESS_THAN)) {
+        result = lhs < rhs;
+      } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
+        result = lhs <= rhs;
       }
 
-      LOG.info("Compare: " + lhs + " " + op + " " + rhs + " ==> " + result);
+      LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
       return result;
     }
+
+    /**
+     * Timestamp Comparator
+     * @param lhs Timestamp to compare
+     * @param op an OData binary operator to use for comparisons
+     * @param rhs Timestamp to compare
+     * @return true if lhs op rhs, false otherwise
+     */
+    private static boolean compare(Timestamp lhs, String op, Timestamp rhs) {
+      String operator = op.toLowerCase();
+      boolean result = false;
+
+      if (operator.contentEquals(Operators.GREATER_THAN)) {
+        result = lhs.after(rhs);
+      } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
+        result = lhs.after(rhs) || lhs.equals(rhs);
+      } else if (operator.contentEquals(Operators.EQ)) {
+        result = lhs.equals(rhs);
+      } else if (operator.contentEquals(Operators.NE)) {
+        result = !lhs.equals(rhs);
+      } else if (operator.contentEquals(Operators.LESS_THAN)) {
+        result = lhs.before(rhs);
+      } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
+        result = lhs.before(rhs) || lhs.equals(rhs);
+      }
+      LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
+      return result;
+    }
+
+    /**
+     * Time Comparator
+     * @param lhs Time to compare
+     * @param op an OData binary operator to use for comparisons
+     * @param rhs Time to compare
+     * @return true if lhs op rhs, false otherwise
+     */
+    private static boolean compare(Time lhs, String op, Time rhs) {
+      String operator = op.toLowerCase();
+      boolean result = false;
+
+      if (operator.contentEquals(Operators.GREATER_THAN)) {
+        result = lhs.toLocalTime().isAfter(rhs.toLocalTime());
+      } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
+        result = lhs.toLocalTime().isAfter(rhs.toLocalTime()) || lhs.toLocalTime().equals(rhs.toLocalTime());
+      } else if (operator.contentEquals(Operators.EQ)) {
+        result = lhs.toLocalTime().equals(rhs.toLocalTime());
+      } else if (operator.contentEquals(Operators.NE)) {
+        result = !lhs.toLocalTime().equals(rhs.toLocalTime());
+      } else if (operator.contentEquals(Operators.LESS_THAN)) {
+        result = lhs.toLocalTime().isBefore(rhs.toLocalTime());
+      } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
+        result = lhs.toLocalTime().isBefore(rhs.toLocalTime()) || lhs.toLocalTime().equals(rhs.toLocalTime());
+      }
+      LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
+      return result;
+    }
+
+    /**
+     * Date Comparator
+     * @param lhs Date to compare
+     * @param op an OData binary operator to use for comparisons
+     * @param rhs Date to compare
+     * @return true if lhs op rhs, false otherwise
+     */
+    private static boolean compare(Date lhs, String op, Date rhs) {
+      String operator = op.toLowerCase();
+      boolean result = false;
+
+      if (operator.contentEquals(Operators.GREATER_THAN)) {
+        result = lhs.after(rhs);
+      } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
+        result = lhs.after(rhs) || lhs.equals(rhs);
+      } else if (operator.contentEquals(Operators.EQ)) {
+        result = lhs.equals(rhs);
+      } else if (operator.contentEquals(Operators.NE)) {
+        result = !lhs.equals(rhs);
+      } else if (operator.contentEquals(Operators.LESS_THAN)) {
+        result = lhs.before(rhs);
+      } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
+        result = lhs.before(rhs) || lhs.equals(rhs);
+      }
+      LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
+      return result;
+    }
+
 
     /**
      * Tests the given string to see if it's valid JSON
@@ -516,12 +717,12 @@ public class WebAPIServer_1_0_2 implements En {
      * @return the resolved setting or item if it's not a client setting or parameter
      */
     private static String resolveValue(String item, Settings settings) {
-      if (item.contains("Parameter_")) {
-        return settings.getParameters().getValue(item.replace("Parameter_", ""));
+      if (item.contains(PARAMETER_PREFIX)) {
+        return settings.getParameters().getValue(item.replace(PARAMETER_PREFIX, ""));
       }
 
-      if (item.contains("ClientSettings_")) {
-        return settings.getClientSettings().get(item.replace("ClientSettings_", ""));
+      if (item.contains(CLIENT_SETTING_PREFIX)) {
+        return settings.getClientSettings().get(item.replace(CLIENT_SETTING_PREFIX, ""));
       }
 
       return item;
@@ -546,26 +747,105 @@ public class WebAPIServer_1_0_2 implements En {
       }
       return data;
     }
-  }
 
-  /**
-   * Converts the given inputStream to a string.
-   * @param inputStream the input stream to convert.
-   * @return the string value contained in the stream.
-   */
-  private static String convertInputStreamToString(InputStream inputStream) {
-    InputStreamReader isReader = new InputStreamReader(inputStream);
-    BufferedReader reader = new BufferedReader(isReader);
-    StringBuilder sb = new StringBuilder();
-    String str;
-    try {
-      while((str = reader.readLine())!= null){
-        sb.append(str);
+    /**
+     * Parses the given edmDateTimeOffsetString into a Java Instant (the type expected by the Olingo type converter).
+     * @param edmDateTimeOffsetString string representation of an Edm DateTimeOffset to parse.
+     * @return the corresponding Instant value.
+     */
+    private static Timestamp parseTimestampFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) {
+      try {
+        return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Timestamp.class);
+      } catch (EdmPrimitiveTypeException ex) {
+        LOG.error(ex.toString());
+        return null;
       }
-      return sb.toString();
-    } catch (Exception ex) {
-      LOG.error("Error in convertInputStreamToString: " + ex);
     }
-    return null;
+
+    /**
+     * Parses the given edmDateString into a Java date (the type expected by the Olingo type converter).
+     * @param edmDateString the date string to convert.
+     * @return the corresponding Data value.
+     */
+    private static Timestamp parseTimestampFromEdmDateString(String edmDateString) {
+      try {
+        return EdmDate.getInstance().valueOfString(edmDateString, true, null, null, null, null, Timestamp.class);
+      } catch (EdmPrimitiveTypeException ex) {
+        LOG.error(ex.toString());
+        return null;
+      }
+    }
+
+    /**
+     * Parses the given edmDateString into a Java date (the type expected by the Olingo type converter).
+     * @param edmTimeOfDayOffsetString the date string to convert.
+     * @return the corresponding Data value.
+     */
+    private static Time parseTimeOfDayFromEdmTimeOfDayString(String edmTimeOfDayOffsetString) {
+      try {
+        return EdmTimeOfDay.getInstance().valueOfString(edmTimeOfDayOffsetString, true, null, null, null, null, Time.class);
+      } catch (EdmPrimitiveTypeException ex) {
+        LOG.error(ex.toString());
+        return null;
+      }
+    }
+
+    private static Time parseTimeOfDayFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) {
+      try {
+        return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Time.class);
+      } catch (EdmPrimitiveTypeException ex) {
+        LOG.error(ex.toString());
+        return null;
+      }
+    }
+
+    /**
+     * Parses the given edmDateString into a Java Date
+     * @param edmDateString the date string to convert.
+     * @return the corresponding Date value.
+     */
+    private static Date parseDateFromEdmDateString(String edmDateString) {
+      try {
+        return EdmDate.getInstance().valueOfString(edmDateString, true, null, null, null, null, Date.class);
+      } catch (EdmPrimitiveTypeException ex) {
+        LOG.error(ex.toString());
+        return null;
+      }
+    }
+
+    /**
+     * Parses the given edmDateTimeOffsetString into a Java Date
+     * @param edmDateTimeOffsetString string representation of an Edm DateTimeOffset to parse.
+     * @return the corresponding Date value.
+     */
+    private static Date parseDateFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) {
+      try {
+        return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Date.class);
+      } catch (EdmPrimitiveTypeException ex) {
+        LOG.error(ex.toString());
+        return null;
+      }
+    }
+
+    /**
+     * Converts the given inputStream to a string.
+     * @param inputStream the input stream to convert.
+     * @return the string value contained in the stream.
+     */
+    private static String convertInputStreamToString(InputStream inputStream) {
+      InputStreamReader isReader = new InputStreamReader(inputStream);
+      BufferedReader reader = new BufferedReader(isReader);
+      StringBuilder sb = new StringBuilder();
+      String str;
+      try {
+        while((str = reader.readLine())!= null){
+          sb.append(str);
+        }
+        return sb.toString();
+      } catch (Exception ex) {
+        LOG.error("Error in convertInputStreamToString: " + ex);
+      }
+      return null;
+    }
   }
 }

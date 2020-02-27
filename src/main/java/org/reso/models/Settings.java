@@ -46,8 +46,8 @@ public class  Settings {
     return settings;
   }
 
-  static final String CLIENT_SETTING_PREFIX = "ClientSettings_";
-  static final String PARAMETER_PREFIX = "Parameter_";
+  public static final String CLIENT_SETTING_PREFIX = "ClientSettings_";
+  public static final String PARAMETER_PREFIX = "Parameter_";
 
   /**
    * Resolves the parameters in request with parameters.
