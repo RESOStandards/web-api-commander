@@ -196,22 +196,22 @@ public class WebAPIServer_1_0_2 implements En {
      * REQ-WA103-QR1
      */
     And("^the provided \"([^\"]*)\" is returned in the \"([^\"]*)\" field$", (String parameterUniqueIdValue, String parameterUniqueId) -> {
+      String expectedValueAsString = Utils.resolveValue(parameterUniqueIdValue, settings), resolvedValueAsString = null;
+      Object resolvedValue = from(responseData.get()).get(Utils.resolveValue(parameterUniqueId, settings));
 
-      String expectedValueAsString = Utils.resolveValue(parameterUniqueIdValue, settings),
-          resolvedValueAsString = from(responseData.get()).get(Utils.resolveValue(parameterUniqueId, settings));
+      LOG.info("Expected Value is: " + expectedValueAsString);
+      LOG.info("Resolved value is: " + resolvedValue);
 
-      //string values in the RESOScript have single quotes inside of double quotes
-      //OData already checks the response data against the metadata that's being advertised,
-      //so we can just do string comparisons
-      if (expectedValueAsString.contains("'")) {
-        expectedValueAsString = expectedValueAsString.replace("'", "");
-        assertEquals(expectedValueAsString, resolvedValueAsString);
+      //both of the inputs should be present
+      assertNotNull(expectedValueAsString);
+      assertNotNull(resolvedValue);
+
+      if (resolvedValue.getClass().isInstance(Integer.class)) {
+        assertEquals(Integer.parseInt(expectedValueAsString), resolvedValue);
       } else {
-        assertEquals(expectedValueAsString, resolvedValueAsString);
+        expectedValueAsString = expectedValueAsString.replace("'", "");
+        assertEquals(expectedValueAsString, resolvedValue.toString());
       }
-
-      LOG.info("Expected Value is:" + expectedValueAsString);
-      LOG.info("Resolved value is:" + resolvedValueAsString);
     });
 
 

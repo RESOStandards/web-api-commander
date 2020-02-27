@@ -171,8 +171,8 @@
         <Parameter Name="RequiredParameters" Value="" />
         <Parameter Name="RequiredParametersFilter" Value="" />
 
-        <!-- Intentionally Blank. Skipped at the moment but referenced in a test. -->
-        <Parameter Name="QueryTooComplexUri" Value="" />
+        <!-- Note: you may need to use Value="?$format=application/xml" on your server -->
+        <Parameter Name="OptionalMetadataFormatParameter" Value="" />
 
     </Parameters>
 
@@ -186,7 +186,7 @@
           Capability="Core"
           WebAPIReference=""
           OutputFile="REQ-WA103-END3.metadata.xml"
-          Url="*ClientSettings_WebAPIURI*/$metadata?$format=application/xml"
+          Url="*ClientSettings_WebAPIURI*/$metadata*Parameter_OptionalMetadataFormatParameter*"
         />
 
         <Request
@@ -216,7 +216,7 @@
           Capability="Query functions"
           WebAPIReference="2.4.2"
           OutputFile="REQ-WA103-QR3.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -226,7 +226,7 @@
           Capability="Client paging ($top, $skip)"
           WebAPIReference="2.4.2"
           OutputFile="REQ-WA103-QR4.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -236,7 +236,7 @@
           Capability="Client pageability ($top, $skip)"
           WebAPIReference="2.4.2"
           OutputFile="REQ-WA103-QR5.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -246,7 +246,7 @@
           Capability="Core"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO1.1.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$SeLeCt=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$SeLeCt=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -256,7 +256,7 @@
           Capability="Core"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO1.2.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$FiLtEr=*Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$FiLtEr=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -266,7 +266,7 @@
           Capability="Core"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO1.3.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*&amp;$OrDeRbY=*Parameter_FilterIntegerField* asc"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*&amp;$OrDeRbY=*Parameter_FilterIntegerField* asc"
         />
 
         <Request
@@ -276,7 +276,7 @@
           Capability="Core"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO1.4.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*&amp;$oRdErBy=*Parameter_FilterIntegerField* desc"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*&amp;$oRdErBy=*Parameter_FilterIntegerField* desc"
         />
 
         <Request
@@ -286,7 +286,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO2"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -296,7 +296,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO3"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* ne *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -306,7 +306,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO4"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -316,7 +316,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO5.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ge *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* ge *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -326,7 +326,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO6.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -336,7 +336,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO7.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* le *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* le *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -346,7 +346,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO9.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow* and *Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueHigh**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow* and *Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueHigh**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -356,7 +356,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO10.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueHigh* or *Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueHigh* or *Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -366,7 +366,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO11.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=not(*Parameter_FilterNotField* le *Parameter_FilterNotValue*)*Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and not(*Parameter_FilterNotField* le *Parameter_FilterNotValue*)*Parameter_RequiredParameters*"
         />
 
         <Request
@@ -376,7 +376,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO25.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=date(*Parameter_TimestampField*) gt *Parameter_DateValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and date(*Parameter_TimestampField*) gt *Parameter_DateValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -386,7 +386,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO26.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=time(*Parameter_TimestampField*) lt *Parameter_TimeValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and time(*Parameter_TimestampField*) lt *Parameter_TimeValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -396,7 +396,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO26.2.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* lt *Parameter_DateTimeValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and *Parameter_TimestampField* lt *Parameter_DateTimeValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -406,7 +406,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO27.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* le now()*Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and *Parameter_TimestampField* le now()*Parameter_RequiredParameters*"
         />
 
         <Request
@@ -416,7 +416,7 @@
           Capability="Query functions"
           WebAPIReference="2.4.9"
           OutputFile="REQ-WA103-QM7.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_UniqueID*,*Parameter_SingleValueLookupField*&amp;$filter=*Parameter_SingleValueLookupField* has *Parameter_SingleValueLookupValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_UniqueID*,*Parameter_SingleValueLookupField*&amp;$filter=*Parameter_SingleValueLookupField* ne null and *Parameter_SingleValueLookupField* has *Parameter_SingleValueLookupValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -426,7 +426,7 @@
           Capability="Query functions"
           WebAPIReference="2.4.10"
           OutputFile="REQ-WA103-QM8.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_UniqueID*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_UniqueID*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* ne null and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -436,7 +436,7 @@
           Capability="Query functions"
           WebAPIReference="2.4.10"
           OutputFile="REQ-WA103-QM8_Enum_MVL_Multi.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_UniqueID*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1* and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue2**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_UniqueID*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* ne null and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1* and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue2**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -446,7 +446,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO8.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterHasField* has *Parameter_FilterHasLookupValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterHasField* ne null and *Parameter_FilterHasField* has *Parameter_FilterHasLookupValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -456,7 +456,7 @@
           Capability="Sortability ($orderby)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO28_OrderByAscFiltered.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -476,7 +476,7 @@
           Capability="Sortability ($orderby)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO28_OrderByDescFiltered.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc&amp;$filter=*Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -496,7 +496,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO18_DateYear.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=year(*Parameter_DateField*) eq *Parameter_YearValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_DateField* ne null and year(*Parameter_DateField*) eq *Parameter_YearValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -506,7 +506,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO18_TimeYear.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=year(*Parameter_TimestampField*) eq *Parameter_YearValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and year(*Parameter_TimestampField*) eq *Parameter_YearValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -516,7 +516,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO19_DateMonth.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=month(*Parameter_DateField*) eq *Parameter_MonthValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_DateField* ne null and month(*Parameter_DateField*) eq *Parameter_MonthValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -526,7 +526,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO19_TimeMonth.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=month(*Parameter_TimestampField*) eq *Parameter_MonthValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and month(*Parameter_TimestampField*) eq *Parameter_MonthValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -536,7 +536,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO20_DateDay.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=day(*Parameter_DateField*) eq *Parameter_DayValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_DateField* ne null and day(*Parameter_DateField*) eq *Parameter_DayValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -546,7 +546,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO20_TimeDay.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=day(*Parameter_TimestampField*) eq *Parameter_DayValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and day(*Parameter_TimestampField*) eq *Parameter_DayValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -556,7 +556,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO21_TimeHour.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=hour(*Parameter_TimestampField*) eq *Parameter_HourValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and hour(*Parameter_TimestampField*) eq *Parameter_HourValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -566,7 +566,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO22_TimeMinute.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=minute(*Parameter_TimestampField*) gt *Parameter_MinuteValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and minute(*Parameter_TimestampField*) gt *Parameter_MinuteValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -576,7 +576,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO23_TimeSecond.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=second(*Parameter_TimestampField*) lt *Parameter_SecondValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and second(*Parameter_TimestampField*) lt *Parameter_SecondValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -586,7 +586,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO24_TimeFraction.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=fractionalseconds(*Parameter_TimestampField*) lt *Parameter_FractionalValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and fractionalseconds(*Parameter_TimestampField*) lt *Parameter_FractionalValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -620,26 +620,6 @@
         />
 
         <Request
-          TestDescription="Support Only Correct Data Types: Edm.Boolean, Edm.Byte, Edm.Date, Edm.DateTimeOffset, Edm.Decimal, Edm.Double, Edm.Int16, Edm.Int32, Edm.Int64. Edm.SByte, Edm.String, Edm.TimeOfDay, Edm.Geography, Edm.GeographyPoint, Edm.GeographyLineString, Edm.GeographyPolygon, Edm.GeographyMultiPoint, Edm.GeographyMultiLineString, Edm.GeographyMultiPolygon, Edm.EnumType."
-          RequirementId="REQ-WA103-QM1"
-          MetallicLevel="Platinum"
-          Capability="Metadata Support"
-          WebAPIReference="2.4.3"
-          OutputFile="REQ-WA103-QM1.json"
-          Url=""
-        />
-
-        <Request
-          TestDescription="Support Lambda Operators"
-          RequirementId="REQ-WA103-QM2"
-          MetallicLevel="Platinum"
-          Capability="Optional Support"
-          WebAPIReference="2.4.5"
-          OutputFile="REQ-WA103-QM2.json"
-          Url=""
-        />
-
-        <Request
           TestDescription="Support Literals: $any"
           RequirementId="REQ-WA103-QM3"
           MetallicLevel="Platinum"
@@ -666,7 +646,7 @@
           Capability="Query functions"
           WebAPIReference="2.4.7"
           OutputFile="REQ-WA103-QM5_GeoSpatialLongLat_PointGeo.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=geo.distance(*Parameter_GeoSpatialField*, geography'POINT(*Parameter_GeoSpatialValue*)') le *Parameter_GeoSpatialDistanceValue*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_GeoSpatialField* ne null and geo.distance(*Parameter_GeoSpatialField*, geography'POINT(*Parameter_GeoSpatialValue*)') le *Parameter_GeoSpatialDistanceValue*"
         />
 
         <Request
@@ -676,7 +656,7 @@
           Capability="Query functions"
           WebAPIReference="2.4.7"
           OutputFile="REQ-WA103-QM5_GeoSpatialLongLat_LatGT1_PointGeo.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=geo.distance(*Parameter_GeoSpatialField*, geography'POINT(*Parameter_GeoSpatialValue*)') le *Parameter_GeoSpatialDistanceValue* and *Parameter_GeoSpatialLatitudeField* gt 1"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_GeoSpatialField* ne null and geo.distance(*Parameter_GeoSpatialField*, geography'POINT(*Parameter_GeoSpatialValue*)') le *Parameter_GeoSpatialDistanceValue* and *Parameter_GeoSpatialLatitudeField* gt 1"
         />
 
         <Request
@@ -686,7 +666,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO12_Grouping.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=(*Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow*) and (*Parameter_FilterIntegerField* le *Parameter_FilterIntegerValueHigh* and *Parameter_FilterIntegerField* ge *Parameter_FilterIntegerValueLow*)*Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and (*Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow*) and (*Parameter_FilterIntegerField* le *Parameter_FilterIntegerValueHigh* and *Parameter_FilterIntegerField* ge *Parameter_FilterIntegerValueLow*)*Parameter_RequiredParameters*"
         />
 
         <Request
@@ -696,7 +676,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO13_Contains.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=contains(*Parameter_ContainsField*,'*Parameter_ContainsValue*')*Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_ContainsField* ne null and contains(*Parameter_ContainsField*,'*Parameter_ContainsValue*')*Parameter_RequiredParameters*"
         />
 
         <Request
@@ -706,7 +686,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO14_EndsWith.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=endswith(*Parameter_EndsWithField*,'*Parameter_EndsWithValue*')*Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_EndsWithField* ne null and endswith(*Parameter_EndsWithField*,'*Parameter_EndsWithValue*')*Parameter_RequiredParameters*"
         />
 
         <Request
@@ -716,7 +696,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO15_StartsWith.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=startswith(*Parameter_StartsWithField*,'*Parameter_StartsWithValue*')*Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_StartsWithField* ne null and startswith(*Parameter_StartsWithField*,'*Parameter_StartsWithValue*')*Parameter_RequiredParameters*"
         />
 
         <Request
@@ -726,7 +706,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO16_ToLowerEQ.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=tolower(*Parameter_ToLowerField*) eq '*Parameter_ToLowerValue*'*Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_ToLowerField* ne null and tolower(*Parameter_ToLowerField*) eq '*Parameter_ToLowerValue*'*Parameter_RequiredParameters*"
         />
 
         <Request
@@ -736,7 +716,7 @@
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
           OutputFile="REQ-WA103-QO17_ToUpperEQ.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=toupper(*Parameter_ToUpperField*) eq '*Parameter_ToUpperValue*'*Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_ToUpperField* ne null and toupper(*Parameter_ToUpperField*) eq '*Parameter_ToUpperValue*'*Parameter_RequiredParameters*"
         />
 
         <Request
