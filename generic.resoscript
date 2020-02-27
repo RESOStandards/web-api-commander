@@ -391,11 +391,11 @@
 
         <Request
           TestDescription="Query Support: $filter: Date: EdmDateTimeOffset field is less than EdmDateTimeOffset value."
-          RequirementId="REQ-WA103-QO26"
+          RequirementId="REQ-WA103-QO26.2"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO26.json"
+          OutputFile="REQ-WA103-QO26.2.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* lt *Parameter_DateTimeValue**Parameter_RequiredParameters*"
         />
 
