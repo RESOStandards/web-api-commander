@@ -170,12 +170,12 @@ public class App {
 
             //TODO: create dynamic JUnit (or similar) test runner
             LOG.info(SMALL_DIVIDER);
-            LOG.info("Assertion: #" + (i + 1));
+            LOG.info("Request: #" + (i + 1));
             LOG.info(SMALL_DIVIDER);
-            LOG.info("Assertion Name:         " + request.getName());
+            LOG.info("Request Name:      " + request.getName());
 
             //TODO: function-ize the property test
-            LOG.info("Assertion Description:  " + (request.getTestDescription().length() > 0 ? request.getTestDescription() : "Not Specified"));
+            LOG.info("Description:       " + (request.getTestDescription().length() > 0 ? request.getTestDescription() : "Not Specified"));
             LOG.info("Requirement Id:    " + (request.getRequirementId().length() > 0 ? request.getRequirementId() : "Not Specified"));
             LOG.info("Metallic Level:    " + (request.getMetallicLevel().length() > 0 ? request.getMetallicLevel() : "Not Specified"));
             LOG.info("Capability:        " + (request.getCapability().length() > 0 ? request.getCapability() : "Not Specified"));
@@ -200,6 +200,8 @@ public class App {
 
               if (responseCode == HttpStatus.SC_OK) {
                 STATS.updateRequest(request, Request.Status.SUCCEEDED);
+              } else {
+                STATS.updateRequest(request, Request.Status.FAILED);
               }
 
               if (request.getOutputFile().toLowerCase().contains(EDMX_EXTENSION.toLowerCase())) {
@@ -210,16 +212,9 @@ public class App {
                   LOG.error("Error: Invalid metadata retrieved. Cannot continue!!");
                   System.exit(NOT_OK);
                 }
-              } else if (responseCode != null && request.getAssertResponseCode() != null) {
-                if (responseCode == Integer.parseInt(request.getAssertResponseCode())) {
-                  LOG.info("Assert Response Code " + request.getAssertResponseCode() + " passed!");
-                } else {
-                  LOG.error("Request " + request.getName() + " Failed!");
-                  STATS.updateRequest(request, Request.Status.FAILED);
-                }
               }
-
             } else {
+              LOG.info("Request " + request.getRequirementId() + " has an empty URL. Skipping...");
               STATS.updateRequest(request, Request.Status.SKIPPED);
             }
           } catch (Exception ex) {
@@ -228,10 +223,6 @@ public class App {
             LOG.error("Stack trace:");
             Arrays.stream(ex.getStackTrace()).forEach(stackTraceElement -> LOG.error(stackTraceElement.toString()));
           } finally {
-            if (request != null && STATS.getRequests().size() > 0) {
-              LOG.info("Request " + STATS.getRequests().get(request).getStatus().toString().toLowerCase() + "!");
-            }
-
             if (resolvedUrl != null && resolvedUrl.length() > 0) {
               LOG.info("Elapsed Time: " + String.format("%.2f", (STATS.getRequests().get(request).getElapsedTimeMillis() / 1000.0)) + "s");
             }
@@ -443,7 +434,7 @@ public class App {
     numIncomplete = stats.getRequestCount(Request.Status.STARTED);
 
     reportBuilder.append("\n\n" + DIVIDER);
-    reportBuilder.append("\nAssertion Statistics");
+    reportBuilder.append("\nRequest Statistics");
     reportBuilder.append("\n" + DIVIDER);
 
     reportBuilder.append(generateTotalsReport(stats.totalRequestCount(), numSucceeded, numFailed, numSkipped, numIncomplete));
@@ -462,7 +453,7 @@ public class App {
       numSkipped = stats.filterByMetallicCertification(metallicKey, stats.filterByStatus(Request.Status.SKIPPED)).size();
       numIncomplete = stats.filterByMetallicCertification(metallicKey, stats.filterByStatus(Request.Status.STARTED)).size();
 
-      reportBuilder.append("\n\n").append(metallicKey).append(numSucceeded > 0 && numSucceeded == (requestCount - numSkipped) ? " - REQUESTS SUCCEEDED!" : "");
+      reportBuilder.append("\n\n").append(metallicKey).append(numSucceeded > 0 && numSucceeded == (requestCount - numSkipped) ? " - ALL REQUESTS SUCCEEDED!" : "");
       reportBuilder.append(generateTotalsReport(requestCount, numSucceeded, numFailed, numSkipped, numIncomplete));
     }
 
@@ -477,7 +468,7 @@ public class App {
       numSkipped = stats.filterByCapability(capabilityKey, stats.filterByStatus(Request.Status.SKIPPED)).size();
       numIncomplete = stats.filterByCapability(capabilityKey, stats.filterByStatus(Request.Status.STARTED)).size();
 
-      reportBuilder.append("\n\n").append(capabilityKey).append(numSucceeded > 0 && numSucceeded == (requestCount - numSkipped) ? " - REQUESTS SUCCEEDED!" : "");
+      reportBuilder.append("\n\n").append(capabilityKey).append(numSucceeded > 0 && numSucceeded == (requestCount - numSkipped) ? " - ALL REQUESTS SUCCEEDED!" : "");
       reportBuilder.append(generateTotalsReport(requestCount, numSucceeded, numFailed, numSkipped, numIncomplete));
     }
     reportBuilder.append("\n" + DIVIDER + "\n");

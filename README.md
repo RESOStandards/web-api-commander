@@ -296,7 +296,6 @@ The XML DTD for this schema is as follows:
   <!ELEMENT Requests (Request)*>
   <!ELEMENT Request (#PCDATA)*>
   <!ATTLIST Request
-    AssertResponseCode CDATA #IMPLIED
     Capability CDATA #REQUIRED
     MetallicLevel CDATA #REQUIRED
     OutputFile CDATA #REQUIRED
