@@ -366,7 +366,7 @@
         />
 
         <Request
-          TestDescription="Query Support: $filter: Date: Date gt date value"
+          TestDescription="Query Support: $filter: Date portion of EdmDateTimeOffset field is less than EdmDate value."
           RequirementId="REQ-WA103-QO25.filter.date.gt.dateValue"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
@@ -376,8 +376,8 @@
         />
 
         <Request
-          TestDescription="Query Support: $filter: Date: Time"
-          RequirementId="REQ-WA103-QO26"
+          TestDescription="Query Support: $filter: Time portion of EdmDateTimeOffset field is less than EdmTime value."
+          RequirementId="REQ-WA103-QO26.filter.time.lt.timeValue"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
@@ -386,12 +386,12 @@
         />
 
         <Request
-          TestDescription="Query Support: $filter: Date: Time (2)"
-          RequirementId="REQ-WA103-QO26"
+          TestDescription="Query Support: $filter: Date: EdmDateTimeOffset field is less than EdmDateTimeOffset value."
+          RequirementId="REQ-WA103-QO26.filter.dateTimeOffset.ls.dateTimeOffsetValue"
           MetallicLevel="Core"
           Capability="Filterability ($filter)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO26-2.json"
+          OutputFile="REQ-WA103-QO26.filter.dateTimeOffset.ls.dateTimeOffsetValue.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* lt *Parameter_DateTimeValue**Parameter_RequiredParameters*"
         />
 

@@ -151,9 +151,25 @@ Feature: Web API Server 1.0.2 Certification
     And Integer data in "Parameter_FilterNotField" "ne" "Parameter_FilterNotValue"
 
   @REQ-WA103-QO25 @core @2.4.4 @filterability-endorsement
-  Scenario: Query Support: $filter: Date: Date gt date value
+  Scenario: Query Support: $filter: Date portion of EdmDateTimeOffset field is greater than EdmDate value
     When a GET request is made to the resolved Url in "REQ-WA103-QO25.filter.date.gt.dateValue"
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
     And Date data in "Parameter_TimestampField" "gt" "Parameter_DateValue"
+
+  @REQ-WA103-QO26 @core @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter: Time portion of EdmDateTimeOffset field is less than EdmTime value
+    When a GET request is made to the resolved Url in "REQ-WA103-QO26.filter.time.lt.timeValue"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And TimeOfDay data in "Parameter_TimestampField" "lt" "Parameter_TimeValue"
+
+  @REQ-WA103-QO26.2 @core @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter: Date: EdmDateTimeOffset field is less than EdmDateTimeOffset value
+    When a GET request is made to the resolved Url in "REQ-WA103-QO26.filter.dateTimeOffset.ls.dateTimeOffsetValue"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And DateTimeOffset data in "Parameter_TimestampField" "lt" "Parameter_DateTimeValue"
