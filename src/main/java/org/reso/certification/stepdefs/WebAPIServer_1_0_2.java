@@ -559,9 +559,13 @@ public class WebAPIServer_1_0_2 implements En {
      */
     private static void assertDateTimeOffset(String parameterFieldName, String op, String parameterAssertedValue, String responseData) {
       AtomicReference<Timestamp> assertedValue = new AtomicReference<>();
-
-      assertedValue.set(parseTimestampFromEdmDateTimeOffsetString(Settings.resolveParametersString(parameterAssertedValue, settings)));
-      assertDateTimeOffset(parameterFieldName, op, assertedValue.get(), responseData);
+      try {
+        assertedValue.set(parseTimestampFromEdmDateTimeOffsetString(Settings.resolveParametersString(parameterAssertedValue, settings)));
+        assertDateTimeOffset(parameterFieldName, op, assertedValue.get(), responseData);
+      } catch (EdmPrimitiveTypeException ptex) {
+        LOG.error("ERROR: Cannot Convert the value in "
+            + Settings.resolveParametersString(parameterAssertedValue, settings) + " to a Timestamp value!!");
+      }
     }
 
     /**
@@ -739,51 +743,40 @@ public class WebAPIServer_1_0_2 implements En {
      * Parses the given edmDateTimeOffsetString into a Java Instant (the type expected by the Olingo type converter).
      * @param edmDateTimeOffsetString string representation of an Edm DateTimeOffset to parse.
      * @return the corresponding Instant value.
+     * @throws EdmPrimitiveTypeException
      */
-    private static Timestamp parseTimestampFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) {
-      try {
-        return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Timestamp.class);
-      } catch (EdmPrimitiveTypeException ex) {
-        LOG.error(ex.toString());
-        return null;
-      }
+    private static Timestamp parseTimestampFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) throws EdmPrimitiveTypeException {
+      return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Timestamp.class);
     }
 
     /**
-     * Parses the given edmDateString into a Java date (the type expected by the Olingo type converter).
+     * Parses the given edmDateString into a Java Timestamp.
      * @param edmDateString the date string to convert.
-     * @return the corresponding Data value.
+     * @return the corresponding Timestamp value.
+     * @throws EdmPrimitiveTypeException
      */
-    private static Timestamp parseTimestampFromEdmDateString(String edmDateString) {
-      try {
-        return EdmDate.getInstance().valueOfString(edmDateString, true, null, null, null, null, Timestamp.class);
-      } catch (EdmPrimitiveTypeException ex) {
-        LOG.error(ex.toString());
-        return null;
-      }
+    private static Timestamp parseTimestampFromEdmDateString(String edmDateString) throws EdmPrimitiveTypeException {
+      return EdmDate.getInstance().valueOfString(edmDateString, true, null, null, null, null, Timestamp.class);
     }
 
     /**
-     * Parses the given edmDateString into a Java date (the type expected by the Olingo type converter).
+     * Parses the given edmDateString into a Java Time.
      * @param edmTimeOfDayOffsetString the date string to convert.
-     * @return the corresponding Data value.
+     * @return the corresponding Time value.
+     * @throws EdmPrimitiveTypeException
      */
-    private static Time parseTimeOfDayFromEdmTimeOfDayString(String edmTimeOfDayOffsetString) {
-      try {
-        return EdmTimeOfDay.getInstance().valueOfString(edmTimeOfDayOffsetString, true, null, null, null, null, Time.class);
-      } catch (EdmPrimitiveTypeException ex) {
-        LOG.error(ex.toString());
-        return null;
-      }
+    private static Time parseTimeOfDayFromEdmTimeOfDayString(String edmTimeOfDayOffsetString) throws EdmPrimitiveTypeException {
+      return EdmTimeOfDay.getInstance().valueOfString(edmTimeOfDayOffsetString, true, null, null, null, null, Time.class);
     }
 
-    private static Time parseTimeOfDayFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) {
-      try {
-        return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Time.class);
-      } catch (EdmPrimitiveTypeException ex) {
-        LOG.error(ex.toString());
-        return null;
-      }
+    /**
+     * Parses the given DateTimeOffsetString into a Java Time.
+     * @param edmDateTimeOffsetString the DateTimeOffsetString to parse.
+     * @return the corresponding Time value.
+     * @throws EdmPrimitiveTypeException
+     */
+    private static Time parseTimeOfDayFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) throws EdmPrimitiveTypeException {
+      return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Time.class);
     }
 
     /**

@@ -113,12 +113,6 @@
         <Parameter Name="MultipleLookupValue1" Value="Refrigerator" />
         <Parameter Name="MultipleLookupValue2" Value="Stacked" />
 
-        <!-- Computed Enumeration Values - do not change -->
-        <Parameter Name="SingleValueLookupValue" Value="*Parameter_SingleValueLookupNamespace*'*Parameter_SingleLookupValue*'" />
-        <Parameter Name="MultipleValueLookupValue1" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue1*'"/>
-        <Parameter Name="MultipleValueLookupValue2" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue2*'" />
-
-
         <!-- For Expand Testing -->
         <Parameter Name="ExpandField" Value="ListAgent" />
 
@@ -168,9 +162,14 @@
         <Parameter Name="ConcatFieldTwoValue" Value="YOUR TwoValue GOES HERE" />
         <Parameter Name="ConcatFieldBothValue" Value="Your 'OneValue: TwoValue' GOES HERE" /> <!-- format 'OneValue: TwoValue' -->
 
-        <!-- OData $select list - created from other parameterized fields, you shouldn't have to touch this -->
+        <!-- Computed OData $select list - do not change -->
         <Parameter Name="SelectList"
                    Value="*Parameter_KeyOrKeyNumericField*,*Parameter_FilterIntegerField*,*Parameter_ContainsField*,*Parameter_FilterHasField*,*Parameter_DateField*" />
+
+        <!-- Computed Enumeration Values - do not change -->
+        <Parameter Name="SingleValueLookupValue" Value="*Parameter_SingleValueLookupNamespace*'*Parameter_SingleLookupValue*'" />
+        <Parameter Name="MultipleValueLookupValue1" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue1*'"/>
+        <Parameter Name="MultipleValueLookupValue2" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue2*'" />
 
         <!-- OPTIONAL: System Specific Additional Required Parameters for Queries. Leave Blank if none. -->
         <Parameter Name="RequiredParameters" Value="" />
