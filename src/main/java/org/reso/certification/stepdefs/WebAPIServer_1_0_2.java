@@ -197,17 +197,20 @@ public class WebAPIServer_1_0_2 implements En {
       String expectedValueAsString = Settings.resolveParametersString(parameterUniqueIdValue, settings), resolvedValueAsString = null;
       Object resolvedValue = from(responseData.get()).get(Settings.resolveParametersString(parameterUniqueId, settings));
 
-      LOG.info("Expected Value is: " + expectedValueAsString);
-      LOG.info("Resolved value is: " + resolvedValue);
-
       //both of the inputs should be present
       assertNotNull(expectedValueAsString);
       assertNotNull(resolvedValue);
 
+      //quotes are passed for strings, let's strip them off
+      expectedValueAsString = expectedValueAsString
+          .replace("'", "").replace("\"", "");
+
+      LOG.info("Expected Value is: " + expectedValueAsString);
+      LOG.info("Resolved value is: " + resolvedValue);
+
       if (resolvedValue.getClass().isInstance(Integer.class)) {
         assertEquals(Integer.parseInt(expectedValueAsString), resolvedValue);
       } else {
-        expectedValueAsString = expectedValueAsString.replace("'", "");
         assertEquals(expectedValueAsString, resolvedValue.toString());
       }
     });
@@ -381,7 +384,6 @@ public class WebAPIServer_1_0_2 implements En {
       from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
         fieldValue.set(Integer.parseInt(item.get(fieldName).toString()));
         result.set(result.get() && Utils.compare(fieldValue.get(), op, assertedValue));
-        LOG.info("Compare: " + fieldValue.get() + " " + op + " " + assertedValue + " ==> " + result.get());
       });
 
       assertTrue(result.get());
