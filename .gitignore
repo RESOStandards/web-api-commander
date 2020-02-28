@@ -3,16 +3,7 @@
 
 # Ignore Gradle build output directory
 gradle/
-
-build/tmp
-build/classes
-build/distributions
-build/generated
-build/reports
-build/resources
-build/scripts
-build/test-results
+build/
 .idea/
 *.log
 *.iml
-build/
