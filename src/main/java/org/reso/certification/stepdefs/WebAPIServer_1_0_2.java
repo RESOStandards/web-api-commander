@@ -283,8 +283,7 @@ public class WebAPIServer_1_0_2 implements En {
       List<POJONode> l2 = from(responseData.get()).getJsonObject(JSON_VALUE_PATH);
 
       int combinedCount = l1.size() + l2.size();
-      Set<POJONode> combined = new LinkedHashSet<>();
-      combined.addAll(l1);
+      Set<POJONode> combined = new LinkedHashSet<>(l1);
       LOG.info("Response Page 1: " + new POJONode(l1));
 
       combined.addAll(l2);
@@ -364,9 +363,10 @@ public class WebAPIServer_1_0_2 implements En {
      * and is used to select among the supported comparisons.
      */
     And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
-      LOG.info("Parameter_FieldName: " + parameterFieldName + ", op: " + op + ", Parameter_Value: " + parameterAssertedValue);
       String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
       int assertedValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, settings));
+
+      LOG.info("fieldName: " + fieldName + ", op: " + op + ", assertedValue: " + assertedValue);
 
       //subsequent value comparisons are and-ed together while iterating over the list of items, so init to true
       AtomicBoolean result = new AtomicBoolean(true);
@@ -377,7 +377,7 @@ public class WebAPIServer_1_0_2 implements En {
       from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
         fieldValue.set(Integer.parseInt(item.get(fieldName).toString()));
         result.set(result.get() && Utils.compare(fieldValue.get(), op, assertedValue));
-        LOG.info("Compare: " + fieldValue.get() + " " + op + " " + assertedValue + " is " + result.get());
+        LOG.info("Compare: " + fieldValue.get() + " " + op + " " + assertedValue + " ==> " + result.get());
       });
 
       assertTrue(result.get());
@@ -437,10 +437,8 @@ public class WebAPIServer_1_0_2 implements En {
           lhsValue.set(Integer.parseInt(item.get(fieldName).toString()));
           rhsValue.set(Integer.parseInt(item.get(fieldName).toString()));
 
-          LOG.info("Checking LHS");
-          lhsResult.set(Utils.compare(lhsValue.get(), opLhs, assertedLhsValue));
 
-          LOG.info("Checking RHS");
+          lhsResult.set(Utils.compare(lhsValue.get(), opLhs, assertedLhsValue));
           rhsResult.set(Utils.compare(rhsValue.get(), opRhs, assertedRhsValue));
 
           if (op.contentEquals(Operators.AND)) {
@@ -783,14 +781,10 @@ public class WebAPIServer_1_0_2 implements En {
      * Parses the given edmDateString into a Java Date
      * @param edmDateString the date string to convert.
      * @return the corresponding Date value.
+     * @throws EdmPrimitiveTypeException
      */
-    private static Date parseDateFromEdmDateString(String edmDateString) {
-      try {
-        return EdmDate.getInstance().valueOfString(edmDateString, true, null, null, null, null, Date.class);
-      } catch (EdmPrimitiveTypeException ex) {
-        LOG.error(ex.toString());
-        return null;
-      }
+    private static Date parseDateFromEdmDateString(String edmDateString) throws EdmPrimitiveTypeException {
+      return EdmDate.getInstance().valueOfString(edmDateString, true, null, null, null, null, Date.class);
     }
 
     /**
@@ -798,13 +792,8 @@ public class WebAPIServer_1_0_2 implements En {
      * @param edmDateTimeOffsetString string representation of an Edm DateTimeOffset to parse.
      * @return the corresponding Date value.
      */
-    private static Date parseDateFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) {
-      try {
-        return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Date.class);
-      } catch (EdmPrimitiveTypeException ex) {
-        LOG.error(ex.toString());
-        return null;
-      }
+    private static Date parseDateFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) throws EdmPrimitiveTypeException {
+      return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Date.class);
     }
 
     /**

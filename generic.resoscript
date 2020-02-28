@@ -101,7 +101,8 @@
         <!-- Enumerated Field for "has" testing -->
         <Parameter Name="FilterHasField" Value="PropertyType" />
         <Parameter Name="FilterHasValue" Value="Residential" />
-        <Parameter Name="FilterHasLookupValue" Value="PropertyEnums.PropertyType'*Parameter_FilterHasValue*'" />
+        <Parameter Name="FilterHasLookupNamespace" Value="PropertyEnums.PropertyType" />
+        <Parameter Name="FilterHasLookupValue" Value="*Parameter_FilterHasLookupNamespace*'*Parameter_FilterHasValue*'" />
 
         <!-- Enumerated Field for SingleValue/Multi-value testing -->
         <Parameter Name="SingleValueLookupField" Value="PropertyType" />
