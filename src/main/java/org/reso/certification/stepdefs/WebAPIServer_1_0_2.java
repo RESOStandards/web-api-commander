@@ -562,9 +562,9 @@ public class WebAPIServer_1_0_2 implements En {
       try {
         assertedValue.set(parseTimestampFromEdmDateTimeOffsetString(Settings.resolveParametersString(parameterAssertedValue, settings)));
         assertDateTimeOffset(parameterFieldName, op, assertedValue.get(), responseData);
-      } catch (EdmPrimitiveTypeException ptex) {
+      } catch (EdmPrimitiveTypeException tex) {
         LOG.error("ERROR: Cannot Convert the value in "
-            + Settings.resolveParametersString(parameterAssertedValue, settings) + " to a Timestamp value!!");
+            + Settings.resolveParametersString(parameterAssertedValue, settings) + " to a Timestamp value!!" + tex);
       }
     }
 
@@ -584,8 +584,8 @@ public class WebAPIServer_1_0_2 implements En {
         try {
           fieldValue.set(parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
           assertTrue(compare(fieldValue.get(), op, timestamp));
-        } catch (Exception ex) {
-          LOG.error(ex.toString());
+        } catch (EdmPrimitiveTypeException tex) {
+          LOG.error("ERROR: Cannot Convert the value in " + fieldValue.get() + " to a Timestamp value!!" + tex);
         }
       });
     }

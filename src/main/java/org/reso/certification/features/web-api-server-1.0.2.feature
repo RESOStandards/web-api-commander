@@ -175,7 +175,7 @@ Feature: Web API Server 1.0.2 Certification
     And DateTimeOffset data in "Parameter_TimestampField" "lt" "Parameter_DateTimeValue"
 
   @REQ-WA103-QO27 @core @2.4.4 @filterability-endorsement
-  Scenario: Query Support: $filter: Date: EdmDateTimeOffset field is less than EdmDateTimeOffset value
+  Scenario: Query Support: $filter: DateTimeOffset le now()
     When a GET request is made to the resolved Url in "REQ-WA103-QO27"
     Then the server responds with a status code of 200
     And the response is valid JSON
