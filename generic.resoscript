@@ -105,13 +105,19 @@
 
         <!-- Enumerated Field for SingleValue/Multi-value testing -->
         <Parameter Name="SingleValueLookupField" Value="PropertyType" />
-        <Parameter Name="SingleLookupValue" Value="Residential"/>
-        <Parameter Name="SingleValueLookupValue" Value="PropertyEnums.PropertyType'*Parameter_SingleLookupValue*'" />
+        <Parameter Name="SingleLookupValue" Value="Residential" />
+        <Parameter Name="SingleValueLookupNamespace" Value="PropertyEnums.PropertyType" />
+
         <Parameter Name="MultipleValueLookupField" Value="Appliances" />
+        <Parameter Name="MultipleValueLookupNamespace" Value="PropertyEnums.Appliances" />
         <Parameter Name="MultipleLookupValue1" Value="Refrigerator" />
-        <Parameter Name="MultipleValueLookupValue1" Value="PropertyEnums.Appliances'*Parameter_MultipleLookupValue1*'"/>
         <Parameter Name="MultipleLookupValue2" Value="Stacked" />
-        <Parameter Name="MultipleValueLookupValue2" Value="PropertyEnums.Appliances'*Parameter_MultipleLookupValue2*'" />
+
+        <!-- Computed Enumeration Values - do not change -->
+        <Parameter Name="SingleValueLookupValue" Value="*Parameter_SingleValueLookupNamespace*'*Parameter_SingleLookupValue*'" />
+        <Parameter Name="MultipleValueLookupValue1" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue1*'"/>
+        <Parameter Name="MultipleValueLookupValue2" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue2*'" />
+
 
         <!-- For Expand Testing -->
         <Parameter Name="ExpandField" Value="ListAgent" />
@@ -143,6 +149,7 @@
         <Parameter Name="YearValue" Value="2018" />
         <Parameter Name="MonthValue" Value="12" />
         <Parameter Name="DayValue" Value="31" />
+
         <Parameter Name="TimestampField" Value="ModificationTimestamp" />
         <Parameter Name="TimeValue" Value="23:55:55" />
         <Parameter Name="HourValue" Value="23" />
