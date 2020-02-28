@@ -150,11 +150,6 @@
         <Parameter Name="SecondValue" Value="55" />
         <Parameter Name="FractionalValue" Value="30" />
 
-        <!-- OData $select list - created from other parameterized fields -->
-        <Parameter Name="SelectList"
-                   Value="*Parameter_KeyOrKeyNumericField*,*Parameter_FilterIntegerField*,*Parameter_ContainsField*,*Parameter_FilterHasField*,*Parameter_DateField*" />
-
-
         <!-- REQUIRED: New Fields for WS103 Testing -->
         <Parameter Name="ValueField" Value="AboveGradeFinishedArea" />
         <Parameter Name="CastField" Value="AboveGradeFinishedArea" />
@@ -165,6 +160,10 @@
         <Parameter Name="ConcatFieldTwo" Value="City" />
         <Parameter Name="ConcatFieldTwoValue" Value="YOUR TwoValue GOES HERE" />
         <Parameter Name="ConcatFieldBothValue" Value="Your 'OneValue: TwoValue' GOES HERE" /> <!-- format 'OneValue: TwoValue' -->
+
+        <!-- OData $select list - created from other parameterized fields, you shouldn't have to touch this -->
+        <Parameter Name="SelectList"
+                   Value="*Parameter_KeyOrKeyNumericField*,*Parameter_FilterIntegerField*,*Parameter_ContainsField*,*Parameter_FilterHasField*,*Parameter_DateField*" />
 
         <!-- OPTIONAL: System Specific Additional Required Parameters for Queries. Leave Blank if none. -->
         <Parameter Name="RequiredParameters" Value="" />

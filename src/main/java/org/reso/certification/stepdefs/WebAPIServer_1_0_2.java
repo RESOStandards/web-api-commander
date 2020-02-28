@@ -1,6 +1,7 @@
 package org.reso.certification.stepdefs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.POJONode;
 import io.cucumber.java8.En;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
@@ -274,17 +275,22 @@ public class WebAPIServer_1_0_2 implements En {
 
       //TODO: convert to OData filter factory
       URI requestUri = Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl() + "&$skip=" + skipCount);
-      LOG.info("Request URI: " + (requestUri != null ? requestUri.toString() : ""));
 
       executeGetRequest.apply(requestUri);
-
     });
     And("^data in the \"([^\"]*)\" fields are different in the second request than in the first$", (String parameterUniqueId) -> {
-      ObjectMapper mapper = new ObjectMapper();
-      List<Object> l1 = from(initialResponseData.get()).getList(JSON_VALUE_PATH);
-      List<Object> l2 = from(responseData.get()).getList(JSON_VALUE_PATH);
+      List<POJONode> l1 = from(initialResponseData.get()).getJsonObject(JSON_VALUE_PATH);
+      List<POJONode> l2 = from(responseData.get()).getJsonObject(JSON_VALUE_PATH);
 
-      assertFalse(l1.containsAll(l2));
+      int combinedCount = l1.size() + l2.size();
+      Set<POJONode> combined = new LinkedHashSet<>();
+      combined.addAll(l1);
+      LOG.info("Response Page 1: " + new POJONode(l1));
+
+      combined.addAll(l2);
+      LOG.info("Response Page 2: " + new POJONode(l2));
+
+      assertEquals(combinedCount, combined.size());
     });
 
     //==================================================================================================================
