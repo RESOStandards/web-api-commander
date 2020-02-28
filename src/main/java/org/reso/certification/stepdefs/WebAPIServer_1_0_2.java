@@ -1,6 +1,7 @@
 package org.reso.certification.stepdefs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.POJONode;
 import io.cucumber.java8.En;
 import io.restassured.response.Response;
@@ -77,10 +78,12 @@ public class WebAPIServer_1_0_2 implements En {
      */
 
     /*
-     * Resets the local instance state used during test time. TODO: refactor into collection of AtomicReference<T>
+     * Resets the local instance state used during test time.
+     * NOTE: you should add any local variables you need reset between tests here.
+     *
+     * TODO: refactor into collection of AtomicReference<T>
      */
-    Runnable resetState = () -> {
-      commander.set(null);
+    Runnable resetRequestState = () -> {
       oDataRawResponse.set(null);
       request.set(null);
       responseCode.set(null);
@@ -105,6 +108,7 @@ public class WebAPIServer_1_0_2 implements En {
         oDataRawResponse.set(rawRequest.get().execute());
         responseData.set(Utils.convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
         serverODataHeaderVersion.set(oDataRawResponse.get().getHeader(HEADER_ODATA_VERSION).toString());
+        responseCode.set(oDataRawResponse.get().getStatusCode());
         LOG.info("Request succeeded..." + responseData.get().getBytes().length + " bytes received.");
       } catch (ODataClientErrorException cex) {
         LOG.debug("OData Client Error Exception caught. Check subsequent test output for asserted conditions...");
@@ -120,11 +124,6 @@ public class WebAPIServer_1_0_2 implements En {
      * Background
      */
     Given("^a RESOScript file was provided$", () -> {
-      /*  NOTE: this item is the first step in the Background */
-
-      //Reset ALL local state variables prior to each run.
-      resetState.run();
-
       if (pathToRESOScript == null) {
         pathToRESOScript = System.getProperty("pathToRESOScript");
       }
@@ -300,6 +299,9 @@ public class WebAPIServer_1_0_2 implements En {
      * GET request by requirementId (see generic.resoscript)
      */
     When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", (String requirementId) -> {
+      //reset local state each time a get request is run
+      resetRequestState.run();
+
       URI requestUri = Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl());
       executeGetRequest.apply(requestUri);
     });
@@ -308,12 +310,9 @@ public class WebAPIServer_1_0_2 implements En {
      * Assert response code
      */
     Then("^the server responds with a status code of (\\d+)$", (Integer assertedResponseCode) -> {
-      responseCode.set(oDataClientErrorException.get() != null
-          ? oDataClientErrorException.get().getStatusLine().getStatusCode()
-          : oDataRawResponse.get().getStatusCode());
-
-      LOG.info("Asserted Response Code: " + assertedResponseCode + ", " + "Server Response Code: " + responseCode);
-      assertEquals(responseCode.get().intValue(), assertedResponseCode.intValue());
+      LOG.info("Server Response Code: " + responseCode + ", " + "Asserted Response Code: " + assertedResponseCode);
+      assertTrue(responseCode.get() > 0 && assertedResponseCode > 0);
+      assertEquals(assertedResponseCode.intValue(), responseCode.get().intValue());
     });
 
     /*
@@ -510,9 +509,9 @@ public class WebAPIServer_1_0_2 implements En {
     });
 
     /*
-     * Lookups
+     * Single-Valued enumerations
      */
-    And("^Data in \"([^\"]*)\" has \"([^\"]*)\"$", (String parameterFieldName, String parameterAssertedValue) -> {
+    And("^Single Valued Enumeration Data in \"([^\"]*)\" has \"([^\"]*)\"$", (String parameterFieldName, String parameterAssertedValue) -> {
       String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
       AtomicReference<String> fieldValue = new AtomicReference<>();
       AtomicReference<String> assertedValue = new AtomicReference<>();
@@ -528,6 +527,26 @@ public class WebAPIServer_1_0_2 implements En {
           LOG.info("Assert True: " + fieldValue.get() + " equals " + assertedValue.get() + " ==> " + result.get());
           assertTrue(result.get());
       });
+    });
+
+    And("^Multiple Valued Enumeration Data in \"([^\"]*)\" has \"([^\"]*)\"$", (String parameterFieldName, String parameterAssertedValue) -> {
+      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
+      AtomicReference<String> fieldValue = new AtomicReference<>();
+      AtomicReference<String> assertedValue = new AtomicReference<>();
+
+      AtomicBoolean result = new AtomicBoolean(false);
+
+      assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, settings));
+      LOG.info("Asserted value is: " + assertedValue.get());
+
+      from(responseData.get()).getList(JSON_VALUE_PATH, ObjectNode.class).forEach(item -> {
+        fieldValue.set(item.get(fieldName).toString());
+        result.set(fieldValue.get().contains(assertedValue.get()));
+        LOG.info("Assert True: " + fieldValue.get() + " has " + assertedValue.get() + " ==> " + result.get());
+        assertTrue(result.get());
+
+      });
+
     });
   }
 

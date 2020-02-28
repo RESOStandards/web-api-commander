@@ -436,11 +436,11 @@
 
         <Request
           TestDescription="Support Multi Value Lookups (2)"
-          RequirementId="REQ-WA103-QM8"
+          RequirementId="REQ-WA103-QM8.2"
           MetallicLevel="Bronze"
           Capability="Query functions"
           WebAPIReference="2.4.10"
-          OutputFile="REQ-WA103-QM8_Enum_MVL_Multi.json"
+          OutputFile="REQ-WA103-QM8.2.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* ne null and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1* and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue2**Parameter_RequiredParameters*"
         />
 

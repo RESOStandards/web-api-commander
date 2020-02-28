@@ -188,4 +188,12 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
-    And Data in "Parameter_SingleValueLookupField" has "Parameter_SingleLookupValue"
+    And Single Valued Enumeration Data in "Parameter_SingleValueLookupField" has "Parameter_SingleLookupValue"
+
+  @REQ-WA103-QM8 @bronze @2.4.10 @queryability-endorsement
+  Scenario: Support Multi Value Lookups
+    When a GET request is made to the resolved Url in "REQ-WA103-QM8"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And Multiple Valued Enumeration Data in "Parameter_MultipleValueLookupField" has "Parameter_MultipleLookupValue1"
