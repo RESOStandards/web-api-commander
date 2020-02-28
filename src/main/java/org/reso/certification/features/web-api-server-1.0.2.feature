@@ -23,12 +23,12 @@ Feature: Web API Server 1.0.2 Certification
     And the results match the expected DataSystem JSON schema
 
   @REQ-WA103-QR1 @core @2.4.1 @query-functions-endorsement
-  Scenario: Search Parameters: Select UniqueID
+  Scenario: Search Parameters: Select KeyOrKeyNumeric Field
     When a GET request is made to the resolved Url in "REQ-WA103-QR1"
     Then the server responds with a status code of 200
     And the response is valid JSON
-    And the response has singleton results in the "Parameter_UniqueID" field
-    And the provided "Parameter_UniqueIDValue" is returned in the "Parameter_UniqueID" field
+    And the response has singleton results in "Parameter_KeyOrKeyNumericField"
+    And the provided "Parameter_KeyOrKeyNumericValue" is returned in "Parameter_KeyOrKeyNumericField"
 
   @REQ-WA103-QR3 @core @2.4.2 @query-functions-endorsement
   Scenario: Query Support: $select
@@ -56,7 +56,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
-    And data in the "Parameter_UniqueId" fields are different in the second request than in the first
+    And data in the "Parameter_KeyOrKeyNumeric" fields are different in the second request than in the first
 
   @REQ-WA103-QO1.1 @REQ-WA103-QO1.select @core @2.4.4 @core-endorsement @OData-4.0
   Scenario: Query Support: $select case-sensitivity for OData 4.0

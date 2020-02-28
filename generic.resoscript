@@ -82,12 +82,11 @@
         <!-- REQUIRED: OData $select list - adapt this for your system and then adjust the remaining queries accordingly -->
         <Parameter Name="SelectList" Value="ListingKey,BedroomsTotal,StreetName,PropertyType,ModificationTimestamp" />
 
-        <!-- REQUIRED: Substitute key name from your EndpointMetadata here, either ListingKey or ListingKeyInteger,
-        which requires rewriting some of the queries that follow... -->
-        <Parameter Name="UniqueID" Value="ListingKey" />
+        <!-- REQUIRED: Substitute key name from your Resource here, either Key or KeyNumeric -->
+        <Parameter Name="KeyOrKeyNumericField" Value="ListingKey" />
 
-        <!-- REQUIRED: Provide a value for the UniqueID from your server -->
-        <Parameter Name="UniqueIDValue" Value="REQUIRED: YOUR UniqueIDValue GOES HERE" />
+        <!-- REQUIRED: Provide a value for the KeyOrKeyNumeric from your server -->
+        <Parameter Name="KeyOrKeyNumericValue" Value="REQUIRED: YOUR KeyOrKeyNumericValue GOES HERE" />
 
         <!-- For Top, Skip, and Sort Testing -->
         <Parameter Name="TopCount" Value="5" />
@@ -200,13 +199,13 @@
         />
 
         <Request
-          TestDescription="Search Parameters: Select UniqueID"
+          TestDescription="Search Parameters: Select KeyOrKeyNumeric Field"
           RequirementId="REQ-WA103-QR1"
           MetallicLevel="Core"
           Capability="Query functions"
           WebAPIReference="2.4.1"
           OutputFile="REQ-WA103-QR1.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*(*Parameter_UniqueIDValue*)?$select=*Parameter_UniqueID*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*(*Parameter_KeyOrKeyNumericValue*)?$select=*Parameter_KeyOrKeyNumericField*"
         />
 
         <Request
@@ -416,7 +415,7 @@
           Capability="Query functions"
           WebAPIReference="2.4.9"
           OutputFile="REQ-WA103-QM7.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_UniqueID*,*Parameter_SingleValueLookupField*&amp;$filter=*Parameter_SingleValueLookupField* ne null and *Parameter_SingleValueLookupField* has *Parameter_SingleValueLookupValue**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_SingleValueLookupField*&amp;$filter=*Parameter_SingleValueLookupField* ne null and *Parameter_SingleValueLookupField* has *Parameter_SingleValueLookupValue**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -426,7 +425,7 @@
           Capability="Query functions"
           WebAPIReference="2.4.10"
           OutputFile="REQ-WA103-QM8.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_UniqueID*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* ne null and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* ne null and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1**Parameter_RequiredParameters*"
         />
 
         <Request
@@ -436,7 +435,7 @@
           Capability="Query functions"
           WebAPIReference="2.4.10"
           OutputFile="REQ-WA103-QM8_Enum_MVL_Multi.json"
-          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_UniqueID*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* ne null and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1* and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue2**Parameter_RequiredParameters*"
+          Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* ne null and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1* and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue2**Parameter_RequiredParameters*"
         />
 
         <Request

@@ -195,7 +195,7 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * REQ-WA103-QR1
      */
-    And("^the provided \"([^\"]*)\" is returned in the \"([^\"]*)\" field$", (String parameterUniqueIdValue, String parameterUniqueId) -> {
+    And("^the provided \"([^\"]*)\" is returned in \"([^\"]*)\"$", (String parameterUniqueIdValue, String parameterUniqueId) -> {
       String expectedValueAsString = Utils.resolveValue(parameterUniqueIdValue, settings), resolvedValueAsString = null;
       Object resolvedValue = from(responseData.get()).get(Utils.resolveValue(parameterUniqueId, settings));
 
@@ -391,7 +391,7 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * True if data are present in the response
      */
-    And("^the response has singleton results in the \"([^\"]*)\" field$", (String parameterFieldName) -> {
+    And("^the response has singleton results in \"([^\"]*)\"", (String parameterFieldName) -> {
       String value = Utils.resolveValue(parameterFieldName, settings);
       boolean isPresent = from(responseData.get()).get() != null && value != null;
       LOG.info("Response value is: " + value);
