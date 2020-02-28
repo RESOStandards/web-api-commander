@@ -68,7 +68,7 @@ public class  Settings {
    * @param settings the settings to use to resolve the parameters
    * @return the resolved parameter string
    */
-  private static String resolveParametersString(String parameterString, Settings settings) {
+  public static String resolveParametersString(String parameterString, Settings settings) {
     StringBuilder resolved = new StringBuilder();
     String[] fragments = parameterString.split("\\*");
     String val;

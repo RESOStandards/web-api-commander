@@ -8,7 +8,7 @@
     * Some items are marked OPTIONAL.
     * Any item that has a blank Url will be skipped (which will be printed in the results).
 
-    Contact info@reso.org with further questions.
+    Contact josh@reso.org with further questions.
  -->
 <!DOCTYPE OutputScript [
   <!ELEMENT OutputScript (ClientSettings|Parameters|Requests)*>
@@ -77,11 +77,6 @@
         <!-- REQUIRED: 501 Not Implemented -->
         <Parameter Name="501NotImplemented" Value="*Parameter_EndpointResource*?$search=red OR blue" />
 
-        <!-- MISC PARAMETERS  -->
-
-        <!-- REQUIRED: OData $select list - adapt this for your system and then adjust the remaining queries accordingly -->
-        <Parameter Name="SelectList" Value="ListingKey,BedroomsTotal,StreetName,PropertyType,ModificationTimestamp" />
-
         <!-- REQUIRED: Substitute key name from your Resource here, either Key or KeyNumeric -->
         <Parameter Name="KeyOrKeyNumericField" Value="ListingKey" />
 
@@ -100,7 +95,7 @@
         <Parameter Name="FilterIntegerNotFound" Value="-1" />
 
         <!-- Integer Field for "not" testing -->
-        <Parameter Name="FilterNotField" Value="BedroomsTotal" />
+        <Parameter Name="FilterNotField" Value="*Parameter_FilterIntegerField*" />
         <Parameter Name="FilterNotValue" Value="-1" />
 
         <!-- Enumerated Field for "has" testing -->
@@ -154,6 +149,11 @@
         <Parameter Name="MinuteValue" Value="55" />
         <Parameter Name="SecondValue" Value="55" />
         <Parameter Name="FractionalValue" Value="30" />
+
+        <!-- OData $select list - created from other parameterized fields -->
+        <Parameter Name="SelectList"
+                   Value="*Parameter_KeyOrKeyNumericField*,*Parameter_FilterIntegerField*,*Parameter_ContainsField*,*Parameter_FilterHasField*,*Parameter_DateField*" />
+
 
         <!-- REQUIRED: New Fields for WS103 Testing -->
         <Parameter Name="ValueField" Value="AboveGradeFinishedArea" />

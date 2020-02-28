@@ -35,8 +35,6 @@ import java.util.function.Function;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
-import static org.reso.models.Settings.CLIENT_SETTING_PREFIX;
-import static org.reso.models.Settings.PARAMETER_PREFIX;
 
 public class WebAPIServer_1_0_2 implements En {
   private static final Logger LOG = LogManager.getLogger(WebAPIServer_1_0_2.class);
@@ -196,8 +194,8 @@ public class WebAPIServer_1_0_2 implements En {
      * REQ-WA103-QR1
      */
     And("^the provided \"([^\"]*)\" is returned in \"([^\"]*)\"$", (String parameterUniqueIdValue, String parameterUniqueId) -> {
-      String expectedValueAsString = Utils.resolveValue(parameterUniqueIdValue, settings), resolvedValueAsString = null;
-      Object resolvedValue = from(responseData.get()).get(Utils.resolveValue(parameterUniqueId, settings));
+      String expectedValueAsString = Settings.resolveParametersString(parameterUniqueIdValue, settings), resolvedValueAsString = null;
+      Object resolvedValue = from(responseData.get()).get(Settings.resolveParametersString(parameterUniqueId, settings));
 
       LOG.info("Expected Value is: " + expectedValueAsString);
       LOG.info("Resolved value is: " + resolvedValue);
@@ -220,7 +218,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^data are present in fields contained within \"([^\"]*)\"$", (String parameterSelectList) -> {
       AtomicInteger numFieldsWithData = new AtomicInteger();
-      List<String> fieldList = new ArrayList<>(Arrays.asList(Utils.resolveValue(parameterSelectList, settings).split(",")));
+      List<String> fieldList = new ArrayList<>(Arrays.asList(Settings.resolveParametersString(parameterSelectList, settings).split(",")));
 
       AtomicInteger numResults = new AtomicInteger();
 
@@ -238,7 +236,7 @@ public class WebAPIServer_1_0_2 implements En {
 
       LOG.info("Number of Results: " + numResults.get());
       LOG.info("Number of Fields: " + fieldList.size());
-      LOG.info("Field with Data: " + numFieldsWithData.get());
+      LOG.info("Fields with Data: " + numFieldsWithData.get());
       if (numFieldsWithData.get() > 0) {
         LOG.info("Percent Fill: " + ((numResults.get() * fieldList.size()) / (1.0 * numFieldsWithData.get()) * 100) + "%");
       } else {
@@ -256,7 +254,7 @@ public class WebAPIServer_1_0_2 implements En {
       List<String> items = from(responseData.get()).getList(JSON_VALUE_PATH);
       AtomicInteger numResults = new AtomicInteger(items.size());
 
-      int topCount = Integer.parseInt(Utils.resolveValue(parameterTopCount, settings));
+      int topCount = Integer.parseInt(Settings.resolveParametersString(parameterTopCount, settings));
       LOG.info("Number of values returned: " + numResults.get() + ", top count is: " + topCount);
 
       assertTrue(numResults.get() > 0 && numResults.get() <= topCount);
@@ -268,7 +266,7 @@ public class WebAPIServer_1_0_2 implements En {
      * $skip=*Parameter_TopCount*
      */
     And("^a GET request is made to the resolved Url in \"([^\"]*)\" with \\$skip=\"([^\"]*)\"$", (String requirementId, String parameterTopCount) -> {
-      int skipCount = Integer.parseInt(Utils.resolveValue(parameterTopCount, settings));
+      int skipCount = Integer.parseInt(Settings.resolveParametersString(parameterTopCount, settings));
       LOG.info("Skip count is: " + skipCount);
 
       //preserve initial response data for later comparisons
@@ -361,8 +359,8 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
       LOG.info("Parameter_FieldName: " + parameterFieldName + ", op: " + op + ", Parameter_Value: " + parameterAssertedValue);
-      String fieldName = Utils.resolveValue(parameterFieldName, settings);
-      int assertedValue = Integer.parseInt(Utils.resolveValue(parameterAssertedValue, settings));
+      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
+      int assertedValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, settings));
 
       //subsequent value comparisons are and-ed together while iterating over the list of items, so init to true
       AtomicBoolean result = new AtomicBoolean(true);
@@ -392,7 +390,7 @@ public class WebAPIServer_1_0_2 implements En {
      * True if data are present in the response
      */
     And("^the response has singleton results in \"([^\"]*)\"", (String parameterFieldName) -> {
-      String value = Utils.resolveValue(parameterFieldName, settings);
+      String value = Settings.resolveParametersString(parameterFieldName, settings);
       boolean isPresent = from(responseData.get()).get() != null && value != null;
       LOG.info("Response value is: " + value);
       LOG.info("IsPresent: " + isPresent);
@@ -404,7 +402,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the number of results is less than or equal to \"([^\"]*)\"$", (String limitField) -> {
       int count = from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).size(),
-          limit = Integer.parseInt(Utils.resolveValue(limitField, settings));
+          limit = Integer.parseInt(Settings.resolveParametersString(limitField, settings));
       LOG.info("Results count is: " + count + ", Limit is: " + limit);
       assertTrue(count <= limit);
     });
@@ -413,9 +411,9 @@ public class WebAPIServer_1_0_2 implements En {
      * True if data in the lhs expression and rhs expressions pass the AND or OR condition given in andOrOp
      */
     And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String opLhs, String parameterAssertedLhsValue, String andOrOp, String opRhs, String parameterAssertedRhsValue) -> {
-        String fieldName = Utils.resolveValue(parameterFieldName, settings);
-        Integer assertedLhsValue = Integer.parseInt(Utils.resolveValue(parameterAssertedLhsValue, settings)),
-                assertedRhsValue = Integer.parseInt(Utils.resolveValue(parameterAssertedRhsValue, settings));
+        String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
+        Integer assertedLhsValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedLhsValue, settings)),
+                assertedRhsValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedRhsValue, settings));
 
         String op = andOrOp.toLowerCase();
         boolean isAndOp = op.contains(Operators.AND);
@@ -455,11 +453,11 @@ public class WebAPIServer_1_0_2 implements En {
      * Date Comparison glue
      */
     And("^Date data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
-      String fieldName = Utils.resolveValue(parameterFieldName, settings);
+      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
       AtomicReference<Date> fieldValue = new AtomicReference<>();
       AtomicReference<Date> assertedValue = new AtomicReference<>();
 
-      assertedValue.set(Utils.parseDateFromEdmDateString(Utils.resolveValue(parameterAssertedValue, settings)));
+      assertedValue.set(Utils.parseDateFromEdmDateString(Settings.resolveParametersString(parameterAssertedValue, settings)));
       LOG.info("Asserted value is: " + assertedValue.get().toString());
 
       from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
@@ -476,11 +474,11 @@ public class WebAPIServer_1_0_2 implements En {
      * Time comparison glue
      */
     And("^TimeOfDay data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
-      String fieldName = Utils.resolveValue(parameterFieldName, settings);
+      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
       AtomicReference<Time> fieldValue = new AtomicReference<>();
       AtomicReference<Time> assertedValue = new AtomicReference<>();
 
-      assertedValue.set(Utils.parseTimeOfDayFromEdmTimeOfDayString(Utils.resolveValue(parameterAssertedValue, settings)));
+      assertedValue.set(Utils.parseTimeOfDayFromEdmTimeOfDayString(Settings.resolveParametersString(parameterAssertedValue, settings)));
       LOG.info("Asserted value is: " + assertedValue.get().toString());
 
       from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
@@ -511,13 +509,13 @@ public class WebAPIServer_1_0_2 implements En {
      * Lookups
      */
     And("^Data in \"([^\"]*)\" has \"([^\"]*)\"$", (String parameterFieldName, String parameterAssertedValue) -> {
-      String fieldName = Utils.resolveValue(parameterFieldName, settings);
+      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
       AtomicReference<String> fieldValue = new AtomicReference<>();
       AtomicReference<String> assertedValue = new AtomicReference<>();
 
       AtomicBoolean result = new AtomicBoolean(false);
 
-      assertedValue.set(Utils.resolveValue(parameterAssertedValue, settings));
+      assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, settings));
       LOG.info("Asserted value is: " + assertedValue.get());
 
       from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
@@ -556,7 +554,7 @@ public class WebAPIServer_1_0_2 implements En {
     private static void assertDateTimeOffset(String parameterFieldName, String op, String parameterAssertedValue, String responseData) {
       AtomicReference<Timestamp> assertedValue = new AtomicReference<>();
 
-      assertedValue.set(parseTimestampFromEdmDateTimeOffsetString(resolveValue(parameterAssertedValue, settings)));
+      assertedValue.set(parseTimestampFromEdmDateTimeOffsetString(Settings.resolveParametersString(parameterAssertedValue, settings)));
       assertDateTimeOffset(parameterFieldName, op, assertedValue.get(), responseData);
     }
 
@@ -569,7 +567,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     private static void assertDateTimeOffset(String parameterFieldName, String op, Timestamp timestamp, String responseData) {
       LOG.info("Asserted time is: " + timestamp);
-      String fieldName = resolveValue(parameterFieldName, settings);
+      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
       AtomicReference<Timestamp> fieldValue = new AtomicReference<>();
 
       from(responseData).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
@@ -710,24 +708,7 @@ public class WebAPIServer_1_0_2 implements En {
         return false;
       }
     }
-
-    /**
-     * Resolves the given item into a value
-     * @param item an item which can either be a reference to a parameter, client setting, or it can be an actual value.
-     * @return the resolved setting or item if it's not a client setting or parameter
-     */
-    private static String resolveValue(String item, Settings settings) {
-      if (item.contains(PARAMETER_PREFIX)) {
-        return settings.getParameters().getValue(item.replace(PARAMETER_PREFIX, ""));
-      }
-
-      if (item.contains(CLIENT_SETTING_PREFIX)) {
-        return settings.getClientSettings().get(item.replace(CLIENT_SETTING_PREFIX, ""));
-      }
-
-      return item;
-    }
-
+    
     /**
      * Returns the String data contained within a given ODataRawResponse.
      * @param oDataRawResponse the response to convert.
