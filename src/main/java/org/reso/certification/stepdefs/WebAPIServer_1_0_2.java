@@ -310,7 +310,7 @@ public class WebAPIServer_1_0_2 implements En {
      * Assert response code
      */
     Then("^the server responds with a status code of (\\d+)$", (Integer assertedResponseCode) -> {
-      LOG.info("Server Response Code: " + responseCode + ", " + "Asserted Response Code: " + assertedResponseCode);
+      LOG.info("Asserted Response Code: " + assertedResponseCode + ", Server Response Code: " + responseCode);
       assertTrue(responseCode.get() > 0 && assertedResponseCode > 0);
       assertEquals(assertedResponseCode.intValue(), responseCode.get().intValue());
     });
@@ -320,7 +320,6 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the response is valid XML$", () -> {
       assertTrue(Commander.validateXML(responseData.get()));
-
       LOG.info("Response is valid XML!");
     });
 
@@ -330,8 +329,12 @@ public class WebAPIServer_1_0_2 implements En {
     And("^the response is valid JSON$", () -> {
       oDataRawResponse.get().getRawResponse().toString();
       assertTrue(Utils.isValidJson(responseData.get()));
-
       LOG.info("Response is valid JSON!");
+
+      String showResponses = System.getProperty("showResponses");
+      if (Boolean.parseBoolean(showResponses)) {
+        LOG.info("Response: " + new ObjectMapper().readTree(responseData.get()).toPrettyString());
+      }
     });
 
     /*
@@ -347,12 +350,14 @@ public class WebAPIServer_1_0_2 implements En {
      *
      * TODO: make a general Header assertion function
      */
-    Then("^the server responds with a status code of (\\d+) if the server headers report OData version \"([^\"]*)\"$",
-        (Integer assertedHttpResponseCode, String assertedODataVersion) -> {
-      boolean versionsMatch = responseCode.get().intValue() == assertedHttpResponseCode.intValue(),
-              responseCodesMatch = serverODataHeaderVersion.get().equals(assertedODataVersion);
+    Then("^the server responds with a status code of (\\d+) if the server headers report OData version \"([^\"]*)\"$", (Integer assertedHttpResponseCode, String assertedODataVersion) -> {
+      boolean versionsMatch = serverODataHeaderVersion.get().equals(assertedODataVersion),
+              responseCodesMatch = responseCode.get().intValue() == assertedHttpResponseCode.intValue();
+
+      LOG.info("Asserted OData Version: " + assertedODataVersion + ", Server Version: " + serverODataHeaderVersion.get());
 
       if (versionsMatch) {
+        LOG.info("Asserted Response Code: " + assertedHttpResponseCode + ", Response code: " + responseCode.get());
         assertTrue(responseCodesMatch);
       }
     });
