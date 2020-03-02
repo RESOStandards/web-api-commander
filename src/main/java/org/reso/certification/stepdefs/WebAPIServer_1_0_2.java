@@ -28,7 +28,7 @@ import java.io.*;
 import java.net.URI;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -501,6 +501,11 @@ public class WebAPIServer_1_0_2 implements En {
     });
 
     /*
+     * Year comparison glue
+     */
+
+
+    /*
      * Timestamp comparison glue
      */
     And("^DateTimeOffset data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
@@ -592,6 +597,60 @@ public class WebAPIServer_1_0_2 implements En {
         }
       });
     });
+
+    And("^\"([^\"]*)\" data in Date Field \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String stringDatePart, String parameterFieldName, String op, String parameterAssertedValue) -> {
+      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
+      AtomicReference<Integer> fieldValue = new AtomicReference<>();
+      AtomicInteger assertedValue = new AtomicInteger();
+      AtomicReference<String> datePart = new AtomicReference<>(stringDatePart.toLowerCase());
+
+      try {
+        assertedValue.set(Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, settings)));
+        LOG.info("Asserted value is: " + assertedValue.get());
+
+        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+          try {
+            fieldValue.set(Utils.getDatePart(datePart.get(), item.get(fieldName)));
+            assertTrue(Utils.compare(fieldValue.get(), op, assertedValue.get()));
+          } catch (Exception ex){
+            //fail();
+            LOG.error("ERROR: exception thrown." + ex);
+          }
+        });
+      } catch (Exception ex) {
+        fail();
+        LOG.error("ERROR: exception thrown." + ex);
+      }
+    });
+
+    /*
+     * Year comparison from Timestamp Field
+     * TODO: consolidate with Year comparison with Date Field
+     */
+    And("^\"([^\"]*)\" data in Timestamp Field \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String stringDatePart, String parameterFieldName, String op, String parameterAssertedValue) -> {
+      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
+      AtomicReference<Integer> fieldValue = new AtomicReference<>();
+      AtomicReference<Integer> assertedValue = new AtomicReference<>();
+      AtomicReference<String> datePart = new AtomicReference<>(stringDatePart.toLowerCase());
+
+      try {
+        assertedValue.set(Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, settings)));
+        LOG.info("Asserted value is: " + assertedValue.get().toString());
+
+        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+          try {
+            fieldValue.set(Utils.getTimestampPart(datePart.get(), item.get(fieldName).toString()));
+            assertTrue(Utils.compare(fieldValue.get(), op, assertedValue.get()));
+          } catch (Exception ex){
+            fail();
+            LOG.error("ERROR: exception thrown." + ex);
+          }
+        });
+      } catch (Exception ex) {
+        fail();
+        LOG.error("ERROR: exception thrown." + ex);
+      }
+    });
   }
 
   /**
@@ -607,6 +666,17 @@ public class WebAPIServer_1_0_2 implements En {
       GREATER_THAN_OR_EQUAL = "ge",
       LESS_THAN = "lt",
       LESS_THAN_OR_EQUAL = "le";
+  }
+
+  private static class DateParts {
+    private static final String
+      YEAR = "year",
+      MONTH = "month",
+      DAY = "day",
+      HOUR = "hour",
+      MINUTE = "minute",
+      SECOND = "second",
+      FRACTIONAL = "fractional";
   }
 
   private static class Utils {
@@ -703,6 +773,34 @@ public class WebAPIServer_1_0_2 implements En {
         result = lhs.before(rhs);
       } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
         result = lhs.before(rhs) || lhs.equals(rhs);
+      }
+      LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
+      return result;
+    }
+
+    /**
+     * Year Comparator
+     * @param lhs Year to compare
+     * @param op an OData binary operator to use for comparisons
+     * @param rhs Timestamp to compare
+     * @return true if lhs op rhs, false otherwise
+     */
+    private static boolean compare(Year lhs, String op, Year rhs) {
+      String operator = op.toLowerCase();
+      boolean result = false;
+
+      if (operator.contentEquals(Operators.GREATER_THAN)) {
+        result = lhs.isAfter(rhs);
+      } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
+        result = lhs.isAfter(rhs) || lhs.equals(rhs);
+      } else if (operator.contentEquals(Operators.EQ)) {
+        result = lhs.equals(rhs);
+      } else if (operator.contentEquals(Operators.NE)) {
+        result = !lhs.equals(rhs);
+      } else if (operator.contentEquals(Operators.LESS_THAN)) {
+        result = lhs.isBefore(rhs);
+      } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
+        result = lhs.isBefore(rhs) || lhs.equals(rhs);
       }
       LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
       return result;
@@ -858,6 +956,57 @@ public class WebAPIServer_1_0_2 implements En {
      */
     private static Date parseDateFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) throws EdmPrimitiveTypeException {
       return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Date.class);
+    }
+
+    /***
+     * Tries to parse datePart from the given Object value
+     * @param datePart the timestamp part, "Year", "Month", "Day", etc. to try and parse
+     * @param value the value to try and parse
+     * @return the Integer portion of the date if successful, otherwise throws an Exception
+     * @exception throws an exception if value cannot be parsed into a date.
+     */
+    private static Integer getDatePart(String datePart, Object value) throws EdmPrimitiveTypeException {
+      LocalDate date = LocalDate.parse(parseDateFromEdmDateString(value.toString()).toString());
+      switch (datePart) {
+        case DateParts.YEAR:
+          return date.getYear();
+        case DateParts.MONTH:
+          return date.getMonthValue();
+        case DateParts.DAY:
+          return date.getDayOfMonth();
+        default:
+          return null;
+      }
+    }
+
+    /***
+     * Tries to parse datePart from the given Object value
+     * @param timestampPart the timestamp part, "Year", "Month", "Day", etc. to try and parse
+     * @param value the value to try and parse
+     * @return the Integer portion of the date if successful, otherwise throws an Exception
+     */
+    private static Integer getTimestampPart(String timestampPart, Object value) throws EdmPrimitiveTypeException {
+      //Turns nanoseconds into two most significant 2 digits for fractional comparisons
+      Integer ADJUSTMENT_FACTOR = 10000000;
+      OffsetDateTime offsetDateTime = OffsetDateTime.parse(value.toString());
+
+      if (timestampPart.equals(DateParts.YEAR)) {
+        return offsetDateTime.getYear();
+      } else if (timestampPart.equals(DateParts.MONTH)) {
+        return offsetDateTime.getMonthValue();
+      } else if (timestampPart.equals(DateParts.DAY)) {
+        return offsetDateTime.getDayOfMonth();
+      } else if (timestampPart.equals(DateParts.HOUR)) {
+        return offsetDateTime.getHour();
+      } else if (timestampPart.equals(DateParts.MINUTE)) {
+        return offsetDateTime.getMinute();
+      } else if (timestampPart.equals(DateParts.SECOND)) {
+        return offsetDateTime.getSecond();
+      } else if (timestampPart.equals(DateParts.FRACTIONAL)) {
+        return offsetDateTime.getNano() / ADJUSTMENT_FACTOR;
+      } else {
+        return null;
+      }
     }
 
     /**

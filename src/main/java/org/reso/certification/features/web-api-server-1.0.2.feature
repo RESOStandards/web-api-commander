@@ -245,3 +245,83 @@ Feature: Web API Server 1.0.2 Certification
     And the response is valid JSON
     And the response has results
     And DateTimeOffset data in "Parameter_TimestampField" is sorted in "desc" order
+
+  @REQ-WA103-QO18.1 @gold @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter: Date: year
+    When a GET request is made to the resolved Url in "REQ-WA103-QO18.1"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And "year" data in Date Field "Parameter_DateField" "eq" "Parameter_YearValue"
+
+  @REQ-WA103-QO18.2 @gold @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter: Date: year comparison with timestamp
+    When a GET request is made to the resolved Url in "REQ-WA103-QO18.2"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And "year" data in Timestamp Field "Parameter_TimestampField" "eq" "Parameter_YearValue"
+
+  @REQ-WA103-QO19.1 @gold @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter: Date: month
+    When a GET request is made to the resolved Url in "REQ-WA103-QO19.1"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And "month" data in Date Field "Parameter_DateField" "eq" "Parameter_MonthValue"
+
+  @REQ-WA103-QO19.2 @gold @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter: Date: month comparison with timestamp
+    When a GET request is made to the resolved Url in "REQ-WA103-QO19.2"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And "month" data in Timestamp Field "Parameter_TimestampField" "eq" "Parameter_MonthValue"
+
+  @REQ-WA103-QO20.1 @gold @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter: Date: day
+    When a GET request is made to the resolved Url in "REQ-WA103-QO20.1"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And "day" data in Date Field "Parameter_DateField" "eq" "Parameter_DayValue"
+
+  @REQ-WA103-QO20.2 @gold @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter: Date: day comparison with timestamp
+    When a GET request is made to the resolved Url in "REQ-WA103-QO20.2"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And "day" data in Timestamp Field "Parameter_TimestampField" "eq" "Parameter_DayValue"
+
+  @REQ-WA103-QO21 @gold @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter: Date: hour comparison with timestamp
+    When a GET request is made to the resolved Url in "REQ-WA103-QO21"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And "hour" data in Timestamp Field "Parameter_TimestampField" "eq" "Parameter_HourValue"
+
+  @REQ-WA103-QO22 @gold @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter: Date: minute comparison with timestamp
+    When a GET request is made to the resolved Url in "REQ-WA103-QO22"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And "minute" data in Timestamp Field "Parameter_TimestampField" "gt" "Parameter_MinuteValue"
+
+  @REQ-WA103-QO23 @gold @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter: Date: second comparison with timestamp
+    When a GET request is made to the resolved Url in "REQ-WA103-QO23"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And "second" data in Timestamp Field "Parameter_TimestampField" "lt" "Parameter_SecondValue"
+
+  @REQ-WA103-QO24 @gold @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter: Date: fractional seconds comparison with timestamp
+    When a GET request is made to the resolved Url in "REQ-WA103-QO24"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And "fractional" data in Timestamp Field "Parameter_TimestampField" "lt" "Parameter_FractionalValue"
