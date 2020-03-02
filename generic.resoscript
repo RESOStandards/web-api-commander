@@ -680,7 +680,7 @@
       MetallicLevel="Platinum"
       Capability="Filterability ($filter)"
       WebAPIReference="2.4.4"
-      OutputFile="REQ-WA103-QO13_Contains.json"
+      OutputFile="REQ-WA103-QO13.json"
       Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_ContainsField* ne null and contains(*Parameter_ContainsField*,'*Parameter_ContainsValue*')*Parameter_RequiredParameters*"
     />
 

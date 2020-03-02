@@ -603,6 +603,7 @@ public class WebAPIServer_1_0_2 implements En {
       AtomicReference<Integer> fieldValue = new AtomicReference<>();
       AtomicInteger assertedValue = new AtomicInteger();
       AtomicReference<String> datePart = new AtomicReference<>(stringDatePart.toLowerCase());
+      AtomicReference<String> operator = new AtomicReference<>(op.toLowerCase());
 
       try {
         assertedValue.set(Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, settings)));
@@ -611,7 +612,7 @@ public class WebAPIServer_1_0_2 implements En {
         from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           try {
             fieldValue.set(Utils.getDatePart(datePart.get(), item.get(fieldName)));
-            assertTrue(Utils.compare(fieldValue.get(), op, assertedValue.get()));
+            assertTrue(Utils.compare(fieldValue.get(), operator.get(), assertedValue.get()));
           } catch (Exception ex){
             //fail();
             LOG.error("ERROR: exception thrown." + ex);
@@ -632,6 +633,7 @@ public class WebAPIServer_1_0_2 implements En {
       AtomicReference<Integer> fieldValue = new AtomicReference<>();
       AtomicReference<Integer> assertedValue = new AtomicReference<>();
       AtomicReference<String> datePart = new AtomicReference<>(stringDatePart.toLowerCase());
+      AtomicReference<String> operator = new AtomicReference<>(op.toLowerCase());
 
       try {
         assertedValue.set(Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, settings)));
@@ -640,7 +642,7 @@ public class WebAPIServer_1_0_2 implements En {
         from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           try {
             fieldValue.set(Utils.getTimestampPart(datePart.get(), item.get(fieldName).toString()));
-            assertTrue(Utils.compare(fieldValue.get(), op, assertedValue.get()));
+            assertTrue(Utils.compare(fieldValue.get(), operator.get(), assertedValue.get()));
           } catch (Exception ex){
             fail();
             LOG.error("ERROR: exception thrown." + ex);
@@ -650,6 +652,21 @@ public class WebAPIServer_1_0_2 implements En {
         fail();
         LOG.error("ERROR: exception thrown." + ex);
       }
+    });
+
+    /*
+     * String functions
+     */
+    And("^String data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
+      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
+      AtomicReference<String> fieldValue = new AtomicReference<>();
+      AtomicReference<String> assertedValue = new AtomicReference(Settings.resolveParametersString(parameterAssertedValue, settings));
+      AtomicReference<String> operator = new AtomicReference<>(op.toLowerCase());
+
+      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        assertTrue(Utils.compare(item.get(fieldName).toString(), operator.get(), assertedValue.get()));
+      });
+
     });
   }
 
@@ -665,7 +682,12 @@ public class WebAPIServer_1_0_2 implements En {
       GREATER_THAN = "gt",
       GREATER_THAN_OR_EQUAL = "ge",
       LESS_THAN = "lt",
-      LESS_THAN_OR_EQUAL = "le";
+      LESS_THAN_OR_EQUAL = "le",
+      CONTAINS = "contains",
+      ENDS_WITH = "endswith",
+      STARTS_WITH = "startswith",
+      TO_LOWER = "tolower",
+      TO_UPPER = "toupper";
   }
 
   private static class DateParts {
@@ -747,6 +769,33 @@ public class WebAPIServer_1_0_2 implements En {
       }
 
       LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
+      return result;
+    }
+
+    /**
+     * Returns true if each item in the list is true
+     * @param lhs Integer value
+     * @param op an OData binary operator for use for comparisons
+     * @param rhs Integer value
+     * @return true if lhs op rhs produces true, false otherwise
+     */
+    private static boolean compare(String lhs, String op, String rhs) {
+      String operator = op.toLowerCase();
+      boolean result = false;
+
+      if (operator.contentEquals(Operators.CONTAINS)) {
+        result = lhs.contains(rhs);
+      } else if (operator.contentEquals(Operators.STARTS_WITH)) {
+        result = lhs.startsWith(rhs);
+      } else if (operator.contentEquals(Operators.ENDS_WITH)) {
+        result = lhs.endsWith(rhs);
+      } else if (operator.contentEquals(Operators.TO_LOWER)) {
+        result = lhs.toLowerCase().equals(rhs);
+      } else if (operator.contentEquals(Operators.TO_UPPER)) {
+        result = lhs.toUpperCase().equals(rhs);
+      }
+
+      LOG.info("Compare: " + operator + "(" + lhs + ") == " + rhs + " ==> " + result);
       return result;
     }
 

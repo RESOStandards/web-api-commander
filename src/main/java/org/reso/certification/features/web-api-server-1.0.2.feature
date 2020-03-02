@@ -325,3 +325,43 @@ Feature: Web API Server 1.0.2 Certification
     And the response is valid JSON
     And the response has results
     And "fractional" data in Timestamp Field "Parameter_TimestampField" "lt" "Parameter_FractionalValue"
+
+  @REQ-WA103-QO13 @platinum @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter - String: contains
+    When a GET request is made to the resolved Url in "REQ-WA103-QO13"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And String data in "Parameter_ContainsField" "contains" "Parameter_ContainsValue"
+
+  @REQ-WA103-QO14 @platinum @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter - String: ends with
+    When a GET request is made to the resolved Url in "REQ-WA103-QO14"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And String data in "Parameter_EndsWithField" "endswith" "Parameter_EndsWithValue"
+
+  @REQ-WA103-QO15 @platinum @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter - String: starts with
+    When a GET request is made to the resolved Url in "REQ-WA103-QO15"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And String data in "Parameter_StartsWithField" "startswith" "Parameter_StartsWithValue"
+
+  @REQ-WA103-QO16 @platinum @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter - String: tolower() support
+    When a GET request is made to the resolved Url in "REQ-WA103-QO16"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And String data in "Parameter_ToLowerField" "tolower" "Parameter_ToLowerValue"
+
+  @REQ-WA103-QO17 @platinum @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter - String: toupper() support
+    When a GET request is made to the resolved Url in "REQ-WA103-QO17"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And String data in "Parameter_ToUpperField" "toupper" "Parameter_ToUpperValue"
