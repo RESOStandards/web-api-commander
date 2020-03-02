@@ -1,6 +1,5 @@
 Feature: Web API Server 1.0.2 Certification
-  All Scenarios Passing means that the Web API server is fully-compliant with the RESO specification.
-  It's not expected that a server will pass all scenarios.
+  All Scenarios passing means the given Web API server is fully-compliant with the RESO Platinum Web API 1.0.2 Server specification.
 
   Background:
     Given a RESOScript file was provided
@@ -58,7 +57,7 @@ Feature: Web API Server 1.0.2 Certification
     And the response has results
     And data in the "Parameter_KeyOrKeyNumeric" fields are different in the second request than in the first
 
-  @REQ-WA103-QO1.1 @REQ-WA103-QO1.select @core @2.4.4 @core-endorsement @OData-4.0
+  @REQ-WA103-QO1.1 @core @2.4.4 @core-endorsement @OData-4.0
   Scenario: Query Support: $select case-sensitivity for OData 4.0
     When a GET request is made to the resolved Url in "REQ-WA103-QO1.1"
     Then the server responds with a status code of 400 if the server headers report OData version "4.0"
@@ -182,7 +181,7 @@ Feature: Web API Server 1.0.2 Certification
     And the response has results
     And DateTimeOffset data in "Parameter_TimestampField" "le" now()
 
-  @REQ-WA103-QM7 @bronze @2.4.9 @queryability-endorsement
+  @REQ-WA103-QM7 @bronze @2.4.9 @filterability-endorsement
   Scenario: Support Single Value Lookups
     When a GET request is made to the resolved Url in "REQ-WA103-QM7"
     Then the server responds with a status code of 200
@@ -190,10 +189,59 @@ Feature: Web API Server 1.0.2 Certification
     And the response has results
     And Single Valued Enumeration Data in "Parameter_SingleValueLookupField" has "Parameter_SingleLookupValue"
 
-  @REQ-WA103-QM8 @bronze @2.4.10 @queryability-endorsement
+  @REQ-WA103-QM8 @bronze @2.4.10 @filterability-endorsement
   Scenario: Support Multi Value Lookups
     When a GET request is made to the resolved Url in "REQ-WA103-QM8"
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
     And Multiple Valued Enumeration Data in "Parameter_MultipleValueLookupField" has "Parameter_MultipleLookupValue1"
+
+  @REQ-WA103-QM8.2 @bronze @2.4.10 @filterability-endorsement
+  Scenario: Support Multi Value Lookups multiple values
+    When a GET request is made to the resolved Url in "REQ-WA103-QM8.2"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And Multiple Valued Enumeration Data in "Parameter_MultipleValueLookupField" has "Parameter_MultipleLookupValue1"
+    And Multiple Valued Enumeration Data in "Parameter_MultipleValueLookupField" has "Parameter_MultipleLookupValue2"
+
+  @REQ-WA103-QO8 @bronze @2.4.4 @filterability-endorsement
+  Scenario: Query Support: $filter - Comparison: has
+    When a GET request is made to the resolved Url in "REQ-WA103-QO8"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And Single Valued Enumeration Data in "Parameter_FilterHasField" has "Parameter_FilterHasValue"
+
+  @REQ-WA103-QO28.1 @bronze @2.4.4 @sortability-endorsement
+  Scenario: Query Support: $orderby asc filtered
+    When a GET request is made to the resolved Url in "REQ-WA103-QO28.1"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And DateTimeOffset data in "Parameter_TimestampField" is sorted in "asc" order
+
+  @REQ-WA103-QO28.2 @bronze @2.4.4 @sortability-endorsement
+  Scenario: Query Support: $orderby asc no filter
+    When a GET request is made to the resolved Url in "REQ-WA103-QO28.2"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And DateTimeOffset data in "Parameter_TimestampField" is sorted in "asc" order
+
+  @REQ-WA103-QO28.3 @bronze @2.4.4 @sortability-endorsement
+  Scenario: Query Support: $orderby desc filtered
+    When a GET request is made to the resolved Url in "REQ-WA103-QO28.3"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And DateTimeOffset data in "Parameter_TimestampField" is sorted in "desc" order
+
+  @REQ-WA103-QO28.4 @bronze @2.4.4 @sortability-endorsement
+  Scenario: Query Support: $orderby desc no filter
+    When a GET request is made to the resolved Url in "REQ-WA103-QO28.4"
+    Then the server responds with a status code of 200
+    And the response is valid JSON
+    And the response has results
+    And DateTimeOffset data in "Parameter_TimestampField" is sorted in "desc" order

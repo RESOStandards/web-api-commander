@@ -330,7 +330,6 @@ public class WebAPIServer_1_0_2 implements En {
      * validate JSON wrapper
      */
     And("^the response is valid JSON$", () -> {
-      oDataRawResponse.get().getRawResponse().toString();
       assertTrue(Utils.isValidJson(responseData.get()));
       LOG.info("Response is valid JSON!");
 
@@ -403,7 +402,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the response has singleton results in \"([^\"]*)\"", (String parameterFieldName) -> {
       String value = Settings.resolveParametersString(parameterFieldName, settings);
-      boolean isPresent = from(responseData.get()).get() != null && value != null;
+      boolean isPresent = from(responseData.get()).get() != null;
       LOG.info("Response value is: " + value);
       LOG.info("IsPresent: " + isPresent);
       assertTrue(isPresent);
@@ -536,6 +535,10 @@ public class WebAPIServer_1_0_2 implements En {
       });
     });
 
+    /*
+     * Multi-valued enumerations testing.
+     * TODO: turn array into JSON array and parse values from there
+     */
     And("^Multiple Valued Enumeration Data in \"([^\"]*)\" has \"([^\"]*)\"$", (String parameterFieldName, String parameterAssertedValue) -> {
       String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
       AtomicReference<String> fieldValue = new AtomicReference<>();
@@ -551,9 +554,43 @@ public class WebAPIServer_1_0_2 implements En {
         result.set(fieldValue.get().contains(assertedValue.get()));
         LOG.info("Assert True: " + fieldValue.get() + " has " + assertedValue.get() + " ==> " + result.get());
         assertTrue(result.get());
-
       });
+    });
 
+    /*
+     * Date comparison ordering (asc, desc).
+     */
+    And("^DateTimeOffset data in \"([^\"]*)\" is sorted in \"([^\"]*)\" order$", (String parameterFieldName, String parameterOrderByDirection) -> {
+      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
+      final String ASC = "asc", DESC = "desc";
+      AtomicReference<String> orderBy = new AtomicReference<>(parameterOrderByDirection.toLowerCase());
+
+      assertTrue(orderBy.get().equals(ASC) || orderBy.get().equals(DESC));
+
+      //used to store the last value for comparisons
+      AtomicReference<Timestamp> initialValue = new AtomicReference<>();
+      AtomicReference<Timestamp> currentValue = new AtomicReference<>();
+      AtomicInteger count = new AtomicInteger(0);
+
+      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        try {
+          if (count.get() == 0) {
+            initialValue.set(Utils.parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+          } else {
+            currentValue.set(Utils.parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+            if (orderBy.get().equals(ASC)) {
+              assertTrue(Utils.compare(initialValue.get(), Operators.LESS_THAN_OR_EQUAL, currentValue.get()));
+            } else if (orderBy.get().equals(DESC)){
+              assertTrue(Utils.compare(initialValue.get(), Operators.GREATER_THAN_OR_EQUAL, currentValue.get()));
+            }
+            initialValue.set(currentValue.get());
+          }
+          count.getAndIncrement();
+        } catch (EdmPrimitiveTypeException ptex) {
+          LOG.error("ERROR: exception thrown parsing Timestamp from given string." + ptex);
+          fail();
+        }
+      });
     });
   }
 
@@ -767,7 +804,7 @@ public class WebAPIServer_1_0_2 implements En {
      * Parses the given edmDateTimeOffsetString into a Java Instant (the type expected by the Olingo type converter).
      * @param edmDateTimeOffsetString string representation of an Edm DateTimeOffset to parse.
      * @return the corresponding Instant value.
-     * @throws EdmPrimitiveTypeException
+     * @throws EdmPrimitiveTypeException thrown if given value cannot be parsed.
      */
     private static Timestamp parseTimestampFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) throws EdmPrimitiveTypeException {
       return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Timestamp.class);
@@ -777,7 +814,7 @@ public class WebAPIServer_1_0_2 implements En {
      * Parses the given edmDateString into a Java Timestamp.
      * @param edmDateString the date string to convert.
      * @return the corresponding Timestamp value.
-     * @throws EdmPrimitiveTypeException
+     * @throws EdmPrimitiveTypeException thrown if given value cannot be parsed.
      */
     private static Timestamp parseTimestampFromEdmDateString(String edmDateString) throws EdmPrimitiveTypeException {
       return EdmDate.getInstance().valueOfString(edmDateString, true, null, null, null, null, Timestamp.class);
@@ -787,7 +824,7 @@ public class WebAPIServer_1_0_2 implements En {
      * Parses the given edmDateString into a Java Time.
      * @param edmTimeOfDayOffsetString the date string to convert.
      * @return the corresponding Time value.
-     * @throws EdmPrimitiveTypeException
+     * @throws EdmPrimitiveTypeException thrown if given value cannot be parsed.
      */
     private static Time parseTimeOfDayFromEdmTimeOfDayString(String edmTimeOfDayOffsetString) throws EdmPrimitiveTypeException {
       return EdmTimeOfDay.getInstance().valueOfString(edmTimeOfDayOffsetString, true, null, null, null, null, Time.class);
@@ -797,7 +834,7 @@ public class WebAPIServer_1_0_2 implements En {
      * Parses the given DateTimeOffsetString into a Java Time.
      * @param edmDateTimeOffsetString the DateTimeOffsetString to parse.
      * @return the corresponding Time value.
-     * @throws EdmPrimitiveTypeException
+     * @throws EdmPrimitiveTypeException thrown if given value cannot be parsed.
      */
     private static Time parseTimeOfDayFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) throws EdmPrimitiveTypeException {
       return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Time.class);
@@ -807,7 +844,7 @@ public class WebAPIServer_1_0_2 implements En {
      * Parses the given edmDateString into a Java Date
      * @param edmDateString the date string to convert.
      * @return the corresponding Date value.
-     * @throws EdmPrimitiveTypeException
+     * @throws EdmPrimitiveTypeException thrown if given value cannot be parsed.
      */
     private static Date parseDateFromEdmDateString(String edmDateString) throws EdmPrimitiveTypeException {
       return EdmDate.getInstance().valueOfString(edmDateString, true, null, null, null, null, Date.class);
@@ -817,6 +854,7 @@ public class WebAPIServer_1_0_2 implements En {
      * Parses the given edmDateTimeOffsetString into a Java Date
      * @param edmDateTimeOffsetString string representation of an Edm DateTimeOffset to parse.
      * @return the corresponding Date value.
+     * @throws EdmPrimitiveTypeException thrown if given value cannot be parsed.
      */
     private static Date parseDateFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) throws EdmPrimitiveTypeException {
       return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Date.class);

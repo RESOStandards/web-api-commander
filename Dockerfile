@@ -17,6 +17,3 @@ COPY --from=builder /home/gradle/project/build/libs/web-api-commander.jar ./
 
 ENTRYPOINT ["java","-jar","/web-api-commander.jar"]
 CMD ["--help"]
-
-
-

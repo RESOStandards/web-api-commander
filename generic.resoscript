@@ -25,7 +25,7 @@
     Name CDATA #REQUIRED
     Value CDATA #REQUIRED>
   <!ELEMENT Requests (Request)*>
-  <!ELEMENT Request (#PCDATA)*>
+  <!ELEMENT Request (#PCDATA)>
   <!ATTLIST Request
     Capability CDATA #REQUIRED
     MetallicLevel CDATA #REQUIRED
@@ -456,41 +456,41 @@
 
         <Request
           TestDescription="Query Support: $orderby asc filtered"
-          RequirementId="REQ-WA103-QO28"
+          RequirementId="REQ-WA103-QO28.1"
           MetallicLevel="Bronze"
           Capability="Sortability ($orderby)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO28_OrderByAscFiltered.json"
+          OutputFile="REQ-WA103-QO28.1.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
           TestDescription="Query Support: $orderby asc no filter"
-          RequirementId="REQ-WA103-QO28"
+          RequirementId="REQ-WA103-QO28.2"
           MetallicLevel="Bronze"
           Capability="Sortability ($orderby)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO28_OrderByAscNoFilter.json"
+          OutputFile="REQ-WA103-QO28.2.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc"
         />
 
         <Request
           TestDescription="Query Support: $orderby desc filtered"
-          RequirementId="REQ-WA103-QO28"
+          RequirementId="REQ-WA103-QO28.3"
           MetallicLevel="Bronze"
           Capability="Sortability ($orderby)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO28_OrderByDescFiltered.json"
+          OutputFile="REQ-WA103-QO28.3.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
         />
 
         <Request
           TestDescription="Query Support: $orderby desc no filter"
-          RequirementId="REQ-WA103-QO28"
+          RequirementId="REQ-WA103-QO28.4"
           MetallicLevel="Bronze"
           Capability="Sortability ($orderby)"
           WebAPIReference="2.4.4"
-          OutputFile="REQ-WA103-QO28_OrderByDescNoFilter.json"
+          OutputFile="REQ-WA103-QO28.4.json"
           Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc"
         />
 
