@@ -659,8 +659,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^String data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
       String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
-      AtomicReference<String> fieldValue = new AtomicReference<>();
-      AtomicReference<String> assertedValue = new AtomicReference(Settings.resolveParametersString(parameterAssertedValue, settings));
+      AtomicReference<String> assertedValue = new AtomicReference<>(Settings.resolveParametersString(parameterAssertedValue, settings));
       AtomicReference<String> operator = new AtomicReference<>(op.toLowerCase());
 
       from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
