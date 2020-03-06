@@ -335,51 +335,99 @@ ability to run individual or multiple tests using tags.
 
 ### Web API Usage
 
-The Commander may be run in automated testing mode for a Web API 1.0.2 Server Certification using a terminal. You do not need to use the Commander JAR file mentioned elsewhere in this step. Instead, you will run the tests using Gradle for automation against a clean copy of the latest Commander code.
+The Commander may be run in automated testing mode for a Web API 1.0.2 Server Certification using a terminal. 
+You do not need to use the Commander JAR file mentioned elsewhere in this step. 
+Instead, you will run the tests using Gradle for automation against a clean copy of the latest Commander code.
 
-You will need to download the source code so you can run Gradle in the root of the directory. This assumes that you also have Java 8 (1.8.0) or above installed, as mentioned elsewhere in this [`README`](#getting-started).
+You will need to download the source code so you can run Gradle in the root of the directory. 
+This assumes that you also have Java 8 (1.8.0) or above installed, as mentioned elsewhere in this [`README`](#getting-started).
 
-First, change into the directory you want to work in and clone the Commander repository. You will need to have Git installed. Chances are you already do, to check, open a command line and type `git` and if it's present, it will print some info about the app. If not, [there are instructions here](https://git-scm.com/downloads).
+First, change into the directory you want to work in and clone the Commander repository. 
+You will need to have Git installed. 
+Chances are you already do, to check, open a command line and type `git` and if it's present, 
+it will print some info about the app. If not, [there are instructions here](https://git-scm.com/downloads).
 
-**MacOS or Linux**
+##### MacOS or Linux
 ```
 $ git clone https://github.com/RESOStandards/web-api-commander.git
 ```
 
-**Windows**
+##### Windows
 ```
 C:\> git clone https://github.com/RESOStandards/web-api-commander.git
 ```
 
-This will clone the repository into a directory called web-api-commander, which means you will have a fresh copy of the latest code to execute. To refresh the code after you have downloaded it, issue the command `$ git pull` in the root of the directory that was just created. 
+This will clone the repository into a directory called web-api-commander relative to whatever directory you're currently in, 
+which also means you'll have a fresh copy of the latest code to execute. 
+
+To refresh the code after you have downloaded it, issue the command `$ git pull` in the root of the directory that was just created. 
  
-The Gradle wrapper provides a convenient way to automatically install Gradle when running tests. After you have cloned the repository, issuing the following command: 
+#### Running with the Gradle Wrapper
+The Gradle wrapper provides a convenient way to automatically install Gradle when running tests. 
 
-**MacOS or Linux**
+After you have cloned the repository, the task you run will depend on the level of Web API 1.0.2 Server Certification 
+you're interested in. 
+
+Before you do that, however, you'll want to make sure that you are running the 6.2.2 version of Gradle.
+
+In the project directory, perform one of the following steps:
+
+##### MacOS or Linux 
+```$ ./gradlew wrapper --gradle-version 6.2.2 --distribution-type all```
+
+##### Windows
+```C:\path\to\web-api-commander> gradlew wrapper --gradle-version 6.2.2 --distribution-type all```
+
+You should see a success message. For more information, [see here](https://docs.gradle.org/current/userguide/gradle_wrapper.html).
+
+### Convenience Methods for Web API 1.0.2 Gold and Platinum Certification (Recommended)
+While you may use tags to filter tests as you choose, explained in the next section, it's convenient
+to be able to run a predefined set of tests for Gold or Platinum certification. 
+
+These tasks will also produce reports in the local `build` directory, named according to which test you ran. 
+
+#### Gold Certification
+
+This will run the Gold tests against the Web API 1.0.2 Server provided as `WebAPIURI` in `your.resoscript` file.
+
+##### MacOS or Linux
 ```
-$ ./gradlew testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript
+$ ./gradlew testWebAPIServer_1_0_2_Gold -DpathToRESOScript=/path/to/your.resoscript -DshowResponses=true
 ```
 
-**Windows**
+##### Windows
 ```
-C:\path\to\web-api-commander> gradlew.bat testWebAPIServer_1_0_2 -DpathToRESOScript=C:\path\to\your.resoscript
-```
-
-This will run the entirety of the tests against the Web API server provided as `WebAPIURI` in `your.resoscript` file. You can pass tags to filter on in order to run one or more tests matching the given tag.
-
-Note that the first time you run this command, it will take some time to complete as Gradle will download all dependencies and compile the application before running the test suite. *Note: this step will be Dockerized so it can be run with a single command in a Docker container in upcoming versions of the Commander.*
-
-
-To filter by tags, a command similar to the following would be used:
-
-**MacOS or Linux**
-```
-$ gradle testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript -Dcucumber.filter.tags="@core"
+C:\path\to\web-api-commander> gradlew testWebAPIServer_1_0_2_Gold -DpathToRESOScript=C:\path\to\your.resoscript -DshowResponses=true
 ```
 
-**Windows**
+*Note: the first time you run these tasks, they will take some time as the environment is being configured behind the 
+scenes and the code is being compiled from the contents of the source directory you downloaded in the previous step. 
+
+#### Platinum Certification
+This will run the Platinum tests against the Web API 1.0.2 Server provided as `WebAPIURI` in `your.resoscript` file.
+
+##### MacOS or Linux
 ```
-C:\path\to\web-api-commander> gradlew.bat testWebAPIServer_1_0_2 -DpathToRESOScript=C:\path\to\your.resoscript -Dcucumber.filter.tags="@core"
+$ ./gradlew testWebAPIServer_1_0_2_Platinum -DpathToRESOScript=/path/to/your.resoscript -DshowResponses=true
+```
+
+##### Windows
+```
+C:\path\to\web-api-commander> gradlew testWebAPIServer_1_0_2_Platinum -DpathToRESOScript=C:\path\to\your.resoscript -DshowResponses=true
+```
+
+#### Advanced feature: Tag Filtering 
+You may also filter by tags. These are the items in the Cucumber .feature files prefixed by an `@` symbol. Expressions 
+may also be used with tags. See the [Cucumber Documentation](https://cucumber.io/docs/cucumber/api/#tags) for more information. 
+
+##### MacOS or Linux
+```
+$ gradle testWebAPIServer_1_0_2_Platinum -DpathToRESOScript=/path/to/your.resoscript -Dcucumber.filter.tags="@core"
+```
+
+##### Windows
+```
+C:\path\to\web-api-commander> gradlew.bat testWebAPIServer_1_0_2_Platinum -DpathToRESOScript=C:\path\to\your.resoscript -Dcucumber.filter.tags="@core"
 ```
 
 This would run only the tests marked as `@core` in the 
@@ -403,32 +451,48 @@ Please feel free to suggest additional tags that might be useful.
 
 A sample of the runtime terminal output follows:
 
-```
-    @REQ-WA103-END3 @core @x.y.z @core-support-endorsement
-    Scenario: REQ-WA103-END3 - CORE - Request and Validate Server Metadata   
+```gherkin
+    > Task :testWebApiServer_1_0_2_Platinum
+    
+    @REQ-WA103-END3 @core @x.y.z @core-endorsement @metadata
+    Scenario: Request and Validate Server Metadata                                                         
     
     Using RESOScript: /path/to/your.resoscript
-      Given a RESOScript file was provided                                   
-    
+      Given a RESOScript file was provided                                                                 
+      
     RESOScript loaded successfully!
-      And Client Settings and Parameters were read from the file             
-    
+      And Client Settings and Parameters were read from the file                                           
+      
     Bearer token loaded... first 4 characters: abcd
-    Service root is: https://api.server.com/serviceRoot
-      And an OData client was successfully created from the given RESOScript 
-    
-    Request URI: https://api.server.com/serviceRoot/$metadata?$format=application/xml
-    Request succeeded...185032 bytes received.
-      When a GET request is made to the resolved Url in "REQ-WA103-END3"     
-    
-    Response code is: 200
-      Then the server responds with a status code of 200                     
-    
-    Response is valid XML!
-      And the response is valid XML                                          
-    
+    Service root is: https://api.server.com/
+      And an OData client was successfully created from the given RESOScript                               
+      
+    Fetching XMLMetadata with OData Client from: https://api.server.com/$metadata
+      When a successful metadata request is made to the service root in "ClientSettings_WebAPIURI"         
+      
     Metadata is valid!
-      And the metadata returned is valid   
+      And the metadata returned is valid                                                                   
+      
+    Fetching Edm with OData Client from: https://api.server.com/$metadata
+    Found EntityContainer for the given resource: 'Property'
+      And the metadata contains the "Parameter_EndpointResource" resource                                  
+      
+    Searching metadata for fields in given select list: ListingKey,BedroomsTotal,StreetName,PropertyType,ListingContractDate,ModificationTimestamp,Latitude,Longitude
+    Found: 'ListingKey'
+    Found: 'BedroomsTotal'
+    Found: 'StreetName'
+    Found: 'PropertyType'
+    Found: 'ListingContractDate'
+    Found: 'ModificationTimestamp'
+    Found: 'Latitude'
+    Found: 'Longitude'
+      And resource metadata for "Parameter_EndpointResource" contains the fields in "Parameter_SelectList" 
+      
+    
+    1 Scenarios (1 passed)
+    7 Steps (7 passed)
+    0m3.244s
+   
 ```
 
 This shows configuration parameters, requests, and responses in a lightweight-manner. 
@@ -456,24 +520,73 @@ These commands should not be necessary for the normal use of the Commander. Ther
 A [Dockerfile](./Dockerfile) has been provided to dockerize the application. 
 This can be used for CI/CD environments such as Jenkins or TravisCI. The following command will build an image for you:
 
+
+### Commander Features Other Than Automated Web API Testing
 ```
-$ docker build -t darnjo/web-api-command .
+$ docker build -t web-api-commander .
 ```
 
 The usage for the docker container is the same for `web-api-commander.jar` presented above.
 
 ```
-$ docker run -it darnjo/web-api-commander --help
+$ docker run -it web-api-commander --help
 ```
 
 If you have input files you may need to mount your filesystem into the docker container
 
 ```
-$ docker run -it -v $PWD:/app darnjo/web-api-commander --validateMetadata --inputFile <pathInContainer>
+$ docker run -it -v $PWD:/app web-api-commander --validateMetadata --inputFile <pathInContainer>
+```
+
+### Automated Web API Testing
+
+You may also run the tests in a Docker container locally by issuing one of the following commands. 
+Docker must be running on your local machine.
+
+#### MacOS or Linux All-In-One Commands
+
+
+##### Gold
+```
+cd ~; \
+rm -rf commander-tmp/; \
+mkdir commander-tmp; \
+cd commander-tmp; \
+git clone https://github.com/RESOStandards/web-api-commander.git; \
+cd web-api-commander; \
+docker run --rm -u gradle -v "$PWD":/home/gradle/project -v /path/to/your/resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_1_0_2_Gold -DpathToRESOScript=/home/gradle/project/resoscripts/your.resoscript -DshowResponses=true
+```
+
+##### Platinum 
+
+```
+cd ~; \
+rm -rf commander-tmp/; \
+mkdir commander-tmp; \
+cd commander-tmp; \
+git clone https://github.com/RESOStandards/web-api-commander.git; \
+cd web-api-commander; \
+docker run --rm -u gradle -v "$PWD":/home/gradle/project -v /path/to/your/resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_1_0_2_Platinum -DpathToRESOScript=/home/gradle/project/resoscripts/your.resoscript -DshowResponses=true
+```
+
+Note that this will create a directory in your home directory for the project, and build artifacts and the log will be placed in that directory, 
+which is also where you will end up after runtime.
+
+
+#### Windows All-In-One WIP
+
+##### Gold
+
+```
+cd C:\;mkdir commander-tmp;cd commander-tmp;git clone https://github.com/RESOStandards/web-api-commander.git;cd web-api-commander; docker run --rm -u gradle -v C:\current\path\web-api-commander:/home/gradle/project -v C:\path\to\your\resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_1_0_2_Gold -DpathToRESOScript=/home/gradle/project/resoscripts/your.resoscript -DshowResponses=true
+```
+
+##### Platinum
+```
+cd C:\;mkdir commander-tmp;cd commander-tmp;git clone https://github.com/RESOStandards/web-api-commander.git;cd web-api-commander;docker run --rm -u gradle -v C:\current\path\web-api-commander:/home/gradle/project -v C:\path\to\your\resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_1_0_2_Platinum -DpathToRESOScript=/home/gradle/project/resoscripts/your.resoscript -DshowResponses=true
 ```
 
 ---
-
 ## Logging
 
 In the current version of the Commander, two logs are produced. One is outputted in the terminal at `INFO` level during runtime through `stdout`. A detailed log called `commander.log` will be outputted at runtime and will contain details down to the wire requests. 
