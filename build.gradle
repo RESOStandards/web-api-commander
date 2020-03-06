@@ -67,7 +67,7 @@ tasks.withType(JavaCompile) {
   options.deprecation = true
 }
 
-// task for Web API Server Testing - this is what should be run in the command line
+// task for general Web API Server Testing - this is what should be run in the command line to run everything
 task testWebApiServer_1_0_2() {
   dependsOn jar
   doLast {
@@ -87,6 +87,56 @@ task testWebApiServer_1_0_2() {
           'src/main/java/org/reso/certification/features'
       ]
       systemProperties = System.getProperties()
+    }
+  }
+
+  // task for Web API Server 1.0.2 Gold Testing
+  task testWebApiServer_1_0_2_Gold() {
+    dependsOn jar
+    doLast {
+      javaexec {
+        main = "io.cucumber.core.cli.Main"
+        classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+        args = [
+            '--strict',
+            '--plugin',
+            'pretty',
+            '--plugin',
+            'json:build/web-api-server-1.0.2.gold.json',
+            '--plugin',
+            'html:build/web-api-server-1.0.2.gold.html',
+            '--glue',
+            'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
+            'src/main/java/org/reso/certification/features',
+            '--tags',
+            'not @platinum'
+        ]
+        systemProperties = System.getProperties()
+      }
+    }
+  }
+
+  // task for Web API Server 1.0.2 Platinum Testing - currently equivalent to all, but generates a platinum-named report.
+  task testWebApiServer_1_0_2_Platinum() {
+    dependsOn jar
+    doLast {
+      javaexec {
+        main = "io.cucumber.core.cli.Main"
+        classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+        args = [
+            '--strict',
+            '--plugin',
+            'pretty',
+            '--plugin',
+            'json:build/web-api-server-1.0.2.platinum.json',
+            '--plugin',
+            'html:build/web-api-server-1.0.2.platinum.html',
+            '--glue',
+            'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
+            'src/main/java/org/reso/certification/features'
+        ]
+        systemProperties = System.getProperties()
+      }
     }
   }
 }

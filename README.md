@@ -335,49 +335,116 @@ ability to run individual or multiple tests using tags.
 
 ### Web API Usage
 
-The Commander may be run in automated testing mode for a Web API 1.0.2 Server Certification using a terminal. You do not need to use the Commander JAR file mentioned elsewhere in this step. Instead, you will run the tests using Gradle for automation against a clean copy of the latest Commander code.
+The Commander may be run in automated testing mode for a Web API 1.0.2 Server Certification using a terminal. 
+You do not need to use the Commander JAR file mentioned elsewhere in this step. 
+Instead, you will run the tests using Gradle for automation against a clean copy of the latest Commander code.
 
-You will need to download the source code so you can run Gradle in the root of the directory. This assumes that you also have Java 8 (1.8.0) or above installed, as mentioned elsewhere in this [`README`](#getting-started).
+You will need to download the source code so you can run Gradle in the root of the directory. 
+This assumes that you also have Java 8 (1.8.0) or above installed, as mentioned elsewhere in this [`README`](#getting-started).
 
-First, change into the directory you want to work in and clone the Commander repository. You will need to have Git installed. Chances are you already do, to check, open a command line and type `git` and if it's present, it will print some info about the app. If not, [there are instructions here](https://git-scm.com/downloads).
+First, change into the directory you want to work in and clone the Commander repository. 
+You will need to have Git installed. 
+Chances are you already do, to check, open a command line and type `git` and if it's present, 
+it will print some info about the app. If not, [there are instructions here](https://git-scm.com/downloads).
 
-**MacOS or Linux**
+##### MacOS or Linux
 ```
 $ git clone https://github.com/RESOStandards/web-api-commander.git
 ```
 
-**Windows**
+##### Windows
 ```
 C:\> git clone https://github.com/RESOStandards/web-api-commander.git
 ```
 
-This will clone the repository into a directory called web-api-commander, which means you will have a fresh copy of the latest code to execute. To refresh the code after you have downloaded it, issue the command `$ git pull` in the root of the directory that was just created. 
+This will clone the repository into a directory called web-api-commander relative to whatever directory you're currently in, 
+which also means you'll have a fresh copy of the latest code to execute. 
+
+To refresh the code after you have downloaded it, issue the command `$ git pull` in the root of the directory that was just created. 
  
-The Gradle wrapper provides a convenient way to automatically install Gradle when running tests. After you have cloned the repository, issuing the following command: 
+#### Running with the Gradle Wrapper
+The Gradle wrapper provides a convenient way to automatically install Gradle when running tests. 
 
-**MacOS or Linux**
+After you have cloned the repository, the task you run will depend on the level of Web API 1.0.2 Server Certification 
+you're interested in. 
+
+Before you do that, however, you'll want to make sure that you are running the 6.2.2 version of Gradle.
+
+In the project directory, perform one of the following steps:
+
+##### MacOS or Linux 
+```$ ./gradlew wrapper --gradle-version 6.2.2 --distribution-type all```
+
+##### Windows
+```C:\path\to\web-api-commander> gradlew wrapper --gradle-version 6.2.2 --distribution-type all```
+
+You should see a success message. For more information, [see here](https://docs.gradle.org/current/userguide/gradle_wrapper.html).
+
+### Convenience Methods for Web API 1.0.2 Gold and Platinum Certification (Recommended)
+While you may use tags to filter tests as you choose, explained in the next section, it's convenient
+to be able to run a predefined set of tests for Gold or Platinum certification. 
+
+These tasks will also produce reports in the local `build` directory, named according to which test you ran. 
+
+#### Gold Certification
+
+This will run the Gold tests against the Web API 1.0.2 Server provided as `WebAPIURI` in `your.resoscript` file.
+
+##### MacOS or Linux
 ```
-$ ./gradlew testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript
+$ ./gradlew testWebAPIServer_1_0_2_Gold -DpathToRESOScript=/path/to/your.resoscript -DshowResponses=true
 ```
 
-**Windows**
+##### Windows
 ```
-C:\path\to\web-api-commander> gradlew.bat testWebAPIServer_1_0_2 -DpathToRESOScript=C:\path\to\your.resoscript
+C:\path\to\web-api-commander> gradlew testWebAPIServer_1_0_2 -DpathToRESOScript=C:\path\to\your.resoscript -DshowResponses=true
 ```
 
-This will run the entirety of the tests against the Web API server provided as `WebAPIURI` in `your.resoscript` file. You can pass tags to filter on in order to run one or more tests matching the given tag.
+*Note: the first time you run these tasks, they will take some time as the environment is being configured behind the 
+scenes and the code is being compiled from the contents of the source directory you downloaded in the previous step. 
 
-Note that the first time you run this command, it will take some time to complete as Gradle will download all dependencies and compile the application before running the test suite. *Note: this step will be Dockerized so it can be run with a single command in a Docker container in upcoming versions of the Commander.*
+#### Platinum Certification
+This will run the Platinum tests against the Web API 1.0.2 Server provided as `WebAPIURI` in `your.resoscript` file.
+
+##### MacOS or Linux
+```
+$ ./gradlew testWebAPIServer_1_0_2_Platinum -DpathToRESOScript=/path/to/your.resoscript -DshowResponses=true
+```
+
+##### Windows
+```
+C:\path\to\web-api-commander> gradlew testWebAPIServer_1_0_2_Platinum -DpathToRESOScript=C:\path\to\your.resoscript -DshowResponses=true
+```
 
 
+#### General Task Wrapper (Advanced)
+You may also run the gradle task wrapper using your own tags. 
+
+This runs all tests without any additional parameters given. With no tags, the wrapper is called like this:
+  
+##### MacOS or Linux
+```
+$ ./gradlew testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript -DshowResponses=true
+```
+
+##### Windows
+```
+C:\path\to\web-api-commander> gradlew.bat testWebAPIServer_1_0_2 -DpathToRESOScript=C:\path\to\your.resoscript -DshowResponses=true
+```
+ 
+This will run the entirety of the tests against the Web API 1.0.2 Server provided as `WebAPIURI` in `your.resoscript` file. 
+You can pass tags to filter on in order to run one or more tests matching the given tag.
+
+
+#### Advanced feature: Tag Filtering 
 To filter by tags, a command similar to the following would be used:
 
-**MacOS or Linux**
+##### MacOS or Linux
 ```
 $ gradle testWebAPIServer_1_0_2 -DpathToRESOScript=/path/to/your.resoscript -Dcucumber.filter.tags="@core"
 ```
 
-**Windows**
+##### Windows
 ```
 C:\path\to\web-api-commander> gradlew.bat testWebAPIServer_1_0_2 -DpathToRESOScript=C:\path\to\your.resoscript -Dcucumber.filter.tags="@core"
 ```
@@ -456,14 +523,16 @@ These commands should not be necessary for the normal use of the Commander. Ther
 A [Dockerfile](./Dockerfile) has been provided to dockerize the application. 
 This can be used for CI/CD environments such as Jenkins or TravisCI. The following command will build an image for you:
 
+
+### Commander Features Other Than Automated Web API Testing
 ```
-$ docker build -t darnjo/web-api-command .
+$ docker build -t web-api-commander .
 ```
 
 The usage for the docker container is the same for `web-api-commander.jar` presented above.
 
 ```
-$ docker run -it darnjo/web-api-commander --help
+$ docker run -it web-api-commander --help
 ```
 
 If you have input files you may need to mount your filesystem into the docker container
@@ -471,6 +540,26 @@ If you have input files you may need to mount your filesystem into the docker co
 ```
 $ docker run -it -v $PWD:/app darnjo/web-api-commander --validateMetadata --inputFile <pathInContainer>
 ```
+
+### Automated Web API Testing
+
+You may also run the tests in a Docker container locally by issuing the following command. 
+Docker must be running on your local machine. This must be done from the root of the Web API Commander 
+project directory. 
+
+#### MacOS or Linux
+```
+$ docker run --rm -u gradle -v "$PWD":/home/gradle/project -v /path/to/your/resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_1_0_2 -DpathToRESOScript=/home/gradle/project/resoscripts/your.resoscript -DshowResponses=true
+```
+
+#### Windows
+```
+$ docker run --rm -u gradle -v C:\path\to\web-api-commander\:/home/gradle/project -v C:\path\to\your\resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_1_0_2 -DpathToRESOScript=/home/gradle/project/resoscripts/your.resoscript -DshowResponses=true
+```
+
+You may also run the specific task wrappers for Gold or Platinum Web API 1.0.2 Server testing
+by replacing `testWebAPIServer_1_0_2` above with `testWebAPIServer_1_0_2_Gold` or `testWebAPIServer_1_0_2_Platinum`, respectively. 
+
 
 ---
 
