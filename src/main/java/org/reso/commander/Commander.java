@@ -184,18 +184,11 @@ public class Commander {
    * Gets server metadata in Edm format.
    * @implNote the data in this item are cached in the commander once fetched
    * @return Edm representation of the server metadata.
+   * @return
    */
   public Edm getEdm() {
     if (edm == null) {
-      try {
-        EdmMetadataRequest metadataRequest = client.getRetrieveRequestFactory().getMetadataRequest(serviceRoot);
-        LOG.info("Fetching Edm with OData Client from: " + metadataRequest.getURI().toString());
-        edm = metadataRequest.execute().getBody();
-      } catch (ODataClientErrorException cex) {
-        LOG.error("ERROR: could not retrieve Metadata for the given service root!");
-        LOG.error(cex.getStatusLine().toString());
-        throw cex;
-      }
+      getODataRetrieveEdmResponse().getBody();
     }
     return edm;
   }
@@ -210,17 +203,38 @@ public class Commander {
       try {
         EdmMetadataRequest metadataRequest = client.getRetrieveRequestFactory().getMetadataRequest(serviceRoot);
         LOG.info("Fetching XMLMetadata with OData Client from: " + metadataRequest.getURI().toString());
-        xmlMetadata = metadataRequest.getXMLMetadata();
+        return metadataRequest.getXMLMetadata();
       } catch (ODataClientErrorException cex) {
         LOG.error("ERROR: could not retrieve Metadata for the given service root!");
         LOG.error(cex.getStatusLine().toString());
         throw cex;
       }
     }
-    return xmlMetadata;
+    return null;
   }
 
-  public Edm getEdm(String pathToXmlMetadata) {
+  /**
+   * Used to contain the response for the request as well as get metadata.
+   * @return the OData response retrieved from the server when making the request.
+   */
+  public ODataRetrieveResponse<Edm> getODataRetrieveEdmResponse() {
+    try {
+      EdmMetadataRequest metadataRequest = client.getRetrieveRequestFactory().getMetadataRequest(serviceRoot);
+      LOG.info("Fetching Edm with OData Client from: " + metadataRequest.getURI().toString());
+      return metadataRequest.execute();
+    } catch (ODataClientErrorException cex) {
+      LOG.error("ERROR: could not retrieve Metadata for the given service root!");
+      LOG.error(cex.getStatusLine().toString());
+      throw cex;
+    }
+  }
+
+  /**
+   * Reads Edm from XMLMetadata in the given path.
+   * @param pathToXmlMetadata the path to the XML metadata.
+   * @return an Edm object containing XML Metadata to read.
+   */
+  public Edm readEdm(String pathToXmlMetadata) {
     try {
       return client.getReader().readMetadata(new FileInputStream(pathToXmlMetadata));
     } catch (FileNotFoundException fex) {
@@ -229,6 +243,11 @@ public class Commander {
     return null;
   }
 
+  /**
+   * Saves the given Edm model to the given outputFileName.
+   * @param metadata the metadata to save.
+   * @param outputFileName the file name to output the metadata to.
+   */
   public void saveMetadata(Edm metadata, String outputFileName) {
     try {
       FileWriter writer = new FileWriter(outputFileName);
@@ -253,6 +272,30 @@ public class Commander {
       // also check whether metadata contains a valid service document in OData v4 format
       return client.metadataValidation().isServiceDocument(metadata)
           && client.metadataValidation().isV4Metadata(metadata);
+    } catch (NullPointerException nex) {
+      LOG.error("ERROR: Validation Failed! Null pointer exception while trying to validate metadata.");
+    } catch (Exception ex) {
+      LOG.error("ERROR: Validation Failed! General error occurred when validating metadata.\n" + ex.getMessage());
+      if (ex.getCause() != null) {
+        LOG.error("Caused by: " + ex.getCause().getMessage());
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Validates given XMLMetadata
+   *
+   * @param metadata the XMLMetadata to be validated
+   * @return true if the metadata is valid, meaning that it's also a valid OData 4 Service Document
+   */
+  public boolean validateMetadata(Edm metadata) {
+    try {
+      // call the probably-useless metadata validator. can't hurt though
+      // SEE: https://github.com/apache/olingo-odata4/blob/master/lib/client-core/src/main/java/org/apache/olingo/client/core/serialization/ODataMetadataValidationImpl.java#L77-L116
+      client.metadataValidation().validateMetadata(metadata);
+      //if Edm metadata are invalid, the previous line will throw an exception and this line won't be reached.
+      return true;
     } catch (NullPointerException nex) {
       LOG.error("ERROR: Validation Failed! Null pointer exception while trying to validate metadata.");
     } catch (Exception ex) {

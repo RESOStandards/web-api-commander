@@ -8,12 +8,15 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-END3 @core @x.y.z @core-endorsement @metadata
   Scenario: Request and Validate Server Metadata
-    When a successful metadata request is made to the service root in "ClientSettings_WebAPIURI"
-    And the metadata returned is valid
+    When a default entity container exists for the service root in "ClientSettings_WebAPIURI"
+    And XML Metadata are requested from the service root in "ClientSettings_WebAPIURI"
+    Then the server responds with a status code of 200
+    And the Edm metadata returned by the server are valid
+    And the XML metadata returned by the server are valid
     And the metadata contains the "Parameter_EndpointResource" resource
     And resource metadata for "Parameter_EndpointResource" contains the fields in "Parameter_SelectList"
 
-  @REQ-WA103-END2 @core @x.y.z @core-endorsement
+  @REQ-WA103-END2 @core @x.y.z @core-endorsement @datasystem
   Scenario: Data System Endpoint test
     When a GET request is made to the resolved Url in "REQ-WA103-END2"
     Then the server responds with a status code of 200

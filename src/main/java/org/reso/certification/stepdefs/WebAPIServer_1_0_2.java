@@ -7,34 +7,28 @@ import io.cucumber.java8.En;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
-import org.apache.http.Header;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
+import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
-import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
-import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
-import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
-import org.apache.olingo.commons.core.edm.primitivetype.EdmTimeOfDay;
 import org.reso.commander.Commander;
+import org.reso.commander.TestUtils;
 import org.reso.models.ClientSettings;
 import org.reso.models.Request;
 import org.reso.models.Settings;
 
-import java.io.*;
+import java.io.File;
 import java.net.URI;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.Year;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,22 +37,21 @@ import java.util.function.Function;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
+import static org.reso.commander.TestUtils.HEADER_ODATA_VERSION;
+import static org.reso.commander.TestUtils.JSON_VALUE_PATH;
+import static org.reso.commander.TestUtils.Operators.*;
 
 public class WebAPIServer_1_0_2 implements En {
   private static final Logger LOG = LogManager.getLogger(WebAPIServer_1_0_2.class);
-
+  private static Settings settings;
+  //container to hold retrieved metadata for later comparisons
+  private static AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
+  private static AtomicReference<Edm> edm = new AtomicReference<>();
   private Response response;
   private ValidatableResponse json;
   private RequestSpecification request;
-
-  private static Settings settings;
   private String serviceRoot, bearerToken, clientId, clientSecret, authorizationUri, tokenUri, redirectUri, scope;
   private String pathToRESOScript;
-
-  private static final String JSON_VALUE_PATH = "value";
-
-  //container to hold retrieved metadata for later comparisons
-  private static AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
 
   public WebAPIServer_1_0_2() {
 
@@ -76,8 +69,6 @@ public class WebAPIServer_1_0_2 implements En {
 
     AtomicReference<String> serverODataHeaderVersion = new AtomicReference<>();
     AtomicReference<Boolean> testAppliesToServerODataHeaderVersion = new AtomicReference<>();
-
-    final String HEADER_ODATA_VERSION = "OData-Version";
 
     /*
      * Instance Utility Methods - must precede usage
@@ -112,14 +103,14 @@ public class WebAPIServer_1_0_2 implements En {
       try {
         rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(requestUri));
         oDataRawResponse.set(rawRequest.get().execute());
-        responseData.set(Utils.convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
+        responseData.set(TestUtils.convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
         serverODataHeaderVersion.set(oDataRawResponse.get().getHeader(HEADER_ODATA_VERSION).toString());
         responseCode.set(oDataRawResponse.get().getStatusCode());
         LOG.info("Request succeeded..." + responseData.get().getBytes().length + " bytes received.");
       } catch (ODataClientErrorException cex) {
         LOG.debug("OData Client Error Exception caught. Check subsequent test output for asserted conditions...");
         oDataClientErrorException.set(cex);
-        serverODataHeaderVersion.set(Utils.getHeaderData(HEADER_ODATA_VERSION, cex.getHeaderInfo()));
+        serverODataHeaderVersion.set(TestUtils.getHeaderData(HEADER_ODATA_VERSION, cex.getHeaderInfo()));
         responseCode.set(cex.getStatusLine().getStatusCode());
         oDataClientErrorExceptionHandled.set(true);
         throw cex;
@@ -194,16 +185,30 @@ public class WebAPIServer_1_0_2 implements En {
 
 
     /*
-     * REQ-WA103-END3
+     * Edm Metadata Validator
      */
-    And("^the metadata returned is valid$", () -> {
-      if (xmlMetadata.get() == null) {
-        fail("ERROR: No XML Metadata Exists!");
+    And("^the Edm metadata returned by the server are valid$", () -> {
+      assertNotNull("ERROR: No Entity Data Model (Edm) Exists!", edm.get());
+
+      try {
+        boolean isValid = commander.get().validateMetadata(edm.get());
+        LOG.info("Edm Metadata is " + (isValid ? "valid" : "invalid") + "!");
+        assertTrue(isValid);
+      } catch (Exception ex) {
+        fail(ex.getMessage());
       }
+    });
+
+
+    /*
+     * XMLMetadata Validator
+     */
+    And("^the XML metadata returned by the server are valid$", () -> {
+      assertNotNull("ERROR: No XML Metadata Exists!", xmlMetadata.get());
 
       try {
         boolean isValid = commander.get().validateMetadata(xmlMetadata.get());
-        LOG.info("Metadata is " + (isValid ? "valid" : "invalid") + "!");
+        LOG.info("XML Metadata is " + (isValid ? "valid" : "invalid") + "!");
         assertTrue(isValid);
       } catch (Exception ex) {
         fail(ex.getMessage());
@@ -385,7 +390,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the response is valid JSON$", () -> {
       try {
-        assertTrue(Utils.isValidJson(responseData.get()));
+        assertTrue(TestUtils.isValidJson(responseData.get()));
         LOG.info("Response is valid JSON!");
 
         String showResponses = System.getProperty("showResponses");
@@ -438,7 +443,7 @@ public class WebAPIServer_1_0_2 implements En {
         //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
         from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           fieldValue.set(Integer.parseInt(item.get(fieldName).toString()));
-          result.set(result.get() && Utils.compare(fieldValue.get(), op, assertedValue));
+          result.set(result.get() && TestUtils.compare(fieldValue.get(), op, assertedValue));
         });
 
         assertTrue(result.get());
@@ -496,10 +501,10 @@ public class WebAPIServer_1_0_2 implements En {
       try {
         String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
         Integer assertedLhsValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedLhsValue, settings)),
-                assertedRhsValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedRhsValue, settings));
+            assertedRhsValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedRhsValue, settings));
 
         String op = andOrOp.toLowerCase();
-        boolean isAndOp = op.contains(Operators.AND);
+        boolean isAndOp = op.contains(AND);
 
         //these should default to true when And and false when Or for the purpose of boolean comparisons
         AtomicBoolean lhsResult = new AtomicBoolean(isAndOp);
@@ -507,7 +512,7 @@ public class WebAPIServer_1_0_2 implements En {
         AtomicBoolean itemResult = new AtomicBoolean(isAndOp);
 
         AtomicReference<Integer> lhsValue = new AtomicReference<>(),
-                                 rhsValue = new AtomicReference<>();
+            rhsValue = new AtomicReference<>();
 
         //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
         from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
@@ -515,14 +520,14 @@ public class WebAPIServer_1_0_2 implements En {
           rhsValue.set(Integer.parseInt(item.get(fieldName).toString()));
 
 
-          lhsResult.set(Utils.compare(lhsValue.get(), opLhs, assertedLhsValue));
-          rhsResult.set(Utils.compare(rhsValue.get(), opRhs, assertedRhsValue));
+          lhsResult.set(TestUtils.compare(lhsValue.get(), opLhs, assertedLhsValue));
+          rhsResult.set(TestUtils.compare(rhsValue.get(), opRhs, assertedRhsValue));
 
-          if (op.contentEquals(Operators.AND)) {
+          if (op.contentEquals(AND)) {
             itemResult.set(lhsResult.get() && rhsResult.get());
             LOG.info("Assert True: " + lhsResult.get() + " AND " + rhsResult.get() + " ==> " + itemResult.get());
             assertTrue(itemResult.get());
-          } else if (op.contentEquals(Operators.OR)) {
+          } else if (op.contentEquals(OR)) {
             itemResult.set(lhsResult.get() || rhsResult.get());
             LOG.info("Assert True: " + lhsResult.get() + " OR " + rhsResult.get() + " ==> " + itemResult.get());
             assertTrue(itemResult.get());
@@ -542,13 +547,13 @@ public class WebAPIServer_1_0_2 implements En {
         AtomicReference<Date> fieldValue = new AtomicReference<>();
         AtomicReference<Date> assertedValue = new AtomicReference<>();
 
-        assertedValue.set(Utils.parseDateFromEdmDateString(Settings.resolveParametersString(parameterAssertedValue, settings)));
+        assertedValue.set(TestUtils.parseDateFromEdmDateString(Settings.resolveParametersString(parameterAssertedValue, settings)));
         LOG.info("Asserted value is: " + assertedValue.get().toString());
 
         from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           try {
-            fieldValue.set(Utils.parseDateFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
-            assertTrue(Utils.compare(fieldValue.get(), op, assertedValue.get()));
+            fieldValue.set(TestUtils.parseDateFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+            assertTrue(TestUtils.compare(fieldValue.get(), op, assertedValue.get()));
           } catch (Exception ex) {
             fail(ex.toString());
 
@@ -568,13 +573,13 @@ public class WebAPIServer_1_0_2 implements En {
         AtomicReference<Time> fieldValue = new AtomicReference<>();
         AtomicReference<Time> assertedValue = new AtomicReference<>();
 
-        assertedValue.set(Utils.parseTimeOfDayFromEdmTimeOfDayString(Settings.resolveParametersString(parameterAssertedValue, settings)));
+        assertedValue.set(TestUtils.parseTimeOfDayFromEdmTimeOfDayString(Settings.resolveParametersString(parameterAssertedValue, settings)));
         LOG.info("Asserted value is: " + assertedValue.get().toString());
 
         from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           try {
-            fieldValue.set(Utils.parseTimeOfDayFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
-            assertTrue(Utils.compare(fieldValue.get(), op, assertedValue.get()));
+            fieldValue.set(TestUtils.parseTimeOfDayFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+            assertTrue(TestUtils.compare(fieldValue.get(), op, assertedValue.get()));
           } catch (Exception ex) {
             LOG.error(ex.getMessage());
           }
@@ -589,7 +594,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^DateTimeOffset data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
       try {
-        Utils.assertDateTimeOffset(parameterFieldName, op, parameterAssertedValue, responseData.get());
+        TestUtils.assertDateTimeOffset(parameterFieldName, op, parameterAssertedValue, responseData.get(), settings);
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
@@ -600,7 +605,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^DateTimeOffset data in \"([^\"]*)\" \"([^\"]*)\" now\\(\\)$", (String parameterFieldName, String op) -> {
       try {
-        Utils.assertDateTimeOffset(parameterFieldName, op, Timestamp.from(Instant.now()), responseData.get());
+        TestUtils.assertDateTimeOffset(parameterFieldName, op, Timestamp.from(Instant.now()), responseData.get(), settings);
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
@@ -676,13 +681,13 @@ public class WebAPIServer_1_0_2 implements En {
         from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           try {
             if (count.get() == 0) {
-              initialValue.set(Utils.parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+              initialValue.set(TestUtils.parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
             } else {
-              currentValue.set(Utils.parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+              currentValue.set(TestUtils.parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
               if (orderBy.get().equals(ASC)) {
-                assertTrue(Utils.compare(initialValue.get(), Operators.LESS_THAN_OR_EQUAL, currentValue.get()));
-              } else if (orderBy.get().equals(DESC)){
-                assertTrue(Utils.compare(initialValue.get(), Operators.GREATER_THAN_OR_EQUAL, currentValue.get()));
+                assertTrue(TestUtils.compare(initialValue.get(), LESS_THAN_OR_EQUAL, currentValue.get()));
+              } else if (orderBy.get().equals(DESC)) {
+                assertTrue(TestUtils.compare(initialValue.get(), GREATER_THAN_OR_EQUAL, currentValue.get()));
               }
               initialValue.set(currentValue.get());
             }
@@ -709,9 +714,9 @@ public class WebAPIServer_1_0_2 implements En {
 
         from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           try {
-            fieldValue.set(Utils.getDatePart(datePart.get(), item.get(fieldName)));
-            assertTrue(Utils.compare(fieldValue.get(), operator.get(), assertedValue.get()));
-          } catch (Exception ex){
+            fieldValue.set(TestUtils.getDatePart(datePart.get(), item.get(fieldName)));
+            assertTrue(TestUtils.compare(fieldValue.get(), operator.get(), assertedValue.get()));
+          } catch (Exception ex) {
             fail(ex.getMessage());
           }
         });
@@ -738,9 +743,9 @@ public class WebAPIServer_1_0_2 implements En {
 
           from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
             try {
-              fieldValue.set(Utils.getTimestampPart(datePart.get(), item.get(fieldName).toString()));
-              assertTrue(Utils.compare(fieldValue.get(), operator.get(), assertedValue.get()));
-            } catch (Exception ex){
+              fieldValue.set(TestUtils.getTimestampPart(datePart.get(), item.get(fieldName).toString()));
+              assertTrue(TestUtils.compare(fieldValue.get(), operator.get(), assertedValue.get()));
+            } catch (Exception ex) {
               fail(ex.getMessage());
             }
           });
@@ -762,17 +767,18 @@ public class WebAPIServer_1_0_2 implements En {
         AtomicReference<String> operator = new AtomicReference<>(op.toLowerCase());
 
         from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-          assertTrue(Utils.compare(item.get(fieldName).toString(), operator.get(), assertedValue.get()));
+          assertTrue(TestUtils.compare(item.get(fieldName).toString(), operator.get(), assertedValue.get()));
         });
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
     });
 
-    /*
-     * Metadata validation methods
-     */
 
+
+    //===============================\\
+    //  Metadata validation methods  \\
+    //===============================\\
 
     /*
       Checks that metadata are accessible and contain the resource name specified in generic.resoscript
@@ -782,7 +788,7 @@ public class WebAPIServer_1_0_2 implements En {
       AtomicReference<CsdlEntityContainer> entityContainer = new AtomicReference<>();
 
       try {
-        entityContainer.set(ODataHelper.findDefaultEntityContainer(commander.get(), xmlMetadata.get()));
+        entityContainer.set(TestUtils.findDefaultEntityContainer(edm.get(), xmlMetadata.get()));
 
         assertNotNull("ERROR: server metadata does not contain the given resource name: " + resourceName,
             entityContainer.get().getEntitySet(resourceName));
@@ -794,7 +800,9 @@ public class WebAPIServer_1_0_2 implements En {
       }
     });
 
-
+    /*
+     *
+     */
     And("^resource metadata for \"([^\"]*)\" contains the fields in \"([^\"]*)\"$", (String parameterResourceName, String parameterSelectList) -> {
       final String FIELD_SEPARATOR = ",";
       final String selectList = Settings.resolveParametersString(parameterSelectList, settings);
@@ -805,7 +813,7 @@ public class WebAPIServer_1_0_2 implements En {
 
         //create field lookup
         Map<String, CsdlProperty> fieldMap = new HashMap<>();
-        ODataHelper.findEntityTypesForEntityTypeName(commander.get(), xmlMetadata.get(), resourceName)
+        TestUtils.findEntityTypesForEntityTypeName(edm.get(), xmlMetadata.get(), resourceName)
             .forEach(csdlProperty -> fieldMap.put(csdlProperty.getName(), csdlProperty));
 
         LOG.info("Searching metadata for fields in given select list: " + selectList);
@@ -819,12 +827,16 @@ public class WebAPIServer_1_0_2 implements En {
       }
     });
 
-    When("^a successful metadata request is made to the service root in \"([^\"]*)\"$", (String clientSettingsServiceRoot) -> {
+    When("^a default entity container exists for the service root in \"([^\"]*)\"$", (String clientSettingsServiceRoot) -> {
       final String serviceRoot = Settings.resolveParametersString(clientSettingsServiceRoot, settings);
-
       assertEquals("ERROR: given service root doesn't match the one configured in the Commander", serviceRoot, commander.get().getServiceRoot());
+
       try {
-        xmlMetadata.set(commander.get().getXMLMetadata());
+        ODataRetrieveResponse<Edm> oDataRetrieveResponse = commander.get().getODataRetrieveEdmResponse();
+        responseCode.set(oDataRetrieveResponse.getStatusCode());
+        edm.set(oDataRetrieveResponse.getBody());
+        assertNotNull("ERROR: could not find default entity container for given service root: " + serviceRoot, edm.get().getEntityContainer());
+        LOG.info("Found Default Entity Container: '" + edm.get().getEntityContainer().getNamespace() + "'");
       } catch (ODataClientErrorException cex) {
         responseCode.set(cex.getStatusLine().getStatusCode());
         fail(cex.getMessage());
@@ -833,458 +845,20 @@ public class WebAPIServer_1_0_2 implements En {
       }
     });
 
-  }
+    And("^XML Metadata are requested from the service root in \"([^\"]*)\"$", (String clientSettingsServiceRoot) -> {
+      final String serviceRoot = Settings.resolveParametersString(clientSettingsServiceRoot, settings);
+      assertEquals("ERROR: given service root doesn't match the one configured in the Commander", serviceRoot, commander.get().getServiceRoot());
 
-  private static final class ODataHelper {
-    /**
-     * Finds the default entity container for the given configuration.
-     * @param commander a commander instance with a valid service root.
-     * @param xmlMetadata XML Metadata to search through
-     * @return the default CSDL Container for the given XMLMetadata
-     * @throws Exception if required metadata cannot be parsed, an exception will be thrown with an appropriate message.
-     */
-    private static CsdlEntityContainer findDefaultEntityContainer(Commander commander, XMLMetadata xmlMetadata) throws Exception {
-      Edm edm = commander.getEdm();
-      if (edm == null)
-        throw new Exception("ERROR: Could not retrieve Edm from server using the given service root!");
-
-      if (xmlMetadata == null)
-        throw new Exception("ERROR: the provided XML metadata was null!");
-
-      if (edm.getEntityContainer() == null)
-        throw new Exception("ERROR: Could not find default EntityContainer for service root: " + commander.getServiceRoot());
-
-      String entityContainerNamespace = edm.getEntityContainer().getNamespace();
-      if (entityContainerNamespace == null)
-        throw new Exception("ERROR: no default EntityContainer namespace could be found");
-
-      return xmlMetadata.getSchema(entityContainerNamespace).getEntityContainer();
-    }
-
-    /**
-     * Gets a list of CsdlProperty items for the given entityTypeName.
-     * @param commander a Commander instance with a valid service root.
-     * @param xmlMetadata the metadata to search.
-     * @param entityTypeName the name of the entityType to search for. MUST be in the default EntityContainer.
-     * @return a list of CsdlProperty items for the given entityTypeName
-     * @throws Exception is thrown if the given metadata doesn't contain the given type name.
-     */
-    private static List<CsdlProperty> findEntityTypesForEntityTypeName(Commander commander, XMLMetadata xmlMetadata, String entityTypeName) throws Exception {
-      CsdlEntityContainer entityContainer = findDefaultEntityContainer(commander, xmlMetadata);
-      CsdlSchema schemaForType = xmlMetadata.getSchema(entityContainer.getEntitySet(entityTypeName).getTypeFQN().getNamespace());
-
-      if (schemaForType == null)
-        throw new Exception("ERROR: could not find type corresponding to given type name: " + entityTypeName);
-
-      return schemaForType.getEntityType(entityTypeName).getProperties();
-    }
-  }
-
-  /**
-   * Contains the list of supported operators for use in query expressions.
-   */
-  private static class Operators {
-    private static final String
-      AND = "and",
-      OR = "or",
-      NE = "ne",
-      EQ = "eq",
-      GREATER_THAN = "gt",
-      GREATER_THAN_OR_EQUAL = "ge",
-      LESS_THAN = "lt",
-      LESS_THAN_OR_EQUAL = "le",
-      CONTAINS = "contains",
-      ENDS_WITH = "endswith",
-      STARTS_WITH = "startswith",
-      TO_LOWER = "tolower",
-      TO_UPPER = "toupper";
-  }
-
-  private static class DateParts {
-    private static final String
-      YEAR = "year",
-      MONTH = "month",
-      DAY = "day",
-      HOUR = "hour",
-      MINUTE = "minute",
-      SECOND = "second",
-      FRACTIONAL = "fractional";
-  }
-
-  private static class Utils {
-
-    /**
-     * For each parameterFieldName value in responseData, assertTrue(value op timestamp)
-     * @param parameterFieldName the field name containing data
-     * @param op an OData binary operator to be used for comparsions
-     * @param parameterAssertedValue value to be used for comparisons
-     * @param responseData string containing JSON response data
-     */
-    private static void assertDateTimeOffset(String parameterFieldName, String op, String parameterAssertedValue, String responseData) {
-      AtomicReference<Timestamp> assertedValue = new AtomicReference<>();
       try {
-        assertedValue.set(parseTimestampFromEdmDateTimeOffsetString(Settings.resolveParametersString(parameterAssertedValue, settings)));
-        assertDateTimeOffset(parameterFieldName, op, assertedValue.get(), responseData);
-      } catch (EdmPrimitiveTypeException tex) {
-        LOG.error("ERROR: Cannot Convert the value in "
-            + Settings.resolveParametersString(parameterAssertedValue, settings) + " to a Timestamp value!!" + tex);
-      }
-    }
-
-    /**
-     * For each parameterFieldName value in responseData, assertTrue(value op timestamp)
-     * @param parameterFieldName the field name containing data
-     * @param op an OData binary operator to be used for comparsions
-     * @param timestamp value to be used for comparisons
-     * @param responseData string containing JSON response data
-     */
-    private static void assertDateTimeOffset(String parameterFieldName, String op, Timestamp timestamp, String responseData) {
-      LOG.info("Asserted time is: " + timestamp);
-      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
-      AtomicReference<Timestamp> fieldValue = new AtomicReference<>();
-
-      from(responseData).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-        try {
-          fieldValue.set(parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
-          assertTrue(compare(fieldValue.get(), op, timestamp));
-        } catch (EdmPrimitiveTypeException tex) {
-          LOG.error("ERROR: Cannot Convert the value in " + fieldValue.get() + " to a Timestamp value!!" + tex);
-        }
-      });
-    }
-
-    /**
-     * Returns true if each item in the list is true
-     * @param lhs Integer value
-     * @param op an OData binary operator for use for comparisons
-     * @param rhs Integer value
-     * @return true if lhs op rhs produces true, false otherwise
-     */
-    private static boolean compare(Integer lhs, String op, Integer rhs) {
-      String operator = op.toLowerCase();
-      boolean result = false;
-
-      if (operator.contentEquals(Operators.GREATER_THAN)) {
-        result = lhs > rhs;
-      } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
-        result = lhs >= rhs;
-      } else if (operator.contentEquals(Operators.EQ)) {
-        result = lhs.equals(rhs);
-      } else if (operator.contentEquals(Operators.NE)) {
-        result = !lhs.equals(rhs);
-      } else if (operator.contentEquals(Operators.LESS_THAN)) {
-        result = lhs < rhs;
-      } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
-        result = lhs <= rhs;
-      }
-      LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
-      return result;
-    }
-
-    /**
-     * Returns true if each item in the list is true
-     * @param lhs Integer value
-     * @param op an OData binary operator for use for comparisons
-     * @param rhs Integer value
-     * @return true if lhs op rhs produces true, false otherwise
-     */
-    private static boolean compare(String lhs, String op, String rhs) {
-      String operator = op.toLowerCase();
-      boolean result = false;
-
-      if (operator.contentEquals(Operators.CONTAINS)) {
-        result = lhs.contains(rhs);
-      } else if (operator.contentEquals(Operators.STARTS_WITH)) {
-        result = lhs.startsWith(rhs);
-      } else if (operator.contentEquals(Operators.ENDS_WITH)) {
-        result = lhs.endsWith(rhs);
-      } else if (operator.contentEquals(Operators.TO_LOWER)) {
-        result = lhs.toLowerCase().equals(rhs);
-      } else if (operator.contentEquals(Operators.TO_UPPER)) {
-        result = lhs.toUpperCase().equals(rhs);
-      }
-      LOG.info("Compare: \"" + lhs + "\" " + operator + " \"" + rhs + "\" ==> " + result);
-      return result;
-    }
-
-    /**
-     * Timestamp Comparator
-     * @param lhs Timestamp to compare
-     * @param op an OData binary operator to use for comparisons
-     * @param rhs Timestamp to compare
-     * @return true if lhs op rhs, false otherwise
-     */
-    private static boolean compare(Timestamp lhs, String op, Timestamp rhs) {
-      String operator = op.toLowerCase();
-      boolean result = false;
-
-      if (operator.contentEquals(Operators.GREATER_THAN)) {
-        result = lhs.after(rhs);
-      } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
-        result = lhs.after(rhs) || lhs.equals(rhs);
-      } else if (operator.contentEquals(Operators.EQ)) {
-        result = lhs.equals(rhs);
-      } else if (operator.contentEquals(Operators.NE)) {
-        result = !lhs.equals(rhs);
-      } else if (operator.contentEquals(Operators.LESS_THAN)) {
-        result = lhs.before(rhs);
-      } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
-        result = lhs.before(rhs) || lhs.equals(rhs);
-      }
-      LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
-      return result;
-    }
-
-    /**
-     * Year Comparator
-     * @param lhs Year to compare
-     * @param op an OData binary operator to use for comparisons
-     * @param rhs Timestamp to compare
-     * @return true if lhs op rhs, false otherwise
-     */
-    private static boolean compare(Year lhs, String op, Year rhs) {
-      String operator = op.toLowerCase();
-      boolean result = false;
-
-      if (operator.contentEquals(Operators.GREATER_THAN)) {
-        result = lhs.isAfter(rhs);
-      } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
-        result = lhs.isAfter(rhs) || lhs.equals(rhs);
-      } else if (operator.contentEquals(Operators.EQ)) {
-        result = lhs.equals(rhs);
-      } else if (operator.contentEquals(Operators.NE)) {
-        result = !lhs.equals(rhs);
-      } else if (operator.contentEquals(Operators.LESS_THAN)) {
-        result = lhs.isBefore(rhs);
-      } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
-        result = lhs.isBefore(rhs) || lhs.equals(rhs);
-      }
-      LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
-      return result;
-    }
-
-    /**
-     * Time Comparator
-     * @param lhs Time to compare
-     * @param op an OData binary operator to use for comparisons
-     * @param rhs Time to compare
-     * @return true if lhs op rhs, false otherwise
-     */
-    private static boolean compare(Time lhs, String op, Time rhs) {
-      String operator = op.toLowerCase();
-      boolean result = false;
-
-      if (operator.contentEquals(Operators.GREATER_THAN)) {
-        result = lhs.toLocalTime().isAfter(rhs.toLocalTime());
-      } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
-        result = lhs.toLocalTime().isAfter(rhs.toLocalTime()) || lhs.toLocalTime().equals(rhs.toLocalTime());
-      } else if (operator.contentEquals(Operators.EQ)) {
-        result = lhs.toLocalTime().equals(rhs.toLocalTime());
-      } else if (operator.contentEquals(Operators.NE)) {
-        result = !lhs.toLocalTime().equals(rhs.toLocalTime());
-      } else if (operator.contentEquals(Operators.LESS_THAN)) {
-        result = lhs.toLocalTime().isBefore(rhs.toLocalTime());
-      } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
-        result = lhs.toLocalTime().isBefore(rhs.toLocalTime()) || lhs.toLocalTime().equals(rhs.toLocalTime());
-      }
-      LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
-      return result;
-    }
-
-    /**
-     * Date Comparator
-     * @param lhs Date to compare
-     * @param op an OData binary operator to use for comparisons
-     * @param rhs Date to compare
-     * @return true if lhs op rhs, false otherwise
-     */
-    private static boolean compare(Date lhs, String op, Date rhs) {
-      String operator = op.toLowerCase();
-      boolean result = false;
-
-      if (operator.contentEquals(Operators.GREATER_THAN)) {
-        result = lhs.after(rhs);
-      } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
-        result = lhs.after(rhs) || lhs.equals(rhs);
-      } else if (operator.contentEquals(Operators.EQ)) {
-        result = lhs.equals(rhs);
-      } else if (operator.contentEquals(Operators.NE)) {
-        result = !lhs.equals(rhs);
-      } else if (operator.contentEquals(Operators.LESS_THAN)) {
-        result = lhs.before(rhs);
-      } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
-        result = lhs.before(rhs) || lhs.equals(rhs);
-      }
-      LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
-      return result;
-    }
-
-
-    /**
-     * Tests the given string to see if it's valid JSON
-     * @param jsonString the JSON string to test the validity of
-     * @return true if valid, false otherwise. Throws {@link IOException}
-     */
-    private static boolean isValidJson(String jsonString) {
-      try {
-        final ObjectMapper mapper = new ObjectMapper();
-        mapper.readTree(jsonString);
-        return true;
-      } catch (IOException e) {
-        return false;
-      }
-    }
-    
-    /**
-     * Returns the String data contained within a given ODataRawResponse.
-     * @param oDataRawResponse the response to convert.
-     * @return the response stream as a string.
-     */
-    private static String getResponseData(ODataRawResponse oDataRawResponse) {
-      return convertInputStreamToString(oDataRawResponse.getRawResponse());
-    }
-
-    private static String getHeaderData(String key, Header[] headers) {
-      String data = null;
-
-      for(Header header : headers) {
-        if (header.getName().toLowerCase().contains(key.toLowerCase())) {
-          data = header.getValue();
-        }
-      }
-      return data;
-    }
-
-    /**
-     * Parses the given edmDateTimeOffsetString into a Java Instant (the type expected by the Olingo type converter).
-     * @param edmDateTimeOffsetString string representation of an Edm DateTimeOffset to parse.
-     * @return the corresponding Instant value.
-     * @throws EdmPrimitiveTypeException thrown if given value cannot be parsed.
-     */
-    private static Timestamp parseTimestampFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) throws EdmPrimitiveTypeException {
-      return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Timestamp.class);
-    }
-
-    /**
-     * Parses the given edmDateString into a Java Timestamp.
-     * @param edmDateString the date string to convert.
-     * @return the corresponding Timestamp value.
-     * @throws EdmPrimitiveTypeException thrown if given value cannot be parsed.
-     */
-    private static Timestamp parseTimestampFromEdmDateString(String edmDateString) throws EdmPrimitiveTypeException {
-      return EdmDate.getInstance().valueOfString(edmDateString, true, null, null, null, null, Timestamp.class);
-    }
-
-    /**
-     * Parses the given edmDateString into a Java Time.
-     * @param edmTimeOfDayOffsetString the date string to convert.
-     * @return the corresponding Time value.
-     * @throws EdmPrimitiveTypeException thrown if given value cannot be parsed.
-     */
-    private static Time parseTimeOfDayFromEdmTimeOfDayString(String edmTimeOfDayOffsetString) throws EdmPrimitiveTypeException {
-      return EdmTimeOfDay.getInstance().valueOfString(edmTimeOfDayOffsetString, true, null, null, null, null, Time.class);
-    }
-
-    /**
-     * Parses the given DateTimeOffsetString into a Java Time.
-     * @param edmDateTimeOffsetString the DateTimeOffsetString to parse.
-     * @return the corresponding Time value.
-     * @throws EdmPrimitiveTypeException thrown if given value cannot be parsed.
-     */
-    private static Time parseTimeOfDayFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) throws EdmPrimitiveTypeException {
-      return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Time.class);
-    }
-
-    /**
-     * Parses the given edmDateString into a Java Date
-     * @param edmDateString the date string to convert.
-     * @return the corresponding Date value.
-     * @throws EdmPrimitiveTypeException thrown if given value cannot be parsed.
-     */
-    private static Date parseDateFromEdmDateString(String edmDateString) throws EdmPrimitiveTypeException {
-      return EdmDate.getInstance().valueOfString(edmDateString, true, null, null, null, null, Date.class);
-    }
-
-    /**
-     * Parses the given edmDateTimeOffsetString into a Java Date
-     * @param edmDateTimeOffsetString string representation of an Edm DateTimeOffset to parse.
-     * @return the corresponding Date value.
-     * @throws EdmPrimitiveTypeException thrown if given value cannot be parsed.
-     */
-    private static Date parseDateFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) throws EdmPrimitiveTypeException {
-      return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Date.class);
-    }
-
-    /***
-     * Tries to parse datePart from the given Object value
-     * @param datePart the timestamp part, "Year", "Month", "Day", etc. to try and parse
-     * @param value the value to try and parse
-     * @return the Integer portion of the date if successful, otherwise throws an Exception
-     * @exception throws an exception if value cannot be parsed into a date.
-     */
-    private static Integer getDatePart(String datePart, Object value) throws EdmPrimitiveTypeException {
-      LocalDate date = LocalDate.parse(parseDateFromEdmDateString(value.toString()).toString());
-      switch (datePart) {
-        case DateParts.YEAR:
-          return date.getYear();
-        case DateParts.MONTH:
-          return date.getMonthValue();
-        case DateParts.DAY:
-          return date.getDayOfMonth();
-        default:
-          return null;
-      }
-    }
-
-    /***
-     * Tries to parse datePart from the given Object value
-     * @param timestampPart the timestamp part, "Year", "Month", "Day", etc. to try and parse
-     * @param value the value to try and parse
-     * @return the Integer portion of the date if successful, otherwise throws an Exception
-     */
-    private static Integer getTimestampPart(String timestampPart, Object value) throws EdmPrimitiveTypeException {
-      //Turns nanoseconds into two most significant 2 digits for fractional comparisons
-      Integer ADJUSTMENT_FACTOR = 10000000;
-      OffsetDateTime offsetDateTime = OffsetDateTime.parse(value.toString());
-
-      if (timestampPart.equals(DateParts.YEAR)) {
-        return offsetDateTime.getYear();
-      } else if (timestampPart.equals(DateParts.MONTH)) {
-        return offsetDateTime.getMonthValue();
-      } else if (timestampPart.equals(DateParts.DAY)) {
-        return offsetDateTime.getDayOfMonth();
-      } else if (timestampPart.equals(DateParts.HOUR)) {
-        return offsetDateTime.getHour();
-      } else if (timestampPart.equals(DateParts.MINUTE)) {
-        return offsetDateTime.getMinute();
-      } else if (timestampPart.equals(DateParts.SECOND)) {
-        return offsetDateTime.getSecond();
-      } else if (timestampPart.equals(DateParts.FRACTIONAL)) {
-        return offsetDateTime.getNano() / ADJUSTMENT_FACTOR;
-      } else {
-        return null;
-      }
-    }
-
-    /**
-     * Converts the given inputStream to a string.
-     * @param inputStream the input stream to convert.
-     * @return the string value contained in the stream.
-     */
-    private static String convertInputStreamToString(InputStream inputStream) {
-      InputStreamReader isReader = new InputStreamReader(inputStream);
-      BufferedReader reader = new BufferedReader(isReader);
-      StringBuilder sb = new StringBuilder();
-      String str;
-      try {
-        while((str = reader.readLine())!= null){
-          sb.append(str);
-        }
-        return sb.toString();
+        xmlMetadata.set(commander.get().getXMLMetadata());
+        assertNotNull("ERROR: could not find valid XML Metadata for given service root: " + serviceRoot, xmlMetadata.get());
+        LOG.info("XML Metadata retrieved from: " + serviceRoot);
+      } catch (ODataClientErrorException cex) {
+        responseCode.set(cex.getStatusLine().getStatusCode());
+        fail(cex.getMessage());
       } catch (Exception ex) {
-        LOG.error("Error in convertInputStreamToString: " + ex);
+        fail(ex.getMessage());
       }
-      return null;
-    }
+    });
   }
 }

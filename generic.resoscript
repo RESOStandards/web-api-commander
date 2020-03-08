@@ -183,7 +183,8 @@
 
   <Requests>
 
-    <!-- NOTE: for this test, we always assume that /$metadata is relative to the Web API Service Root, referred to as WebAPIURI here -->
+    <!-- NOTE: the query in this test is no longer being used for automated testing,
+               was originally: Url="*ClientSettings_WebAPIURI*/$metadata*Parameter_OptionalMetadataFormatParameter*"-->
     <Request
       TestDescription="Metadata Endpoint"
       RequirementId="REQ-WA103-END3"
@@ -191,7 +192,7 @@
       Capability="Core"
       WebAPIReference=""
       OutputFile="REQ-WA103-END3.metadata.xml"
-      Url="*ClientSettings_WebAPIURI*/$metadata*Parameter_OptionalMetadataFormatParameter*"
+      Url=""
     />
 
     <Request
