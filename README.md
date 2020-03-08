@@ -459,24 +459,34 @@ A sample of the runtime terminal output follows:
     
     Using RESOScript: /path/to/your.resoscript
       Given a RESOScript file was provided                                                                 
-      
+    
     RESOScript loaded successfully!
       And Client Settings and Parameters were read from the file                                           
-      
+    
     Bearer token loaded... first 4 characters: abcd
-    Service root is: https://api.server.com/
+    Service root is: https://api.server.com
       And an OData client was successfully created from the given RESOScript                               
-      
-    Fetching XMLMetadata with OData Client from: https://api.server.com/$metadata
-      When a successful metadata request is made to the service root in "ClientSettings_WebAPIURI"         
-      
-    Metadata is valid!
-      And the metadata returned is valid                                                                   
-      
+    
     Fetching Edm with OData Client from: https://api.server.com/$metadata
+    Found Default Entity Container: 'Default'
+      When a default entity container exists for the service root in "ClientSettings_WebAPIURI"            
+    
+    Fetching XMLMetadata with OData Client from: https://api.server.com/$metadata
+    XML Metadata retrieved from: https://api.server.com
+      And XML Metadata are requested from the service root in "ClientSettings_WebAPIURI"                   
+    
+    Asserted Response Code: 200, Server Response Code: 200
+      Then the server responds with a status code of 200                                                   
+    
+    Edm Metadata is valid!
+      And the Edm metadata returned by the server are valid                                                
+    
+    XML Metadata is valid!
+      And the XML metadata returned by the server are valid                                                
+    
     Found EntityContainer for the given resource: 'Property'
       And the metadata contains the "Parameter_EndpointResource" resource                                  
-      
+    
     Searching metadata for fields in given select list: ListingKey,BedroomsTotal,StreetName,PropertyType,ListingContractDate,ModificationTimestamp,Latitude,Longitude
     Found: 'ListingKey'
     Found: 'BedroomsTotal'
@@ -487,12 +497,12 @@ A sample of the runtime terminal output follows:
     Found: 'Latitude'
     Found: 'Longitude'
       And resource metadata for "Parameter_EndpointResource" contains the fields in "Parameter_SelectList" 
-      
+    
     
     1 Scenarios (1 passed)
-    7 Steps (7 passed)
-    0m3.244s
-   
+    10 Steps (10 passed)
+    0m3.177s
+       
 ```
 
 This shows configuration parameters, requests, and responses in a lightweight-manner. 
