@@ -199,18 +199,9 @@ public class Commander {
    * @return XMLMetadata representation of the server metadata.
    */
   public XMLMetadata getXMLMetadata() {
-    if (xmlMetadata == null) {
-      try {
-        EdmMetadataRequest metadataRequest = client.getRetrieveRequestFactory().getMetadataRequest(serviceRoot);
-        LOG.info("Fetching XMLMetadata with OData Client from: " + metadataRequest.getURI().toString());
-        return metadataRequest.getXMLMetadata();
-      } catch (ODataClientErrorException cex) {
-        LOG.error("ERROR: could not retrieve Metadata for the given service root!");
-        LOG.error(cex.getStatusLine().toString());
-        throw cex;
-      }
-    }
-    return null;
+    EdmMetadataRequest metadataRequest = client.getRetrieveRequestFactory().getMetadataRequest(serviceRoot);
+    LOG.info("Fetching XMLMetadata with OData Client from: " + metadataRequest.getURI().toString());
+    return metadataRequest.getXMLMetadata();
   }
 
   /**
@@ -218,15 +209,9 @@ public class Commander {
    * @return the OData response retrieved from the server when making the request.
    */
   public ODataRetrieveResponse<Edm> getODataRetrieveEdmResponse() {
-    try {
-      EdmMetadataRequest metadataRequest = client.getRetrieveRequestFactory().getMetadataRequest(serviceRoot);
-      LOG.info("Fetching Edm with OData Client from: " + metadataRequest.getURI().toString());
-      return metadataRequest.execute();
-    } catch (ODataClientErrorException cex) {
-      LOG.error("ERROR: could not retrieve Metadata for the given service root!");
-      LOG.error(cex.getStatusLine().toString());
-      throw cex;
-    }
+    EdmMetadataRequest metadataRequest = client.getRetrieveRequestFactory().getMetadataRequest(serviceRoot);
+    LOG.info("Fetching Edm with OData Client from: " + metadataRequest.getURI().toString());
+    return metadataRequest.execute();
   }
 
   /**

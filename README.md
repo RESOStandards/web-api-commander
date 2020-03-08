@@ -452,9 +452,9 @@ Please feel free to suggest additional tags that might be useful.
 A sample of the runtime terminal output follows:
 
 ```gherkin
-    > Task :testWebApiServer_1_0_2_Platinum
-    
-    @REQ-WA103-END3 @core @x.y.z @core-endorsement @metadata
+> Task :testWebApiServer_1_0_2_Platinum
+
+    @REQ-WA103-END3 @core @2.4.1 @core-endorsement @metadata
     Scenario: Request and Validate Server Metadata                                                         
     
     Using RESOScript: /path/to/your.resoscript
@@ -471,15 +471,15 @@ A sample of the runtime terminal output follows:
     Found Default Entity Container: 'Default'
       When a default entity container exists for the service root in "ClientSettings_WebAPIURI"            
     
-    Fetching XMLMetadata with OData Client from: https://api.server.com/$metadata
-    XML Metadata retrieved from: https://api.server.com
-      And XML Metadata are requested from the service root in "ClientSettings_WebAPIURI"                   
-    
     Asserted Response Code: 200, Server Response Code: 200
       Then the server responds with a status code of 200                                                   
     
     Edm Metadata is valid!
       And the Edm metadata returned by the server are valid                                                
+    
+    Fetching XMLMetadata with OData Client from: https://api.server.com/$metadata
+    XML Metadata retrieved from: https://api.server.com
+      And XML Metadata are requested from the service root in "ClientSettings_WebAPIURI"                   
     
     XML Metadata is valid!
       And the XML metadata returned by the server are valid                                                
@@ -501,7 +501,7 @@ A sample of the runtime terminal output follows:
     
     1 Scenarios (1 passed)
     10 Steps (10 passed)
-    0m3.177s
+    0m3.071s
        
 ```
 

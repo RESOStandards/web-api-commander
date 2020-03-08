@@ -835,6 +835,7 @@ public class WebAPIServer_1_0_2 implements En {
         ODataRetrieveResponse<Edm> oDataRetrieveResponse = commander.get().getODataRetrieveEdmResponse();
         responseCode.set(oDataRetrieveResponse.getStatusCode());
         edm.set(oDataRetrieveResponse.getBody());
+
         assertNotNull("ERROR: could not find default entity container for given service root: " + serviceRoot, edm.get().getEntityContainer());
         LOG.info("Found Default Entity Container: '" + edm.get().getEntityContainer().getNamespace() + "'");
       } catch (ODataClientErrorException cex) {
