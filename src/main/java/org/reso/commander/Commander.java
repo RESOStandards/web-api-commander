@@ -1,25 +1,20 @@
 package org.reso.commander;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.input.ReaderInputStream;
-import org.apache.commons.io.output.WriterOutputStream;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
+import org.apache.olingo.client.api.communication.request.retrieve.EdmMetadataRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
-import org.apache.olingo.client.api.edm.xml.Edmx;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.client.core.ODataClientFactory;
 import org.apache.olingo.client.core.domain.ClientEntitySetImpl;
-import org.apache.olingo.client.core.edm.ClientCsdlXMLMetadata;
-import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.auth.OAuth2HttpClientFactory;
@@ -52,7 +47,14 @@ public class Commander {
   private ODataClient client;
   private boolean useEdmEnabledClient;
 
-  String serviceRoot, bearerToken, clientId, clientSecret, authorizationUri, tokenUri, redirectUri, scope;
+  private String serviceRoot;
+  String bearerToken;
+  String clientId;
+  String clientSecret;
+  String authorizationUri;
+  String tokenUri;
+  String redirectUri;
+  String scope;
   boolean isTokenClient, isOAuthClient;
 
   private static final Logger LOG = LogManager.getLogger(Commander.class);
@@ -67,6 +69,14 @@ public class Commander {
 
   public void setClient(ODataClient client) {
     this.client = client;
+  }
+
+  public String getTokenUri() {
+    return tokenUri;
+  }
+
+  public String getServiceRoot() {
+    return serviceRoot;
   }
 
   /**
@@ -167,24 +177,50 @@ public class Commander {
   //private constructor for internal use, use Builder to construct instances
   private Commander() { }
 
+  private Edm edm;
+  private XMLMetadata xmlMetadata;
+
   /**
    * Gets server metadata in Edm format.
-   * <p>
-   * @return XMLMetadata representation of the server metadata.
+   * @implNote the data in this item are cached in the commander once fetched
+   * @return Edm representation of the server metadata.
    */
-  public Edm getMetadata() {
-    Edm metadata = null;
-    try {
-      LOG.info("Fetching Metadata from " + serviceRoot + "...");
-      metadata = client.getRetrieveRequestFactory().getMetadataRequest(serviceRoot).execute().getBody();
-      LOG.info("Transfer complete! KBytes received: " + (metadata.toString().getBytes().length / 1024));
-    } catch (ODataClientErrorException cex) {
-      LOG.error(cex.getStackTrace());
+  public Edm getEdm() {
+    if (edm == null) {
+      try {
+        EdmMetadataRequest metadataRequest = client.getRetrieveRequestFactory().getMetadataRequest(serviceRoot);
+        LOG.info("Fetching Edm with OData Client from: " + metadataRequest.getURI().toString());
+        edm = metadataRequest.execute().getBody();
+      } catch (ODataClientErrorException cex) {
+        LOG.error("ERROR: could not retrieve Metadata for the given service root!");
+        LOG.error(cex.getStatusLine().toString());
+        throw cex;
+      }
     }
-    return metadata;
+    return edm;
   }
 
-  public Edm getMetadata(String pathToXmlMetadata) {
+  /**
+   * Gets server metadata in XMLMetadata format.
+   * @implNote the data in this item are cached in the commander once fetched
+   * @return XMLMetadata representation of the server metadata.
+   */
+  public XMLMetadata getXMLMetadata() {
+    if (xmlMetadata == null) {
+      try {
+        EdmMetadataRequest metadataRequest = client.getRetrieveRequestFactory().getMetadataRequest(serviceRoot);
+        LOG.info("Fetching XMLMetadata with OData Client from: " + metadataRequest.getURI().toString());
+        xmlMetadata = metadataRequest.getXMLMetadata();
+      } catch (ODataClientErrorException cex) {
+        LOG.error("ERROR: could not retrieve Metadata for the given service root!");
+        LOG.error(cex.getStatusLine().toString());
+        throw cex;
+      }
+    }
+    return xmlMetadata;
+  }
+
+  public Edm getEdm(String pathToXmlMetadata) {
     try {
       return client.getReader().readMetadata(new FileInputStream(pathToXmlMetadata));
     } catch (FileNotFoundException fex) {
@@ -200,31 +236,6 @@ public class Commander {
     } catch (Exception ex) {
       LOG.error(ex.getStackTrace());
     }
-  }
-
-  /**
-   * Converts Edm to XMLMetadata
-   * @param edm
-   * @return the XMLMetadata representation of the given Edm
-   */
-  private XMLMetadata convertEdmToXMLMetadata(Edm edm) {
-    XMLMetadata xmlMetadata = null;
-    try {
-      ByteArrayInputStream inputStream = new ByteArrayInputStream(edm.toString().getBytes());
-      xmlMetadata = client.getDeserializer(ContentType.APPLICATION_XML).toMetadata(inputStream);
-    } catch (Exception ex) {
-      LOG.error(ex.getStackTrace());
-    }
-    return xmlMetadata;
-  }
-
-  public boolean validateMetadata(Edm metadata) {
-    try {
-      return validateMetadata(convertEdmToXMLMetadata(metadata));
-    } catch (Exception ex) {
-      LOG.error(ex.getStackTrace());
-    }
-    return false;
   }
 
   /**
@@ -256,10 +267,8 @@ public class Commander {
   public boolean validateMetadata(InputStream inputStream) {
     try {
       // deserialize metadata from given file
-      XMLMetadata metadata =
-          client.getDeserializer(ContentType.APPLICATION_XML).toMetadata(inputStream);
+      XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).toMetadata(inputStream);
       return validateMetadata(metadata);
-
     } catch (Exception ex) {
       LOG.error("ERROR in validateMetadata! " + ex.toString() );
     }
@@ -281,6 +290,14 @@ public class Commander {
       LOG.error(ex.getMessage());
     }
     return false;
+  }
+
+  public boolean isTokenClient() {
+    return isTokenClient;
+  }
+
+  public boolean isOAuthClient() {
+    return isOAuthClient;
   }
 
   public static boolean validateXML(String xmlString) {

@@ -14,8 +14,11 @@ import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
+import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
-import org.apache.olingo.commons.api.format.ContentType;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
+import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
+import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmTimeOfDay;
@@ -28,7 +31,10 @@ import java.io.*;
 import java.net.URI;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.Year;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -116,6 +122,10 @@ public class WebAPIServer_1_0_2 implements En {
         serverODataHeaderVersion.set(Utils.getHeaderData(HEADER_ODATA_VERSION, cex.getHeaderInfo()));
         responseCode.set(cex.getStatusLine().getStatusCode());
         oDataClientErrorExceptionHandled.set(true);
+        throw cex;
+      } catch (Exception ex) {
+        fail(ex.toString());
+        throw ex;
       }
       return null;
     };
@@ -127,12 +137,15 @@ public class WebAPIServer_1_0_2 implements En {
       if (pathToRESOScript == null) {
         pathToRESOScript = System.getProperty("pathToRESOScript");
       }
+
+      assertNotNull("ERROR: pathToRESOScript must be present in command arguments, see README", pathToRESOScript);
       LOG.info("Using RESOScript: " + pathToRESOScript);
     });
     And("^Client Settings and Parameters were read from the file$", () -> {
       if (settings == null) {
         settings = Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript")));
       }
+      assertNotNull("ERROR: Settings could not be loaded.", settings);
       LOG.info("RESOScript loaded successfully!");
     });
     Given("^an OData client was successfully created from the given RESOScript$", () -> {
@@ -165,6 +178,10 @@ public class WebAPIServer_1_0_2 implements En {
           .bearerToken(bearerToken)
           .useEdmEnabledClient(true)
           .build());
+
+      assertNotNull(commander.get());
+      assertTrue("ERROR: Commander must either have a valid bearer token or Client Credentials configuration.",
+          commander.get().isTokenClient() || (commander.get().isOAuthClient() && commander.get().getTokenUri() != null));
     });
 
 
@@ -180,13 +197,17 @@ public class WebAPIServer_1_0_2 implements En {
      * REQ-WA103-END3
      */
     And("^the metadata returned is valid$", () -> {
-      //store the metadata for later comparisons
-      xmlMetadata.set(commander.get().getClient().getDeserializer(ContentType.APPLICATION_XML)
-            .toMetadata(new ByteArrayInputStream(responseData.get().getBytes())));
+      if (xmlMetadata.get() == null) {
+        fail("ERROR: No XML Metadata Exists!");
+      }
 
-      boolean isValid = commander.get().validateMetadata(xmlMetadata.get());
-      LOG.info("Metadata is " + (isValid ? "valid" : "invalid") + "!");
-      assertTrue(isValid);
+      try {
+        boolean isValid = commander.get().validateMetadata(xmlMetadata.get());
+        LOG.info("Metadata is " + (isValid ? "valid" : "invalid") + "!");
+        assertTrue(isValid);
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
 
@@ -194,24 +215,28 @@ public class WebAPIServer_1_0_2 implements En {
      * REQ-WA103-QR1
      */
     And("^the provided \"([^\"]*)\" is returned in \"([^\"]*)\"$", (String parameterUniqueIdValue, String parameterUniqueId) -> {
-      String expectedValueAsString = Settings.resolveParametersString(parameterUniqueIdValue, settings), resolvedValueAsString = null;
-      Object resolvedValue = from(responseData.get()).get(Settings.resolveParametersString(parameterUniqueId, settings));
+      try {
+        String expectedValueAsString = Settings.resolveParametersString(parameterUniqueIdValue, settings), resolvedValueAsString = null;
+        Object resolvedValue = from(responseData.get()).get(Settings.resolveParametersString(parameterUniqueId, settings));
 
-      //both of the inputs should be present
-      assertNotNull(expectedValueAsString);
-      assertNotNull(resolvedValue);
+        //both of the inputs should be present
+        assertNotNull(expectedValueAsString);
+        assertNotNull(resolvedValue);
 
-      //quotes are passed for strings, let's strip them off
-      expectedValueAsString = expectedValueAsString
-          .replace("'", "").replace("\"", "");
+        //quotes are passed for strings, let's strip them off
+        expectedValueAsString = expectedValueAsString
+            .replace("'", "").replace("\"", "");
 
-      LOG.info("Expected Value is: " + expectedValueAsString);
-      LOG.info("Resolved value is: " + resolvedValue);
+        LOG.info("Expected Value is: " + expectedValueAsString);
+        LOG.info("Resolved value is: " + resolvedValue);
 
-      if (resolvedValue.getClass().isInstance(Integer.class)) {
-        assertEquals(Integer.parseInt(expectedValueAsString), resolvedValue);
-      } else {
-        assertEquals(expectedValueAsString, resolvedValue.toString());
+        if (resolvedValue.getClass().isInstance(Integer.class)) {
+          assertEquals(Integer.parseInt(expectedValueAsString), resolvedValue);
+        } else {
+          assertEquals(expectedValueAsString, resolvedValue.toString());
+        }
+      } catch (Exception ex) {
+        fail(ex.getMessage());
       }
     });
 
@@ -220,32 +245,37 @@ public class WebAPIServer_1_0_2 implements En {
      * REQ-WA103-QR3 - $select
      */
     And("^data are present in fields contained within \"([^\"]*)\"$", (String parameterSelectList) -> {
-      AtomicInteger numFieldsWithData = new AtomicInteger();
-      List<String> fieldList = new ArrayList<>(Arrays.asList(Settings.resolveParametersString(parameterSelectList, settings).split(",")));
+      try {
+        AtomicInteger numFieldsWithData = new AtomicInteger();
+        List<String> fieldList = new ArrayList<>(Arrays.asList(Settings.resolveParametersString(parameterSelectList, settings).split(",")));
 
-      AtomicInteger numResults = new AtomicInteger();
+        AtomicInteger numResults = new AtomicInteger();
 
-      //iterate over the items and count the number of fields with data to determine whether there are data present
-      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-        if (item != null) {
-          numResults.getAndIncrement();
-          fieldList.forEach(field -> {
-            if (item.get(field) != null) {
-              numFieldsWithData.getAndIncrement();
-            }
-          });
+
+        //iterate over the items and count the number of fields with data to determine whether there are data present
+        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+          if (item != null) {
+            numResults.getAndIncrement();
+            fieldList.forEach(field -> {
+              if (item.get(field) != null) {
+                numFieldsWithData.getAndIncrement();
+              }
+            });
+          }
+        });
+
+        LOG.info("Number of Results: " + numResults.get());
+        LOG.info("Number of Fields: " + fieldList.size());
+        LOG.info("Fields with Data: " + numFieldsWithData.get());
+        if (numFieldsWithData.get() > 0) {
+          LOG.info("Percent Fill: " + ((numResults.get() * fieldList.size()) / (1.0 * numFieldsWithData.get()) * 100) + "%");
+        } else {
+          LOG.info("Percent Fill: 0% - no fields with data found!");
         }
-      });
-
-      LOG.info("Number of Results: " + numResults.get());
-      LOG.info("Number of Fields: " + fieldList.size());
-      LOG.info("Fields with Data: " + numFieldsWithData.get());
-      if (numFieldsWithData.get() > 0) {
-        LOG.info("Percent Fill: " + ((numResults.get() * fieldList.size()) / (1.0 * numFieldsWithData.get()) * 100) + "%");
-      } else {
-        LOG.info("Percent Fill: 0% - no fields with data found!");
+        assertTrue(numFieldsWithData.get() > 0);
+      } catch (Exception ex) {
+        fail(ex.getMessage());
       }
-      assertTrue(numFieldsWithData.get() > 0);
     });
 
 
@@ -254,13 +284,17 @@ public class WebAPIServer_1_0_2 implements En {
      * $top=*Parameter_TopCount*
      */
     And("^the results contain at most \"([^\"]*)\" records$", (String parameterTopCount) -> {
-      List<String> items = from(responseData.get()).getList(JSON_VALUE_PATH);
-      AtomicInteger numResults = new AtomicInteger(items.size());
+      try {
+        List<String> items = from(responseData.get()).getList(JSON_VALUE_PATH);
+        AtomicInteger numResults = new AtomicInteger(items.size());
 
-      int topCount = Integer.parseInt(Settings.resolveParametersString(parameterTopCount, settings));
-      LOG.info("Number of values returned: " + numResults.get() + ", top count is: " + topCount);
+        int topCount = Integer.parseInt(Settings.resolveParametersString(parameterTopCount, settings));
+        LOG.info("Number of values returned: " + numResults.get() + ", top count is: " + topCount);
 
-      assertTrue(numResults.get() > 0 && numResults.get() <= topCount);
+        assertTrue(numResults.get() > 0 && numResults.get() <= topCount);
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
 
@@ -269,29 +303,37 @@ public class WebAPIServer_1_0_2 implements En {
      * $skip=*Parameter_TopCount*
      */
     And("^a GET request is made to the resolved Url in \"([^\"]*)\" with \\$skip=\"([^\"]*)\"$", (String requirementId, String parameterTopCount) -> {
-      int skipCount = Integer.parseInt(Settings.resolveParametersString(parameterTopCount, settings));
-      LOG.info("Skip count is: " + skipCount);
+      try {
+        int skipCount = Integer.parseInt(Settings.resolveParametersString(parameterTopCount, settings));
+        LOG.info("Skip count is: " + skipCount);
 
-      //preserve initial response data for later comparisons
-      initialResponseData.set(responseData.get());
+        //preserve initial response data for later comparisons
+        initialResponseData.set(responseData.get());
 
-      //TODO: convert to OData filter factory
-      URI requestUri = Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl() + "&$skip=" + skipCount);
+        //TODO: convert to OData filter factory
+        URI requestUri = Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl() + "&$skip=" + skipCount);
 
-      executeGetRequest.apply(requestUri);
+        executeGetRequest.apply(requestUri);
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
     And("^data in the \"([^\"]*)\" fields are different in the second request than in the first$", (String parameterUniqueId) -> {
-      List<POJONode> l1 = from(initialResponseData.get()).getJsonObject(JSON_VALUE_PATH);
-      List<POJONode> l2 = from(responseData.get()).getJsonObject(JSON_VALUE_PATH);
+      try {
+        List<POJONode> l1 = from(initialResponseData.get()).getJsonObject(JSON_VALUE_PATH);
+        List<POJONode> l2 = from(responseData.get()).getJsonObject(JSON_VALUE_PATH);
 
-      int combinedCount = l1.size() + l2.size();
-      Set<POJONode> combined = new LinkedHashSet<>(l1);
-      LOG.info("Response Page 1: " + new POJONode(l1));
+        int combinedCount = l1.size() + l2.size();
+        Set<POJONode> combined = new LinkedHashSet<>(l1);
+        LOG.info("Response Page 1: " + new POJONode(l1));
 
-      combined.addAll(l2);
-      LOG.info("Response Page 2: " + new POJONode(l2));
+        combined.addAll(l2);
+        LOG.info("Response Page 2: " + new POJONode(l2));
 
-      assertEquals(combinedCount, combined.size());
+        assertEquals(combinedCount, combined.size());
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
     //==================================================================================================================
@@ -302,49 +344,57 @@ public class WebAPIServer_1_0_2 implements En {
      * GET request by requirementId (see generic.resoscript)
      */
     When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", (String requirementId) -> {
-      //reset local state each time a get request is run
-      resetRequestState.run();
+      try {
+        //reset local state each time a get request is run
+        resetRequestState.run();
 
-      URI requestUri = Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl());
-      executeGetRequest.apply(requestUri);
+        URI requestUri = Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl());
+        executeGetRequest.apply(requestUri);
+      } catch (Exception ex) {
+        LOG.debug("Exception was thrown in " + this.getClass() + ": " + ex.toString());
+      }
     });
 
     /*
      * Assert response code
      */
     Then("^the server responds with a status code of (\\d+)$", (Integer assertedResponseCode) -> {
-      LOG.info("Asserted Response Code: " + assertedResponseCode + ", Server Response Code: " + responseCode);
-      assertTrue(responseCode.get() > 0 && assertedResponseCode > 0);
-      assertEquals(assertedResponseCode.intValue(), responseCode.get().intValue());
+      try {
+        LOG.info("Asserted Response Code: " + assertedResponseCode + ", Server Response Code: " + responseCode);
+        assertTrue(responseCode.get() > 0 && assertedResponseCode > 0);
+        assertEquals(assertedResponseCode.intValue(), responseCode.get().intValue());
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
     /*
      * validate XML wrapper
      */
     And("^the response is valid XML$", () -> {
-      assertTrue(Commander.validateXML(responseData.get()));
-      LOG.info("Response is valid XML!");
+      try {
+        assertTrue(Commander.validateXML(responseData.get()));
+        LOG.info("Response is valid XML!");
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
     /*
      * validate JSON wrapper
      */
     And("^the response is valid JSON$", () -> {
-      assertTrue(Utils.isValidJson(responseData.get()));
-      LOG.info("Response is valid JSON!");
+      try {
+        assertTrue(Utils.isValidJson(responseData.get()));
+        LOG.info("Response is valid JSON!");
 
-      String showResponses = System.getProperty("showResponses");
-      if (Boolean.parseBoolean(showResponses)) {
-        LOG.info("Response: " + new ObjectMapper().readTree(responseData.get()).toPrettyString());
+        String showResponses = System.getProperty("showResponses");
+        if (Boolean.parseBoolean(showResponses)) {
+          LOG.info("Response: " + new ObjectMapper().readTree(responseData.get()).toPrettyString());
+        }
+      } catch (Exception ex) {
+        fail(ex.getMessage());
       }
-    });
-
-    /*
-     * Assert OData version
-     */
-    And("^the server reports OData version \"([^\"]*)\"$", (String assertODataVersion) -> {
-      LOG.info("Asserted version: " + assertODataVersion + ", Reported OData Version: " + serverODataHeaderVersion.get()); ;
-      assertEquals(serverODataHeaderVersion.get(), assertODataVersion);
     });
 
     /*
@@ -353,14 +403,19 @@ public class WebAPIServer_1_0_2 implements En {
      * TODO: make a general Header assertion function
      */
     Then("^the server responds with a status code of (\\d+) if the server headers report OData version \"([^\"]*)\"$", (Integer assertedHttpResponseCode, String assertedODataVersion) -> {
-      boolean versionsMatch = serverODataHeaderVersion.get().equals(assertedODataVersion),
-              responseCodesMatch = responseCode.get().intValue() == assertedHttpResponseCode.intValue();
+      try {
+        boolean versionsMatch = serverODataHeaderVersion.get().equals(assertedODataVersion),
+            responseCodesMatch = responseCode.get().intValue() == assertedHttpResponseCode.intValue();
 
-      LOG.info("Asserted OData Version: " + assertedODataVersion + ", Server Version: " + serverODataHeaderVersion.get());
+        LOG.info("Asserted OData Version: " + assertedODataVersion + ", Server Version: " + serverODataHeaderVersion.get());
 
-      if (versionsMatch) {
-        LOG.info("Asserted Response Code: " + assertedHttpResponseCode + ", Response code: " + responseCode.get());
-        assertTrue(responseCodesMatch);
+        if (versionsMatch) {
+          LOG.info("Asserted Response Code: " + assertedHttpResponseCode + ", Response code: " + responseCode.get());
+          assertTrue(responseCodesMatch);
+        }
+      } catch (Exception ex) {
+        //DEBUG only in this case as we are expecting an error and don't want to throw or print it
+        LOG.debug(ex.toString());
       }
     });
 
@@ -369,59 +424,76 @@ public class WebAPIServer_1_0_2 implements En {
      * and is used to select among the supported comparisons.
      */
     And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
-      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
-      int assertedValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, settings));
+      try {
+        String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
+        int assertedValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, settings));
 
-      LOG.info("fieldName: " + fieldName + ", op: " + op + ", assertedValue: " + assertedValue);
+        LOG.info("fieldName: " + fieldName + ", op: " + op + ", assertedValue: " + assertedValue);
 
-      //subsequent value comparisons are and-ed together while iterating over the list of items, so init to true
-      AtomicBoolean result = new AtomicBoolean(true);
+        //subsequent value comparisons are and-ed together while iterating over the list of items, so init to true
+        AtomicBoolean result = new AtomicBoolean(true);
 
-      AtomicReference<Integer> fieldValue = new AtomicReference<>();
+        AtomicReference<Integer> fieldValue = new AtomicReference<>();
 
-      //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
-      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-        fieldValue.set(Integer.parseInt(item.get(fieldName).toString()));
-        result.set(result.get() && Utils.compare(fieldValue.get(), op, assertedValue));
-      });
+        //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
+        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+          fieldValue.set(Integer.parseInt(item.get(fieldName).toString()));
+          result.set(result.get() && Utils.compare(fieldValue.get(), op, assertedValue));
+        });
 
-      assertTrue(result.get());
+        assertTrue(result.get());
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
     /*
      * True if response has results, meaning value.length > 0
      */
     And("^the response has results$", () -> {
-      int count = from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).size();
-      LOG.info("Results count is: " + count);
-      assertTrue(count > 0);
+      try {
+        int count = from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).size();
+        LOG.info("Results count is: " + count);
+        assertTrue(count > 0);
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
     /*
      * True if data are present in the response
      */
     And("^the response has singleton results in \"([^\"]*)\"", (String parameterFieldName) -> {
-      String value = Settings.resolveParametersString(parameterFieldName, settings);
-      boolean isPresent = from(responseData.get()).get() != null;
-      LOG.info("Response value is: " + value);
-      LOG.info("IsPresent: " + isPresent);
-      assertTrue(isPresent);
+      try {
+        String value = Settings.resolveParametersString(parameterFieldName, settings);
+        boolean isPresent = from(responseData.get()).get() != null;
+        LOG.info("Response value is: " + value);
+        LOG.info("IsPresent: " + isPresent);
+        assertTrue(isPresent);
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
     /*
      * True if results count less than or equal to limit
      */
     And("^the number of results is less than or equal to \"([^\"]*)\"$", (String limitField) -> {
-      int count = from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).size(),
-          limit = Integer.parseInt(Settings.resolveParametersString(limitField, settings));
-      LOG.info("Results count is: " + count + ", Limit is: " + limit);
-      assertTrue(count <= limit);
+      try {
+        int count = from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).size(),
+            limit = Integer.parseInt(Settings.resolveParametersString(limitField, settings));
+        LOG.info("Results count is: " + count + ", Limit is: " + limit);
+        assertTrue(count <= limit);
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
     /*
      * True if data in the lhs expression and rhs expressions pass the AND or OR condition given in andOrOp
      */
     And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String opLhs, String parameterAssertedLhsValue, String andOrOp, String opRhs, String parameterAssertedRhsValue) -> {
+      try {
         String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
         Integer assertedLhsValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedLhsValue, settings)),
                 assertedRhsValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedRhsValue, settings));
@@ -456,88 +528,107 @@ public class WebAPIServer_1_0_2 implements En {
             assertTrue(itemResult.get());
           }
         });
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
     /*
      * Date Comparison glue
      */
     And("^Date data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
-      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
-      AtomicReference<Date> fieldValue = new AtomicReference<>();
-      AtomicReference<Date> assertedValue = new AtomicReference<>();
+      try {
+        String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
+        AtomicReference<Date> fieldValue = new AtomicReference<>();
+        AtomicReference<Date> assertedValue = new AtomicReference<>();
 
-      assertedValue.set(Utils.parseDateFromEdmDateString(Settings.resolveParametersString(parameterAssertedValue, settings)));
-      LOG.info("Asserted value is: " + assertedValue.get().toString());
+        assertedValue.set(Utils.parseDateFromEdmDateString(Settings.resolveParametersString(parameterAssertedValue, settings)));
+        LOG.info("Asserted value is: " + assertedValue.get().toString());
 
-      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-        try {
-          fieldValue.set(Utils.parseDateFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
-          assertTrue(Utils.compare(fieldValue.get(), op, assertedValue.get()));
-        } catch (Exception ex){
-          LOG.error(ex.toString());
-        }
-      });
+        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+          try {
+            fieldValue.set(Utils.parseDateFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+            assertTrue(Utils.compare(fieldValue.get(), op, assertedValue.get()));
+          } catch (Exception ex) {
+            fail(ex.toString());
+
+          }
+        });
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
     /*
      * Time comparison glue
      */
     And("^TimeOfDay data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
-      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
-      AtomicReference<Time> fieldValue = new AtomicReference<>();
-      AtomicReference<Time> assertedValue = new AtomicReference<>();
+      try {
+        String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
+        AtomicReference<Time> fieldValue = new AtomicReference<>();
+        AtomicReference<Time> assertedValue = new AtomicReference<>();
 
-      assertedValue.set(Utils.parseTimeOfDayFromEdmTimeOfDayString(Settings.resolveParametersString(parameterAssertedValue, settings)));
-      LOG.info("Asserted value is: " + assertedValue.get().toString());
+        assertedValue.set(Utils.parseTimeOfDayFromEdmTimeOfDayString(Settings.resolveParametersString(parameterAssertedValue, settings)));
+        LOG.info("Asserted value is: " + assertedValue.get().toString());
 
-      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-        try {
-          fieldValue.set(Utils.parseTimeOfDayFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
-          assertTrue(Utils.compare(fieldValue.get(), op, assertedValue.get()));
-        } catch (Exception ex){
-          LOG.error(ex.toString());
-        }
-      });
+        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+          try {
+            fieldValue.set(Utils.parseTimeOfDayFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+            assertTrue(Utils.compare(fieldValue.get(), op, assertedValue.get()));
+          } catch (Exception ex) {
+            LOG.error(ex.getMessage());
+          }
+        });
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
-
-    /*
-     * Year comparison glue
-     */
-
 
     /*
      * Timestamp comparison glue
      */
     And("^DateTimeOffset data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
-      Utils.assertDateTimeOffset(parameterFieldName, op, parameterAssertedValue, responseData.get());
+      try {
+        Utils.assertDateTimeOffset(parameterFieldName, op, parameterAssertedValue, responseData.get());
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
     /*
      * Timestamp comparison to now()
      */
     And("^DateTimeOffset data in \"([^\"]*)\" \"([^\"]*)\" now\\(\\)$", (String parameterFieldName, String op) -> {
-      Utils.assertDateTimeOffset(parameterFieldName, op, Timestamp.from(Instant.now()), responseData.get());
+      try {
+        Utils.assertDateTimeOffset(parameterFieldName, op, Timestamp.from(Instant.now()), responseData.get());
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
     /*
      * Single-Valued enumerations
      */
     And("^Single Valued Enumeration Data in \"([^\"]*)\" has \"([^\"]*)\"$", (String parameterFieldName, String parameterAssertedValue) -> {
-      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
-      AtomicReference<String> fieldValue = new AtomicReference<>();
-      AtomicReference<String> assertedValue = new AtomicReference<>();
+      try {
+        String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
+        AtomicReference<String> fieldValue = new AtomicReference<>();
+        AtomicReference<String> assertedValue = new AtomicReference<>();
 
-      AtomicBoolean result = new AtomicBoolean(false);
+        AtomicBoolean result = new AtomicBoolean(false);
 
-      assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, settings));
-      LOG.info("Asserted value is: " + assertedValue.get());
+        assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, settings));
+        LOG.info("Asserted value is: " + assertedValue.get());
 
-      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           fieldValue.set(item.get(fieldName).toString());
           result.set(fieldValue.get().contentEquals(assertedValue.get()));
           LOG.info("Assert True: " + fieldValue.get() + " equals " + assertedValue.get() + " ==> " + result.get());
           assertTrue(result.get());
-      });
+        });
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
     /*
@@ -545,57 +636,64 @@ public class WebAPIServer_1_0_2 implements En {
      * TODO: turn array into JSON array and parse values from there
      */
     And("^Multiple Valued Enumeration Data in \"([^\"]*)\" has \"([^\"]*)\"$", (String parameterFieldName, String parameterAssertedValue) -> {
-      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
-      AtomicReference<String> fieldValue = new AtomicReference<>();
-      AtomicReference<String> assertedValue = new AtomicReference<>();
+      try {
+        String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
+        AtomicReference<String> fieldValue = new AtomicReference<>();
+        AtomicReference<String> assertedValue = new AtomicReference<>();
 
-      AtomicBoolean result = new AtomicBoolean(false);
+        AtomicBoolean result = new AtomicBoolean(false);
 
-      assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, settings));
-      LOG.info("Asserted value is: " + assertedValue.get());
+        assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, settings));
+        LOG.info("Asserted value is: " + assertedValue.get());
 
-      from(responseData.get()).getList(JSON_VALUE_PATH, ObjectNode.class).forEach(item -> {
-        fieldValue.set(item.get(fieldName).toString());
-        result.set(fieldValue.get().contains(assertedValue.get()));
-        LOG.info("Assert True: " + fieldValue.get() + " has " + assertedValue.get() + " ==> " + result.get());
-        assertTrue(result.get());
-      });
+        from(responseData.get()).getList(JSON_VALUE_PATH, ObjectNode.class).forEach(item -> {
+          fieldValue.set(item.get(fieldName).toString());
+          result.set(fieldValue.get().contains(assertedValue.get()));
+          LOG.info("Assert True: " + fieldValue.get() + " has " + assertedValue.get() + " ==> " + result.get());
+          assertTrue(result.get());
+        });
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
     /*
      * Date comparison ordering (asc, desc).
      */
     And("^DateTimeOffset data in \"([^\"]*)\" is sorted in \"([^\"]*)\" order$", (String parameterFieldName, String parameterOrderByDirection) -> {
-      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
-      final String ASC = "asc", DESC = "desc";
-      AtomicReference<String> orderBy = new AtomicReference<>(parameterOrderByDirection.toLowerCase());
+      try {
+        String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
+        final String ASC = "asc", DESC = "desc";
+        AtomicReference<String> orderBy = new AtomicReference<>(parameterOrderByDirection.toLowerCase());
 
-      assertTrue(orderBy.get().equals(ASC) || orderBy.get().equals(DESC));
+        assertTrue(orderBy.get().equals(ASC) || orderBy.get().equals(DESC));
 
-      //used to store the last value for comparisons
-      AtomicReference<Timestamp> initialValue = new AtomicReference<>();
-      AtomicReference<Timestamp> currentValue = new AtomicReference<>();
-      AtomicInteger count = new AtomicInteger(0);
+        //used to store the last value for comparisons
+        AtomicReference<Timestamp> initialValue = new AtomicReference<>();
+        AtomicReference<Timestamp> currentValue = new AtomicReference<>();
+        AtomicInteger count = new AtomicInteger(0);
 
-      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-        try {
-          if (count.get() == 0) {
-            initialValue.set(Utils.parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
-          } else {
-            currentValue.set(Utils.parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
-            if (orderBy.get().equals(ASC)) {
-              assertTrue(Utils.compare(initialValue.get(), Operators.LESS_THAN_OR_EQUAL, currentValue.get()));
-            } else if (orderBy.get().equals(DESC)){
-              assertTrue(Utils.compare(initialValue.get(), Operators.GREATER_THAN_OR_EQUAL, currentValue.get()));
+        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+          try {
+            if (count.get() == 0) {
+              initialValue.set(Utils.parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+            } else {
+              currentValue.set(Utils.parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+              if (orderBy.get().equals(ASC)) {
+                assertTrue(Utils.compare(initialValue.get(), Operators.LESS_THAN_OR_EQUAL, currentValue.get()));
+              } else if (orderBy.get().equals(DESC)){
+                assertTrue(Utils.compare(initialValue.get(), Operators.GREATER_THAN_OR_EQUAL, currentValue.get()));
+              }
+              initialValue.set(currentValue.get());
             }
-            initialValue.set(currentValue.get());
+            count.getAndIncrement();
+          } catch (EdmPrimitiveTypeException ptex) {
+            fail(ptex.getMessage());
           }
-          count.getAndIncrement();
-        } catch (EdmPrimitiveTypeException ptex) {
-          LOG.error("ERROR: exception thrown parsing Timestamp from given string." + ptex);
-          fail();
-        }
-      });
+        });
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
 
     And("^\"([^\"]*)\" data in Date Field \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String stringDatePart, String parameterFieldName, String op, String parameterAssertedValue) -> {
@@ -614,13 +712,11 @@ public class WebAPIServer_1_0_2 implements En {
             fieldValue.set(Utils.getDatePart(datePart.get(), item.get(fieldName)));
             assertTrue(Utils.compare(fieldValue.get(), operator.get(), assertedValue.get()));
           } catch (Exception ex){
-            //fail();
-            LOG.error("ERROR: exception thrown." + ex);
+            fail(ex.getMessage());
           }
         });
       } catch (Exception ex) {
-        fail();
-        LOG.error("ERROR: exception thrown." + ex);
+        fail(ex.getMessage());
       }
     });
 
@@ -629,28 +725,30 @@ public class WebAPIServer_1_0_2 implements En {
      * TODO: consolidate with Year comparison with Date Field
      */
     And("^\"([^\"]*)\" data in Timestamp Field \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String stringDatePart, String parameterFieldName, String op, String parameterAssertedValue) -> {
-      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
-      AtomicReference<Integer> fieldValue = new AtomicReference<>();
-      AtomicReference<Integer> assertedValue = new AtomicReference<>();
-      AtomicReference<String> datePart = new AtomicReference<>(stringDatePart.toLowerCase());
-      AtomicReference<String> operator = new AtomicReference<>(op.toLowerCase());
-
       try {
-        assertedValue.set(Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, settings)));
-        LOG.info("Asserted value is: " + assertedValue.get().toString());
+        String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
+        AtomicReference<Integer> fieldValue = new AtomicReference<>();
+        AtomicReference<Integer> assertedValue = new AtomicReference<>();
+        AtomicReference<String> datePart = new AtomicReference<>(stringDatePart.toLowerCase());
+        AtomicReference<String> operator = new AtomicReference<>(op.toLowerCase());
 
-        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-          try {
-            fieldValue.set(Utils.getTimestampPart(datePart.get(), item.get(fieldName).toString()));
-            assertTrue(Utils.compare(fieldValue.get(), operator.get(), assertedValue.get()));
-          } catch (Exception ex){
-            fail();
-            LOG.error("ERROR: exception thrown." + ex);
-          }
-        });
+        try {
+          assertedValue.set(Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, settings)));
+          LOG.info("Asserted value is: " + assertedValue.get().toString());
+
+          from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+            try {
+              fieldValue.set(Utils.getTimestampPart(datePart.get(), item.get(fieldName).toString()));
+              assertTrue(Utils.compare(fieldValue.get(), operator.get(), assertedValue.get()));
+            } catch (Exception ex){
+              fail(ex.getMessage());
+            }
+          });
+        } catch (Exception ex) {
+          fail(ex.getMessage());
+        }
       } catch (Exception ex) {
-        fail();
-        LOG.error("ERROR: exception thrown." + ex);
+        fail(ex.getMessage());
       }
     });
 
@@ -658,15 +756,128 @@ public class WebAPIServer_1_0_2 implements En {
      * String functions
      */
     And("^String data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
-      String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
-      AtomicReference<String> assertedValue = new AtomicReference<>(Settings.resolveParametersString(parameterAssertedValue, settings));
-      AtomicReference<String> operator = new AtomicReference<>(op.toLowerCase());
+      try {
+        String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
+        AtomicReference<String> assertedValue = new AtomicReference<>(Settings.resolveParametersString(parameterAssertedValue, settings));
+        AtomicReference<String> operator = new AtomicReference<>(op.toLowerCase());
 
-      from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-        assertTrue(Utils.compare(item.get(fieldName).toString(), operator.get(), assertedValue.get()));
-      });
-
+        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+          assertTrue(Utils.compare(item.get(fieldName).toString(), operator.get(), assertedValue.get()));
+        });
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
     });
+
+    /*
+     * Metadata validation methods
+     */
+
+
+    /*
+      Checks that metadata are accessible and contain the resource name specified in generic.resoscript
+     */
+    And("^the metadata contains the \"([^\"]*)\" resource$", (String parameterResourceName) -> {
+      final String resourceName = Settings.resolveParametersString(parameterResourceName, settings);
+      AtomicReference<CsdlEntityContainer> entityContainer = new AtomicReference<>();
+
+      try {
+        entityContainer.set(ODataHelper.findDefaultEntityContainer(commander.get(), xmlMetadata.get()));
+
+        assertNotNull("ERROR: server metadata does not contain the given resource name: " + resourceName,
+            entityContainer.get().getEntitySet(resourceName));
+
+        LOG.info("Found EntityContainer for the given resource: '" + resourceName + "'");
+
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
+    });
+
+
+    And("^resource metadata for \"([^\"]*)\" contains the fields in \"([^\"]*)\"$", (String parameterResourceName, String parameterSelectList) -> {
+      final String FIELD_SEPARATOR = ",";
+      final String selectList = Settings.resolveParametersString(parameterSelectList, settings);
+
+      try {
+        final String resourceName = Settings.resolveParametersString(parameterResourceName, settings);
+        List<String> fieldNames = Arrays.asList(selectList.split(FIELD_SEPARATOR));
+
+        //create field lookup
+        Map<String, CsdlProperty> fieldMap = new HashMap<>();
+        ODataHelper.findEntityTypesForEntityTypeName(commander.get(), xmlMetadata.get(), resourceName)
+            .forEach(csdlProperty -> fieldMap.put(csdlProperty.getName(), csdlProperty));
+
+        LOG.info("Searching metadata for fields in given select list: " + selectList);
+        fieldNames.forEach(fieldName -> {
+          //trim string just in case spaces were used after the commas
+          assertNotNull("ERROR: Field name '" + fieldName + "' is not present in server metadata!", fieldMap.get(fieldName.trim()));
+          LOG.info("Found: '" + fieldName.trim() + "'");
+        });
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
+    });
+
+    When("^a successful metadata request is made to the service root in \"([^\"]*)\"$", (String clientSettingsServiceRoot) -> {
+      final String serviceRoot = Settings.resolveParametersString(clientSettingsServiceRoot, settings);
+
+      assertEquals("ERROR: given service root doesn't match the one configured in the Commander", serviceRoot, commander.get().getServiceRoot());
+      try {
+        xmlMetadata.set(commander.get().getXMLMetadata());
+      } catch (ODataClientErrorException cex) {
+        responseCode.set(cex.getStatusLine().getStatusCode());
+        fail(cex.getMessage());
+      } catch (Exception ex) {
+        fail(ex.getMessage());
+      }
+    });
+
+  }
+
+  private static final class ODataHelper {
+    /**
+     * Finds the default entity container for the given configuration.
+     * @param commander a commander instance with a valid service root.
+     * @param xmlMetadata XML Metadata to search through
+     * @return the default CSDL Container for the given XMLMetadata
+     * @throws Exception if required metadata cannot be parsed, an exception will be thrown with an appropriate message.
+     */
+    private static CsdlEntityContainer findDefaultEntityContainer(Commander commander, XMLMetadata xmlMetadata) throws Exception {
+      Edm edm = commander.getEdm();
+      if (edm == null)
+        throw new Exception("ERROR: Could not retrieve Edm from server using the given service root!");
+
+      if (xmlMetadata == null)
+        throw new Exception("ERROR: the provided XML metadata was null!");
+
+      if (edm.getEntityContainer() == null)
+        throw new Exception("ERROR: Could not find default EntityContainer for service root: " + commander.getServiceRoot());
+
+      String entityContainerNamespace = edm.getEntityContainer().getNamespace();
+      if (entityContainerNamespace == null)
+        throw new Exception("ERROR: no default EntityContainer namespace could be found");
+
+      return xmlMetadata.getSchema(entityContainerNamespace).getEntityContainer();
+    }
+
+    /**
+     * Gets a list of CsdlProperty items for the given entityTypeName.
+     * @param commander a Commander instance with a valid service root.
+     * @param xmlMetadata the metadata to search.
+     * @param entityTypeName the name of the entityType to search for. MUST be in the default EntityContainer.
+     * @return a list of CsdlProperty items for the given entityTypeName
+     * @throws Exception is thrown if the given metadata doesn't contain the given type name.
+     */
+    private static List<CsdlProperty> findEntityTypesForEntityTypeName(Commander commander, XMLMetadata xmlMetadata, String entityTypeName) throws Exception {
+      CsdlEntityContainer entityContainer = findDefaultEntityContainer(commander, xmlMetadata);
+      CsdlSchema schemaForType = xmlMetadata.getSchema(entityContainer.getEntitySet(entityTypeName).getTypeFQN().getNamespace());
+
+      if (schemaForType == null)
+        throw new Exception("ERROR: could not find type corresponding to given type name: " + entityTypeName);
+
+      return schemaForType.getEntityType(entityTypeName).getProperties();
+    }
   }
 
   /**
@@ -766,7 +977,6 @@ public class WebAPIServer_1_0_2 implements En {
       } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
         result = lhs <= rhs;
       }
-
       LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
       return result;
     }
@@ -793,8 +1003,7 @@ public class WebAPIServer_1_0_2 implements En {
       } else if (operator.contentEquals(Operators.TO_UPPER)) {
         result = lhs.toUpperCase().equals(rhs);
       }
-
-      LOG.info("Compare: " + operator + "(" + lhs + ") == " + rhs + " ==> " + result);
+      LOG.info("Compare: \"" + lhs + "\" " + operator + " \"" + rhs + "\" ==> " + result);
       return result;
     }
 

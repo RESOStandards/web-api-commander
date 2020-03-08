@@ -6,12 +6,12 @@ Feature: Web API Server 1.0.2 Certification
     And Client Settings and Parameters were read from the file
     And an OData client was successfully created from the given RESOScript
 
-  @REQ-WA103-END3 @core @x.y.z @core-endorsement
+  @REQ-WA103-END3 @core @x.y.z @core-endorsement @metadata
   Scenario: Request and Validate Server Metadata
-    When a GET request is made to the resolved Url in "REQ-WA103-END3"
-    Then the server responds with a status code of 200
-    And the response is valid XML
+    When a successful metadata request is made to the service root in "ClientSettings_WebAPIURI"
     And the metadata returned is valid
+    And the metadata contains the "Parameter_EndpointResource" resource
+    And resource metadata for "Parameter_EndpointResource" contains the fields in "Parameter_SelectList"
 
   @REQ-WA103-END2 @core @x.y.z @core-endorsement
   Scenario: Data System Endpoint test

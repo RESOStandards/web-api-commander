@@ -207,7 +207,7 @@ public class App {
               if (request.getOutputFile().toLowerCase().contains(EDMX_EXTENSION.toLowerCase())) {
                 //Main.main(new String[]{"-g", "org.reso.certification.stepdefs#WebAPIServer_1_0_2", "/home/jdarnell/work/reso/github/web-api-commander/src/main/java/org/reso/certification/features/web-api-server-1.0.2.feature"});
                 if (validateMetadata(commander, outputFilePath)) {
-                  metadata = commander.getMetadata(outputFilePath);
+                  metadata = commander.getEdm(outputFilePath);
                 } else {
                   LOG.error("Error: Invalid metadata retrieved. Cannot continue!!");
                   System.exit(NOT_OK);
@@ -248,7 +248,7 @@ public class App {
       if (cmd.hasOption(APP_OPTIONS.ACTIONS.GET_METADATA)) {
         APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GET_METADATA);
 
-        metadata = commander.getMetadata();
+        metadata = commander.getEdm();
         getMetadataReport(metadata);
 
       } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.VALIDATE_METADATA)) {
