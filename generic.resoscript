@@ -19,8 +19,7 @@
   <!ELEMENT OutputScript (RESOScriptVersion|ClientSettings|Parameters|Requests)*>
   <!ELEMENT RESOScriptVersion (#PCDATA)>
   <!ELEMENT ClientSettings
-    (RESOScriptVersion|WebAPIURI|AuthenticationType|
-      BearerToken|ClientIdentification|ClientSecret|TokenURI|ClientScope|Version|Preauthenticate)*>
+    (RESOScriptVersion|WebAPIURI|AuthenticationType|BearerToken|ClientIdentification|ClientSecret|TokenURI|ClientScope)*>
   <!ELEMENT WebAPIURI (#PCDATA)>
   <!ELEMENT AuthenticationType (#PCDATA)>
   <!ELEMENT BearerToken (#PCDATA)>
@@ -28,8 +27,6 @@
   <!ELEMENT ClientSecret (#PCDATA)>
   <!ELEMENT TokenURI (#PCDATA)>
   <!ELEMENT ClientScope (#PCDATA)>
-  <!ELEMENT Version (#PCDATA)>
-  <!ELEMENT Preauthenticate (#PCDATA)>
   <!ELEMENT Parameters (Parameter)*>
   <!ELEMENT Parameter (#PCDATA)>
   <!ATTLIST Parameter
@@ -47,19 +44,20 @@
     WebAPIReference CDATA #REQUIRED>
   ]>
 
+  <!--
+  ############################################################
+    TODO: this document will be updated with language
+    matching the OAuth 2.0 Specification and ClientSettings
+    will be removed.
 
-<!--
-############################################################
-  TODO: this document will be updated with language
-  matching the OAuth 2.0 Specification and ClientSettings
-  will be removed.
+    See:
+        https://tools.ietf.org/html/rfc8252
 
-  See:
-      https://tools.ietf.org/html/rfc8252
+    Watch for subsequent changes to this file.
+    ClientSettings will be converted to Parameters forthwith.
+  ############################################################-->
 
-  Watch for subsequent changes to this file.
-  ClientSettings will be converted to Parameters forthwith.
-############################################################-->
+
 <OutputScript>
 
   <!--
@@ -68,7 +66,8 @@
   ############################################################-->
 
   <!-- The current version of this RESOScript -->
-  <RESOScriptVersion>1.0.4</RESOScriptVersion>
+  <RESOScriptVersion>1.0.5</RESOScriptVersion>
+
 
   <!--
   ############################################################
@@ -106,6 +105,7 @@
 
   </ClientSettings>
 
+
   <!--
   ############################################################
     Parameters Section - add your testing variables here
@@ -123,6 +123,7 @@
 
     <!-- REQUIRED: Core - The name of the resource being tested -->
     <Parameter Name="EndpointResource" Value="REQUIRED: YOUR RESOURCE GOES HERE, FOR EXAMPLE 'Property'" />
+
 
     <!--
     ############################################################
@@ -191,12 +192,6 @@
     <Parameter Name="FilterNotField" Value="*Parameter_FilterIntegerField*" />
     <Parameter Name="FilterNotValue" Value="-1" />
 
-    <!-- Enumerated Field for "has" testing -->
-    <Parameter Name="FilterHasField" Value="*Parameter_SingleValueLookupField*" />
-    <Parameter Name="FilterHasValue" Value="*Parameter_SingleValueLookupValue*" />
-    <Parameter Name="FilterHasLookupNamespace" Value="*Parameter_SingleValueLookupNamespace*" />
-    <Parameter Name="FilterHasLookupValue" Value="*Parameter_FilterHasLookupNamespace*'*Parameter_FilterHasValue*'" />
-
     <!-- Platinum - String Fields for testing -->
     <Parameter Name="ContainsField" Value="*Parameter_StringField*" />
     <Parameter Name="ContainsValue" Value="M" />
@@ -222,7 +217,8 @@
     <Parameter Name="FractionalValue" Value="30" />
 
     <!-- Platinum - GeoSpatial query values -->
-    <Parameter Name="GeoSpatialDistanceValue" Value="100" />
+    <Parameter Name="GeoSpatialDistanceValue" Value="1000" />
+    <Parameter Name="SRID" Value="0" />
 
     <!--
     ############################################################
@@ -257,11 +253,14 @@
     <Parameter Name="CastFieldType" Value="Edm.String" />
 
     <!-- Computed OData $select list -->
+
+    <!-- Computed OData $select list -->
     <Parameter Name="SelectList"
-               Value="*Parameter_KeyOrKeyNumericField*,*Parameter_FilterIntegerField*,*Parameter_ContainsField*,*Parameter_FilterHasField*,*Parameter_DateField*" />
+               Value="*Parameter_KeyOrKeyNumericField*,*Parameter_FilterIntegerField*,*Parameter_FilterHasField*,*Parameter_DateField*,*Parameter_TimestampField*,*Parameter_GeoSpatialField*,*Parameter_StringField" />
 
     <!-- Computed Enumeration Values - do not change -->
     <Parameter Name="SingleValueLookupValue" Value="*Parameter_SingleValueLookupNamespace*'*Parameter_SingleLookupValue*'" />
+    <Parameter Name="FilterHasValueLookupValue" Value="*Parameter_FilterHasLookupNamespace*'*Parameter_FilterHasLookupValue*'" />
     <Parameter Name="MultipleValueLookupValue1" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue1*'"/>
     <Parameter Name="MultipleValueLookupValue2" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue2*'" />
 
@@ -547,7 +546,7 @@
       Capability="Filterability ($filter)"
       WebAPIReference="2.4.4"
       OutputFile="REQ-WA103-QO8.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterHasField* ne null and *Parameter_FilterHasField* has *Parameter_FilterHasLookupValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterHasField* ne null and *Parameter_FilterHasField* has *Parameter_FilterHasValueLookupValue**Parameter_RequiredParameters*"
     />
 
     <Request
@@ -646,7 +645,7 @@
       MetallicLevel="Gold"
       Capability="Filterability ($filter)"
       WebAPIReference="2.4.4"
-      OutputFile="REQ-WA103-QO20_TimeDay.json"
+      OutputFile="REQ-WA103-QO20.2.json"
       Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and day(*Parameter_TimestampField*) eq *Parameter_DayValue**Parameter_RequiredParameters*"
     />
 
@@ -656,7 +655,7 @@
       MetallicLevel="Gold"
       Capability="Filterability ($filter)"
       WebAPIReference="2.4.4"
-      OutputFile="REQ-WA103-QO21_TimeHour.json"
+      OutputFile="REQ-WA103-QO21.json"
       Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and hour(*Parameter_TimestampField*) eq *Parameter_HourValue**Parameter_RequiredParameters*"
     />
 
@@ -666,7 +665,7 @@
       MetallicLevel="Gold"
       Capability="Filterability ($filter)"
       WebAPIReference="2.4.4"
-      OutputFile="REQ-WA103-QO22_TimeMinute.json"
+      OutputFile="REQ-WA103-QO22.json"
       Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and minute(*Parameter_TimestampField*) gt *Parameter_MinuteValue**Parameter_RequiredParameters*"
     />
 
@@ -676,7 +675,7 @@
       MetallicLevel="Gold"
       Capability="Filterability ($filter)"
       WebAPIReference="2.4.4"
-      OutputFile="REQ-WA103-QO23_TimeSecond.json"
+      OutputFile="REQ-WA103-QO23.json"
       Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and second(*Parameter_TimestampField*) lt *Parameter_SecondValue**Parameter_RequiredParameters*"
     />
 
@@ -686,37 +685,37 @@
       MetallicLevel="Gold"
       Capability="Filterability ($filter)"
       WebAPIReference="2.4.4"
-      OutputFile="REQ-WA103-QO24_TimeFraction.json"
+      OutputFile="REQ-WA103-QO24.json"
       Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and fractionalseconds(*Parameter_TimestampField*) lt *Parameter_FractionalValue**Parameter_RequiredParameters*"
     />
 
     <Request
       TestDescription="Query Support: $expand"
-      RequirementId="REQ-WA103-QO29"
+      RequirementId="REQ-WA103-QO29.1"
       MetallicLevel="Platinum"
       Capability="Expandability ($expand)"
       WebAPIReference="2.4.4"
-      OutputFile="REQ-WA103-QO29_Expand.json"
+      OutputFile="REQ-WA103-QO29.1.json"
       Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*"
     />
 
     <Request
       TestDescription="Query Support: $expand media photo count"
-      RequirementId="REQ-WA103-QO29"
+      RequirementId="REQ-WA103-QO29.2"
       MetallicLevel="Platinum"
       Capability="Expandability ($expand)"
       WebAPIReference="2.4.4"
-      OutputFile="REQ-WA103-QO29_Expand_MediaPhotoCount.json"
+      OutputFile="REQ-WA103-QO29.2.json"
       Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*&amp;$filter=PhotosCount gt 0"
     />
 
     <Request
       TestDescription="Query Support: $expand required field"
-      RequirementId="REQ-WA103-QO29"
+      RequirementId="REQ-WA103-QO29.3"
       MetallicLevel="Platinum"
       Capability="Expandability ($expand)"
       WebAPIReference="2.4.4"
-      OutputFile="REQ-WA103-QO29_ExpandReqField.json"
+      OutputFile="REQ-WA103-QO29.3.json"
       Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField**Parameter_RequiredParametersFilter*"
     />
 
@@ -726,7 +725,7 @@
       MetallicLevel="Platinum"
       Capability="Query functions"
       WebAPIReference="2.4.6"
-      OutputFile="REQ-WA103-QM3_Any.json"
+      OutputFile="REQ-WA103-QM3.json"
       Url="*ClientSettings_WebAPIURI*/$any?$top=1"
     />
 
@@ -742,22 +741,22 @@
 
     <Request
       TestDescription="Support GeoSpatial Search Implementation"
-      RequirementId="REQ-WA103-QM5"
+      RequirementId="REQ-WA103-QM5.1"
       MetallicLevel="Platinum"
       Capability="Query functions"
       WebAPIReference="2.4.7"
       OutputFile="REQ-WA103-QM5_GeoSpatialLongLat_PointGeo.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_GeoSpatialField* ne null and geo.distance(*Parameter_GeoSpatialField*, geography'POINT(*Parameter_GeoSpatialValue*)') le *Parameter_GeoSpatialDistanceValue*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_GeoSpatialField* ne null and geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue*"
     />
 
     <Request
       TestDescription="Support GeoSpatial Search Implementation"
-      RequirementId="REQ-WA103-QM5"
+      RequirementId="REQ-WA103-QM5.2"
       MetallicLevel="Platinum"
       Capability="Query functions"
       WebAPIReference="2.4.7"
       OutputFile="REQ-WA103-QM5_GeoSpatialLongLat_LatGT1_PointGeo.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_GeoSpatialField* ne null and geo.distance(*Parameter_GeoSpatialField*, geography'POINT(*Parameter_GeoSpatialValue*)') le *Parameter_GeoSpatialDistanceValue* and *Parameter_GeoSpatialLatitudeField* gt 1"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_GeoSpatialField* ne null and geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue* and *Parameter_GeoSpatialLatitudeField* gt 1"
     />
 
     <Request

@@ -260,11 +260,7 @@ RESOScript files contain zero or more Settings, Parameters, and Requests. For ex
        <BearerToken></BearerToken>
        <ClientIdentification></ClientIdentification>
        <ClientSecret></ClientSecret>
-       <UserName></UserName>
-       <Password></Password>
        <ClientScope></ClientScope>
-       <Version></Version>
-       <Preauthenticate></Preauthenticate>
      </ClientSettings>
      <Parameters>
        <Parameter Name="YourEndpointUrl" Value="https://yourserver.com/api?$filter=..." />
@@ -280,21 +276,24 @@ The XML DTD for this schema is as follows:
 
 ```dtd
 <!DOCTYPE OutputScript [
-  <!ELEMENT OutputScript (ClientSettings|Parameters|Requests)*>
-  <!ELEMENT ClientSettings (WebAPIURI|AuthenticationType|BearerToken|ClientScope|Version|Preauthenticate)*>
+  <!ELEMENT OutputScript (RESOScriptVersion|ClientSettings|Parameters|Requests)*>
+  <!ELEMENT RESOScriptVersion (#PCDATA)>
+  <!ELEMENT ClientSettings
+    (RESOScriptVersion|WebAPIURI|AuthenticationType|BearerToken|ClientIdentification|ClientSecret|TokenURI|ClientScope)*>
   <!ELEMENT WebAPIURI (#PCDATA)>
   <!ELEMENT AuthenticationType (#PCDATA)>
   <!ELEMENT BearerToken (#PCDATA)>
+  <!ELEMENT ClientIdentification (#PCDATA)>
+  <!ELEMENT ClientSecret (#PCDATA)>
+  <!ELEMENT TokenURI (#PCDATA)>
   <!ELEMENT ClientScope (#PCDATA)>
-  <!ELEMENT Version (#PCDATA)>
-  <!ELEMENT Preauthenticate (#PCDATA)>
   <!ELEMENT Parameters (Parameter)*>
   <!ELEMENT Parameter (#PCDATA)>
   <!ATTLIST Parameter
     Name CDATA #REQUIRED
     Value CDATA #REQUIRED>
   <!ELEMENT Requests (Request)*>
-  <!ELEMENT Request (#PCDATA)*>
+  <!ELEMENT Request (#PCDATA)>
   <!ATTLIST Request
     Capability CDATA #REQUIRED
     MetallicLevel CDATA #REQUIRED
