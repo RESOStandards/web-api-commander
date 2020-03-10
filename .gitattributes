@@ -1,2 +1,3 @@
 *.java linguist-detectable=true
 *.xslt linguist-detectable=false
+*.feature linguist-detectable=false
