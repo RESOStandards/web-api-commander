@@ -86,7 +86,7 @@ task testWebApiServer_1_0_2_Gold() {
           'html:build/web-api-server-1.0.2.gold.html',
           '--glue',
           'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
-          'src/main/java/org/reso/certification/features',
+          'src/main/java/org/reso/certification/features/web-api',
           '--tags',
           'not @platinum'
               + (systemProperties.get('cucumber.filter.tags') != null ? ' and ' + systemProperties.get('cucumber.filter.tags') : '')
@@ -113,7 +113,31 @@ task testWebApiServer_1_0_2_Platinum() {
           'html:build/web-api-server-1.0.2.platinum.html',
           '--glue',
           'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
-          'src/main/java/org/reso/certification/features'
+          'src/main/java/org/reso/certification/features/web-api'
+      ]
+    }
+  }
+}
+
+// task for Web API Server 1.0.2 Platinum Testing - currently equivalent to all, but generates a platinum-named report.
+task testDataDictionary_1_6() {
+  dependsOn jar
+  doLast {
+    javaexec {
+      main = "io.cucumber.core.cli.Main"
+      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      systemProperties = System.getProperties()
+      args = [
+          '--strict',
+          '--plugin',
+          'pretty',
+          '--plugin',
+          'json:build/data-dictionary-1.6.json',
+          '--plugin',
+          'html:build/data-dictionary-1.6.html',
+          '--glue',
+          'org.reso.certification.stepdefs#DataDictionary',
+          'src/main/java/org/reso/certification/features/data-dictionary'
       ]
     }
   }

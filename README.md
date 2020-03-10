@@ -430,7 +430,7 @@ C:\path\to\web-api-commander> gradlew.bat testWebAPIServer_1_0_2_Platinum -Dpath
 ```
 
 This would run only the tests marked as `@core` in the 
-[Web API Server 1.0.2 `.feature` file](./src/main/java/org/reso/certification/features/web-api-server-1.0.2.feature).
+[Web API Server 1.0.2 `.feature` file](./src/main/java/org/reso/certification/features/web-api/web-api-server-1.0.2.feature).
 
 
 There is still some "glue code" to back the [test descriptions 
