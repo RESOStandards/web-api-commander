@@ -19,14 +19,17 @@ the Apache Olingo library to provide the following functionality:
   * [Testing Environment](#testing-environment)
   * [Web API Usage](#web-api-usage)
   * [Web API Program Output](#web-api-program-output)
-  * [Gradle Commands](#gradle-commands)
+- [Automated Data Dictionary Testing (pre-alpha)](#automated-web-api-testing-alpha)
+  * [Data Dictionary Usage](#data-dictionary-usage)
+  * [Data Ditionary Program Output](#data-dictionary-program-output)
 - [Docker](#docker)
 - [Logging](#logging)
+- [Gradle Commands](#gradle-commands)
 - [Coming Soon](#coming-soon)
 
 ## Getting Started
 ### [Download Commander JAR (Java 1.8.0+)](https://github.com/RESOStandards/web-api-commander/tree/master/build/libs)
-Your operating system probably already has Java 1.8.0 or greater. 
+Your operating system probably already has Java, but you need 1.8.0 to run the Commander. 
 
 To check, type: 
 
@@ -43,7 +46,7 @@ OpenJDK Runtime Environment (build 1.8.0_242-8u242-b08-0ubuntu3~19.10-b08)
 OpenJDK 64-Bit Server VM (build 25.242-b08, mixed mode)
 ```
 
-If you don't see something similar to this, with 1.8.0 or greater, or an error, you may have to download a Java Runtime Environment. 
+If you don't see something similar to this, with 1.8.0, or an error, you may have to download a Java Runtime Environment. 
 
 [Open JDK is recommended](https://openjdk.java.net/install/index.html).
 
@@ -97,12 +100,17 @@ usage: java -jar web-api-commander
 
 ```
 
-When using commands, if arguments aren't provided, feedback will be displayed in the terminal, as well as the help screen, which will show how to pass each required argument. 
+When using commands, if arguments aren't provided, feedback will be displayed in the terminal, as well as the help screen, 
+which will show how to pass each required argument. 
 
 ## Authentication
-When using the Commader from the terminal, bearer tokens are the currently-supported authentication mechanism. Please see subsequent sections for how to use bearer tokens to accomplish tasks other than fully-automated testing, [discussed elsewhere in this README](#automated-web-api-testing-beta).
+When using the Commader from the terminal, bearer tokens are the currently-supported authentication mechanism. 
+Please see subsequent sections for how to use bearer tokens to accomplish tasks other than fully-automated testing, 
+[discussed elsewhere in this README](#automated-web-api-testing-beta).
 
-Client credentials (OAuth2) are supported in RESOScript files. Please contact josh@reso.org if you are wanting certification using this mechanism. See [generic.resoscript](https://github.com/RESOStandards/web-api-commander/blob/master/generic.resoscript) for client credentials parameters. Note that this has not been tested extensively and is in pre-alpha.
+Client credentials (OAuth2) are supported in RESOScript files. Please contact josh@reso.org if you are wanting 
+certification using this mechanism. See [generic.resoscript](https://github.com/RESOStandards/web-api-commander/blob/master/generic.resoscript) 
+for client credentials parameters. Note that this has not been tested extensively and is in pre-alpha.
 
 
 ## Getting Metadata
@@ -339,7 +347,7 @@ You do not need to use the Commander JAR file mentioned elsewhere in this step.
 Instead, you will run the tests using Gradle for automation against a clean copy of the latest Commander code.
 
 You will need to download the source code so you can run Gradle in the root of the directory. 
-This assumes that you also have Java 8 (1.8.0) or above installed, as mentioned elsewhere in this [`README`](#getting-started).
+This assumes that you also have Java 8 (1.8.0) installed, as mentioned elsewhere in this [`README`](#getting-started).
 
 First, change into the directory you want to work in and clone the Commander repository. 
 You will need to have Git installed. 
@@ -509,6 +517,134 @@ A sample of the runtime terminal output follows:
 This shows configuration parameters, requests, and responses in a lightweight-manner. 
 
 Detailed information will be added to a local `./commander.log` file at runtime.
+
+### Data Dictionary Usage
+
+The Commander may be run in automated testing mode for Data Dictionary 1.5 and 1.6 Certifications using a terminal. 
+
+You do not need to use the Commander JAR file mentioned elsewhere in this step. 
+Instead, you will run the tests using Gradle for automation against a clean copy of the latest Commander code.
+
+You will need to download the source code so you can run Gradle in the root of the directory. 
+This assumes that you also have Java 8 (1.8.0) installed, as mentioned elsewhere in this [`README`](#getting-started).
+
+First, change into the directory you want to work in and clone the Commander repository. 
+You will need to have Git installed. Chances are you already do, to check, open a command line and type `git` and if it's present, 
+it will print some info about the app. If not, [there are instructions here](https://git-scm.com/downloads).
+
+##### MacOS or Linux
+```
+$ git clone https://github.com/RESOStandards/web-api-commander.git
+```
+
+##### Windows
+```
+C:\> git clone https://github.com/RESOStandards/web-api-commander.git
+```
+
+This will clone the repository into a directory called web-api-commander relative to whatever directory you're currently in, 
+which also means you'll have a fresh copy of the latest code to execute. 
+
+To refresh the code after you have downloaded it, issue the command `$ git pull` in the root of the directory that was just created. 
+ 
+#### Running with the Gradle Wrapper
+The Gradle wrapper provides a convenient way to automatically install Gradle when running tests. 
+
+After you have cloned the repository, the task you run will depend on the level of Data Dictionary Certification 
+you're interested in. 
+
+Before you do that, however, you'll want to make sure that you are running the 6.2.2 version of Gradle.
+
+In the project directory, perform one of the following steps:
+
+##### MacOS or Linux 
+```$ ./gradlew wrapper --gradle-version 6.2.2 --distribution-type all```
+
+##### Windows
+```C:\path\to\web-api-commander> gradlew wrapper --gradle-version 6.2.2 --distribution-type all```
+
+You should see a success message. For more information, [see here](https://docs.gradle.org/current/userguide/gradle_wrapper.html).
+
+### Convenience Methods for Data Dictionary 1.5 and 1.6 Certification (Recommended)
+While you may use tags to filter tests as you choose, explained in the next section, it's convenient
+to be able to run a predefined set of tests for 1.5 or 1.6 certification. 
+
+These tasks will also produce reports in the local `build` directory, named according to which test you ran. 
+
+#### DD 1.5 Certification
+This will run Data Dictionary 1.5 tests.
+
+##### MacOS or Linux
+```
+$ ./gradlew testDataDictionary_1_5
+```
+
+##### Windows
+```
+C:\path\to\web-api-commander> gradlew testDataDictionary_1_5
+```
+
+*Note: the first time you run these tasks, they will take some time as the environment is being configured behind the 
+scenes and the code is being compiled from the contents of the source directory you downloaded in the previous step. 
+
+#### DD 1.6 Certification
+This will run Data Dictionary 1.6 tests.
+
+##### MacOS or Linux
+```
+$ ./gradlew testDataDictionary_1_6
+```
+
+##### Windows
+```
+C:\path\to\web-api-commander> gradlew testDataDictionary_1_6
+```
+
+#### Advanced feature: Tag Filtering 
+You may also filter by tags. These are the items in the Cucumber .feature files prefixed by an `@` symbol. Expressions 
+may also be used with tags. See the [Cucumber Documentation](https://cucumber.io/docs/cucumber/api/#tags) for more information. 
+
+##### MacOS or Linux
+```
+$ gradlew testDataDictionary_1_6 -Dcucumber.filter.tags="@IDX_Payload"
+```
+
+##### Windows
+```
+C:\path\to\web-api-commander> gradlew testDataDictionary_1_6 -Dcucumber.filter.tags="@IDX_Payload"
+```
+
+This would run only the tests marked as `@IDX_Payload` in the 
+[Data Dictionary `.feature` files in](./src/main/java/org/reso/certification/features/data-dictionary/).
+
+### Data Dictionary Program Output
+
+A sample of the runtime terminal output follows:
+
+```gherkin
+    > Task :testDataDictionary_1_6
+    
+    @DD1.5_Decimal @DD1.6_Decimal @DD1.5 @DD1.6 @ListPrice @IDX_Payload @DD1.5_ListPrice @DD1.6_ListPrice
+    Scenario: ListPrice                                                                 
+      Given an XML Metadata file was provided                                            
+      And the given file exists                                                          
+      And the file contains valid XML                                                    
+      And the file could be read by the Commander                                        
+      Given "ListPrice" exists in the metadata                                           
+      And "ListPrice" values are not null                                                
+      Then "ListPrice" should be "Decimal" data type                                     
+      And "ListPrice" precision should be between the bounds in the metadata             
+      And "ListPrice" scale should be between the bounds in the metadata                 
+      And "ListPrice" precision should be less than or equal to the RESO maxlength of 14 
+      And "ListPrice" scale should be less than or equal to the RESO scale of 2          
+    
+    1 Scenarios (1 passed)
+    11 Steps (11 passed)
+    0m0.612s
+```
+
+
+----
 
 ### Gradle Commands
 
