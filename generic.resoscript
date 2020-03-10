@@ -10,6 +10,11 @@
 
     Contact josh@reso.org with further questions.
  -->
+
+<!--
+  ############################################################
+    XML DTD - Must come first
+  ############################################################-->
 <!DOCTYPE OutputScript [
   <!ELEMENT OutputScript (RESOScriptVersion|ClientSettings|Parameters|Requests)*>
   <!ELEMENT RESOScriptVersion (#PCDATA)>
@@ -42,6 +47,7 @@
     WebAPIReference CDATA #REQUIRED>
   ]>
 
+
 <!--
 ############################################################
   TODO: this document will be updated with language
@@ -54,7 +60,6 @@
   Watch for subsequent changes to this file.
   ClientSettings will be converted to Parameters forthwith.
 ############################################################-->
-
 <OutputScript>
 
   <!--

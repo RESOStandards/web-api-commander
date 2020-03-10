@@ -6,6 +6,12 @@ Feature: Web API Server 1.0.2 Certification
     And Client Settings and Parameters were read from the file
     And an OData client was successfully created from the given RESOScript
 
+
+
+  #######################################
+  #  Core Tests
+  #######################################
+
   @REQ-WA103-END3 @core @x.y.z @core-endorsement @metadata
   Scenario: Request and Validate Server Metadata
     When a GET request is made to the resolved Url in "REQ-WA103-END3"
@@ -193,6 +199,11 @@ Feature: Web API Server 1.0.2 Certification
     And the response has results
     And Single Valued Enumeration Data in "Parameter_SingleValueLookupField" has "Parameter_SingleLookupValue"
 
+
+  #######################################
+  #  Bronze Tests
+  #######################################
+
   @REQ-WA103-QM8 @bronze @2.4.10 @filterability-endorsement
   Scenario: Support Multi Value Lookups
     When a GET request is made to the resolved Url in "REQ-WA103-QM8"
@@ -249,6 +260,11 @@ Feature: Web API Server 1.0.2 Certification
     And the response is valid JSON
     And the response has results
     And DateTimeOffset data in "Parameter_TimestampField" is sorted in "desc" order
+
+
+  #######################################
+  #  Gold Tests
+  #######################################
 
   @REQ-WA103-QO18.1 @gold @2.4.4 @filterability-endorsement
   Scenario: Query Support: $filter: Date: year
@@ -330,6 +346,10 @@ Feature: Web API Server 1.0.2 Certification
     And the response has results
     And "fractional" data in Timestamp Field "Parameter_TimestampField" "lt" "Parameter_FractionalValue"
 
+  #######################################
+  #  Platinum Tests
+  #######################################
+
   @REQ-WA103-QO13 @platinum @2.4.4 @filterability-endorsement
   Scenario: Query Support: $filter - String: contains
     When a GET request is made to the resolved Url in "REQ-WA103-QO13"
@@ -380,3 +400,38 @@ Feature: Web API Server 1.0.2 Certification
     And data are present within "Parameter_ExpandField"
     And an OData NavigationProperty exists for the given "Parameter_EndpointResource"
     And the expanded data were found in the related resource
+
+
+  #######################################
+  #  RESPONSE CODE TESTING
+  #######################################
+
+  @REQ-WA103-END1 @core @2.4.1 @core-endorsement
+  Scenario: Service Endpoint
+    When a GET request is made to the resolved Url in "REQ-WA103-END1"
+    Then the server responds with a status code of 200
+
+  @REQ-WA103-RC3 @core @2.5.2 @core-endorsement
+  Scenario: 200 OK Request
+    When a GET request is made to the resolved Url in "REQ-WA103-RC3"
+    Then the server responds with a status code of 200
+
+  @REQ-WA103-RC5 @core @2.4.2 @core-endorsement
+  Scenario: 400 Bad Request
+    When a GET request is made to the resolved Url in "REQ-WA103-RC5"
+    Then the server responds with a status code of 400
+
+  @REQ-WA103-RC06 @core @2.5.2 @core-endorsement
+  Scenario: 403 Forbidden Request
+    When a GET request is made to the resolved Url in "REQ-WA103-RC06"
+    Then the server responds with a status code of 403
+
+  @REQ-WA103-RC07 @core @2.5.2 @core-endorsement
+  Scenario: 404 Not Found Request
+    When a GET request is made to the resolved Url in "REQ-WA103-RC07"
+    Then the server responds with a status code of 404
+
+  @REQ-WA103-RC11 @core @2.5.2 @core-endorsement
+  Scenario: 501 Not Implemented Request
+    When a GET request is made to the resolved Url in "REQ-WA103-RC11"
+    Then the server responds with a status code of 501
