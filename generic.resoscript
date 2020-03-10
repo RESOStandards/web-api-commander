@@ -11,11 +11,17 @@
     Contact josh@reso.org with further questions.
  -->
 <!DOCTYPE OutputScript [
-  <!ELEMENT OutputScript (ClientSettings|Parameters|Requests)*>
-  <!ELEMENT ClientSettings (WebAPIURI|AuthenticationType|BearerToken|ClientScope|Version|Preauthenticate)*>
+  <!ELEMENT OutputScript (RESOScriptVersion|ClientSettings|Parameters|Requests)*>
+  <!ELEMENT RESOScriptVersion (#PCDATA)>
+  <!ELEMENT ClientSettings
+    (RESOScriptVersion|WebAPIURI|AuthenticationType|
+      BearerToken|ClientIdentification|ClientSecret|TokenURI|ClientScope|Version|Preauthenticate)*>
   <!ELEMENT WebAPIURI (#PCDATA)>
   <!ELEMENT AuthenticationType (#PCDATA)>
   <!ELEMENT BearerToken (#PCDATA)>
+  <!ELEMENT ClientIdentification (#PCDATA)>
+  <!ELEMENT ClientSecret (#PCDATA)>
+  <!ELEMENT TokenURI (#PCDATA)>
   <!ELEMENT ClientScope (#PCDATA)>
   <!ELEMENT Version (#PCDATA)>
   <!ELEMENT Preauthenticate (#PCDATA)>
@@ -36,60 +42,142 @@
     WebAPIReference CDATA #REQUIRED>
   ]>
 
+<!--
+############################################################
+  TODO: this document will be updated with language
+  matching the OAuth 2.0 Specification and ClientSettings
+  will be removed.
+
+  See:
+      https://tools.ietf.org/html/rfc8252
+
+  Watch for subsequent changes to this file.
+  ClientSettings will be converted to Parameters forthwith.
+############################################################-->
+
 <OutputScript>
-  <!-- TODO: deprecate ClientSettings and move them to Parameters -->
+
+  <!--
+  ############################################################
+    Metadata
+  ############################################################-->
+
+  <!-- The current version of this RESOScript -->
+  <RESOScriptVersion>1.0.4</RESOScriptVersion>
+
+  <!--
+  ############################################################
+    Client Settings
+    TODO: deprecate ClientSettings and move them to Parameters
+  ############################################################-->
   <ClientSettings>
     <!-- URLS -->
     <WebAPIURI><!--REQUIRED: URI of your Web API Service Root goes here --></WebAPIURI>
 
     <!-- Credentials -->
-    <AuthenticationType>Authorization Code</AuthenticationType>
-    <BearerToken><!-- REQUIRED: Your BearerToken goes here --></BearerToken>
-    <ClientScope>all</ClientScope>
-    <Version>Web API/1.0</Version>
-    <Preauthenticate>FALSE</Preauthenticate>
+
+    <!-- AuthenticationType
+
+        This is the OAuth2 grant_type.
+        Use "authorization_code" for BearerToken and "client_credentials" for Client Credentials.
+
+        See:
+        * https://www.oauth.com/oauth2-servers/access-tokens/authorization-code-request/
+        * https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/
+    -->
+    <AuthenticationType>authorization_code</AuthenticationType>
+
+    <!-- Grant Type: authorization_code-->
+    <BearerToken><!-- REQUIRED: Your BearerToken goes here if using Access Tokens --></BearerToken>
+
+    <!-- Grant Type: client_credentials -->
+    <ClientIdentification><!-- REQUIRED: Your client_id value if using Client Credentials--></ClientIdentification>
+    <ClientSecret><!-- REQUIRED: Your client_secret value if using Client Credentials--></ClientSecret>
+    <TokenURI><!-- REQUIRED: Your token endpoint URI--></TokenURI>
+    <ClientScope>
+
+    <!--OPTIONAL - your client scope. See: https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/ -->
+    </ClientScope>
+
   </ClientSettings>
 
+  <!--
+  ############################################################
+    Parameters Section - add your testing variables here
+  ############################################################-->
   <Parameters>
+    <!--
+    ############################################################
+          Service Configuration
+    ############################################################-->
 
-    <!-- REQUIRED: The DataSystems endpoint being tested
+    <!-- REQUIRED: Core - The DataSystems endpoint being tested
     NOTE: the FULL DataSystems URL is required as it might not be relative to the Service Root.
           This will likely change in future revisions. -->
     <Parameter Name="EndpointDataSystem" Value="REQUIRED: YOUR DATA SYSTEMS ENDPOINT GOES HERE" />
 
-    <!-- REQUIRED: The name of the resource being tested -->
+    <!-- REQUIRED: Core - The name of the resource being tested -->
     <Parameter Name="EndpointResource" Value="REQUIRED: YOUR RESOURCE GOES HERE, FOR EXAMPLE 'Property'" />
 
-    <!-- HTTP Code Testing -->
+    <!--
+    ############################################################
+      Required Fields and Values
+    ############################################################-->
 
-    <!-- REQUIRED: 200 Response OK -->
-    <Parameter Name="200_OK" Value="*Parameter_EndpointResource*" />
+    <!-- Note: some of the required values already have sample values provided. See later sections for their values.-->
 
-    <!-- REQUIRED: 400 Bad Request - Requires Full URL & Separate Login Credentials -->
-    <Parameter Name="400BadRequest" Value="*Parameter_EndpointResource*?$filter=BadField eq 'SoBad'" />
-
-    <!-- REQUIRED: 403 Forbidden -->
-    <Parameter Name="403Forbidden" Value="Teams" />
-
-    <!-- REQUIRED: 404 Not Found -->
-    <Parameter Name="404NotFound" Value="ResourceNotFound" />
-
-    <!-- REQUIRED: 501 Not Implemented -->
-    <Parameter Name="501NotImplemented" Value="*Parameter_EndpointResource*?$search=red OR blue" />
-
-    <!-- REQUIRED: Substitute key name from your Resource here, either Key or KeyNumeric -->
+    <!-- REQUIRED: Core - Substitute key name from your Resource here, either Key or KeyNumeric -->
     <Parameter Name="KeyOrKeyNumericField" Value="ListingKey" />
 
-    <!-- REQUIRED: Provide a value for the KeyOrKeyNumeric from your server -->
+    <!-- REQUIRED: Core - Provide a value for the KeyOrKeyNumeric from your server -->
     <Parameter Name="KeyOrKeyNumericValue" Value="REQUIRED: YOUR KeyOrKeyNumericValue GOES HERE" />
 
-    <!-- For Top, Skip, and Sort Testing -->
-    <Parameter Name="TopCount" Value="5" />
-    <Parameter Name="SortCount" Value="20" />
-
-    <!-- Integer Field for eq, ne, gt, ge, lt, le testing -->
-    <!-- Type="Edm.Int16" or Type="Edm.Int32" or Type="Edm.Int64" for non-lookup fields -->
+    <!-- REQUIRED: Core - Integer Field. Should be one of: Type="Edm.Int16", Type="Edm.Int32", or Type="Edm.Int64" -->
     <Parameter Name="FilterIntegerField" Value="BedroomsTotal" />
+
+    <!-- REQUIRED: Core - Enumerated Field for Single-Value Testing -->
+    <Parameter Name="SingleValueLookupField" Value="PropertyType" />
+    <Parameter Name="SingleLookupValue" Value="Residential" />
+    <Parameter Name="SingleValueLookupNamespace" Value="PropertyEnums.PropertyType" />
+
+    <!-- REQUIRED: Core - Enumerated Field for Multi-value testing -->
+    <Parameter Name="MultipleValueLookupField" Value="Appliances" />
+    <Parameter Name="MultipleValueLookupNamespace" Value="PropertyEnums.Appliances" />
+    <Parameter Name="MultipleLookupValue1" Value="Refrigerator" />
+    <Parameter Name="MultipleLookupValue2" Value="Stacked" />
+
+    <!-- REQUIRED: Bronze - Date Field for comparisons. Should be Type="Edm.Date" -->
+    <Parameter Name="DateField" Value="ListingContractDate" />
+    <Parameter Name="TimestampField" Value="ModificationTimestamp" />
+
+    <!-- REQUIRED: Platinum - String Field for comparisons. Should be Type="Edm.String" -->
+    <Parameter Name="StringField" Value="StreetName" />
+
+    <!-- REQUIRED: Platinum - Expand Testing -->
+    <Parameter Name="ExpandField" Value="ListAgent" />
+
+    <!-- REQUIRED: Platinum - GeoSpatial Testing -->
+    <Parameter Name="GeoSpatialLatitudeField" Value="Latitude" />
+    <Parameter Name="GeoSpatialLongitudeField" Value="Longitude" />
+    <Parameter Name="GeoSpatialField" Value="Coordinates" />
+    <Parameter Name="GeoSpatialValue" Value="REQUIRED: YOUR COORDINATES GO HERE in 'Longitude Latitude' format" /> <!-- "Longitude Latitude" -->
+
+    <!-- REQUIRED: New Fields for WS103 Testing -->
+    <Parameter Name="ValueField" Value="AboveGradeFinishedArea" />
+    <Parameter Name="CastField" Value="AboveGradeFinishedArea" />
+    <Parameter Name="CastFieldValue" Value="YOUR CastFieldValue GOES HERE, FOR EXAMPLE 1200" />
+    <Parameter Name="ConcatFieldOne" Value="StreetName" />
+    <Parameter Name="ConcatFieldOneValue" Value="REQUIRED: Your OneValue GOES HERE>" />
+    <Parameter Name="ConcatFieldTwo" Value="City" />
+    <Parameter Name="ConcatFieldTwoValue" Value="YOUR TwoValue GOES HERE" />
+    <Parameter Name="ConcatFieldBothValue" Value="Your 'OneValue: TwoValue' GOES HERE" /> <!-- format 'OneValue: TwoValue' -->
+
+    <!--
+    ############################################################
+      Sample Field Values
+    ############################################################-->
+
+    <!-- FilterIntegerField Sample Values-->
     <Parameter Name="FilterIntegerValueLow" Value="9" />
     <Parameter Name="FilterIntegerValueHigh" Value="15" />
     <Parameter Name="FilterIntegerNotFound" Value="-1" />
@@ -99,71 +187,71 @@
     <Parameter Name="FilterNotValue" Value="-1" />
 
     <!-- Enumerated Field for "has" testing -->
-    <Parameter Name="FilterHasField" Value="PropertyType" />
-    <Parameter Name="FilterHasValue" Value="Residential" />
-    <Parameter Name="FilterHasLookupNamespace" Value="PropertyEnums.PropertyType" />
+    <Parameter Name="FilterHasField" Value="*Parameter_SingleValueLookupField*" />
+    <Parameter Name="FilterHasValue" Value="*Parameter_SingleValueLookupValue*" />
+    <Parameter Name="FilterHasLookupNamespace" Value="*Parameter_SingleValueLookupNamespace*" />
     <Parameter Name="FilterHasLookupValue" Value="*Parameter_FilterHasLookupNamespace*'*Parameter_FilterHasValue*'" />
 
-    <!-- Enumerated Field for SingleValue/Multi-value testing -->
-    <Parameter Name="SingleValueLookupField" Value="PropertyType" />
-    <Parameter Name="SingleLookupValue" Value="Residential" />
-    <Parameter Name="SingleValueLookupNamespace" Value="PropertyEnums.PropertyType" />
-
-    <Parameter Name="MultipleValueLookupField" Value="Appliances" />
-    <Parameter Name="MultipleValueLookupNamespace" Value="PropertyEnums.Appliances" />
-    <Parameter Name="MultipleLookupValue1" Value="Refrigerator" />
-    <Parameter Name="MultipleLookupValue2" Value="Stacked" />
-
-    <!-- For Expand Testing -->
-    <Parameter Name="ExpandField" Value="ListAgent" />
-
-    <!-- For Geo-spatial Testing -->
-    <Parameter Name="GeoSpatialLatitudeField" Value="Latitude" />
-    <Parameter Name="GeoSpatialLongitudeField" Value="Longitude" />
-    <Parameter Name="GeoSpatialField" Value="Coordinates" />
-    <Parameter Name="GeoSpatialValue" Value="REQUIRED: YOUR COORDINATES GO HERE in 'Longitude Latitude' format" /> <!-- "Longitude Latitude" -->
-    <Parameter Name="GeoSpatialDistanceValue" Value="100" />
-
-    <!--String Fields for testing -->
-    <!-- Type="Edm.String" -->
-    <Parameter Name="ContainsField" Value="StreetName" />
+    <!-- Platinum - String Fields for testing -->
+    <Parameter Name="ContainsField" Value="*Parameter_StringField*" />
     <Parameter Name="ContainsValue" Value="M" />
-    <Parameter Name="EndsWithField" Value="StreetName" />
+    <Parameter Name="EndsWithField" Value="*Parameter_StringField*" />
     <Parameter Name="EndsWithValue" Value="Rd" />
-    <Parameter Name="StartsWithField" Value="StreetName" />
+    <Parameter Name="StartsWithField" Value="*Parameter_StringField*" />
     <Parameter Name="StartsWithValue" Value="M" />
-    <Parameter Name="ToLowerField" Value="StreetName" />
+    <Parameter Name="ToLowerField" Value="*Parameter_StringField*" />
     <Parameter Name="ToLowerValue" Value="main" />
-    <Parameter Name="ToUpperField" Value="StreetName" />
+    <Parameter Name="ToUpperField" Value="*Parameter_StringField*" />
     <Parameter Name="ToUpperValue" Value="MAIN" />
 
-    <!-- REQUIRED: Date Fields for testing -->
-    <Parameter Name="DateField" Value="ListingContractDate" />
+    <!-- Gold and Platinum: Date Fields for testing -->
     <Parameter Name="DateTimeValue" Value="2018-12-31T23:55:55-09:00" />
     <Parameter Name="DateValue" Value="2018-12-31" />
     <Parameter Name="YearValue" Value="2018" />
     <Parameter Name="MonthValue" Value="12" />
     <Parameter Name="DayValue" Value="31" />
-
-    <Parameter Name="TimestampField" Value="ModificationTimestamp" />
     <Parameter Name="TimeValue" Value="23:55:55" />
     <Parameter Name="HourValue" Value="23" />
     <Parameter Name="MinuteValue" Value="55" />
     <Parameter Name="SecondValue" Value="55" />
     <Parameter Name="FractionalValue" Value="30" />
 
-    <!-- REQUIRED: New Fields for WS103 Testing -->
-    <Parameter Name="ValueField" Value="AboveGradeFinishedArea" />
-    <Parameter Name="CastField" Value="AboveGradeFinishedArea" />
-    <Parameter Name="CastFieldType" Value="Edm.String" />
-    <Parameter Name="CastFieldValue" Value="YOUR CastFieldValue GOES HERE, FOR EXAMPLE 1200" />
-    <Parameter Name="ConcatFieldOne" Value="StreetName" />
-    <Parameter Name="ConcatFieldOneValue" Value="YOUR OneValue GOES HERE>" />
-    <Parameter Name="ConcatFieldTwo" Value="City" />
-    <Parameter Name="ConcatFieldTwoValue" Value="YOUR TwoValue GOES HERE" />
-    <Parameter Name="ConcatFieldBothValue" Value="Your 'OneValue: TwoValue' GOES HERE" /> <!-- format 'OneValue: TwoValue' -->
+    <!-- Platinum - GeoSpatial query values -->
+    <Parameter Name="GeoSpatialDistanceValue" Value="100" />
 
-    <!-- Computed OData $select list - do not change -->
+    <!--
+    ############################################################
+      HTTP Code Testing
+    ############################################################-->
+
+    <!-- 200 Response OK: This should always work! No need to change it -->
+    <Parameter Name="200_OK" Value="*Parameter_EndpointResource*" />
+
+    <!-- REQUIRED: 400 Bad Request - Adjust to something that produces a 400 response if this doesn't work -->
+    <Parameter Name="400BadRequest" Value="*Parameter_EndpointResource*?$filter=BadField eq 'SoBad'" />
+
+    <!-- REQUIRED: 403 Forbidden - Set this to a restricted resource for the given credentials -->
+    <Parameter Name="403Forbidden" Value="Teams" />
+
+    <!-- REQUIRED: 404 Not Found - You shouldn't need to change this -->
+    <Parameter Name="404NotFound" Value="ResourceNotFound" />
+
+    <!-- REQUIRED: 501 Not Implemented - Set this to an OData query that hasn't been implemented on your server -->
+    <Parameter Name="501NotImplemented" Value="*Parameter_EndpointResource*?$search=red OR blue" />
+
+    <!--
+    ############################################################
+      Constants and Computed Values - Do Not Change
+    ############################################################-->
+
+    <!-- For Top, Skip, and Sort Testing -->
+    <Parameter Name="TopCount" Value="5" />
+    <Parameter Name="SortCount" Value="20" />
+
+    <!-- New Values for WS103 Testing -->
+    <Parameter Name="CastFieldType" Value="Edm.String" />
+
+    <!-- Computed OData $select list -->
     <Parameter Name="SelectList"
                Value="*Parameter_KeyOrKeyNumericField*,*Parameter_FilterIntegerField*,*Parameter_ContainsField*,*Parameter_FilterHasField*,*Parameter_DateField*" />
 
@@ -172,19 +260,21 @@
     <Parameter Name="MultipleValueLookupValue1" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue1*'"/>
     <Parameter Name="MultipleValueLookupValue2" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue2*'" />
 
+    <Parameter Name="OptionalMetadataFormatParameter" Value="?$format=application/xml" />
+
+    <!--
+    ############################################################
+      Optional Parameters. You should not need these
+    ############################################################-->
+
     <!-- OPTIONAL: System Specific Additional Required Parameters for Queries. Leave Blank if none. -->
     <Parameter Name="RequiredParameters" Value="" />
     <Parameter Name="RequiredParametersFilter" Value="" />
-
-    <!-- Note: you may need to use Value="?$format=application/xml" on your server -->
-    <Parameter Name="OptionalMetadataFormatParameter" Value="" />
 
   </Parameters>
 
   <Requests>
 
-    <!-- NOTE: the query in this test is no longer being used for automated testing,
-               was originally: Url="*ClientSettings_WebAPIURI*/$metadata*Parameter_OptionalMetadataFormatParameter*"-->
     <Request
       TestDescription="Metadata Endpoint"
       RequirementId="REQ-WA103-END3"
@@ -192,7 +282,7 @@
       Capability="Core"
       WebAPIReference=""
       OutputFile="REQ-WA103-END3.metadata.xml"
-      Url=""
+      Url="*ClientSettings_WebAPIURI*/$metadata*Parameter_OptionalMetadataFormatParameter*"
     />
 
     <Request

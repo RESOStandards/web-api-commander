@@ -9,6 +9,7 @@ import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
+import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
@@ -78,6 +79,29 @@ public final class TestUtils {
     assertNotNull("ERROR: could not find type corresponding to given type name: " + entityTypeName, schemaForType);
 
     return schemaForType.getEntityType(entityTypeName).getProperties();
+  }
+
+  /**
+   * Gets a list of CsdlProperty items for the given entityTypeName.
+   *
+   * @param xmlMetadata    the metadata to search.
+   * @param entityTypeName the name of the entityType to search for. MUST be in the default EntityContainer.
+   * @return a list of CsdlProperty items for the given entityTypeName
+   * @throws Exception is thrown if the given metadata doesn't contain the given type name.
+   */
+  public static List<CsdlNavigationProperty> findNavigationPropertiesForEntityTypeName(Edm edm, XMLMetadata xmlMetadata, String entityTypeName) {
+    assertNotNull("ERROR: Edm Cannot be Null!", edm);
+    assertNotNull("ERROR: XMLMetadata Cannot be Null!", xmlMetadata);
+    assertNotNull("ERROR: entityTypeName cannot be null!", entityTypeName);
+
+    CsdlEntityContainer entityContainer = findDefaultEntityContainer(edm, xmlMetadata);
+    assertNotNull("ERROR: could not find a default entity container for the given server!", entityContainer);
+
+    CsdlSchema schemaForType = xmlMetadata.getSchema(entityContainer.getEntitySet(entityTypeName).getTypeFQN().getNamespace());
+
+    assertNotNull("ERROR: could not find type corresponding to given type name: " + entityTypeName, schemaForType);
+
+    return schemaForType.getEntityType(entityTypeName).getNavigationProperties();
   }
 
   /**

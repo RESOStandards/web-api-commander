@@ -454,10 +454,10 @@ A sample of the runtime terminal output follows:
 ```gherkin
 > Task :testWebApiServer_1_0_2_Platinum
 
-    @REQ-WA103-END3 @core @2.4.1 @core-endorsement @metadata
+    @REQ-WA103-END3 @core @x.y.z @core-endorsement @metadata
     Scenario: Request and Validate Server Metadata                                                         
     
-    Using RESOScript: /path/to/your.resoscript
+    Using RESOScript: /path/to/your.resocript
       Given a RESOScript file was provided                                                                 
     
     RESOScript loaded successfully!
@@ -467,22 +467,25 @@ A sample of the runtime terminal output follows:
     Service root is: https://api.server.com
       And an OData client was successfully created from the given RESOScript                               
     
-    Fetching Edm with OData Client from: https://api.server.com/$metadata
-    Found Default Entity Container: 'Default'
-      When a default entity container exists for the service root in "ClientSettings_WebAPIURI"            
+    Request URI: https://api.server.com/$metadata?$format=application/xml
+    Request succeeded...185032 bytes received.
+      When a GET request is made to the resolved Url in "REQ-WA103-END3"                                   
     
     Asserted Response Code: 200, Server Response Code: 200
       Then the server responds with a status code of 200                                                   
     
-    Edm Metadata is valid!
-      And the Edm metadata returned by the server are valid                                                
-    
-    Fetching XMLMetadata with OData Client from: https://api.server.com/$metadata
-    XML Metadata retrieved from: https://api.server.com
-      And XML Metadata are requested from the service root in "ClientSettings_WebAPIURI"                   
+    Response is valid XML!
+      And the response is valid XML                                                                        
     
     XML Metadata is valid!
       And the XML metadata returned by the server are valid                                                
+    
+    Fetching Edm with OData Client from: https://api.server.com/$metadata
+    Found Default Entity Container: 'Default'
+      And a default entity container exists for the service root in "ClientSettings_WebAPIURI"             
+    
+    Edm Metadata is valid!
+      And the Edm metadata returned by the server are valid                                                
     
     Found EntityContainer for the given resource: 'Property'
       And the metadata contains the "Parameter_EndpointResource" resource                                  
@@ -500,9 +503,8 @@ A sample of the runtime terminal output follows:
     
     
     1 Scenarios (1 passed)
-    10 Steps (10 passed)
-    0m3.071s
-       
+    11 Steps (11 passed)
+    0m3.342s       
 ```
 
 This shows configuration parameters, requests, and responses in a lightweight-manner. 

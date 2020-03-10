@@ -4,26 +4,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.POJONode;
 import io.cucumber.java8.En;
-import io.restassured.response.Response;
-import io.restassured.response.ValidatableResponse;
-import io.restassured.specification.RequestSpecification;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
+import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
+import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
+import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.commander.Commander;
 import org.reso.commander.TestUtils;
 import org.reso.models.ClientSettings;
 import org.reso.models.Request;
 import org.reso.models.Settings;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URI;
 import java.sql.Time;
@@ -44,14 +45,37 @@ import static org.reso.commander.TestUtils.Operators.*;
 public class WebAPIServer_1_0_2 implements En {
   private static final Logger LOG = LogManager.getLogger(WebAPIServer_1_0_2.class);
   private static Settings settings;
+
   //container to hold retrieved metadata for later comparisons
   private static AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
   private static AtomicReference<Edm> edm = new AtomicReference<>();
-  private Response response;
-  private ValidatableResponse json;
-  private RequestSpecification request;
+
   private String serviceRoot, bearerToken, clientId, clientSecret, authorizationUri, tokenUri, redirectUri, scope;
   private String pathToRESOScript;
+
+  /**
+   * Accessors used for running one-off tests that have dependent metadata tests
+   * @param commander the commander instance to make the request with.
+   * @return the XMLMetadata for the given request.
+   */
+  private static XMLMetadata getXMLMetadata(Commander commander) {
+    if (xmlMetadata.get() == null) {
+      xmlMetadata.set(commander.getXMLMetadata());
+    }
+    return xmlMetadata.get();
+  }
+
+  /**
+   * Accessors used for running one-off tests that have dependent metadata tests
+   * @param commander the commander instance to make the request with.
+   * @return the Edm for the given request.
+   */
+  private static Edm getEdmMetadata(Commander commander) {
+    if (edm.get() == null) {
+      edm.set(commander.getEdm());
+    }
+    return edm.get();
+  }
 
   public WebAPIServer_1_0_2() {
 
@@ -59,6 +83,7 @@ public class WebAPIServer_1_0_2 implements En {
     AtomicReference<Commander> commander = new AtomicReference<>();
     AtomicReference<ODataRawResponse> oDataRawResponse = new AtomicReference<>();
     AtomicReference<Request> request = new AtomicReference<>();
+    AtomicReference<URI> requestUri = new AtomicReference<>();
     AtomicReference<Integer> responseCode = new AtomicReference<>();
     AtomicReference<String> responseData = new AtomicReference<>();
     AtomicReference<String> initialResponseData = new AtomicReference<>(); //used if two result sets need to be compared
@@ -98,10 +123,10 @@ public class WebAPIServer_1_0_2 implements En {
      * Executes HTTP GET request and sets the expected local variables.
      * Handles exceptions and sets response codes.
      */
-    Function<URI, Void> executeGetRequest = (URI requestUri) -> {
-      LOG.info("Request URI: " + requestUri);
+    Function<URI, Void> executeGetRequest = (URI uri) -> {
+      LOG.info("Request URI: " + uri);
       try {
-        rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(requestUri));
+        rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(uri));
         oDataRawResponse.set(rawRequest.get().execute());
         responseData.set(TestUtils.convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
         serverODataHeaderVersion.set(oDataRawResponse.get().getHeader(HEADER_ODATA_VERSION).toString());
@@ -204,9 +229,12 @@ public class WebAPIServer_1_0_2 implements En {
      * XMLMetadata Validator
      */
     And("^the XML metadata returned by the server are valid$", () -> {
-      assertNotNull("ERROR: No XML Metadata Exists!", xmlMetadata.get());
+      assertNotNull("ERROR: No Response Data exists to convert to XML Metadata!", responseData.get());
 
       try {
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(responseData.get().getBytes());
+        xmlMetadata.set(commander.get().getClient().getDeserializer(ContentType.APPLICATION_XML).toMetadata(byteArrayInputStream));
+
         boolean isValid = commander.get().validateMetadata(xmlMetadata.get());
         LOG.info("XML Metadata is " + (isValid ? "valid" : "invalid") + "!");
         assertTrue(isValid);
@@ -316,9 +344,9 @@ public class WebAPIServer_1_0_2 implements En {
         initialResponseData.set(responseData.get());
 
         //TODO: convert to OData filter factory
-        URI requestUri = Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl() + "&$skip=" + skipCount);
+        requestUri.set(Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl() + "&$skip=" + skipCount));
 
-        executeGetRequest.apply(requestUri);
+        executeGetRequest.apply(requestUri.get());
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
@@ -353,8 +381,8 @@ public class WebAPIServer_1_0_2 implements En {
         //reset local state each time a get request is run
         resetRequestState.run();
 
-        URI requestUri = Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl());
-        executeGetRequest.apply(requestUri);
+        requestUri.set(Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl()));
+        executeGetRequest.apply(requestUri.get());
       } catch (Exception ex) {
         LOG.debug("Exception was thrown in " + this.getClass() + ": " + ex.toString());
       }
@@ -861,5 +889,61 @@ public class WebAPIServer_1_0_2 implements En {
         fail(ex.getMessage());
       }
     });
+
+
+    /*
+     * Tests whether a navigation property can be found in the given resource name.
+     */
+    And("^an OData NavigationProperty exists for the given \"([^\"]*)\"$", (String parameterEndpointResource) -> {
+      String resourceName = Settings.resolveParametersString(parameterEndpointResource, settings);
+
+      List<CsdlNavigationProperty> navigationProperties
+          = TestUtils.findNavigationPropertiesForEntityTypeName(getEdmMetadata(commander.get()), getXMLMetadata(commander.get()), resourceName);
+
+      assertTrue("ERROR: no navigation properties found for the given '" + resourceName + "' resource!",
+          navigationProperties.size() > 0);
+
+      LOG.info("Found the following Navigation Properties:");
+      navigationProperties.forEach(csdlNavigationProperty -> {
+        LOG.info("\tName: " + csdlNavigationProperty.getName());
+        LOG.info("\tType: " + csdlNavigationProperty.getType());
+      });
+
+    });
+
+    /*
+     * Checks to see whether the expanded field has data
+     */
+    And("^data are present within \"([^\"]*)\"$", (String parameterExpandField) -> {
+      String expandField = Settings.resolveParametersString(parameterExpandField, settings);
+      assertFalse("ERROR: no expand field found for " + parameterExpandField, expandField.isEmpty());
+
+      ClientEntitySet results = commander.get().getClient().getRetrieveRequestFactory().getEntitySetRequest(requestUri.get()).execute().getBody();
+
+      LOG.info("Results count is: " + results.getEntities().size());
+      AtomicInteger counter = new AtomicInteger();
+      results.getEntities().forEach(clientEntity -> {
+        LOG.info("\nItem #" + counter.getAndIncrement());
+        clientEntity.getProperties().forEach(clientProperty -> {
+          LOG.info("\tField Name: " + clientProperty.getName());
+          LOG.info("\tField Value: " + clientProperty.getValue().toString());
+          LOG.info("\tType Name: " + clientProperty.getValue().getTypeName());
+          LOG.info("\n");
+
+          assertNotNull("ERROR: '" + parameterExpandField + "' not found in results!", clientProperty.getName());
+          assertNotNull("ERROR: data type could not be found for " + clientProperty.getName(), clientProperty.getValue().getTypeName());
+        });
+      });
+
+    });
+
+    /*
+     * Checks to see whether expanding the EndpointResource on ExpandField produces equivalent records from the corresponding
+     * resource of the expanded type
+     */
+    And("^the expanded data were found in the related resource$", () -> {
+      //TODO: this depends on either finding the appropriate navigation property for a given relationship, or having the Expanded resource name
+    });
+
   }
 }

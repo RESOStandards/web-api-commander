@@ -188,7 +188,7 @@ public class Commander {
    */
   public Edm getEdm() {
     if (edm == null) {
-      getODataRetrieveEdmResponse().getBody();
+      edm = getODataRetrieveEdmResponse().getBody();
     }
     return edm;
   }
@@ -199,9 +199,12 @@ public class Commander {
    * @return XMLMetadata representation of the server metadata.
    */
   public XMLMetadata getXMLMetadata() {
-    EdmMetadataRequest metadataRequest = client.getRetrieveRequestFactory().getMetadataRequest(serviceRoot);
-    LOG.info("Fetching XMLMetadata with OData Client from: " + metadataRequest.getURI().toString());
-    return metadataRequest.getXMLMetadata();
+    if (xmlMetadata == null) {
+      EdmMetadataRequest metadataRequest = client.getRetrieveRequestFactory().getMetadataRequest(serviceRoot);
+      LOG.info("Fetching XMLMetadata with OData Client from: " + metadataRequest.getURI().toString());
+      xmlMetadata = metadataRequest.getXMLMetadata();
+    }
+    return xmlMetadata;
   }
 
   /**
@@ -434,6 +437,10 @@ public class Commander {
     return getEntitySet(requestUri, limit, integerVoidFunction);
   }
 
+  public ClientEntitySet getEntitySet(String requestUri) {
+    return getEntitySet(requestUri, 1);
+  }
+
   /**
    * Fairly primitive, for now, version of a fetch function.
    * TODO: add a function that can write a page at a time.
@@ -458,14 +465,12 @@ public class Commander {
         if (requestUri != null && requestUri.length() > 0 && preparedUri != null) {
           uriBuilder = new URIBuilder(preparedUri);
 
-          if (uriBuilder != null) {
-            if (skip != null && skip > 0) uriBuilder.addParameter("$skip", skip.toString());
+          if (skip != null && skip > 0) uriBuilder.addParameter("$skip", skip.toString());
 
-            URI uri = uriBuilder.build();
-            LOG.debug("URI created: " + uri.toString());
+          URI uri = uriBuilder.build();
+          LOG.debug("URI created: " + uri.toString());
 
-            return uri;
-          }
+          return uri;
         }
       } catch (Exception ex) {
         LOG.error("ERROR: " + ex.toString());
@@ -495,7 +500,7 @@ public class Commander {
 
     } catch (Exception ex) {
       //NOTE: sometimes a bad skip link in the payload can cause exceptions...the Olingo library validates the responses.
-      LOG.error("ERROR: getEntitySet could not continue. " + ex.getCause());
+      LOG.error("ERROR: getEntitySet could not continue. " + ex.toString());
       System.exit(NOT_OK);
     } finally {
       //trim results size to requested limit
