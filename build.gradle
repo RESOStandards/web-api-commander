@@ -119,7 +119,34 @@ task testWebApiServer_1_0_2_Platinum() {
   }
 }
 
-// task for Web API Server 1.0.2 Platinum Testing - currently equivalent to all, but generates a platinum-named report.
+// task for Data Dictionary 1.5
+task testDataDictionary_1_5() {
+  dependsOn jar
+  doLast {
+    javaexec {
+      main = "io.cucumber.core.cli.Main"
+      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      systemProperties = System.getProperties()
+      args = [
+          '--strict',
+          '--plugin',
+          'pretty',
+          '--plugin',
+          'json:build/data-dictionary-1.5.json',
+          '--plugin',
+          'html:build/data-dictionary-1.5.html',
+          '--glue',
+          'org.reso.certification.stepdefs#DataDictionary',
+          'src/main/java/org/reso/certification/features/data-dictionary',
+          '--tags',
+          '@DD1.5'
+              + (systemProperties.get('cucumber.filter.tags') != null ? ' and ' + systemProperties.get('cucumber.filter.tags') : '')
+      ]
+    }
+  }
+}
+
+// task for Data Dictionary 1.6
 task testDataDictionary_1_6() {
   dependsOn jar
   doLast {
@@ -137,7 +164,10 @@ task testDataDictionary_1_6() {
           'html:build/data-dictionary-1.6.html',
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary'
+          'src/main/java/org/reso/certification/features/data-dictionary',
+          '--tags',
+          '@DD1.6'
+              + (systemProperties.get('cucumber.filter.tags') != null ? ' and ' + systemProperties.get('cucumber.filter.tags') : '')
       ]
     }
   }

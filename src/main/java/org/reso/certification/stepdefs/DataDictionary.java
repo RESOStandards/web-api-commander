@@ -4,24 +4,37 @@ import io.cucumber.java8.En;
 public class DataDictionary implements En {
 
   public DataDictionary() {
+
     /*
-     * Boolean Fields
+     * Background Functions
+     */
+    Given("^an XML Metadata file was provided$", () -> {
+    });
+    And("^the given file exists$", () -> {
+    });
+    And("^the file contains valid XML$", () -> {
+    });
+    And("^the file could be read by the Commander$", () -> {
+    });
+
+    /*
+     * Generic Functions
      */
     Given("^\"([^\"]*)\" exists in the metadata$", (String fieldName) -> {
     });
-    And("^\"([^\"]*)\" boolean values are not null$", (String fieldName) -> {
+    And("^\"([^\"]*)\" values are not null$", (String fieldName) -> {
     });
-    Then("^\"([^\"]*)\" should be Boolean data type$", (String fieldName) -> {
+    Then("^\"([^\"]*)\" should be \"([^\"]*)\" data type$", (String fieldName, String dataTypeName) -> {
     });
 
+
+    /*
+     * Boolean Fields - handled by generic functions
+     */
 
     /*
      * Date Fields
      */
-    And("^\"([^\"]*)\" date values are not null$", (String fieldName) -> {
-    });
-    Then("^\"([^\"]*)\" should be Date data type$", (String fieldName) -> {
-    });
     And("^\"([^\"]*)\" length should be between the bounds in the metadata$", (String fieldName) -> {
     });
     And("^\"([^\"]*)\" length should be less than or equal to the RESO maxlength of (\\d+)$", (String fieldName, Integer maxLength) -> {
@@ -30,63 +43,38 @@ public class DataDictionary implements En {
     /*
      * Decimal Fields
      */
-    And("^\"([^\"]*)\" decimal values are not null$", (String arg0) -> {
+    And("^\"([^\"]*)\" precision should be between the bounds in the metadata$", (String fieldName) -> {
     });
-    Then("^\"([^\"]*)\" should be Decimal data type$", (String arg0) -> {
+    And("^\"([^\"]*)\" scale should be between the bounds in the metadata$", (String fieldName) -> {
     });
-    And("^\"([^\"]*)\" precision should be between the bounds in the metadata$", (String arg0) -> {
+    And("^\"([^\"]*)\" precision should be less than or equal to the RESO maxlength of (\\d+)$", (String fieldName, Integer maxLength) -> {
     });
-    And("^\"([^\"]*)\" scale should be between the bounds in the metadata$", (String arg0) -> {
-    });
-    And("^\"([^\"]*)\" precision should be less than or equal to the RESO maxlength of (\\d+)$", (String arg0, Integer arg1) -> {
-    });
-    And("^\"([^\"]*)\" scale should be less than or equal to the RESO scale of (\\d+)$", (String arg0, Integer arg1) -> {
+    And("^\"([^\"]*)\" scale should be less than or equal to the RESO scale of (\\d+)$", (String fieldName, Integer scale) -> {
     });
 
 
     /*
-     * Integer Fields
+     * Integer Fields - handled by generic functions
      */
-    And("^\"([^\"]*)\" integer values are not null$", (String arg0) -> {
-    });
-    Then("^\"([^\"]*)\" should be Integer data type$", (String arg0) -> {
-    });
-
-
 
     /*
      * Multi-select Fields
      */
-    And("^\"([^\"]*)\" enum values can be compiled$", (String arg0) -> {
+    And("^\"([^\"]*)\" enum values can be compiled$", (String fieldName) -> {
     });
-    And("^\"([^\"]*)\" stringlist-multi values are not null$", (String arg0) -> {
-    });
-    Then("^\"([^\"]*)\" should be Array of Strings data type$", (String arg0) -> {
-    });
-    And("^\"([^\"]*)\" should only contain enum values found in the metadata$", (String arg0) -> {
+    And("^\"([^\"]*)\" should only contain enum values found in the metadata$", (String fieldName) -> {
     });
 
     /*
-     * Single-select Fields
+     * Single-select Fields - handled by generic functions
      */
-    And("^\"([^\"]*)\" stringlist-single values are not null$", (String arg0) -> {
-    });
-    Then("^\"([^\"]*)\" should be String data type$", (String arg0) -> {
-    });
 
     /*
-     * String Fields
+     * String Fields - handled by generic functions
      */
-    And("^\"([^\"]*)\" string values are not null$", (String arg0) -> {
-    });
 
     /*
-     * Timestamp Fields
+     * Timestamp Fields - handled by generic functions
      */
-    And("^\"([^\"]*)\" timestamp values are not null$", (String arg0) -> {
-    });
-    Then("^\"([^\"]*)\" should be Timestamp data type$", (String arg0) -> {
-    });
-
   }
 }

@@ -1,13 +1,17 @@
 Feature: StringList-Multi Testing
 
   Background:
+    Given an XML Metadata file was provided
+    And the given file exists
+    And the file contains valid XML
+    And the file could be read by the Commander
 
   @DD1.5_StringList-Multi @DD1.6_StringList-Multi @DD1.5 @DD1.6 @AccessibilityFeatures @IDX_Payload @DD1.5_AccessibilityFeatures @DD1.6_AccessibilityFeatures
   Scenario: AccessibilityFeatures
     Given "AccessibilityFeatures" exists in the metadata
     And "AccessibilityFeatures" enum values can be compiled
-    And "AccessibilityFeatures" stringlist-multi values are not null
-    Then "AccessibilityFeatures" should be Array of Strings data type
+    And "AccessibilityFeatures" values are not null
+    Then "AccessibilityFeatures" should be "Array of Strings" data type
     And "AccessibilityFeatures" should only contain enum values found in the metadata
     And "AccessibilityFeatures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -15,8 +19,8 @@ Feature: StringList-Multi Testing
   Scenario: Appliances
     Given "Appliances" exists in the metadata
     And "Appliances" enum values can be compiled
-    And "Appliances" stringlist-multi values are not null
-    Then "Appliances" should be Array of Strings data type
+    And "Appliances" values are not null
+    Then "Appliances" should be "Array of Strings" data type
     And "Appliances" should only contain enum values found in the metadata
     And "Appliances" length should be less than or equal to the RESO maxlength of 1024
 
@@ -24,8 +28,8 @@ Feature: StringList-Multi Testing
   Scenario: ArchitecturalStyle
     Given "ArchitecturalStyle" exists in the metadata
     And "ArchitecturalStyle" enum values can be compiled
-    And "ArchitecturalStyle" stringlist-multi values are not null
-    Then "ArchitecturalStyle" should be Array of Strings data type
+    And "ArchitecturalStyle" values are not null
+    Then "ArchitecturalStyle" should be "Array of Strings" data type
     And "ArchitecturalStyle" should only contain enum values found in the metadata
     And "ArchitecturalStyle" length should be less than or equal to the RESO maxlength of 1024
 
@@ -33,8 +37,8 @@ Feature: StringList-Multi Testing
   Scenario: AssociationAmenities
     Given "AssociationAmenities" exists in the metadata
     And "AssociationAmenities" enum values can be compiled
-    And "AssociationAmenities" stringlist-multi values are not null
-    Then "AssociationAmenities" should be Array of Strings data type
+    And "AssociationAmenities" values are not null
+    Then "AssociationAmenities" should be "Array of Strings" data type
     And "AssociationAmenities" should only contain enum values found in the metadata
     And "AssociationAmenities" length should be less than or equal to the RESO maxlength of 1024
 
@@ -42,8 +46,8 @@ Feature: StringList-Multi Testing
   Scenario: AssociationFeeIncludes
     Given "AssociationFeeIncludes" exists in the metadata
     And "AssociationFeeIncludes" enum values can be compiled
-    And "AssociationFeeIncludes" stringlist-multi values are not null
-    Then "AssociationFeeIncludes" should be Array of Strings data type
+    And "AssociationFeeIncludes" values are not null
+    Then "AssociationFeeIncludes" should be "Array of Strings" data type
     And "AssociationFeeIncludes" should only contain enum values found in the metadata
     And "AssociationFeeIncludes" length should be less than or equal to the RESO maxlength of 1024
 
@@ -51,8 +55,8 @@ Feature: StringList-Multi Testing
   Scenario: Basement
     Given "Basement" exists in the metadata
     And "Basement" enum values can be compiled
-    And "Basement" stringlist-multi values are not null
-    Then "Basement" should be Array of Strings data type
+    And "Basement" values are not null
+    Then "Basement" should be "Array of Strings" data type
     And "Basement" should only contain enum values found in the metadata
     And "Basement" length should be less than or equal to the RESO maxlength of 1024
 
@@ -60,8 +64,8 @@ Feature: StringList-Multi Testing
   Scenario: BodyType
     Given "BodyType" exists in the metadata
     And "BodyType" enum values can be compiled
-    And "BodyType" stringlist-multi values are not null
-    Then "BodyType" should be Array of Strings data type
+    And "BodyType" values are not null
+    Then "BodyType" should be "Array of Strings" data type
     And "BodyType" should only contain enum values found in the metadata
     And "BodyType" length should be less than or equal to the RESO maxlength of 1024
 
@@ -69,8 +73,8 @@ Feature: StringList-Multi Testing
   Scenario: BuildingFeatures
     Given "BuildingFeatures" exists in the metadata
     And "BuildingFeatures" enum values can be compiled
-    And "BuildingFeatures" stringlist-multi values are not null
-    Then "BuildingFeatures" should be Array of Strings data type
+    And "BuildingFeatures" values are not null
+    Then "BuildingFeatures" should be "Array of Strings" data type
     And "BuildingFeatures" should only contain enum values found in the metadata
     And "BuildingFeatures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -78,8 +82,8 @@ Feature: StringList-Multi Testing
   Scenario: BusinessType
     Given "BusinessType" exists in the metadata
     And "BusinessType" enum values can be compiled
-    And "BusinessType" stringlist-multi values are not null
-    Then "BusinessType" should be Array of Strings data type
+    And "BusinessType" values are not null
+    Then "BusinessType" should be "Array of Strings" data type
     And "BusinessType" should only contain enum values found in the metadata
     And "BusinessType" length should be less than or equal to the RESO maxlength of 1024
 
@@ -87,8 +91,8 @@ Feature: StringList-Multi Testing
   Scenario: BuyerAgentDesignation
     Given "BuyerAgentDesignation" exists in the metadata
     And "BuyerAgentDesignation" enum values can be compiled
-    And "BuyerAgentDesignation" stringlist-multi values are not null
-    Then "BuyerAgentDesignation" should be Array of Strings data type
+    And "BuyerAgentDesignation" values are not null
+    Then "BuyerAgentDesignation" should be "Array of Strings" data type
     And "BuyerAgentDesignation" should only contain enum values found in the metadata
     And "BuyerAgentDesignation" length should be less than or equal to the RESO maxlength of 50
 
@@ -96,8 +100,8 @@ Feature: StringList-Multi Testing
   Scenario: BuyerFinancing
     Given "BuyerFinancing" exists in the metadata
     And "BuyerFinancing" enum values can be compiled
-    And "BuyerFinancing" stringlist-multi values are not null
-    Then "BuyerFinancing" should be Array of Strings data type
+    And "BuyerFinancing" values are not null
+    Then "BuyerFinancing" should be "Array of Strings" data type
     And "BuyerFinancing" should only contain enum values found in the metadata
     And "BuyerFinancing" length should be less than or equal to the RESO maxlength of 1024
 
@@ -105,8 +109,8 @@ Feature: StringList-Multi Testing
   Scenario: CoBuyerAgentDesignation
     Given "CoBuyerAgentDesignation" exists in the metadata
     And "CoBuyerAgentDesignation" enum values can be compiled
-    And "CoBuyerAgentDesignation" stringlist-multi values are not null
-    Then "CoBuyerAgentDesignation" should be Array of Strings data type
+    And "CoBuyerAgentDesignation" values are not null
+    Then "CoBuyerAgentDesignation" should be "Array of Strings" data type
     And "CoBuyerAgentDesignation" should only contain enum values found in the metadata
     And "CoBuyerAgentDesignation" length should be less than or equal to the RESO maxlength of 50
 
@@ -114,8 +118,8 @@ Feature: StringList-Multi Testing
   Scenario: CoListAgentDesignation
     Given "CoListAgentDesignation" exists in the metadata
     And "CoListAgentDesignation" enum values can be compiled
-    And "CoListAgentDesignation" stringlist-multi values are not null
-    Then "CoListAgentDesignation" should be Array of Strings data type
+    And "CoListAgentDesignation" values are not null
+    Then "CoListAgentDesignation" should be "Array of Strings" data type
     And "CoListAgentDesignation" should only contain enum values found in the metadata
     And "CoListAgentDesignation" length should be less than or equal to the RESO maxlength of 50
 
@@ -123,8 +127,8 @@ Feature: StringList-Multi Testing
   Scenario: CommonWalls
     Given "CommonWalls" exists in the metadata
     And "CommonWalls" enum values can be compiled
-    And "CommonWalls" stringlist-multi values are not null
-    Then "CommonWalls" should be Array of Strings data type
+    And "CommonWalls" values are not null
+    Then "CommonWalls" should be "Array of Strings" data type
     And "CommonWalls" should only contain enum values found in the metadata
     And "CommonWalls" length should be less than or equal to the RESO maxlength of 1024
 
@@ -132,8 +136,8 @@ Feature: StringList-Multi Testing
   Scenario: CommunityFeatures
     Given "CommunityFeatures" exists in the metadata
     And "CommunityFeatures" enum values can be compiled
-    And "CommunityFeatures" stringlist-multi values are not null
-    Then "CommunityFeatures" should be Array of Strings data type
+    And "CommunityFeatures" values are not null
+    Then "CommunityFeatures" should be "Array of Strings" data type
     And "CommunityFeatures" should only contain enum values found in the metadata
     And "CommunityFeatures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -141,8 +145,8 @@ Feature: StringList-Multi Testing
   Scenario: ConstructionMaterials
     Given "ConstructionMaterials" exists in the metadata
     And "ConstructionMaterials" enum values can be compiled
-    And "ConstructionMaterials" stringlist-multi values are not null
-    Then "ConstructionMaterials" should be Array of Strings data type
+    And "ConstructionMaterials" values are not null
+    Then "ConstructionMaterials" should be "Array of Strings" data type
     And "ConstructionMaterials" should only contain enum values found in the metadata
     And "ConstructionMaterials" length should be less than or equal to the RESO maxlength of 1024
 
@@ -150,8 +154,8 @@ Feature: StringList-Multi Testing
   Scenario: Cooling
     Given "Cooling" exists in the metadata
     And "Cooling" enum values can be compiled
-    And "Cooling" stringlist-multi values are not null
-    Then "Cooling" should be Array of Strings data type
+    And "Cooling" values are not null
+    Then "Cooling" should be "Array of Strings" data type
     And "Cooling" should only contain enum values found in the metadata
     And "Cooling" length should be less than or equal to the RESO maxlength of 1024
 
@@ -159,8 +163,8 @@ Feature: StringList-Multi Testing
   Scenario: CurrentFinancing
     Given "CurrentFinancing" exists in the metadata
     And "CurrentFinancing" enum values can be compiled
-    And "CurrentFinancing" stringlist-multi values are not null
-    Then "CurrentFinancing" should be Array of Strings data type
+    And "CurrentFinancing" values are not null
+    Then "CurrentFinancing" should be "Array of Strings" data type
     And "CurrentFinancing" should only contain enum values found in the metadata
     And "CurrentFinancing" length should be less than or equal to the RESO maxlength of 1024
 
@@ -168,8 +172,8 @@ Feature: StringList-Multi Testing
   Scenario: CurrentUse
     Given "CurrentUse" exists in the metadata
     And "CurrentUse" enum values can be compiled
-    And "CurrentUse" stringlist-multi values are not null
-    Then "CurrentUse" should be Array of Strings data type
+    And "CurrentUse" values are not null
+    Then "CurrentUse" should be "Array of Strings" data type
     And "CurrentUse" should only contain enum values found in the metadata
     And "CurrentUse" length should be less than or equal to the RESO maxlength of 1024
 
@@ -177,8 +181,8 @@ Feature: StringList-Multi Testing
   Scenario: DevelopmentStatus
     Given "DevelopmentStatus" exists in the metadata
     And "DevelopmentStatus" enum values can be compiled
-    And "DevelopmentStatus" stringlist-multi values are not null
-    Then "DevelopmentStatus" should be Array of Strings data type
+    And "DevelopmentStatus" values are not null
+    Then "DevelopmentStatus" should be "Array of Strings" data type
     And "DevelopmentStatus" should only contain enum values found in the metadata
     And "DevelopmentStatus" length should be less than or equal to the RESO maxlength of 1024
 
@@ -186,8 +190,8 @@ Feature: StringList-Multi Testing
   Scenario: Disclosures
     Given "Disclosures" exists in the metadata
     And "Disclosures" enum values can be compiled
-    And "Disclosures" stringlist-multi values are not null
-    Then "Disclosures" should be Array of Strings data type
+    And "Disclosures" values are not null
+    Then "Disclosures" should be "Array of Strings" data type
     And "Disclosures" should only contain enum values found in the metadata
     And "Disclosures" length should be less than or equal to the RESO maxlength of 4000
 
@@ -195,8 +199,8 @@ Feature: StringList-Multi Testing
   Scenario: DocumentsAvailable
     Given "DocumentsAvailable" exists in the metadata
     And "DocumentsAvailable" enum values can be compiled
-    And "DocumentsAvailable" stringlist-multi values are not null
-    Then "DocumentsAvailable" should be Array of Strings data type
+    And "DocumentsAvailable" values are not null
+    Then "DocumentsAvailable" should be "Array of Strings" data type
     And "DocumentsAvailable" should only contain enum values found in the metadata
     And "DocumentsAvailable" length should be less than or equal to the RESO maxlength of 1024
 
@@ -204,8 +208,8 @@ Feature: StringList-Multi Testing
   Scenario: DoorFeatures
     Given "DoorFeatures" exists in the metadata
     And "DoorFeatures" enum values can be compiled
-    And "DoorFeatures" stringlist-multi values are not null
-    Then "DoorFeatures" should be Array of Strings data type
+    And "DoorFeatures" values are not null
+    Then "DoorFeatures" should be "Array of Strings" data type
     And "DoorFeatures" should only contain enum values found in the metadata
     And "DoorFeatures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -213,8 +217,8 @@ Feature: StringList-Multi Testing
   Scenario: Electric
     Given "Electric" exists in the metadata
     And "Electric" enum values can be compiled
-    And "Electric" stringlist-multi values are not null
-    Then "Electric" should be Array of Strings data type
+    And "Electric" values are not null
+    Then "Electric" should be "Array of Strings" data type
     And "Electric" should only contain enum values found in the metadata
     And "Electric" length should be less than or equal to the RESO maxlength of 1024
 
@@ -222,8 +226,8 @@ Feature: StringList-Multi Testing
   Scenario: ExistingLeaseType
     Given "ExistingLeaseType" exists in the metadata
     And "ExistingLeaseType" enum values can be compiled
-    And "ExistingLeaseType" stringlist-multi values are not null
-    Then "ExistingLeaseType" should be Array of Strings data type
+    And "ExistingLeaseType" values are not null
+    Then "ExistingLeaseType" should be "Array of Strings" data type
     And "ExistingLeaseType" should only contain enum values found in the metadata
     And "ExistingLeaseType" length should be less than or equal to the RESO maxlength of 75
 
@@ -231,8 +235,8 @@ Feature: StringList-Multi Testing
   Scenario: ExteriorFeatures
     Given "ExteriorFeatures" exists in the metadata
     And "ExteriorFeatures" enum values can be compiled
-    And "ExteriorFeatures" stringlist-multi values are not null
-    Then "ExteriorFeatures" should be Array of Strings data type
+    And "ExteriorFeatures" values are not null
+    Then "ExteriorFeatures" should be "Array of Strings" data type
     And "ExteriorFeatures" should only contain enum values found in the metadata
     And "ExteriorFeatures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -240,8 +244,8 @@ Feature: StringList-Multi Testing
   Scenario: Fencing
     Given "Fencing" exists in the metadata
     And "Fencing" enum values can be compiled
-    And "Fencing" stringlist-multi values are not null
-    Then "Fencing" should be Array of Strings data type
+    And "Fencing" values are not null
+    Then "Fencing" should be "Array of Strings" data type
     And "Fencing" should only contain enum values found in the metadata
     And "Fencing" length should be less than or equal to the RESO maxlength of 1024
 
@@ -249,8 +253,8 @@ Feature: StringList-Multi Testing
   Scenario: FinancialDataSource
     Given "FinancialDataSource" exists in the metadata
     And "FinancialDataSource" enum values can be compiled
-    And "FinancialDataSource" stringlist-multi values are not null
-    Then "FinancialDataSource" should be Array of Strings data type
+    And "FinancialDataSource" values are not null
+    Then "FinancialDataSource" should be "Array of Strings" data type
     And "FinancialDataSource" should only contain enum values found in the metadata
     And "FinancialDataSource" length should be less than or equal to the RESO maxlength of 75
 
@@ -258,8 +262,8 @@ Feature: StringList-Multi Testing
   Scenario: FireplaceFeatures
     Given "FireplaceFeatures" exists in the metadata
     And "FireplaceFeatures" enum values can be compiled
-    And "FireplaceFeatures" stringlist-multi values are not null
-    Then "FireplaceFeatures" should be Array of Strings data type
+    And "FireplaceFeatures" values are not null
+    Then "FireplaceFeatures" should be "Array of Strings" data type
     And "FireplaceFeatures" should only contain enum values found in the metadata
     And "FireplaceFeatures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -267,8 +271,8 @@ Feature: StringList-Multi Testing
   Scenario: Flooring
     Given "Flooring" exists in the metadata
     And "Flooring" enum values can be compiled
-    And "Flooring" stringlist-multi values are not null
-    Then "Flooring" should be Array of Strings data type
+    And "Flooring" values are not null
+    Then "Flooring" should be "Array of Strings" data type
     And "Flooring" should only contain enum values found in the metadata
     And "Flooring" length should be less than or equal to the RESO maxlength of 1024
 
@@ -276,8 +280,8 @@ Feature: StringList-Multi Testing
   Scenario: FoundationDetails
     Given "FoundationDetails" exists in the metadata
     And "FoundationDetails" enum values can be compiled
-    And "FoundationDetails" stringlist-multi values are not null
-    Then "FoundationDetails" should be Array of Strings data type
+    And "FoundationDetails" values are not null
+    Then "FoundationDetails" should be "Array of Strings" data type
     And "FoundationDetails" should only contain enum values found in the metadata
     And "FoundationDetails" length should be less than or equal to the RESO maxlength of 1024
 
@@ -285,8 +289,8 @@ Feature: StringList-Multi Testing
   Scenario: FrontageType
     Given "FrontageType" exists in the metadata
     And "FrontageType" enum values can be compiled
-    And "FrontageType" stringlist-multi values are not null
-    Then "FrontageType" should be Array of Strings data type
+    And "FrontageType" values are not null
+    Then "FrontageType" should be "Array of Strings" data type
     And "FrontageType" should only contain enum values found in the metadata
     And "FrontageType" length should be less than or equal to the RESO maxlength of 1024
 
@@ -294,8 +298,8 @@ Feature: StringList-Multi Testing
   Scenario: Gas
     Given "Gas" exists in the metadata
     And "Gas" enum values can be compiled
-    And "Gas" stringlist-multi values are not null
-    Then "Gas" should be Array of Strings data type
+    And "Gas" values are not null
+    Then "Gas" should be "Array of Strings" data type
     And "Gas" should only contain enum values found in the metadata
     And "Gas" length should be less than or equal to the RESO maxlength of 1024
 
@@ -303,8 +307,8 @@ Feature: StringList-Multi Testing
   Scenario: GreenBuildingVerificationType
     Given "GreenBuildingVerificationType" exists in the metadata
     And "GreenBuildingVerificationType" enum values can be compiled
-    And "GreenBuildingVerificationType" stringlist-multi values are not null
-    Then "GreenBuildingVerificationType" should be Array of Strings data type
+    And "GreenBuildingVerificationType" values are not null
+    Then "GreenBuildingVerificationType" should be "Array of Strings" data type
     And "GreenBuildingVerificationType" should only contain enum values found in the metadata
     And "GreenBuildingVerificationType" length should be less than or equal to the RESO maxlength of 1024
 
@@ -312,8 +316,8 @@ Feature: StringList-Multi Testing
   Scenario: GreenEnergyEfficient
     Given "GreenEnergyEfficient" exists in the metadata
     And "GreenEnergyEfficient" enum values can be compiled
-    And "GreenEnergyEfficient" stringlist-multi values are not null
-    Then "GreenEnergyEfficient" should be Array of Strings data type
+    And "GreenEnergyEfficient" values are not null
+    Then "GreenEnergyEfficient" should be "Array of Strings" data type
     And "GreenEnergyEfficient" should only contain enum values found in the metadata
     And "GreenEnergyEfficient" length should be less than or equal to the RESO maxlength of 1024
 
@@ -321,8 +325,8 @@ Feature: StringList-Multi Testing
   Scenario: GreenEnergyGeneration
     Given "GreenEnergyGeneration" exists in the metadata
     And "GreenEnergyGeneration" enum values can be compiled
-    And "GreenEnergyGeneration" stringlist-multi values are not null
-    Then "GreenEnergyGeneration" should be Array of Strings data type
+    And "GreenEnergyGeneration" values are not null
+    Then "GreenEnergyGeneration" should be "Array of Strings" data type
     And "GreenEnergyGeneration" should only contain enum values found in the metadata
     And "GreenEnergyGeneration" length should be less than or equal to the RESO maxlength of 1024
 
@@ -330,8 +334,8 @@ Feature: StringList-Multi Testing
   Scenario: GreenIndoorAirQuality
     Given "GreenIndoorAirQuality" exists in the metadata
     And "GreenIndoorAirQuality" enum values can be compiled
-    And "GreenIndoorAirQuality" stringlist-multi values are not null
-    Then "GreenIndoorAirQuality" should be Array of Strings data type
+    And "GreenIndoorAirQuality" values are not null
+    Then "GreenIndoorAirQuality" should be "Array of Strings" data type
     And "GreenIndoorAirQuality" should only contain enum values found in the metadata
     And "GreenIndoorAirQuality" length should be less than or equal to the RESO maxlength of 1024
 
@@ -339,8 +343,8 @@ Feature: StringList-Multi Testing
   Scenario: GreenLocation
     Given "GreenLocation" exists in the metadata
     And "GreenLocation" enum values can be compiled
-    And "GreenLocation" stringlist-multi values are not null
-    Then "GreenLocation" should be Array of Strings data type
+    And "GreenLocation" values are not null
+    Then "GreenLocation" should be "Array of Strings" data type
     And "GreenLocation" should only contain enum values found in the metadata
     And "GreenLocation" length should be less than or equal to the RESO maxlength of 1024
 
@@ -348,8 +352,8 @@ Feature: StringList-Multi Testing
   Scenario: GreenSustainability
     Given "GreenSustainability" exists in the metadata
     And "GreenSustainability" enum values can be compiled
-    And "GreenSustainability" stringlist-multi values are not null
-    Then "GreenSustainability" should be Array of Strings data type
+    And "GreenSustainability" values are not null
+    Then "GreenSustainability" should be "Array of Strings" data type
     And "GreenSustainability" should only contain enum values found in the metadata
     And "GreenSustainability" length should be less than or equal to the RESO maxlength of 1024
 
@@ -357,8 +361,8 @@ Feature: StringList-Multi Testing
   Scenario: GreenWaterConservation
     Given "GreenWaterConservation" exists in the metadata
     And "GreenWaterConservation" enum values can be compiled
-    And "GreenWaterConservation" stringlist-multi values are not null
-    Then "GreenWaterConservation" should be Array of Strings data type
+    And "GreenWaterConservation" values are not null
+    Then "GreenWaterConservation" should be "Array of Strings" data type
     And "GreenWaterConservation" should only contain enum values found in the metadata
     And "GreenWaterConservation" length should be less than or equal to the RESO maxlength of 1024
 
@@ -366,8 +370,8 @@ Feature: StringList-Multi Testing
   Scenario: Heating
     Given "Heating" exists in the metadata
     And "Heating" enum values can be compiled
-    And "Heating" stringlist-multi values are not null
-    Then "Heating" should be Array of Strings data type
+    And "Heating" values are not null
+    Then "Heating" should be "Array of Strings" data type
     And "Heating" should only contain enum values found in the metadata
     And "Heating" length should be less than or equal to the RESO maxlength of 1024
 
@@ -375,8 +379,8 @@ Feature: StringList-Multi Testing
   Scenario: HorseAmenities
     Given "HorseAmenities" exists in the metadata
     And "HorseAmenities" enum values can be compiled
-    And "HorseAmenities" stringlist-multi values are not null
-    Then "HorseAmenities" should be Array of Strings data type
+    And "HorseAmenities" values are not null
+    Then "HorseAmenities" should be "Array of Strings" data type
     And "HorseAmenities" should only contain enum values found in the metadata
     And "HorseAmenities" length should be less than or equal to the RESO maxlength of 1024
 
@@ -384,8 +388,8 @@ Feature: StringList-Multi Testing
   Scenario: HoursDaysOfOperation
     Given "HoursDaysOfOperation" exists in the metadata
     And "HoursDaysOfOperation" enum values can be compiled
-    And "HoursDaysOfOperation" stringlist-multi values are not null
-    Then "HoursDaysOfOperation" should be Array of Strings data type
+    And "HoursDaysOfOperation" values are not null
+    Then "HoursDaysOfOperation" should be "Array of Strings" data type
     And "HoursDaysOfOperation" should only contain enum values found in the metadata
     And "HoursDaysOfOperation" length should be less than or equal to the RESO maxlength of 1024
 
@@ -393,8 +397,8 @@ Feature: StringList-Multi Testing
   Scenario: IncomeIncludes
     Given "IncomeIncludes" exists in the metadata
     And "IncomeIncludes" enum values can be compiled
-    And "IncomeIncludes" stringlist-multi values are not null
-    Then "IncomeIncludes" should be Array of Strings data type
+    And "IncomeIncludes" values are not null
+    Then "IncomeIncludes" should be "Array of Strings" data type
     And "IncomeIncludes" should only contain enum values found in the metadata
     And "IncomeIncludes" length should be less than or equal to the RESO maxlength of 1024
 
@@ -402,8 +406,8 @@ Feature: StringList-Multi Testing
   Scenario: InteriorFeatures
     Given "InteriorFeatures" exists in the metadata
     And "InteriorFeatures" enum values can be compiled
-    And "InteriorFeatures" stringlist-multi values are not null
-    Then "InteriorFeatures" should be Array of Strings data type
+    And "InteriorFeatures" values are not null
+    Then "InteriorFeatures" should be "Array of Strings" data type
     And "InteriorFeatures" should only contain enum values found in the metadata
     And "InteriorFeatures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -411,8 +415,8 @@ Feature: StringList-Multi Testing
   Scenario: IrrigationSource
     Given "IrrigationSource" exists in the metadata
     And "IrrigationSource" enum values can be compiled
-    And "IrrigationSource" stringlist-multi values are not null
-    Then "IrrigationSource" should be Array of Strings data type
+    And "IrrigationSource" values are not null
+    Then "IrrigationSource" should be "Array of Strings" data type
     And "IrrigationSource" should only contain enum values found in the metadata
     And "IrrigationSource" length should be less than or equal to the RESO maxlength of 1024
 
@@ -420,8 +424,8 @@ Feature: StringList-Multi Testing
   Scenario: LaborInformation
     Given "LaborInformation" exists in the metadata
     And "LaborInformation" enum values can be compiled
-    And "LaborInformation" stringlist-multi values are not null
-    Then "LaborInformation" should be Array of Strings data type
+    And "LaborInformation" values are not null
+    Then "LaborInformation" should be "Array of Strings" data type
     And "LaborInformation" should only contain enum values found in the metadata
     And "LaborInformation" length should be less than or equal to the RESO maxlength of 1024
 
@@ -429,8 +433,8 @@ Feature: StringList-Multi Testing
   Scenario: LaundryFeatures
     Given "LaundryFeatures" exists in the metadata
     And "LaundryFeatures" enum values can be compiled
-    And "LaundryFeatures" stringlist-multi values are not null
-    Then "LaundryFeatures" should be Array of Strings data type
+    And "LaundryFeatures" values are not null
+    Then "LaundryFeatures" should be "Array of Strings" data type
     And "LaundryFeatures" should only contain enum values found in the metadata
     And "LaundryFeatures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -438,8 +442,8 @@ Feature: StringList-Multi Testing
   Scenario: LeaseRenewalCompensation
     Given "LeaseRenewalCompensation" exists in the metadata
     And "LeaseRenewalCompensation" enum values can be compiled
-    And "LeaseRenewalCompensation" stringlist-multi values are not null
-    Then "LeaseRenewalCompensation" should be Array of Strings data type
+    And "LeaseRenewalCompensation" values are not null
+    Then "LeaseRenewalCompensation" should be "Array of Strings" data type
     And "LeaseRenewalCompensation" should only contain enum values found in the metadata
     And "LeaseRenewalCompensation" length should be less than or equal to the RESO maxlength of 255
 
@@ -447,8 +451,8 @@ Feature: StringList-Multi Testing
   Scenario: Levels
     Given "Levels" exists in the metadata
     And "Levels" enum values can be compiled
-    And "Levels" stringlist-multi values are not null
-    Then "Levels" should be Array of Strings data type
+    And "Levels" values are not null
+    Then "Levels" should be "Array of Strings" data type
     And "Levels" should only contain enum values found in the metadata
     And "Levels" length should be less than or equal to the RESO maxlength of 1024
 
@@ -456,8 +460,8 @@ Feature: StringList-Multi Testing
   Scenario: ListAgentDesignation
     Given "ListAgentDesignation" exists in the metadata
     And "ListAgentDesignation" enum values can be compiled
-    And "ListAgentDesignation" stringlist-multi values are not null
-    Then "ListAgentDesignation" should be Array of Strings data type
+    And "ListAgentDesignation" values are not null
+    Then "ListAgentDesignation" should be "Array of Strings" data type
     And "ListAgentDesignation" should only contain enum values found in the metadata
     And "ListAgentDesignation" length should be less than or equal to the RESO maxlength of 50
 
@@ -465,8 +469,8 @@ Feature: StringList-Multi Testing
   Scenario: ListingTerms
     Given "ListingTerms" exists in the metadata
     And "ListingTerms" enum values can be compiled
-    And "ListingTerms" stringlist-multi values are not null
-    Then "ListingTerms" should be Array of Strings data type
+    And "ListingTerms" values are not null
+    Then "ListingTerms" should be "Array of Strings" data type
     And "ListingTerms" should only contain enum values found in the metadata
     And "ListingTerms" length should be less than or equal to the RESO maxlength of 1024
 
@@ -474,8 +478,8 @@ Feature: StringList-Multi Testing
   Scenario: LockBoxType
     Given "LockBoxType" exists in the metadata
     And "LockBoxType" enum values can be compiled
-    And "LockBoxType" stringlist-multi values are not null
-    Then "LockBoxType" should be Array of Strings data type
+    And "LockBoxType" values are not null
+    Then "LockBoxType" should be "Array of Strings" data type
     And "LockBoxType" should only contain enum values found in the metadata
     And "LockBoxType" length should be less than or equal to the RESO maxlength of 1024
 
@@ -483,8 +487,8 @@ Feature: StringList-Multi Testing
   Scenario: LotFeatures
     Given "LotFeatures" exists in the metadata
     And "LotFeatures" enum values can be compiled
-    And "LotFeatures" stringlist-multi values are not null
-    Then "LotFeatures" should be Array of Strings data type
+    And "LotFeatures" values are not null
+    Then "LotFeatures" should be "Array of Strings" data type
     And "LotFeatures" should only contain enum values found in the metadata
     And "LotFeatures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -492,8 +496,8 @@ Feature: StringList-Multi Testing
   Scenario: OperatingExpenseIncludes
     Given "OperatingExpenseIncludes" exists in the metadata
     And "OperatingExpenseIncludes" enum values can be compiled
-    And "OperatingExpenseIncludes" stringlist-multi values are not null
-    Then "OperatingExpenseIncludes" should be Array of Strings data type
+    And "OperatingExpenseIncludes" values are not null
+    Then "OperatingExpenseIncludes" should be "Array of Strings" data type
     And "OperatingExpenseIncludes" should only contain enum values found in the metadata
     And "OperatingExpenseIncludes" length should be less than or equal to the RESO maxlength of 1024
 
@@ -501,8 +505,8 @@ Feature: StringList-Multi Testing
   Scenario: OtherEquipment
     Given "OtherEquipment" exists in the metadata
     And "OtherEquipment" enum values can be compiled
-    And "OtherEquipment" stringlist-multi values are not null
-    Then "OtherEquipment" should be Array of Strings data type
+    And "OtherEquipment" values are not null
+    Then "OtherEquipment" should be "Array of Strings" data type
     And "OtherEquipment" should only contain enum values found in the metadata
     And "OtherEquipment" length should be less than or equal to the RESO maxlength of 1024
 
@@ -510,8 +514,8 @@ Feature: StringList-Multi Testing
   Scenario: OtherStructures
     Given "OtherStructures" exists in the metadata
     And "OtherStructures" enum values can be compiled
-    And "OtherStructures" stringlist-multi values are not null
-    Then "OtherStructures" should be Array of Strings data type
+    And "OtherStructures" values are not null
+    Then "OtherStructures" should be "Array of Strings" data type
     And "OtherStructures" should only contain enum values found in the metadata
     And "OtherStructures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -519,8 +523,8 @@ Feature: StringList-Multi Testing
   Scenario: OwnerPays
     Given "OwnerPays" exists in the metadata
     And "OwnerPays" enum values can be compiled
-    And "OwnerPays" stringlist-multi values are not null
-    Then "OwnerPays" should be Array of Strings data type
+    And "OwnerPays" values are not null
+    Then "OwnerPays" should be "Array of Strings" data type
     And "OwnerPays" should only contain enum values found in the metadata
     And "OwnerPays" length should be less than or equal to the RESO maxlength of 1024
 
@@ -528,8 +532,8 @@ Feature: StringList-Multi Testing
   Scenario: ParkingFeatures
     Given "ParkingFeatures" exists in the metadata
     And "ParkingFeatures" enum values can be compiled
-    And "ParkingFeatures" stringlist-multi values are not null
-    Then "ParkingFeatures" should be Array of Strings data type
+    And "ParkingFeatures" values are not null
+    Then "ParkingFeatures" should be "Array of Strings" data type
     And "ParkingFeatures" should only contain enum values found in the metadata
     And "ParkingFeatures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -537,8 +541,8 @@ Feature: StringList-Multi Testing
   Scenario: PatioAndPorchFeatures
     Given "PatioAndPorchFeatures" exists in the metadata
     And "PatioAndPorchFeatures" enum values can be compiled
-    And "PatioAndPorchFeatures" stringlist-multi values are not null
-    Then "PatioAndPorchFeatures" should be Array of Strings data type
+    And "PatioAndPorchFeatures" values are not null
+    Then "PatioAndPorchFeatures" should be "Array of Strings" data type
     And "PatioAndPorchFeatures" should only contain enum values found in the metadata
     And "PatioAndPorchFeatures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -546,8 +550,8 @@ Feature: StringList-Multi Testing
   Scenario: PetsAllowed
     Given "PetsAllowed" exists in the metadata
     And "PetsAllowed" enum values can be compiled
-    And "PetsAllowed" stringlist-multi values are not null
-    Then "PetsAllowed" should be Array of Strings data type
+    And "PetsAllowed" values are not null
+    Then "PetsAllowed" should be "Array of Strings" data type
     And "PetsAllowed" should only contain enum values found in the metadata
     And "PetsAllowed" length should be less than or equal to the RESO maxlength of 1024
 
@@ -555,8 +559,8 @@ Feature: StringList-Multi Testing
   Scenario: PoolFeatures
     Given "PoolFeatures" exists in the metadata
     And "PoolFeatures" enum values can be compiled
-    And "PoolFeatures" stringlist-multi values are not null
-    Then "PoolFeatures" should be Array of Strings data type
+    And "PoolFeatures" values are not null
+    Then "PoolFeatures" should be "Array of Strings" data type
     And "PoolFeatures" should only contain enum values found in the metadata
     And "PoolFeatures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -564,8 +568,8 @@ Feature: StringList-Multi Testing
   Scenario: Possession
     Given "Possession" exists in the metadata
     And "Possession" enum values can be compiled
-    And "Possession" stringlist-multi values are not null
-    Then "Possession" should be Array of Strings data type
+    And "Possession" values are not null
+    Then "Possession" should be "Array of Strings" data type
     And "Possession" should only contain enum values found in the metadata
     And "Possession" length should be less than or equal to the RESO maxlength of 255
 
@@ -573,8 +577,8 @@ Feature: StringList-Multi Testing
   Scenario: PossibleUse
     Given "PossibleUse" exists in the metadata
     And "PossibleUse" enum values can be compiled
-    And "PossibleUse" stringlist-multi values are not null
-    Then "PossibleUse" should be Array of Strings data type
+    And "PossibleUse" values are not null
+    Then "PossibleUse" should be "Array of Strings" data type
     And "PossibleUse" should only contain enum values found in the metadata
     And "PossibleUse" length should be less than or equal to the RESO maxlength of 1024
 
@@ -582,8 +586,8 @@ Feature: StringList-Multi Testing
   Scenario: PowerProductionType
     Given "PowerProductionType" exists in the metadata
     And "PowerProductionType" enum values can be compiled
-    And "PowerProductionType" stringlist-multi values are not null
-    Then "PowerProductionType" should be Array of Strings data type
+    And "PowerProductionType" values are not null
+    Then "PowerProductionType" should be "Array of Strings" data type
     And "PowerProductionType" should only contain enum values found in the metadata
     And "PowerProductionType" length should be less than or equal to the RESO maxlength of 1024
 
@@ -591,8 +595,8 @@ Feature: StringList-Multi Testing
   Scenario: PropertyCondition
     Given "PropertyCondition" exists in the metadata
     And "PropertyCondition" enum values can be compiled
-    And "PropertyCondition" stringlist-multi values are not null
-    Then "PropertyCondition" should be Array of Strings data type
+    And "PropertyCondition" values are not null
+    Then "PropertyCondition" should be "Array of Strings" data type
     And "PropertyCondition" should only contain enum values found in the metadata
     And "PropertyCondition" length should be less than or equal to the RESO maxlength of 1024
 
@@ -600,8 +604,8 @@ Feature: StringList-Multi Testing
   Scenario: RentIncludes
     Given "RentIncludes" exists in the metadata
     And "RentIncludes" enum values can be compiled
-    And "RentIncludes" stringlist-multi values are not null
-    Then "RentIncludes" should be Array of Strings data type
+    And "RentIncludes" values are not null
+    Then "RentIncludes" should be "Array of Strings" data type
     And "RentIncludes" should only contain enum values found in the metadata
     And "RentIncludes" length should be less than or equal to the RESO maxlength of 1024
 
@@ -609,8 +613,8 @@ Feature: StringList-Multi Testing
   Scenario: RoadFrontageType
     Given "RoadFrontageType" exists in the metadata
     And "RoadFrontageType" enum values can be compiled
-    And "RoadFrontageType" stringlist-multi values are not null
-    Then "RoadFrontageType" should be Array of Strings data type
+    And "RoadFrontageType" values are not null
+    Then "RoadFrontageType" should be "Array of Strings" data type
     And "RoadFrontageType" should only contain enum values found in the metadata
     And "RoadFrontageType" length should be less than or equal to the RESO maxlength of 1024
 
@@ -618,8 +622,8 @@ Feature: StringList-Multi Testing
   Scenario: RoadResponsibility
     Given "RoadResponsibility" exists in the metadata
     And "RoadResponsibility" enum values can be compiled
-    And "RoadResponsibility" stringlist-multi values are not null
-    Then "RoadResponsibility" should be Array of Strings data type
+    And "RoadResponsibility" values are not null
+    Then "RoadResponsibility" should be "Array of Strings" data type
     And "RoadResponsibility" should only contain enum values found in the metadata
     And "RoadResponsibility" length should be less than or equal to the RESO maxlength of 1024
 
@@ -627,8 +631,8 @@ Feature: StringList-Multi Testing
   Scenario: RoadSurfaceType
     Given "RoadSurfaceType" exists in the metadata
     And "RoadSurfaceType" enum values can be compiled
-    And "RoadSurfaceType" stringlist-multi values are not null
-    Then "RoadSurfaceType" should be Array of Strings data type
+    And "RoadSurfaceType" values are not null
+    Then "RoadSurfaceType" should be "Array of Strings" data type
     And "RoadSurfaceType" should only contain enum values found in the metadata
     And "RoadSurfaceType" length should be less than or equal to the RESO maxlength of 1024
 
@@ -636,8 +640,8 @@ Feature: StringList-Multi Testing
   Scenario: Roof
     Given "Roof" exists in the metadata
     And "Roof" enum values can be compiled
-    And "Roof" stringlist-multi values are not null
-    Then "Roof" should be Array of Strings data type
+    And "Roof" values are not null
+    Then "Roof" should be "Array of Strings" data type
     And "Roof" should only contain enum values found in the metadata
     And "Roof" length should be less than or equal to the RESO maxlength of 1024
 
@@ -645,8 +649,8 @@ Feature: StringList-Multi Testing
   Scenario: SecurityFeatures
     Given "SecurityFeatures" exists in the metadata
     And "SecurityFeatures" enum values can be compiled
-    And "SecurityFeatures" stringlist-multi values are not null
-    Then "SecurityFeatures" should be Array of Strings data type
+    And "SecurityFeatures" values are not null
+    Then "SecurityFeatures" should be "Array of Strings" data type
     And "SecurityFeatures" should only contain enum values found in the metadata
     And "SecurityFeatures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -654,8 +658,8 @@ Feature: StringList-Multi Testing
   Scenario: Sewer
     Given "Sewer" exists in the metadata
     And "Sewer" enum values can be compiled
-    And "Sewer" stringlist-multi values are not null
-    Then "Sewer" should be Array of Strings data type
+    And "Sewer" values are not null
+    Then "Sewer" should be "Array of Strings" data type
     And "Sewer" should only contain enum values found in the metadata
     And "Sewer" length should be less than or equal to the RESO maxlength of 1024
 
@@ -663,8 +667,8 @@ Feature: StringList-Multi Testing
   Scenario: ShowingContactType
     Given "ShowingContactType" exists in the metadata
     And "ShowingContactType" enum values can be compiled
-    And "ShowingContactType" stringlist-multi values are not null
-    Then "ShowingContactType" should be Array of Strings data type
+    And "ShowingContactType" values are not null
+    Then "ShowingContactType" should be "Array of Strings" data type
     And "ShowingContactType" should only contain enum values found in the metadata
     And "ShowingContactType" length should be less than or equal to the RESO maxlength of 75
 
@@ -672,8 +676,8 @@ Feature: StringList-Multi Testing
   Scenario: Skirt
     Given "Skirt" exists in the metadata
     And "Skirt" enum values can be compiled
-    And "Skirt" stringlist-multi values are not null
-    Then "Skirt" should be Array of Strings data type
+    And "Skirt" values are not null
+    Then "Skirt" should be "Array of Strings" data type
     And "Skirt" should only contain enum values found in the metadata
     And "Skirt" length should be less than or equal to the RESO maxlength of 1024
 
@@ -681,8 +685,8 @@ Feature: StringList-Multi Testing
   Scenario: SpaFeatures
     Given "SpaFeatures" exists in the metadata
     And "SpaFeatures" enum values can be compiled
-    And "SpaFeatures" stringlist-multi values are not null
-    Then "SpaFeatures" should be Array of Strings data type
+    And "SpaFeatures" values are not null
+    Then "SpaFeatures" should be "Array of Strings" data type
     And "SpaFeatures" should only contain enum values found in the metadata
     And "SpaFeatures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -690,8 +694,8 @@ Feature: StringList-Multi Testing
   Scenario: SpecialLicenses
     Given "SpecialLicenses" exists in the metadata
     And "SpecialLicenses" enum values can be compiled
-    And "SpecialLicenses" stringlist-multi values are not null
-    Then "SpecialLicenses" should be Array of Strings data type
+    And "SpecialLicenses" values are not null
+    Then "SpecialLicenses" should be "Array of Strings" data type
     And "SpecialLicenses" should only contain enum values found in the metadata
     And "SpecialLicenses" length should be less than or equal to the RESO maxlength of 1024
 
@@ -699,8 +703,8 @@ Feature: StringList-Multi Testing
   Scenario: SpecialListingConditions
     Given "SpecialListingConditions" exists in the metadata
     And "SpecialListingConditions" enum values can be compiled
-    And "SpecialListingConditions" stringlist-multi values are not null
-    Then "SpecialListingConditions" should be Array of Strings data type
+    And "SpecialListingConditions" values are not null
+    Then "SpecialListingConditions" should be "Array of Strings" data type
     And "SpecialListingConditions" should only contain enum values found in the metadata
     And "SpecialListingConditions" length should be less than or equal to the RESO maxlength of 1024
 
@@ -708,8 +712,8 @@ Feature: StringList-Multi Testing
   Scenario: StructureType
     Given "StructureType" exists in the metadata
     And "StructureType" enum values can be compiled
-    And "StructureType" stringlist-multi values are not null
-    Then "StructureType" should be Array of Strings data type
+    And "StructureType" values are not null
+    Then "StructureType" should be "Array of Strings" data type
     And "StructureType" should only contain enum values found in the metadata
     And "StructureType" length should be less than or equal to the RESO maxlength of 1024
 
@@ -717,8 +721,8 @@ Feature: StringList-Multi Testing
   Scenario: SyndicateTo
     Given "SyndicateTo" exists in the metadata
     And "SyndicateTo" enum values can be compiled
-    And "SyndicateTo" stringlist-multi values are not null
-    Then "SyndicateTo" should be Array of Strings data type
+    And "SyndicateTo" values are not null
+    Then "SyndicateTo" should be "Array of Strings" data type
     And "SyndicateTo" should only contain enum values found in the metadata
     And "SyndicateTo" length should be less than or equal to the RESO maxlength of 1024
 
@@ -726,8 +730,8 @@ Feature: StringList-Multi Testing
   Scenario: TaxExemptions
     Given "TaxExemptions" exists in the metadata
     And "TaxExemptions" enum values can be compiled
-    And "TaxExemptions" stringlist-multi values are not null
-    Then "TaxExemptions" should be Array of Strings data type
+    And "TaxExemptions" values are not null
+    Then "TaxExemptions" should be "Array of Strings" data type
     And "TaxExemptions" should only contain enum values found in the metadata
     And "TaxExemptions" length should be less than or equal to the RESO maxlength of 1024
 
@@ -735,8 +739,8 @@ Feature: StringList-Multi Testing
   Scenario: TaxStatusCurrent
     Given "TaxStatusCurrent" exists in the metadata
     And "TaxStatusCurrent" enum values can be compiled
-    And "TaxStatusCurrent" stringlist-multi values are not null
-    Then "TaxStatusCurrent" should be Array of Strings data type
+    And "TaxStatusCurrent" values are not null
+    Then "TaxStatusCurrent" should be "Array of Strings" data type
     And "TaxStatusCurrent" should only contain enum values found in the metadata
     And "TaxStatusCurrent" length should be less than or equal to the RESO maxlength of 50
 
@@ -744,8 +748,8 @@ Feature: StringList-Multi Testing
   Scenario: Telephone
     Given "Telephone" exists in the metadata
     And "Telephone" enum values can be compiled
-    And "Telephone" stringlist-multi values are not null
-    Then "Telephone" should be Array of Strings data type
+    And "Telephone" values are not null
+    Then "Telephone" should be "Array of Strings" data type
     And "Telephone" should only contain enum values found in the metadata
     And "Telephone" length should be less than or equal to the RESO maxlength of 1024
 
@@ -753,8 +757,8 @@ Feature: StringList-Multi Testing
   Scenario: TenantPays
     Given "TenantPays" exists in the metadata
     And "TenantPays" enum values can be compiled
-    And "TenantPays" stringlist-multi values are not null
-    Then "TenantPays" should be Array of Strings data type
+    And "TenantPays" values are not null
+    Then "TenantPays" should be "Array of Strings" data type
     And "TenantPays" should only contain enum values found in the metadata
     And "TenantPays" length should be less than or equal to the RESO maxlength of 1024
 
@@ -762,8 +766,8 @@ Feature: StringList-Multi Testing
   Scenario: UnitTypeType
     Given "UnitTypeType" exists in the metadata
     And "UnitTypeType" enum values can be compiled
-    And "UnitTypeType" stringlist-multi values are not null
-    Then "UnitTypeType" should be Array of Strings data type
+    And "UnitTypeType" values are not null
+    Then "UnitTypeType" should be "Array of Strings" data type
     And "UnitTypeType" should only contain enum values found in the metadata
     And "UnitTypeType" length should be less than or equal to the RESO maxlength of 1024
 
@@ -771,8 +775,8 @@ Feature: StringList-Multi Testing
   Scenario: Utilities
     Given "Utilities" exists in the metadata
     And "Utilities" enum values can be compiled
-    And "Utilities" stringlist-multi values are not null
-    Then "Utilities" should be Array of Strings data type
+    And "Utilities" values are not null
+    Then "Utilities" should be "Array of Strings" data type
     And "Utilities" should only contain enum values found in the metadata
     And "Utilities" length should be less than or equal to the RESO maxlength of 1024
 
@@ -780,8 +784,8 @@ Feature: StringList-Multi Testing
   Scenario: Vegetation
     Given "Vegetation" exists in the metadata
     And "Vegetation" enum values can be compiled
-    And "Vegetation" stringlist-multi values are not null
-    Then "Vegetation" should be Array of Strings data type
+    And "Vegetation" values are not null
+    Then "Vegetation" should be "Array of Strings" data type
     And "Vegetation" should only contain enum values found in the metadata
     And "Vegetation" length should be less than or equal to the RESO maxlength of 1024
 
@@ -789,8 +793,8 @@ Feature: StringList-Multi Testing
   Scenario: View
     Given "View" exists in the metadata
     And "View" enum values can be compiled
-    And "View" stringlist-multi values are not null
-    Then "View" should be Array of Strings data type
+    And "View" values are not null
+    Then "View" should be "Array of Strings" data type
     And "View" should only contain enum values found in the metadata
     And "View" length should be less than or equal to the RESO maxlength of 1024
 
@@ -798,8 +802,8 @@ Feature: StringList-Multi Testing
   Scenario: WaterSource
     Given "WaterSource" exists in the metadata
     And "WaterSource" enum values can be compiled
-    And "WaterSource" stringlist-multi values are not null
-    Then "WaterSource" should be Array of Strings data type
+    And "WaterSource" values are not null
+    Then "WaterSource" should be "Array of Strings" data type
     And "WaterSource" should only contain enum values found in the metadata
     And "WaterSource" length should be less than or equal to the RESO maxlength of 1024
 
@@ -807,8 +811,8 @@ Feature: StringList-Multi Testing
   Scenario: WaterfrontFeatures
     Given "WaterfrontFeatures" exists in the metadata
     And "WaterfrontFeatures" enum values can be compiled
-    And "WaterfrontFeatures" stringlist-multi values are not null
-    Then "WaterfrontFeatures" should be Array of Strings data type
+    And "WaterfrontFeatures" values are not null
+    Then "WaterfrontFeatures" should be "Array of Strings" data type
     And "WaterfrontFeatures" should only contain enum values found in the metadata
     And "WaterfrontFeatures" length should be less than or equal to the RESO maxlength of 1024
 
@@ -816,20 +820,7 @@ Feature: StringList-Multi Testing
   Scenario: WindowFeatures
     Given "WindowFeatures" exists in the metadata
     And "WindowFeatures" enum values can be compiled
-    And "WindowFeatures" stringlist-multi values are not null
-    Then "WindowFeatures" should be Array of Strings data type
+    And "WindowFeatures" values are not null
+    Then "WindowFeatures" should be "Array of Strings" data type
     And "WindowFeatures" should only contain enum values found in the metadata
     And "WindowFeatures" length should be less than or equal to the RESO maxlength of 1024
-
-  
-  
-
-
-#@DD1.5_StringList-Multi @DD1.6_StringList-Multi @DD1.5 @DD1.6 @xxx @DD1.5_xxx @DD1.6_xxx
-#Scenario: xxx
-#  Given "xxx" exists in the metadata
-#  And "xxx" enum values can be compiled
-#  And "xxx" stringlist-multi values are not null
-#  Then "xxx" should be Array of Strings data type
-#  And "xxx" should only contain enum values found in the metadata 
-#  And "xxx" length should be less than or equal to the RESO maxlength of 1024
