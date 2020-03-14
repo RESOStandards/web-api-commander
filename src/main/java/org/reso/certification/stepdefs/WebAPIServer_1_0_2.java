@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.POJONode;
 import io.cucumber.java8.En;
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
+import org.apache.olingo.client.api.communication.ODataServerErrorException;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
@@ -90,8 +92,6 @@ public class WebAPIServer_1_0_2 implements En {
     AtomicReference<ODataRawRequest> rawRequest = new AtomicReference<>();
 
     AtomicReference<ODataClientErrorException> oDataClientErrorException = new AtomicReference<>();
-    AtomicReference<Boolean> oDataClientErrorExceptionHandled = new AtomicReference<>();
-
     AtomicReference<String> serverODataHeaderVersion = new AtomicReference<>();
     AtomicReference<Boolean> testAppliesToServerODataHeaderVersion = new AtomicReference<>();
 
@@ -114,7 +114,6 @@ public class WebAPIServer_1_0_2 implements En {
       rawRequest.set(null);
       oDataClientErrorException.set(null);
       serverODataHeaderVersion.set(null);
-      oDataClientErrorExceptionHandled.set(false);
       testAppliesToServerODataHeaderVersion.set(false);
     };
 
@@ -133,12 +132,19 @@ public class WebAPIServer_1_0_2 implements En {
         responseCode.set(oDataRawResponse.get().getStatusCode());
         LOG.info("Request succeeded..." + responseData.get().getBytes().length + " bytes received.");
       } catch (ODataClientErrorException cex) {
-        LOG.debug("OData Client Error Exception caught. Check subsequent test output for asserted conditions...");
+        LOG.debug("ODataClientErrorException caught. Check tests for asserted conditions...");
         oDataClientErrorException.set(cex);
         serverODataHeaderVersion.set(TestUtils.getHeaderData(HEADER_ODATA_VERSION, cex.getHeaderInfo()));
         responseCode.set(cex.getStatusLine().getStatusCode());
-        oDataClientErrorExceptionHandled.set(true);
-        throw cex;
+      } catch (ODataServerErrorException sex) {
+        LOG.debug("ODataServerErrorException thrown in executeGetRequest. Check tests for asserted conditions...");
+        //TODO: look for better ways to do this in Olingo or open PR
+        if (sex.getMessage().contains(Integer.toString(HttpStatus.SC_NOT_IMPLEMENTED))) {
+          responseCode.set(HttpStatus.SC_NOT_IMPLEMENTED);
+          return null;
+        }
+        fail(sex.toString());
+        throw sex;
       } catch (Exception ex) {
         fail(ex.toString());
         throw ex;
