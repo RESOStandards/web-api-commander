@@ -95,6 +95,8 @@ public class WebAPIServer_1_0_2 implements En {
     AtomicReference<String> serverODataHeaderVersion = new AtomicReference<>();
     AtomicReference<Boolean> testAppliesToServerODataHeaderVersion = new AtomicReference<>();
 
+    final boolean showResponses = Boolean.parseBoolean(System.getProperty("showResponses"));
+
     /*
      * Instance Utility Methods - must precede usage
      */
@@ -163,6 +165,7 @@ public class WebAPIServer_1_0_2 implements En {
       assertNotNull("ERROR: pathToRESOScript must be present in command arguments, see README", pathToRESOScript);
       LOG.info("Using RESOScript: " + pathToRESOScript);
     });
+
     And("^Client Settings and Parameters were read from the file$", () -> {
       if (settings == null) {
         settings = Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript")));
@@ -364,10 +367,17 @@ public class WebAPIServer_1_0_2 implements En {
 
         int combinedCount = l1.size() + l2.size();
         Set<POJONode> combined = new LinkedHashSet<>(l1);
-        LOG.info("Response Page 1: " + new POJONode(l1));
+
+        new POJONode(l1);
+        if (showResponses) {
+          LOG.info("Response Page 1: " + l1);
+        }
 
         combined.addAll(l2);
-        LOG.info("Response Page 2: " + new POJONode(l2));
+        new POJONode(l2);
+        if (showResponses) {
+          LOG.info("Response Page 2: " + l2);
+        }
 
         assertEquals(combinedCount, combined.size());
       } catch (Exception ex) {
@@ -387,6 +397,7 @@ public class WebAPIServer_1_0_2 implements En {
         //reset local state each time a get request is run
         resetRequestState.run();
 
+        LOG.info("Running test with RequirementId: " + requirementId);
         requestUri.set(Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl()));
         executeGetRequest.apply(requestUri.get());
       } catch (Exception ex) {
@@ -427,8 +438,7 @@ public class WebAPIServer_1_0_2 implements En {
         assertTrue(TestUtils.isValidJson(responseData.get()));
         LOG.info("Response is valid JSON!");
 
-        String showResponses = System.getProperty("showResponses");
-        if (Boolean.parseBoolean(showResponses)) {
+        if (showResponses) {
           LOG.info("Response: " + new ObjectMapper().readTree(responseData.get()).toPrettyString());
         }
       } catch (Exception ex) {
@@ -929,13 +939,14 @@ public class WebAPIServer_1_0_2 implements En {
       LOG.info("Results count is: " + results.getEntities().size());
       AtomicInteger counter = new AtomicInteger();
       results.getEntities().forEach(clientEntity -> {
-        LOG.info("\nItem #" + counter.getAndIncrement());
+        if (showResponses) LOG.info("\nItem #" + counter.getAndIncrement());
         clientEntity.getProperties().forEach(clientProperty -> {
-          LOG.info("\tField Name: " + clientProperty.getName());
-          LOG.info("\tField Value: " + clientProperty.getValue().toString());
-          LOG.info("\tType Name: " + clientProperty.getValue().getTypeName());
-          LOG.info("\n");
-
+          if (showResponses) {
+            LOG.info("\tField Name: " + clientProperty.getName());
+            LOG.info("\tField Value: " + clientProperty.getValue().toString());
+            LOG.info("\tType Name: " + clientProperty.getValue().getTypeName());
+            LOG.info("\n");
+          }
           assertNotNull("ERROR: '" + parameterExpandField + "' not found in results!", clientProperty.getName());
           assertNotNull("ERROR: data type could not be found for " + clientProperty.getName(), clientProperty.getValue().getTypeName());
         });
