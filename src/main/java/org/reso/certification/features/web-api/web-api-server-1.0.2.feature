@@ -6,8 +6,6 @@ Feature: Web API Server 1.0.2 Certification
     And Client Settings and Parameters were read from the file
     And an OData client was successfully created from the given RESOScript
 
-
-
   #######################################
   #  Core Tests
   #######################################
@@ -21,6 +19,8 @@ Feature: Web API Server 1.0.2 Certification
     And a default entity container exists for the service root in "ClientSettings_WebAPIURI"
     And the Edm metadata returned by the server are valid
     And the metadata contains the "Parameter_EndpointResource" resource
+    And the given "Parameter_EndpointResource" resource exists within "Parameter_DD17_WellKnownResourceList"
+    And the metadata contains at least one resource from "Parameter_WebAPI102_RequiredResourceList"
     And resource metadata for "Parameter_EndpointResource" contains the fields in "Parameter_SelectList"
 
   @REQ-WA103-END2 @core @2.4.1 @core-endorsement @datasystem

@@ -66,7 +66,7 @@
   ############################################################-->
 
   <!-- The current version of this RESOScript -->
-  <RESOScriptVersion>1.0.5</RESOScriptVersion>
+  <RESOScriptVersion>1.0.6</RESOScriptVersion>
 
 
   <!--
@@ -89,12 +89,13 @@
         * https://www.oauth.com/oauth2-servers/access-tokens/authorization-code-request/
         * https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/
     -->
-    <AuthenticationType>authorization_code</AuthenticationType>
 
-    <!-- Grant Type: authorization_code-->
+    <!-- Grant Type: authorization_code -->
+    <AuthenticationType>authorization_code</AuthenticationType>
     <BearerToken><!-- REQUIRED: Your BearerToken goes here if using Access Tokens --></BearerToken>
 
     <!-- Grant Type: client_credentials -->
+    <!-- <AuthenticationType>client_credentials</AuthenticationType>-->
     <ClientIdentification><!-- REQUIRED: Your client_id value if using Client Credentials--></ClientIdentification>
     <ClientSecret><!-- REQUIRED: Your client_secret value if using Client Credentials--></ClientSecret>
     <TokenURI><!-- REQUIRED: Your token endpoint URI--></TokenURI>
@@ -110,7 +111,9 @@
   ############################################################
     Parameters Section - add your testing variables here
   ############################################################-->
+
   <Parameters>
+
     <!--
     ############################################################
           Service Configuration
@@ -178,6 +181,7 @@
     <Parameter Name="ConcatFieldTwoValue" Value="YOUR TwoValue GOES HERE" />
     <Parameter Name="ConcatFieldBothValue" Value="Your 'OneValue: TwoValue' GOES HERE" /> <!-- format 'OneValue: TwoValue' -->
 
+
     <!--
     ############################################################
       Sample Field Values
@@ -220,6 +224,7 @@
     <Parameter Name="GeoSpatialDistanceValue" Value="1000" />
     <Parameter Name="SRID" Value="0" />
 
+
     <!--
     ############################################################
       HTTP Code Testing
@@ -240,6 +245,7 @@
     <!-- REQUIRED: 501 Not Implemented - Set this to an OData query that hasn't been implemented on your server -->
     <Parameter Name="501NotImplemented" Value="*Parameter_EndpointResource*?$search=red OR blue" />
 
+
     <!--
     ############################################################
       Constants and Computed Values - Do Not Change
@@ -252,11 +258,23 @@
     <!-- New Values for WS103 Testing -->
     <Parameter Name="CastFieldType" Value="Edm.String" />
 
-    <!-- Computed OData $select list -->
+    <!-- Required resource lists for Standard Resource Names requirement -->
+    <Parameter Name="WebAPI102_RequiredResourceList" Value="Property,Member,Office,Media" />
+
+    <!-- Allowed Resources - Update to 1.8 once it's approved -->
+    <Parameter Name="DD17_WellKnownResourceList" Value="Property,Member,Office,Contacts,ContactListings,HistoryTransactional,InternetTracking,Media,OpenHouse,OUID,Prospecting,Queue,Rules,SavedSearch,Showing,Teams" />
+
+    <!-- Gold Select List -->
+    <Parameter Name="GoldSelectList"
+    Value="*Parameter_KeyOrKeyNumericField*,*Parameter_FilterIntegerField*,*Parameter_FilterHasField*,*Parameter_DateField*,*Parameter_TimestampField*,*Parameter_GeoSpatialField*,*Parameter_StringField" />
+
+    <!-- Platinum Select List -->
+    <Parameter Name="PlatinumSelectList"
+               Value="*Parameter_KeyOrKeyNumericField*,*Parameter_FilterIntegerField*,*Parameter_FilterHasField*,*Parameter_DateField*,*Parameter_TimestampField*,*Parameter_GeoSpatialField*,*Parameter_StringField" />
 
     <!-- Computed OData $select list -->
     <Parameter Name="SelectList"
-               Value="*Parameter_KeyOrKeyNumericField*,*Parameter_FilterIntegerField*,*Parameter_FilterHasField*,*Parameter_DateField*,*Parameter_TimestampField*,*Parameter_GeoSpatialField*,*Parameter_StringField" />
+               Value="*Parameter_PlatinumSelectList*" />
 
     <!-- Computed Enumeration Values - do not change -->
     <Parameter Name="SingleValueLookupValue" Value="*Parameter_SingleValueLookupNamespace*'*Parameter_SingleLookupValue*'" />
@@ -265,6 +283,7 @@
     <Parameter Name="MultipleValueLookupValue2" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue2*'" />
 
     <Parameter Name="OptionalMetadataFormatParameter" Value="?$format=application/xml" />
+
 
     <!--
     ############################################################
@@ -277,6 +296,12 @@
 
   </Parameters>
 
+
+  <!--
+  ############################################################
+    Requests Section - Queries used during testing,
+                       DO NOT CHANGE
+  ############################################################-->
   <Requests>
 
     <Request

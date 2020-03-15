@@ -46,6 +46,8 @@ import static org.reso.commander.TestUtils.Operators.*;
 
 public class WebAPIServer_1_0_2 implements En {
   private static final Logger LOG = LogManager.getLogger(WebAPIServer_1_0_2.class);
+  private static final  String FIELD_SEPARATOR = ",", PRETTY_FIELD_SEPARATOR = FIELD_SEPARATOR + " ";
+
   private static Settings settings;
 
   //container to hold retrieved metadata for later comparisons
@@ -145,10 +147,10 @@ public class WebAPIServer_1_0_2 implements En {
           responseCode.set(HttpStatus.SC_NOT_IMPLEMENTED);
           return null;
         }
-        fail(sex.toString());
+        fail("ERROR: unhandled ODataServerErrorException in executeGetRequest()!\n" + sex.toString());
         throw sex;
       } catch (Exception ex) {
-        fail(ex.toString());
+        fail("ERROR: unhandled Exception in executeGetRequest()!\n" + ex.toString());
         throw ex;
       }
       return null;
@@ -227,9 +229,9 @@ public class WebAPIServer_1_0_2 implements En {
       try {
         boolean isValid = commander.get().validateMetadata(edm.get());
         LOG.info("Edm Metadata is " + (isValid ? "valid" : "invalid") + "!");
-        assertTrue(isValid);
+        assertTrue("Edm Metadata at the given service root is not valid! " + serviceRoot, isValid);
       } catch (Exception ex) {
-        fail(ex.getMessage());
+        fail("ERROR: could not validate Edm Metadata!\n" + ex.getMessage());
       }
     });
 
@@ -246,9 +248,9 @@ public class WebAPIServer_1_0_2 implements En {
 
         boolean isValid = commander.get().validateMetadata(xmlMetadata.get());
         LOG.info("XML Metadata is " + (isValid ? "valid" : "invalid") + "!");
-        assertTrue(isValid);
+        assertTrue("ERROR: XML Metadata at the given service root is not valid! " + serviceRoot, isValid);
       } catch (Exception ex) {
-        fail(ex.getMessage());
+        fail("ERROR: could not validate XML Metadata!\n" + ex.getMessage());
       }
     });
 
@@ -273,15 +275,14 @@ public class WebAPIServer_1_0_2 implements En {
         LOG.info("Resolved value is: " + resolvedValue);
 
         if (resolvedValue.getClass().isInstance(Integer.class)) {
-          assertEquals(Integer.parseInt(expectedValueAsString), resolvedValue);
+          assertEquals("ERROR: the given Integer value is not equal to the value found on the server!", Integer.parseInt(expectedValueAsString), resolvedValue);
         } else {
-          assertEquals(expectedValueAsString, resolvedValue.toString());
+          assertEquals("ERROR: the given String value is not equal to the value found on the server!", expectedValueAsString, resolvedValue.toString());
         }
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
     });
-
 
     /*
      * REQ-WA103-QR3 - $select
@@ -289,11 +290,9 @@ public class WebAPIServer_1_0_2 implements En {
     And("^data are present in fields contained within \"([^\"]*)\"$", (String parameterSelectList) -> {
       try {
         AtomicInteger numFieldsWithData = new AtomicInteger();
-        List<String> fieldList = new ArrayList<>(Arrays.asList(Settings.resolveParametersString(parameterSelectList, settings).split(",")));
+        List<String> fieldList = new ArrayList<>(Arrays.asList(Settings.resolveParametersString(parameterSelectList, settings).split(FIELD_SEPARATOR)));
 
         AtomicInteger numResults = new AtomicInteger();
-
-
         //iterate over the items and count the number of fields with data to determine whether there are data present
         from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           if (item != null) {
@@ -314,7 +313,7 @@ public class WebAPIServer_1_0_2 implements En {
         } else {
           LOG.info("Percent Fill: 0% - no fields with data found!");
         }
-        assertTrue(numFieldsWithData.get() > 0);
+        assertTrue("ERROR: no fields with data could be found from the given $select list!",numFieldsWithData.get() > 0);
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
@@ -333,7 +332,8 @@ public class WebAPIServer_1_0_2 implements En {
         int topCount = Integer.parseInt(Settings.resolveParametersString(parameterTopCount, settings));
         LOG.info("Number of values returned: " + numResults.get() + ", top count is: " + topCount);
 
-        assertTrue(numResults.get() > 0 && numResults.get() <= topCount);
+        assertTrue("ERROR: results count must be greater than zero and less than " + parameterTopCount + "!",
+            numResults.get() > 0 && numResults.get() <= topCount);
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
@@ -354,7 +354,6 @@ public class WebAPIServer_1_0_2 implements En {
 
         //TODO: convert to OData filter factory
         requestUri.set(Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl() + "&$skip=" + skipCount));
-
         executeGetRequest.apply(requestUri.get());
       } catch (Exception ex) {
         fail(ex.getMessage());
@@ -369,17 +368,13 @@ public class WebAPIServer_1_0_2 implements En {
         Set<POJONode> combined = new LinkedHashSet<>(l1);
 
         new POJONode(l1);
-        if (showResponses) {
-          LOG.info("Response Page 1: " + l1);
-        }
+        if (showResponses) LOG.info("Response Page 1: " + l1);
 
         combined.addAll(l2);
         new POJONode(l2);
-        if (showResponses) {
-          LOG.info("Response Page 2: " + l2);
-        }
+        if (showResponses) LOG.info("Response Page 2: " + l2);
 
-        assertEquals(combinedCount, combined.size());
+        assertEquals("ERROR: repeated data found, expected unique data on each page!", combinedCount, combined.size());
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
@@ -397,7 +392,7 @@ public class WebAPIServer_1_0_2 implements En {
         //reset local state each time a get request is run
         resetRequestState.run();
 
-        LOG.info("Running test with RequirementId: " + requirementId);
+        LOG.info("RequirementId: " + requirementId);
         requestUri.set(Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl()));
         executeGetRequest.apply(requestUri.get());
       } catch (Exception ex) {
@@ -412,7 +407,9 @@ public class WebAPIServer_1_0_2 implements En {
       try {
         LOG.info("Asserted Response Code: " + assertedResponseCode + ", Server Response Code: " + responseCode);
         assertTrue(responseCode.get() > 0 && assertedResponseCode > 0);
-        assertEquals(assertedResponseCode.intValue(), responseCode.get().intValue());
+
+        assertEquals("ERROR: asserted response code does not match the one returned from the server!",
+            assertedResponseCode.intValue(), responseCode.get().intValue());
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
@@ -423,7 +420,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the response is valid XML$", () -> {
       try {
-        assertTrue(Commander.validateXML(responseData.get()));
+        assertTrue("ERROR: invalid XML response!", Commander.validateXML(responseData.get()));
         LOG.info("Response is valid XML!");
       } catch (Exception ex) {
         fail(ex.getMessage());
@@ -435,12 +432,10 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the response is valid JSON$", () -> {
       try {
-        assertTrue(TestUtils.isValidJson(responseData.get()));
+        assertTrue("ERROR: invalid JSON response!", TestUtils.isValidJson(responseData.get()));
         LOG.info("Response is valid JSON!");
 
-        if (showResponses) {
-          LOG.info("Response: " + new ObjectMapper().readTree(responseData.get()).toPrettyString());
-        }
+        if (showResponses) LOG.info("Response: " + new ObjectMapper().readTree(responseData.get()).toPrettyString());
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
@@ -460,10 +455,11 @@ public class WebAPIServer_1_0_2 implements En {
 
         if (versionsMatch) {
           LOG.info("Asserted Response Code: " + assertedHttpResponseCode + ", Response code: " + responseCode.get());
-          assertTrue(responseCodesMatch);
+          assertTrue("ERROR: asserted response code does not match the one returned from the server!", responseCodesMatch);
         }
       } catch (Exception ex) {
-        //DEBUG only in this case as we are expecting an error and don't want to throw or print it
+        //Don't fail tests like in other cases because get requests may generate exceptions that we want to
+        //continue past and test. Log exceptions to DEBUG instead.
         LOG.debug(ex.toString());
       }
     });
@@ -503,7 +499,7 @@ public class WebAPIServer_1_0_2 implements En {
       try {
         int count = from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).size();
         LOG.info("Results count is: " + count);
-        assertTrue(count > 0);
+        assertTrue("ERROR: no results returned from the server!", count > 0);
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
@@ -518,7 +514,7 @@ public class WebAPIServer_1_0_2 implements En {
         boolean isPresent = from(responseData.get()).get() != null;
         LOG.info("Response value is: " + value);
         LOG.info("IsPresent: " + isPresent);
-        assertTrue(isPresent);
+        assertTrue("ERROR: singleton results not found for '" + value + "'!", isPresent);
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
@@ -532,7 +528,7 @@ public class WebAPIServer_1_0_2 implements En {
         int count = from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).size(),
             limit = Integer.parseInt(Settings.resolveParametersString(limitField, settings));
         LOG.info("Results count is: " + count + ", Limit is: " + limit);
-        assertTrue(count <= limit);
+        assertTrue("ERROR: number of results exceeds that specified in '" + limitField + "'!", count <= limit);
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
@@ -600,7 +596,6 @@ public class WebAPIServer_1_0_2 implements En {
             assertTrue(TestUtils.compare(fieldValue.get(), op, assertedValue.get()));
           } catch (Exception ex) {
             fail(ex.toString());
-
           }
         });
       } catch (Exception ex) {
@@ -745,6 +740,9 @@ public class WebAPIServer_1_0_2 implements En {
       }
     });
 
+    /*
+     * Date Field comparisons
+     */
     And("^\"([^\"]*)\" data in Date Field \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String stringDatePart, String parameterFieldName, String op, String parameterAssertedValue) -> {
       String fieldName = Settings.resolveParametersString(parameterFieldName, settings);
       AtomicReference<Integer> fieldValue = new AtomicReference<>();
@@ -819,7 +817,6 @@ public class WebAPIServer_1_0_2 implements En {
     });
 
 
-
     //===============================\\
     //  Metadata validation methods  \\
     //===============================\\
@@ -845,10 +842,10 @@ public class WebAPIServer_1_0_2 implements En {
     });
 
     /*
-     *
+     * Ensures that the server metadata for the given resource in parameterResourceName contains
+     * all of the fields in the given parameterSelectList.
      */
     And("^resource metadata for \"([^\"]*)\" contains the fields in \"([^\"]*)\"$", (String parameterResourceName, String parameterSelectList) -> {
-      final String FIELD_SEPARATOR = ",";
       final String selectList = Settings.resolveParametersString(parameterSelectList, settings);
 
       try {
@@ -871,6 +868,10 @@ public class WebAPIServer_1_0_2 implements En {
       }
     });
 
+    /*
+     * Finds default Edm entity container at the given Service Root.
+     * Note that this assumes the server can process the Accept application/xml header!
+     */
     When("^a default entity container exists for the service root in \"([^\"]*)\"$", (String clientSettingsServiceRoot) -> {
       final String serviceRoot = Settings.resolveParametersString(clientSettingsServiceRoot, settings);
       assertEquals("ERROR: given service root doesn't match the one configured in the Commander", serviceRoot, commander.get().getServiceRoot());
@@ -890,6 +891,9 @@ public class WebAPIServer_1_0_2 implements En {
       }
     });
 
+    /*
+     * XML Metadata getter
+     */
     And("^XML Metadata are requested from the service root in \"([^\"]*)\"$", (String clientSettingsServiceRoot) -> {
       final String serviceRoot = Settings.resolveParametersString(clientSettingsServiceRoot, settings);
       assertEquals("ERROR: given service root doesn't match the one configured in the Commander", serviceRoot, commander.get().getServiceRoot());
@@ -905,7 +909,6 @@ public class WebAPIServer_1_0_2 implements En {
         fail(ex.getMessage());
       }
     });
-
 
     /*
      * Tests whether a navigation property can be found in the given resource name.
@@ -951,7 +954,6 @@ public class WebAPIServer_1_0_2 implements En {
           assertNotNull("ERROR: data type could not be found for " + clientProperty.getName(), clientProperty.getValue().getTypeName());
         });
       });
-
     });
 
     /*
@@ -960,6 +962,43 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the expanded data were found in the related resource$", () -> {
       //TODO: this depends on either finding the appropriate navigation property for a given relationship, or having the Expanded resource name
+    });
+
+
+    /*
+     * Checks the Standard Resources requirement from Section 2.6 of the Web API specification
+     */
+    And("^the metadata contains at least one resource from \"([^\"]*)\"$", (String parameterRequiredResourceList) -> {
+      String requiredResourceString = Settings.resolveParametersString(parameterRequiredResourceList, settings).replace(" ", "");
+      List<String> requiredResources = Arrays.asList(requiredResourceString.split(","));
+
+      LOG.info("Searching the default entity container for one of the following Standard Resources: " + requiredResourceString.replace(FIELD_SEPARATOR, PRETTY_FIELD_SEPARATOR));
+
+      AtomicBoolean found = new AtomicBoolean(false);
+      requiredResources.forEach(requiredResource -> {
+        if (!found.get()) found.set(found.get() || edm.get().getEntityContainer().getEntitySet(requiredResource) != null);
+      });
+
+      assertTrue("ERROR: could not find one of the following Standard Resource Names in the default entity container: " + requiredResourceString.replace(FIELD_SEPARATOR, PRETTY_FIELD_SEPARATOR),
+          found.get());
+
+      LOG.info("Standard Resource Names requirement met!");
+    });
+
+    /*
+     * Checks that the resource in Parameter_EndpointResource is within the allowed resources for the
+     * latest version of the Data Dictionary, currently 1.7.
+     */
+    And("^the given \"([^\"]*)\" resource exists within \"([^\"]*)\"$", (String parameterResourceName, String parameterResourceList) -> {
+      String resourceName = Settings.resolveParametersString(parameterResourceName, settings),
+             allowedResourceString = Settings.resolveParametersString(parameterResourceList, settings).replace(" ", "");
+      List<String> allowedResources = new ArrayList<>(Arrays.asList(allowedResourceString.split(FIELD_SEPARATOR)));
+
+      LOG.info("Resource Name: " + resourceName);
+      LOG.info("Allowed Resources: " + allowedResourceString.replace(FIELD_SEPARATOR, PRETTY_FIELD_SEPARATOR));
+
+      assertTrue("ERROR: the given resource name '" + resourceName + "' does not exist in the known resources within '" + parameterResourceList + "'. ",
+          allowedResources.contains(resourceName));
     });
 
   }
