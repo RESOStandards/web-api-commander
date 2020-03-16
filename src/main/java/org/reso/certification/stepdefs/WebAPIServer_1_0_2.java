@@ -9,11 +9,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.communication.ODataServerErrorException;
+import org.apache.olingo.client.api.communication.request.retrieve.ODataEntitySetRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
+import org.apache.olingo.client.api.data.ResWrap;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
+import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
@@ -40,8 +43,7 @@ import java.util.function.Function;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
-import static org.reso.commander.TestUtils.HEADER_ODATA_VERSION;
-import static org.reso.commander.TestUtils.JSON_VALUE_PATH;
+import static org.reso.commander.TestUtils.*;
 import static org.reso.commander.TestUtils.Operators.*;
 
 public class WebAPIServer_1_0_2 implements En {
@@ -97,6 +99,10 @@ public class WebAPIServer_1_0_2 implements En {
     AtomicReference<String> serverODataHeaderVersion = new AtomicReference<>();
     AtomicReference<Boolean> testAppliesToServerODataHeaderVersion = new AtomicReference<>();
 
+    AtomicReference<ODataEntitySetRequest<ClientEntitySet>> clientEntitySetRequest = new AtomicReference<>();
+    AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
+    AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
+
     final boolean showResponses = Boolean.parseBoolean(System.getProperty("showResponses"));
 
     /*
@@ -121,6 +127,16 @@ public class WebAPIServer_1_0_2 implements En {
       testAppliesToServerODataHeaderVersion.set(false);
     };
 
+    /*
+     * This is used to prepare the URI coming from the raw RESOScript file to handle special characters
+     * needing to be processed prior to being converted to a valid URI.
+     */
+    Function<String, URI> prepareUri = queryString -> URI.create(
+        /* replace spaces with %20 */
+        queryString.replace(" ", "%20")
+
+        /* add other handlers here */
+    );
 
     /*
      * Executes HTTP GET request and sets the expected local variables.
@@ -163,11 +179,9 @@ public class WebAPIServer_1_0_2 implements En {
       if (pathToRESOScript == null) {
         pathToRESOScript = System.getProperty("pathToRESOScript");
       }
-
       assertNotNull("ERROR: pathToRESOScript must be present in command arguments, see README", pathToRESOScript);
       LOG.info("Using RESOScript: " + pathToRESOScript);
     });
-
     And("^Client Settings and Parameters were read from the file$", () -> {
       if (settings == null) {
         settings = Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript")));
@@ -205,12 +219,22 @@ public class WebAPIServer_1_0_2 implements En {
           .bearerToken(bearerToken)
           .useEdmEnabledClient(true)
           .build());
-
-      assertNotNull(commander.get());
-      assertTrue("ERROR: Commander must either have a valid bearer token or Client Credentials configuration.",
-          commander.get().isTokenClient() || (commander.get().isOAuthClient() && commander.get().getTokenUri() != null));
     });
 
+    /*
+     * Ensures that the client either uses Authorization Codes or Client Credentials
+     */
+    And("^the OData client uses either Authorization Codes or Client Credentials$", () -> {
+      assertNotNull(commander.get());
+      assertTrue("ERROR: Commander must either have a valid Authorization Code or Client Credentials configuration.",
+          commander.get().isTokenClient() || commander.get().isOAuthClient() && commander.get().hasValidAuthConfig());
+
+      if (commander.get().isTokenClient()) {
+        LOG.info("Authentication Type: authorization_code");
+      } else if (commander.get().isOAuthClient()) {
+        LOG.info("Authentication Type: client_credentials");
+      }
+    });
 
     /*
      * REQ-WA103-END2
@@ -933,7 +957,7 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * Checks to see whether the expanded field has data
      */
-    And("^data are present within \"([^\"]*)\"$", (String parameterExpandField) -> {
+    And("^data are present within the expanded field \"([^\"]*)\"$", (String parameterExpandField) -> {
       String expandField = Settings.resolveParametersString(parameterExpandField, settings);
       assertFalse("ERROR: no expand field found for " + parameterExpandField, expandField.isEmpty());
 
@@ -943,6 +967,7 @@ public class WebAPIServer_1_0_2 implements En {
       AtomicInteger counter = new AtomicInteger();
       results.getEntities().forEach(clientEntity -> {
         if (showResponses) LOG.info("\nItem #" + counter.getAndIncrement());
+
         clientEntity.getProperties().forEach(clientProperty -> {
           if (showResponses) {
             LOG.info("\tField Name: " + clientProperty.getName());
@@ -951,6 +976,7 @@ public class WebAPIServer_1_0_2 implements En {
             LOG.info("\n");
           }
           assertNotNull("ERROR: '" + parameterExpandField + "' not found in results!", clientProperty.getName());
+          assertNotNull("ERROR: '" + parameterExpandField + "' contains no data!", clientProperty.getValue());
           assertNotNull("ERROR: data type could not be found for " + clientProperty.getName(), clientProperty.getValue().getTypeName());
         });
       });
@@ -961,7 +987,7 @@ public class WebAPIServer_1_0_2 implements En {
      * resource of the expanded type
      */
     And("^the expanded data were found in the related resource$", () -> {
-      //TODO: this depends on either finding the appropriate navigation property for a given relationship, or having the Expanded resource name
+      //TODO: this depends on either finding the appropriate navigation property for a given relationship, or having the Expanded resource type name
     });
 
 
@@ -1001,5 +1027,56 @@ public class WebAPIServer_1_0_2 implements En {
           allowedResources.contains(resourceName));
     });
 
+
+    When("^a GET request is made to the resolved Url in \"([^\"]*)\" using the OData Client$", (String parameterRequirementId) -> {
+      String uriString = Settings.resolveParameters(settings.getRequests().get(parameterRequirementId), settings).getUrl();
+      assertTrue("ERROR: the resolved Url in '" + parameterRequirementId + "' was invalid!", uriString != null && uriString.length() > 0);
+
+      LOG.info("Requirement Id: " + parameterRequirementId);
+      try {
+        requestUri.set(prepareUri.apply(uriString));
+        clientEntitySetRequest.set(commander.get().getClient().getRetrieveRequestFactory().getEntitySetRequest(requestUri.get()));
+        LOG.info("OData Client Request being made to: " + uriString);
+        clientEntitySetResponse.set(clientEntitySetRequest.get().execute());
+
+        responseCode.set(clientEntitySetResponse.get().getStatusCode());
+
+        ResWrap<EntityCollection> coll = (commander.get().getClient().getDeserializer(ContentType.JSON).toEntitySet(clientEntitySetResponse.get().getRawResponse()));
+        clientEntitySet.set(commander.get().getClient().getBinder().getODataEntitySet(coll));
+      } catch (ODataClientErrorException cex) {
+        oDataClientErrorException.set(cex);
+        responseCode.set(cex.getStatusLine().getStatusCode());
+      } catch (Exception ex) {
+        fail(ex.toString());
+      }
+    });
+
+    /*
+     * Uses the OData ClientEntitySet rather than raw JSON responses for comparisons
+     */
+    And("^client entity set Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String operator, String parameterFieldValue) -> {
+      String fieldName = Settings.resolveParametersString(parameterFieldName, settings),
+             op = operator.trim().toLowerCase();
+
+      Integer fieldValue = Integer.parseInt(Settings.resolveParametersString(parameterFieldValue, settings));
+      assertNotNull(fieldValue);
+
+      clientEntitySet.get().getEntities().forEach(entity -> {
+        assertTrue(compare((Integer)entity.getProperty(fieldName).getValue().asPrimitive().toValue(), op, fieldValue));
+      });
+
+    });
+
+    And("^the OData client response has client entity set data$", () -> {
+      assertNotNull("ERROR: no entity collection returned in response!", clientEntitySet.get());
+      assertTrue("ERROR: no results returned!", clientEntitySet.get().getCount() > 0);
+
+      if (showResponses) {
+        clientEntitySet.get().getEntities().forEach(entity -> {
+          LOG.info("Entity Type is: " + entity.getTypeName());
+          entity.getProperties().forEach(property -> LOG.info("\tProperty: " + property.toString()));
+        });
+      }
+    });
   }
 }

@@ -80,6 +80,24 @@ public class Commander {
   }
 
   /**
+   * Determines whether the given authorization configuration is valid.
+   * @return true if the auth config is valid, false otherwise.
+   */
+  public boolean hasValidAuthConfig() {
+    if (isTokenClient()) {
+      return bearerToken != null && bearerToken.length() > 0;
+    }
+
+    if (isOAuthClient()) {
+      return getTokenUri() != null && getTokenUri().length() > 0
+          && clientId != null && clientId.length() > 0
+          && clientSecret != null && clientSecret.length() > 0
+          && getTokenUri() != null && getTokenUri().length() > 0;
+    }
+    return false;
+  }
+
+  /**
    * Builder pattern for creating Commander instances.
    */
   public static class Builder {
@@ -148,8 +166,7 @@ public class Commander {
       commander.useEdmEnabledClient = this.useEdmEnabledClient;
 
       //items required for OAuth client
-      commander.isOAuthClient =
-          clientId != null && clientId.length() > 0 &&
+      commander.isOAuthClient = clientId != null && clientId.length() > 0 &&
               clientSecret != null && clientSecret.length() > 0 &&
               authorizationUri != null && authorizationUri.length() > 0 &&
               tokenUri != null && tokenUri.length() > 0;

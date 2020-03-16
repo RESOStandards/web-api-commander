@@ -791,7 +791,7 @@
       Capability="Filterability ($filter)"
       WebAPIReference="2.4.4"
       OutputFile="REQ-WA103-QO12_Grouping.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and (*Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow*) and (*Parameter_FilterIntegerField* le *Parameter_FilterIntegerValueHigh* and *Parameter_FilterIntegerField* ge *Parameter_FilterIntegerValueLow*)*Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and (*Parameter_FilterIntegerField* ge *Parameter_FilterIntegerValueLow* and *Parameter_FilterIntegerField* le *Parameter_FilterIntegerValueHigh*) and (*Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueHigh* and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow*)*Parameter_RequiredParameters*"
     />
 
     <Request

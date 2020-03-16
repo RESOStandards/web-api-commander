@@ -1,15 +1,19 @@
 Feature: Web API Server 1.0.2 Certification
   All Scenarios passing means the given Web API server is fully-compliant with the RESO Platinum Web API 1.0.2 Server specification.
 
+  #######################################
+  #  Background
+  #######################################
   Background:
     Given a RESOScript file was provided
     And Client Settings and Parameters were read from the file
     And an OData client was successfully created from the given RESOScript
+    And the OData client uses either Authorization Codes or Client Credentials
+
 
   #######################################
   #  Core Tests
   #######################################
-
   @REQ-WA103-END3 @core @2.4.1 @core-endorsement @metadata
   Scenario: REQ-WA103-END3 - Request and Validate Server Metadata
     When a GET request is made to the resolved Url in "REQ-WA103-END3"
@@ -432,7 +436,7 @@ Feature: Web API Server 1.0.2 Certification
     And the response is valid JSON
     And the response has results
     And data are present in fields contained within "Parameter_SelectList"
-    And data are present within "Parameter_ExpandField"
+    And data are present within the expanded field "Parameter_ExpandField"
     And an OData NavigationProperty exists for the given "Parameter_EndpointResource"
     And the expanded data were found in the related resource
 
@@ -478,9 +482,10 @@ Feature: Web API Server 1.0.2 Certification
     And the response is valid JSON
     And the response has results
 
-  @REQ-WA103-QO12 @platinum @2.4.4 @filterability-endorsement @geospatial
-  Scenario: REQ-WA103-QO12 - Query Support: $filter - Grouping: ()
-    When a GET request is made to the resolved Url in "REQ-WA103-QO29.2"
+  @REQ-WA103-QO12 @platinum @2.4.4 @filterability-endorsement @filterability-endorsement
+  Scenario: REQ-WA103-QO12 - Query Support: $filter - Grouping: filter (ge, le) and (gt, lt) and expect (gt, lt)
+    When a GET request is made to the resolved Url in "REQ-WA103-QO12" using the OData Client
     Then the server responds with a status code of 200
-    And the response is valid JSON
-    And the response has results
+    And the OData client response has client entity set data
+    And client entity set Integer data in "Parameter_FilterIntegerField" "gt" "Parameter_FilterIntegerValueLow"
+    And client entity set Integer data in "Parameter_FilterIntegerField" "lt" "Parameter_FilterIntegerValueHigh"
