@@ -21,7 +21,6 @@ public class Parameters {
         parameters = new LinkedHashMap<>();
     }
 
-
     public static Parameters loadFromRESOScript(File file) {
         final String PARAMETERS_KEY = "Parameters";
         final String NAME_FIELD = "Name";

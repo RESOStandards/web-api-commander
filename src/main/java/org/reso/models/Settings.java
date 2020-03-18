@@ -12,7 +12,7 @@ import java.util.*;
 public class  Settings {
   private ClientSettings clientSettings;
   private Parameters parameters;
-  private Map<String, Request> requests;
+  private Map<Request, Request> requests;
 
   public Settings() {
     clientSettings = new ClientSettings();
@@ -57,9 +57,7 @@ public class  Settings {
    * @return a copy of the request with the URL resolved.
    */
   public static Request resolveParameters(Request request, Settings settings) {
-    //calls to resolve nested parameters
-    return new Request(request.getRequirementId(), request.getOutputFile(), resolveParametersString(request.getUrl(), settings), request.getTestDescription(),
-        request.getMetallicLevel(), request.getCapability(), request.getWebApiReference());
+    return new Request(resolveParametersString(request.getUrl(), settings), request.getOutputFile(), request.getRequestId());
   }
 
   /**
@@ -132,8 +130,25 @@ public class  Settings {
    * Requests getter.
    * @return The request map that was loaded, indexed by request name.
    */
-  public Map<String, Request> getRequests() {
+  public Map<Request, Request> getRequests() {
     return requests;
+  }
+
+  /**
+   * Requests getter.
+   * @return The request map that was loaded, indexed by request name.
+   */
+  public Request getRequestById(String requestId) {
+    Request found = null;
+    for (Map.Entry<Request, Request> entry : getRequests().entrySet()) {
+      Request key = entry.getKey();
+      Request value = entry.getValue();
+      if (key.getRequestId().contentEquals(requestId)) {
+        found = value;
+        break;
+      }
+    }
+    return found;
   }
 
   /**
@@ -151,7 +166,7 @@ public class  Settings {
    * @param requests a list of requests to create the request map from
    */
   private void setRequests(List<Request> requests) {
-    this.requests = new LinkedHashMap<String, Request>();
-    requests.forEach(request -> this.requests.put(request.getRequirementId(), request));
+    this.requests = new LinkedHashMap<Request, Request>();
+    requests.forEach(request -> this.requests.put(request, request));
   }
 }

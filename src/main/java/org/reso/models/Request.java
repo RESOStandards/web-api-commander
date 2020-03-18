@@ -16,14 +16,9 @@ import java.util.Date;
 import java.util.List;
 
 public class Request {
-    private String requirementId;
-    private String name;
+    private String requestId;
     private String outputFile;
     private String url;
-    private String testDescription;
-    private String metallicLevel;
-    private String capability;
-    private String webApiReference;
 
     private Request request;
     private Status status;
@@ -39,55 +34,84 @@ public class Request {
      * @param outputFile
      * @param url
      */
-    public Request(String requirementId, String outputFile, String url, String testDescription, String metallicLevel,
-                   String capability, String webApiReference) {
-
-        //TODO: add Builder
-        setRequirementId(requirementId);
-        setOutputFile(outputFile);
+    public Request(String url, String outputFile, String requestId) {
         setUrl(url);
-        setTestDescription(testDescription);
-        setMetallicLevel(metallicLevel);
-        setCapability(capability);
-        setWebApiReference(webApiReference);
+        setOutputFile(outputFile);
+        setRequestId(requestId);
     }
 
 
+    /**
+     * Gets the status of the given request
+     * @return the status of the request
+     */
     public Status getStatus() {
         return status;
     }
 
+    /**
+     * Sets the status for the give request
+     * @param status the status to set
+     * @return the current instance of the request
+     */
     public Request setStatus(Status status) {
         this.status = status;
         return this;
     }
 
+    /**
+     * Starts request timer
+     * @return the current request
+     */
     public Request startTimer() {
         startDate = new Date();
         return this;
     }
 
+    /**
+     * Stops request timer
+     * @return the current request
+     */
     public Request stopTimer() {
         endDate = new Date();
         return this;
     }
 
+    /**
+     * Gets the elapsed time the request took to run
+     * @return the elapsed time of the request in milliseconds
+     */
     public long getElapsedTimeMillis() {
         return endDate != null && startDate != null ? endDate.getTime() - startDate.getTime() : 0L;
     }
 
+    /**
+     * Sets the exception for a given request
+     * @param failedRequestException the exception that was thrown when the request was executed
+     */
     public void setFailedRequestException(Exception failedRequestException) {
         this.failedRequestException = failedRequestException;
     }
 
+    /**
+     * HTTP Response code getter
+     * @return an Integer representing the response code
+     */
     public Integer getHttpResponseCode() {
         return httpResponseCode;
     }
 
+    /**
+     * HTTP Response code setter
+     * @param httpResponseCode an Integer representing the HTTP Response code
+     */
     public void setHttpResponseCode(Integer httpResponseCode) {
         this.httpResponseCode = httpResponseCode;
     }
 
+    /**
+     * An enumeration of request status options
+     */
     public enum Status {
         STARTED, SUCCEEDED, FAILED, SKIPPED
     }
@@ -121,7 +145,7 @@ public class Request {
             String expression = "/OutputScript/" + REQUESTS_KEY + "/node()";
             NodeList nodes = (NodeList) xPath.compile(expression).evaluate(xmlDocument, XPathConstants.NODESET);
             Node node;
-            String name, outputFile, url, testDescription, requirementId, metallicLevel, capability, webApiReference;
+            String outputFile, url, requestId;
             Request request;
 
             for (int i = 0; i < nodes.getLength(); i++) {
@@ -130,17 +154,9 @@ public class Request {
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     outputFile = safeGetNamedItem(FIELDS.OUTPUT_FILE, node);
                     url = safeGetNamedItem(FIELDS.URL, node);
-                    testDescription = safeGetNamedItem(FIELDS.TEST_DESCRIPTION, node);
-                    requirementId = safeGetNamedItem(FIELDS.REQUIREMENT_ID, node);
-                    metallicLevel = safeGetNamedItem(FIELDS.METALLIC_LEVEL, node);
-                    capability = safeGetNamedItem(FIELDS.CAPABILITY, node);
-                    webApiReference = safeGetNamedItem(FIELDS.WEB_API_REFERENCE, node);
+                    requestId = safeGetNamedItem(FIELDS.REQUEST_ID, node);
 
-                    request = new Request(requirementId, outputFile, url, testDescription, metallicLevel, capability, webApiReference);
-
-                    name = safeGetNamedItem(FIELDS.NAME, node);
-                    request.setName(name == null ? outputFile : name);
-
+                    request = new Request(url, outputFile, requestId);
                     requests.add(request);
                 }
             }
@@ -150,35 +166,20 @@ public class Request {
         return requests;
     }
 
-    private int deserializeTests(Node node) {
-        int numTests = 0;
-
-
-        return numTests;
-    }
-
-    public String getRequirementId() {
-        return requirementId;
-    }
-
-    public void setRequirementId(String requirementId) {
-        this.requirementId = requirementId;
+    /**
+     * Gets the given request by Id, if present.
+     * @return either the request Id or null if none was passed. May be null.
+     */
+    public String getRequestId() {
+        return requestId;
     }
 
     /**
-     * Name getter
-     * @return the name of the request
+     * Sets the given request Id, if present.
+     * @param requestId the request Id to set.
      */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Name setter
-     * @param name the name of the request
-     */
-    private void setName(String name) {
-        this.name = name;
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
     /**
@@ -213,46 +214,12 @@ public class Request {
         this.url = url;
     }
 
-    public String getTestDescription() {
-        return testDescription;
-    }
-
-    public void setTestDescription(String testDescription) {
-        this.testDescription = testDescription;
-    }
-
-    public String getMetallicLevel() {
-        return metallicLevel;
-    }
-
-    public void setMetallicLevel(String metallicLevel) {
-        this.metallicLevel = metallicLevel;
-    }
-
-    public String getCapability() {
-        return capability;
-    }
-
-    public void setCapability(String capability) {
-        this.capability = capability;
-    }
-
-    public String getWebApiReference() {
-        return webApiReference;
-    }
-
-    public void setWebApiReference(String webApiReference) {
-        this.webApiReference = webApiReference;
-    }
-
+    /**
+     * Represents the known fields that can be in a serialized Request
+     */
     private static final class FIELDS {
-        static final String NAME = "Name";
         static final String OUTPUT_FILE = "OutputFile";
         static final String URL = "Url";
-        static final String TEST_DESCRIPTION = "TestDescription";
-        static final String REQUIREMENT_ID = "RequirementId";
-        static final String METALLIC_LEVEL = "MetallicLevel";
-        static final String CAPABILITY = "Capability";
-        static final String WEB_API_REFERENCE = "WebAPIReference";
+        static final String REQUEST_ID = "RequestId";
     }
 }

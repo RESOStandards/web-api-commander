@@ -255,7 +255,7 @@ For those wanting more information, a `log4j.properties` file may be created (as
 use the DEBUG build of the application located in `/build/libs/` identified by `-DEBUG` in the Commander jar's file name.
 
 RESOScript files contain zero or more Settings, Parameters, and Requests. For example:
-```
+```xml
 <?xml version="1.0" encoding="utf-8" ?>
    <OutputScript>
      <ClientSettings>
@@ -287,8 +287,7 @@ The XML DTD for this schema is as follows:
 <!DOCTYPE OutputScript [
   <!ELEMENT OutputScript (RESOScriptVersion|ClientSettings|Parameters|Requests)*>
   <!ELEMENT RESOScriptVersion (#PCDATA)>
-  <!ELEMENT ClientSettings
-    (RESOScriptVersion|WebAPIURI|AuthenticationType|BearerToken|ClientIdentification|ClientSecret|TokenURI|ClientScope)*>
+  <!ELEMENT ClientSettings (WebAPIURI|AuthenticationType|BearerToken|ClientIdentification|ClientSecret|TokenURI|ClientScope)*>
   <!ELEMENT WebAPIURI (#PCDATA)>
   <!ELEMENT AuthenticationType (#PCDATA)>
   <!ELEMENT BearerToken (#PCDATA)>
@@ -304,13 +303,9 @@ The XML DTD for this schema is as follows:
   <!ELEMENT Requests (Request)*>
   <!ELEMENT Request (#PCDATA)>
   <!ATTLIST Request
-    Capability CDATA #REQUIRED
-    MetallicLevel CDATA #REQUIRED
     OutputFile CDATA #REQUIRED
-    RequirementId CDATA #REQUIRED
-    TestDescription CDATA #REQUIRED
-    Url CDATA #REQUIRED
-    WebAPIReference CDATA #REQUIRED>
+    RequestId CDATA #REQUIRED
+    Url CDATA #REQUIRED>
   ]>
 ```
 

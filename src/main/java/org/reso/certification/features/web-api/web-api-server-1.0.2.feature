@@ -440,43 +440,43 @@ Feature: Web API Server 1.0.2 Certification
     And an OData NavigationProperty exists for the given "Parameter_EndpointResource"
     And the expanded data were found in the related resource
 
-  @REQ-WA103-QO29.2 @platinum @2.4.4 @expandability-endorsement
-  Scenario: REQ-WA103-QO29.2 - Query Support: $expand media photo count
+  @REQ-WA103-QO29.2 @platinum @2.4.4 @expandability-endorsement @todo
+  Scenario: REQ-WA103-QO29.2 - Query Support: $expand media photo count (TODO)
     When a GET request is made to the resolved Url in "REQ-WA103-QO29.2"
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
 
-  @REQ-WA103-QO29.3 @platinum @2.4.4 @expandability-endorsement
-  Scenario: REQ-WA103-QO29.3 - Query Support: $expand required field
+  @REQ-WA103-QO29.3 @platinum @2.4.4 @expandability-endorsement @todo
+  Scenario: REQ-WA103-QO29.3 - Query Support: $expand required field (TODO)
     When a GET request is made to the resolved Url in "REQ-WA103-QO29.3"
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
 
-  @REQ-WA103-QM3 @platinum @2.4.6 @queryability-endorsement @deprecated
-  Scenario: REQ-WA103-QM3 - Support Literals: $any
+  @REQ-WA103-QM3 @platinum @2.4.6 @queryability-endorsement @todo
+  Scenario: REQ-WA103-QM3 - Support Literals: any() Lambda Expression (TODO)
     When a GET request is made to the resolved Url in "REQ-WA103-QM3"
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
 
-  @REQ-WA103-QM4 @platinum @2.4.6 @queryability-endorsement
-  Scenario: REQ-WA103-QM4 - Query Support Literals: $all
+  @REQ-WA103-QM4 @platinum @2.4.6 @queryability-endorsement @todo
+  Scenario: REQ-WA103-QM4 - Query Support Literals: all() Lambda Operator (TODO)
     When a GET request is made to the resolved Url in "REQ-WA103-QM4"
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
 
-  @REQ-WA103-QM5.1 @platinum @2.4.7 @queryability-endorsement @geospatial
-  Scenario: REQ-WA103-QM5.1 - Query Support: GeoSpatial Search Implementation
+  @REQ-WA103-QM5.1 @platinum @2.4.7 @queryability-endorsement @geospatial @todo
+  Scenario: REQ-WA103-QM5.1 - Query Support: GeoSpatial Search Implementation (TODO)
     When a GET request is made to the resolved Url in "REQ-WA103-QM5.1"
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
 
-  @REQ-WA103-QM5.2 @platinum @2.4.7 @queryability-endorsement @geospatial
-  Scenario: REQ-WA103-QM5.2 - Query Support: GeoSpatial Search Implementation
+  @REQ-WA103-QM5.2 @platinum @2.4.7 @queryability-endorsement @geospatial @todo
+  Scenario: REQ-WA103-QM5.2 - Query Support: GeoSpatial Search Implementation (TODO)
     When a GET request is made to the resolved Url in "REQ-WA103-QM5.2"
     Then the server responds with a status code of 200
     And the response is valid JSON

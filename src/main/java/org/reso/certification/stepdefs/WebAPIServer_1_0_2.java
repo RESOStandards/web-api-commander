@@ -403,7 +403,8 @@ public class WebAPIServer_1_0_2 implements En {
         initialResponseData.set(responseData.get());
 
         //TODO: convert to OData filter factory
-        requestUri.set(Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl() + "&$skip=" + skipCount));
+        requestUri.set(Commander.prepareURI(Settings.resolveParameters(settings.getRequestById(requirementId), settings).getUrl()
+            + "&" + Commander.ODATA_QUERY_OPTIONS.SKIP +"=" + skipCount));
         executeGetRequest.apply(requestUri.get());
       } catch (Exception ex) {
         fail(ex.getMessage());
@@ -437,13 +438,13 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * GET request by requirementId (see generic.resoscript)
      */
-    When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", (String requirementId) -> {
+    When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", (String requestId) -> {
       try {
         //reset local state each time a get request is run
         resetRequestState.run();
 
-        LOG.info("RequirementId: " + requirementId);
-        requestUri.set(Commander.prepareURI(Settings.resolveParameters(settings.getRequests().get(requirementId), settings).getUrl()));
+        LOG.info("Request ID: " + requestId);
+        requestUri.set(Commander.prepareURI(Settings.resolveParameters(settings.getRequestById(requestId), settings).getUrl()));
         executeGetRequest.apply(requestUri.get());
       } catch (Exception ex) {
         LOG.debug("Exception was thrown in " + this.getClass() + ": " + ex.toString());
@@ -1054,11 +1055,11 @@ public class WebAPIServer_1_0_2 implements En {
     });
 
 
-    When("^a GET request is made to the resolved Url in \"([^\"]*)\" using the OData Client$", (String parameterRequirementId) -> {
-      String uriString = Settings.resolveParameters(settings.getRequests().get(parameterRequirementId), settings).getUrl();
-      assertTrue("ERROR: the resolved Url in '" + parameterRequirementId + "' was invalid!", uriString != null && uriString.length() > 0);
+    When("^a GET request is made to the resolved Url in \"([^\"]*)\" using the OData Client$", (String parameterRequestId) -> {
+      String uriString = Settings.resolveParameters(settings.getRequestById(parameterRequestId), settings).getUrl();
+      assertTrue("ERROR: the resolved Url in '" + parameterRequestId + "' was invalid!", uriString != null && uriString.length() > 0);
 
-      LOG.info("Requirement Id: " + parameterRequirementId);
+      LOG.info("Request Id: " + parameterRequestId);
       try {
         requestUri.set(prepareUri.apply(uriString));
         clientEntitySetRequest.set(commander.get().getClient().getRetrieveRequestFactory().getEntitySetRequest(requestUri.get()));
