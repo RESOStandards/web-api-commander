@@ -67,7 +67,7 @@
   ############################################################-->
 
   <!-- The current version of this RESOScript -->
-  <RESOScriptVersion>1.0.6</RESOScriptVersion>
+  <RESOScriptVersion>1.0.7</RESOScriptVersion>
 
 
   <!--
@@ -126,7 +126,7 @@
     <Parameter Name="EndpointDataSystem" Value="REQUIRED: YOUR DATA SYSTEMS ENDPOINT GOES HERE" />
 
     <!-- REQUIRED: Core - The name of the resource being tested -->
-    <Parameter Name="EndpointResource" Value="REQUIRED: YOUR RESOURCE GOES HERE, FOR EXAMPLE 'Property'" />
+    <Parameter Name="EndpointResource" Value="REQUIRED: YOUR RESOURCE GOES HERE, FOR EXAMPLE, Property" />
 
 
     <!--
@@ -170,17 +170,17 @@
     <Parameter Name="GeoSpatialLatitudeField" Value="Latitude" />
     <Parameter Name="GeoSpatialLongitudeField" Value="Longitude" />
     <Parameter Name="GeoSpatialField" Value="Coordinates" />
-    <Parameter Name="GeoSpatialValue" Value="REQUIRED: YOUR COORDINATES GO HERE in 'Longitude Latitude' format" /> <!-- "Longitude Latitude" -->
+    <Parameter Name="GeoSpatialValue" Value="REQUIRED: YOUR COORDINATES GO HERE in Longitude Latitude format" /> <!-- "Longitude Latitude" -->
 
     <!-- REQUIRED: New Fields for WS103 Testing -->
     <Parameter Name="ValueField" Value="AboveGradeFinishedArea" />
     <Parameter Name="CastField" Value="AboveGradeFinishedArea" />
-    <Parameter Name="CastFieldValue" Value="YOUR CastFieldValue GOES HERE, FOR EXAMPLE 1200" />
+    <Parameter Name="CastFieldValue" Value="YOUR CastFieldValue GOES HERE. FOR EXAMPLE, 1200" />
     <Parameter Name="ConcatFieldOne" Value="StreetName" />
     <Parameter Name="ConcatFieldOneValue" Value="REQUIRED: Your OneValue GOES HERE>" />
     <Parameter Name="ConcatFieldTwo" Value="City" />
     <Parameter Name="ConcatFieldTwoValue" Value="YOUR TwoValue GOES HERE" />
-    <Parameter Name="ConcatFieldBothValue" Value="Your 'OneValue: TwoValue' GOES HERE" /> <!-- format 'OneValue: TwoValue' -->
+    <Parameter Name="ConcatFieldBothValue" Value="Your OneValue: TwoValue GOES HERE" /> <!-- format: "OneValue: TwoValue" -->
 
 
     <!--
@@ -276,6 +276,12 @@
     <!-- Computed OData $select list -->
     <Parameter Name="SelectList"
                Value="*Parameter_PlatinumSelectList*" />
+
+    <!-- Computed Has Value - uses SingleValueLookup field -->
+    <Parameter Name="FilterHasField" Value="*Parameter_SingleValueLookupField*" />
+    <Parameter Name="FilterHasValue" Value="*Parameter_SingleValueLookupValue*" />
+    <Parameter Name="FilterHasLookupNamespace" Value="*Parameter_SingleValueLookupNamespace*" />
+    <Parameter Name="FilterHasLookupValue" Value="*Parameter_SingleLookupValue*" />
 
     <!-- Computed Enumeration Values - do not change -->
     <Parameter Name="SingleValueLookupValue" Value="*Parameter_SingleValueLookupNamespace*'*Parameter_SingleLookupValue*'" />
@@ -772,7 +778,7 @@
       Capability="Query functions"
       WebAPIReference="2.4.7"
       OutputFile="REQ-WA103-QM5_GeoSpatialLongLat_PointGeo.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_GeoSpatialField* ne null and geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue*"
     />
 
     <Request
@@ -782,7 +788,7 @@
       Capability="Query functions"
       WebAPIReference="2.4.7"
       OutputFile="REQ-WA103-QM5_GeoSpatialLongLat_LatGT1_PointGeo.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_GeoSpatialField* ne null and geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue* and *Parameter_GeoSpatialLatitudeField* gt 1"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue* and *Parameter_GeoSpatialLatitudeField* gt 1"
     />
 
     <Request

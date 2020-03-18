@@ -126,7 +126,7 @@
     <Parameter Name="EndpointDataSystem" Value="REQUIRED: YOUR DATA SYSTEMS ENDPOINT GOES HERE" />
 
     <!-- REQUIRED: Core - The name of the resource being tested -->
-    <Parameter Name="EndpointResource" Value="REQUIRED: YOUR RESOURCE GOES HERE, FOR EXAMPLE 'Property'" />
+    <Parameter Name="EndpointResource" Value="REQUIRED: YOUR RESOURCE GOES HERE, FOR EXAMPLE, Property" />
 
 
     <!--
@@ -261,7 +261,7 @@
     Requests Section - Queries used during testing,
                        DO NOT CHANGE
   ############################################################-->
-  <Requests>
+    <Requests>
 
     <Request
       TestDescription="Metadata Endpoint"
@@ -730,7 +730,7 @@
       Capability="Query functions"
       WebAPIReference="2.4.7"
       OutputFile="REQ-WA103-QM5_GeoSpatialLongLat_PointGeo.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_GeoSpatialField* ne null and geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue*"
     />
 
     <Request
@@ -740,7 +740,7 @@
       Capability="Query functions"
       WebAPIReference="2.4.7"
       OutputFile="REQ-WA103-QM5_GeoSpatialLongLat_LatGT1_PointGeo.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_GeoSpatialField* ne null and geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue* and *Parameter_GeoSpatialLatitudeField* gt 1"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue* and *Parameter_GeoSpatialLatitudeField* gt 1"
     />
 
     <Request
