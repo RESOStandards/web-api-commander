@@ -39,6 +39,9 @@ dependencies {
   compile 'io.cucumber:cucumber-junit:5.4.0'
 
   compile 'net.masterthought:cucumber-reporting:5.1.1'
+
+  compile 'com.networknt:json-schema-validator:1.0.35'
+
 }
 
 configurations {

@@ -454,7 +454,7 @@ Feature: Web API Server 1.0.2 Certification
     And the response is valid JSON
     And the response has results
 
-  @REQ-WA103-QM3 @platinum @2.4.6 @queryability-endorsement
+  @REQ-WA103-QM3 @platinum @2.4.6 @queryability-endorsement @deprecated
   Scenario: REQ-WA103-QM3 - Support Literals: $any
     When a GET request is made to the resolved Url in "REQ-WA103-QM3"
     Then the server responds with a status code of 200

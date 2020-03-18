@@ -1,8 +1,12 @@
 package org.reso.certification.stepdefs;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.POJONode;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.ValidationMessage;
 import io.cucumber.java8.En;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -31,6 +35,7 @@ import org.reso.models.Settings;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -237,12 +242,30 @@ public class WebAPIServer_1_0_2 implements En {
     });
 
     /*
-     * REQ-WA103-END2
+     * REQ-WA103-END2 - validate DataSystem endpoint, if present.
      */
     And("^the results match the expected DataSystem JSON schema$", () -> {
-      //TODO - need to add JSON Schema for DataSystem
-    });
+      if (responseCode.get() == HttpStatus.SC_OK && responseData.get() != null) {
+        try {
+          JsonSchemaFactory factory = JsonSchemaFactory.getInstance();
+          InputStream is = Thread.currentThread().getContextClassLoader()
+              .getResourceAsStream("datasystem.schema.4.json");
+          JsonSchema schema = factory.getSchema(is);
 
+          ObjectMapper mapper = new ObjectMapper();
+          JsonNode node = mapper.readTree(responseData.get());
+
+          if (node.findPath(JSON_VALUE_PATH).size() > 0) {
+            Set<ValidationMessage> errors = schema.validate(node);
+            assertEquals("ERROR: data system response does not match the RESO specification. See: https://github.com/RESOStandards/web-api-commander/tree/master/src/main/resources/datasystem.schema.4.json",
+                0, errors.size());
+            LOG.info("DataSystem response matches reference schema!");
+          }
+        } catch (Exception ex) {
+          fail(ex.getMessage());
+        }
+      }
+    });
 
     /*
      * Edm Metadata Validator

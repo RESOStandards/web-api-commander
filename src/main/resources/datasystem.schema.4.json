@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "title": "The Root Schema",
+  "description": "The root schema comprises the entire JSON document.",
+  "required": [
+    "@odata.context",
+    "value"
+  ],
+  "properties": {
+    "@odata.context": {
+      "type": "string",
+      "title": "The @odata.context Schema",
+      "description": "The @odata.context variable is required for odata.metadata=minimal and above, and tells the user where the results came from.",
+      "default": ""
+    },
+    "value": {
+      "type": "array",
+      "title": "OData value array",
+      "description": "OData responses return their values in an array.",
+      "default": [],
+      "items": {
+        "type": "object",
+        "title": "Data System Items",
+        "description": "Each item represents a potential data system configuration.",
+        "default": {},
+        "required": [
+          "kind",
+          "name",
+          "url"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "The Kind Schema",
+            "description": "The kind of object a consumer of the service can expect.",
+            "default": ""
+          },
+          "name": {
+            "type": "string",
+            "title": "The Name Schema",
+            "description": "The name of the resource that can be retrieved from the data system.",
+            "default": ""
+          },
+          "url": {
+            "type": "string",
+            "title": "The Url Schema",
+            "description": "The URL for this resource, which may either be absolute or relative to the service root.",
+            "default": ""
+          }
+        }
+      }
+    }
+  }
+}
