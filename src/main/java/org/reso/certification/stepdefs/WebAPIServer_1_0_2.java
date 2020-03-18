@@ -257,8 +257,11 @@ public class WebAPIServer_1_0_2 implements En {
 
           if (node.findPath(JSON_VALUE_PATH).size() > 0) {
             Set<ValidationMessage> errors = schema.validate(node);
-            assertEquals("ERROR: data system response does not match the RESO specification. See: https://github.com/RESOStandards/web-api-commander/tree/master/src/main/resources/datasystem.schema.4.json",
-                0, errors.size());
+
+            if (errors.size() > 0) LOG.error("ERROR: JSON Schema validation errors were found!");
+            errors.forEach(LOG::error);
+
+            assertEquals(0, errors.size());
             LOG.info("DataSystem response matches reference schema!");
           }
         } catch (Exception ex) {

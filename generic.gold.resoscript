@@ -1,0 +1,869 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  
+  >>> To be used as a template for Web API Server 1.0.2 Gold Certification <<<
+
+  NOTES:
+    * Anything marked REQUIRED should be filled in.
+    * Anything not market REQUIRED shouldn't have to be changed.
+    * Some items are marked OPTIONAL.
+    * Any item that has a blank Url will be skipped (which will be printed in the results).
+
+    Contact josh@reso.org with further questions.
+ -->
+
+<!--
+  ############################################################
+    XML DTD - Must come first
+  ############################################################-->
+<!DOCTYPE OutputScript [
+  <!ELEMENT OutputScript (RESOScriptVersion|ClientSettings|Parameters|Requests)*>
+  <!ELEMENT RESOScriptVersion (#PCDATA)>
+  <!ELEMENT ClientSettings
+    (RESOScriptVersion|WebAPIURI|AuthenticationType|BearerToken|ClientIdentification|ClientSecret|TokenURI|ClientScope)*>
+  <!ELEMENT WebAPIURI (#PCDATA)>
+  <!ELEMENT AuthenticationType (#PCDATA)>
+  <!ELEMENT BearerToken (#PCDATA)>
+  <!ELEMENT ClientIdentification (#PCDATA)>
+  <!ELEMENT ClientSecret (#PCDATA)>
+  <!ELEMENT TokenURI (#PCDATA)>
+  <!ELEMENT ClientScope (#PCDATA)>
+  <!ELEMENT Parameters (Parameter)*>
+  <!ELEMENT Parameter (#PCDATA)>
+  <!ATTLIST Parameter
+    Name CDATA #REQUIRED
+    Value CDATA #REQUIRED>
+  <!ELEMENT Requests (Request)*>
+  <!ELEMENT Request (#PCDATA)>
+  <!ATTLIST Request
+    Capability CDATA #REQUIRED
+    MetallicLevel CDATA #REQUIRED
+    OutputFile CDATA #REQUIRED
+    RequirementId CDATA #REQUIRED
+    TestDescription CDATA #REQUIRED
+    Url CDATA #REQUIRED
+    WebAPIReference CDATA #REQUIRED>
+  ]>
+
+  <!--
+  ############################################################
+    TODO: this document will be updated with language
+    matching the OAuth 2.0 Specification and ClientSettings
+    will be removed.
+
+    See:
+        https://tools.ietf.org/html/rfc8252
+
+    Watch for subsequent changes to this file.
+    ClientSettings will be converted to Parameters forthwith.
+  ############################################################-->
+
+
+<OutputScript>
+
+  <!--
+  ############################################################
+    Metadata
+  ############################################################-->
+
+  <!-- The current version of this RESOScript -->
+  <RESOScriptVersion>1.0.7</RESOScriptVersion>
+
+
+  <!--
+  ############################################################
+    Client Settings
+    TODO: deprecate ClientSettings and move them to Parameters
+  ############################################################-->
+  <ClientSettings>
+    <!-- URLS -->
+    <WebAPIURI><!--REQUIRED: URI of your Web API Service Root goes here --></WebAPIURI>
+
+    <!-- Credentials -->
+
+    <!-- AuthenticationType
+
+        This is the OAuth2 grant_type.
+        Use "authorization_code" for BearerToken and "client_credentials" for Client Credentials.
+
+        See:
+        * https://www.oauth.com/oauth2-servers/access-tokens/authorization-code-request/
+        * https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/
+    -->
+
+    <!-- Grant Type: authorization_code -->
+    <AuthenticationType>authorization_code</AuthenticationType>
+    <BearerToken><!-- REQUIRED: Your BearerToken goes here if using Access Tokens --></BearerToken>
+
+    <!-- Grant Type: client_credentials -->
+    <!-- <AuthenticationType>client_credentials</AuthenticationType>-->
+    <ClientIdentification><!-- REQUIRED: Your client_id value if using Client Credentials--></ClientIdentification>
+    <ClientSecret><!-- REQUIRED: Your client_secret value if using Client Credentials--></ClientSecret>
+    <TokenURI><!-- REQUIRED: Your token endpoint URI--></TokenURI>
+    <ClientScope>
+
+    <!--OPTIONAL - your client scope. See: https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/ -->
+    </ClientScope>
+
+  </ClientSettings>
+
+
+  <!--
+  ############################################################
+    Parameters Section - add your testing variables here
+  ############################################################-->
+
+  <Parameters>
+
+    <!--
+    ############################################################
+          Service Configuration
+    ############################################################-->
+
+    <!-- REQUIRED: Core - The DataSystems endpoint being tested
+    NOTE: the FULL DataSystems URL is required as it might not be relative to the Service Root.
+          This will likely change in future revisions. -->
+    <Parameter Name="EndpointDataSystem" Value="REQUIRED: YOUR DATA SYSTEMS ENDPOINT GOES HERE" />
+
+    <!-- REQUIRED: Core - The name of the resource being tested -->
+    <Parameter Name="EndpointResource" Value="REQUIRED: YOUR RESOURCE GOES HERE, FOR EXAMPLE 'Property'" />
+
+
+    <!--
+    ############################################################
+      Required Fields and Values
+    ############################################################-->
+
+    <!-- Note: some of the required values already have sample values provided. See later sections for their values.-->
+
+    <!-- REQUIRED: Core - Substitute key name from your Resource here, either Key or KeyNumeric -->
+    <Parameter Name="KeyOrKeyNumericField" Value="ListingKey" />
+
+    <!-- REQUIRED: Core - Provide a value for the KeyOrKeyNumeric from your server -->
+    <Parameter Name="KeyOrKeyNumericValue" Value="REQUIRED: YOUR KeyOrKeyNumericValue GOES HERE" />
+
+    <!-- REQUIRED: Core - Integer Field. Should be one of: Type="Edm.Int16", Type="Edm.Int32", or Type="Edm.Int64" -->
+    <Parameter Name="FilterIntegerField" Value="BedroomsTotal" />
+
+    <!-- REQUIRED: Core - Enumerated Field for Single-Value Testing -->
+    <Parameter Name="SingleValueLookupField" Value="PropertyType" />
+    <Parameter Name="SingleLookupValue" Value="Residential" />
+    <Parameter Name="SingleValueLookupNamespace" Value="PropertyEnums.PropertyType" />
+
+    <!-- REQUIRED: Core - Enumerated Field for Multi-value testing -->
+    <Parameter Name="MultipleValueLookupField" Value="Appliances" />
+    <Parameter Name="MultipleValueLookupNamespace" Value="PropertyEnums.Appliances" />
+    <Parameter Name="MultipleLookupValue1" Value="Refrigerator" />
+    <Parameter Name="MultipleLookupValue2" Value="Stacked" />
+
+    <!-- REQUIRED: Bronze - Date Field for comparisons. Should be Type="Edm.Date" -->
+    <Parameter Name="DateField" Value="ListingContractDate" />
+    <Parameter Name="TimestampField" Value="ModificationTimestamp" />
+
+    <!--
+    ############################################################
+      Sample Field Values
+    ############################################################-->
+
+    <!-- FilterIntegerField Sample Values-->
+    <Parameter Name="FilterIntegerValueLow" Value="9" />
+    <Parameter Name="FilterIntegerValueHigh" Value="15" />
+    <Parameter Name="FilterIntegerNotFound" Value="-1" />
+
+    <!-- Gold and Platinum: Integer Field for "not" testing -->
+    <Parameter Name="FilterNotField" Value="*Parameter_FilterIntegerField*" />
+    <Parameter Name="FilterNotValue" Value="-1" />
+
+    <!-- Gold and Platinum: Date Fields for testing -->
+    <Parameter Name="DateTimeValue" Value="2018-12-31T23:55:55-09:00" />
+    <Parameter Name="DateValue" Value="2018-12-31" />
+    <Parameter Name="YearValue" Value="2018" />
+    <Parameter Name="MonthValue" Value="12" />
+    <Parameter Name="DayValue" Value="31" />
+    <Parameter Name="TimeValue" Value="23:55:55" />
+    <Parameter Name="HourValue" Value="23" />
+    <Parameter Name="MinuteValue" Value="55" />
+    <Parameter Name="SecondValue" Value="55" />
+    <Parameter Name="FractionalValue" Value="30" />
+
+    <!--
+    ############################################################
+      HTTP Code Testing
+    ############################################################-->
+
+    <!-- 200 Response OK: This should always work! No need to change it -->
+    <Parameter Name="200_OK" Value="*Parameter_EndpointResource*" />
+
+    <!-- REQUIRED: 400 Bad Request - Adjust to something that produces a 400 response if this doesn't work -->
+    <Parameter Name="400BadRequest" Value="*Parameter_EndpointResource*?$filter=BadField eq 'SoBad'" />
+
+    <!-- REQUIRED: 403 Forbidden - Set this to a restricted resource for the given credentials -->
+    <Parameter Name="403Forbidden" Value="Teams" />
+
+    <!-- REQUIRED: 404 Not Found - You shouldn't need to change this -->
+    <Parameter Name="404NotFound" Value="ResourceNotFound" />
+
+    <!-- REQUIRED: 501 Not Implemented - Set this to an OData query that hasn't been implemented on your server -->
+    <Parameter Name="501NotImplemented" Value="*Parameter_EndpointResource*?$search=red OR blue" />
+
+
+    <!--
+    ############################################################
+      Constants and Computed Values - Do Not Change
+    ############################################################-->
+
+    <!-- For Top, Skip, and Sort Testing -->
+    <Parameter Name="TopCount" Value="5" />
+    <Parameter Name="SortCount" Value="20" />
+
+    <!-- Required resource lists for Standard Resource Names requirement -->
+    <Parameter Name="WebAPI102_RequiredResourceList" Value="Property,Member,Office,Media" />
+
+    <!-- Allowed Resources - Update to 1.8 once it's approved -->
+    <Parameter Name="DD17_WellKnownResourceList" Value="Property,Member,Office,Contacts,ContactListings,HistoryTransactional,InternetTracking,Media,OpenHouse,OUID,Prospecting,Queue,Rules,SavedSearch,Showing,Teams" />
+
+    <!-- Gold Select List -->
+    <Parameter Name="GoldSelectList"
+    Value="*Parameter_KeyOrKeyNumericField*,*Parameter_FilterIntegerField*,*Parameter_SingleValueLookupField*,*Parameter_MultipleValueLookupField*,*Parameter_DateField*,*Parameter_TimestampField*" />
+
+    <!-- Computed OData $select list -->
+    <Parameter Name="SelectList"
+               Value="*Parameter_GoldSelectList*" />
+
+    <!-- Computed Has Value - uses SingleValueLookup field -->
+    <Parameter Name="FilterHasField" Value="*Parameter_SingleValueLookupField*" />
+    <Parameter Name="FilterHasValue" Value="*Parameter_SingleValueLookupValue*" />
+    <Parameter Name="FilterHasLookupNamespace" Value="*Parameter_SingleValueLookupNamespace*" />
+    <Parameter Name="FilterHasLookupValue" Value="*Parameter_SingleLookupValue*" />
+    
+    <!-- Computed Enumeration Values - do not change -->
+    <Parameter Name="SingleValueLookupValue" Value="*Parameter_SingleValueLookupNamespace*'*Parameter_SingleLookupValue*'" />
+    <Parameter Name="FilterHasValueLookupValue" Value="*Parameter_FilterHasLookupNamespace*'*Parameter_FilterHasLookupValue*'" />
+    <Parameter Name="MultipleValueLookupValue1" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue1*'"/>
+    <Parameter Name="MultipleValueLookupValue2" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue2*'" />
+
+    <Parameter Name="OptionalMetadataFormatParameter" Value="?$format=application/xml" />
+
+    <!--
+    ############################################################
+      Optional Parameters. You should not need these
+    ############################################################-->
+
+    <!-- OPTIONAL: System Specific Additional Required Parameters for Queries. Leave Blank if none. -->
+    <Parameter Name="RequiredParameters" Value="" />
+    <Parameter Name="RequiredParametersFilter" Value="" />
+
+  </Parameters>
+
+
+  <!--
+  ############################################################
+    Requests Section - Queries used during testing,
+                       DO NOT CHANGE
+  ############################################################-->
+  <Requests>
+
+    <Request
+      TestDescription="Metadata Endpoint"
+      RequirementId="REQ-WA103-END3"
+      MetallicLevel="Core"
+      Capability="Core"
+      WebAPIReference=""
+      OutputFile="REQ-WA103-END3.metadata.xml"
+      Url="*ClientSettings_WebAPIURI*/$metadata*Parameter_OptionalMetadataFormatParameter*"
+    />
+
+    <Request
+      TestDescription="Data System"
+      RequirementId="REQ-WA103-END2"
+      MetallicLevel="Core"
+      Capability="Core Support"
+      WebAPIReference=""
+      OutputFile="REQ-WA103-END2.datasystem.json"
+      Url="*Parameter_EndpointDataSystem*"
+    />
+
+    <Request
+      TestDescription="Search Parameters: Select KeyOrKeyNumeric Field"
+      RequirementId="REQ-WA103-QR1"
+      MetallicLevel="Core"
+      Capability="Query functions"
+      WebAPIReference="2.4.1"
+      OutputFile="REQ-WA103-QR1.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*(*Parameter_KeyOrKeyNumericValue*)?$select=*Parameter_KeyOrKeyNumericField*"
+    />
+
+    <Request
+      TestDescription="Query Support: $select"
+      RequirementId="REQ-WA103-QR3"
+      MetallicLevel="Core"
+      Capability="Query functions"
+      WebAPIReference="2.4.2"
+      OutputFile="REQ-WA103-QR3.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $top"
+      RequirementId="REQ-WA103-QR4"
+      MetallicLevel="Core"
+      Capability="Client paging ($top, $skip)"
+      WebAPIReference="2.4.2"
+      OutputFile="REQ-WA103-QR4.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $skip"
+      RequirementId="REQ-WA103-QR5"
+      MetallicLevel="Core"
+      Capability="Client pageability ($top, $skip)"
+      WebAPIReference="2.4.2"
+      OutputFile="REQ-WA103-QR5.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $select case-sensitivity. Expect 400 response on OData 4.0"
+      RequirementId="REQ-WA103-QO1.1"
+      MetallicLevel="Core"
+      Capability="Core"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO1.1.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$SeLeCt=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter case-sensitivity. Expect 400 response on OData 4.0"
+      RequirementId="REQ-WA103-QO1.2"
+      MetallicLevel="Core"
+      Capability="Core"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO1.2.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$FiLtEr=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $orderby asc case-sensitivity. Expect 400 response on OData 4.0"
+      RequirementId="REQ-WA103-QO1.3"
+      MetallicLevel="Core"
+      Capability="Core"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO1.3.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*&amp;$OrDeRbY=*Parameter_FilterIntegerField* asc"
+    />
+
+    <Request
+      TestDescription="Query Support: $orderby desc case-sensitivity. Expect 400 response on OData 4.0"
+      RequirementId="REQ-WA103-QO1.4"
+      MetallicLevel="Core"
+      Capability="Core"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO1.4.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*&amp;$oRdErBy=*Parameter_FilterIntegerField* desc"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - Integer Comparison: eq (equal)"
+      RequirementId="REQ-WA103-QO2"
+      MetallicLevel="Core"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO2"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* eq *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - Integer Comparison: ne (not equal)"
+      RequirementId="REQ-WA103-QO3"
+      MetallicLevel="Core"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO3"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* ne *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - Integer Comparison: gt (greater than)"
+      RequirementId="REQ-WA103-QO4"
+      MetallicLevel="Core"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO4"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - Integer Comparison: ge (greater or equal)"
+      RequirementId="REQ-WA103-QO5"
+      MetallicLevel="Core"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO5.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* ge *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - Integer Comparison: lt (less than)"
+      RequirementId="REQ-WA103-QO6"
+      MetallicLevel="Core"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO6.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - Integer Comparison: le (less or equal)"
+      RequirementId="REQ-WA103-QO7"
+      MetallicLevel="Core"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO7.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* le *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - Integer Comparison: and"
+      RequirementId="REQ-WA103-QO9"
+      MetallicLevel="Core"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO9.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow* and *Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueHigh**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - Integer Comparison: or"
+      RequirementId="REQ-WA103-QO10"
+      MetallicLevel="Core"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO10.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueHigh* or *Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - Integer: not operator"
+      RequirementId="REQ-WA103-QO11"
+      MetallicLevel="Core"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO11.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and not(*Parameter_FilterNotField* le *Parameter_FilterNotValue*)*Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter: Date portion of EdmDateTimeOffset field is less than EdmDate value."
+      RequirementId="REQ-WA103-QO25"
+      MetallicLevel="Core"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO25.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and date(*Parameter_TimestampField*) gt *Parameter_DateValue**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter: Time portion of EdmDateTimeOffset field is less than EdmTime value."
+      RequirementId="REQ-WA103-QO26"
+      MetallicLevel="Core"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO26.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and time(*Parameter_TimestampField*) lt *Parameter_TimeValue**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter: Date: EdmDateTimeOffset field is less than EdmDateTimeOffset value."
+      RequirementId="REQ-WA103-QO26.2"
+      MetallicLevel="Core"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO26.2.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and *Parameter_TimestampField* lt *Parameter_DateTimeValue**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter: DateTimeOffset le now()"
+      RequirementId="REQ-WA103-QO27"
+      MetallicLevel="Core"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO27.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and *Parameter_TimestampField* le now()*Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Support Single Value Lookups"
+      RequirementId="REQ-WA103-QM7"
+      MetallicLevel="Bronze"
+      Capability="Query functions"
+      WebAPIReference="2.4.9"
+      OutputFile="REQ-WA103-QM7.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_SingleValueLookupField*&amp;$filter=*Parameter_SingleValueLookupField* ne null and *Parameter_SingleValueLookupField* has *Parameter_SingleValueLookupValue**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Support Multi Value Lookups"
+      RequirementId="REQ-WA103-QM8"
+      MetallicLevel="Bronze"
+      Capability="Query functions"
+      WebAPIReference="2.4.10"
+      OutputFile="REQ-WA103-QM8.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* ne null and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Support Multi Value Lookups (2)"
+      RequirementId="REQ-WA103-QM8.2"
+      MetallicLevel="Bronze"
+      Capability="Query functions"
+      WebAPIReference="2.4.10"
+      OutputFile="REQ-WA103-QM8.2.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* ne null and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1* and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue2**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - Comparison: has"
+      RequirementId="REQ-WA103-QO8"
+      MetallicLevel="Bronze"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO8.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterHasField* ne null and *Parameter_FilterHasField* has *Parameter_FilterHasValueLookupValue**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $orderby asc filtered"
+      RequirementId="REQ-WA103-QO28.1"
+      MetallicLevel="Bronze"
+      Capability="Sortability ($orderby)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO28.1.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $orderby asc no filter"
+      RequirementId="REQ-WA103-QO28.2"
+      MetallicLevel="Bronze"
+      Capability="Sortability ($orderby)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO28.2.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc"
+    />
+
+    <Request
+      TestDescription="Query Support: $orderby desc filtered"
+      RequirementId="REQ-WA103-QO28.3"
+      MetallicLevel="Bronze"
+      Capability="Sortability ($orderby)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO28.3.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc&amp;$filter=*Parameter_FilterIntegerField* ne null and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $orderby desc no filter"
+      RequirementId="REQ-WA103-QO28.4"
+      MetallicLevel="Bronze"
+      Capability="Sortability ($orderby)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO28.4.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_FilterIntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter: Date: year"
+      RequirementId="REQ-WA103-QO18.1"
+      MetallicLevel="Gold"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO18.1.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_DateField* ne null and year(*Parameter_DateField*) eq *Parameter_YearValue**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter: Time: year"
+      RequirementId="REQ-WA103-QO18.2"
+      MetallicLevel="Gold"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO18.2.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and year(*Parameter_TimestampField*) eq *Parameter_YearValue**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter: Date: month"
+      RequirementId="REQ-WA103-QO19.1"
+      MetallicLevel="Gold"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO19.1.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_DateField* ne null and month(*Parameter_DateField*) eq *Parameter_MonthValue**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter: Time: month"
+      RequirementId="REQ-WA103-QO19.2"
+      MetallicLevel="Gold"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO19.2.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and month(*Parameter_TimestampField*) eq *Parameter_MonthValue**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter: Date: day"
+      RequirementId="REQ-WA103-QO20.1"
+      MetallicLevel="Gold"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO20.1.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_DateField* ne null and day(*Parameter_DateField*) eq *Parameter_DayValue**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter: Time: day"
+      RequirementId="REQ-WA103-QO20.2"
+      MetallicLevel="Gold"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO20.2.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and day(*Parameter_TimestampField*) eq *Parameter_DayValue**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter: Date: hour"
+      RequirementId="REQ-WA103-QO21"
+      MetallicLevel="Gold"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO21.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and hour(*Parameter_TimestampField*) eq *Parameter_HourValue**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter: Date: minute"
+      RequirementId="REQ-WA103-QO22"
+      MetallicLevel="Gold"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO22.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and minute(*Parameter_TimestampField*) gt *Parameter_MinuteValue**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter: Date: second"
+      RequirementId="REQ-WA103-QO23"
+      MetallicLevel="Gold"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO23.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and second(*Parameter_TimestampField*) lt *Parameter_SecondValue**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter: Date: fractionalseconds"
+      RequirementId="REQ-WA103-QO24"
+      MetallicLevel="Gold"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO24.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_TimestampField* ne null and fractionalseconds(*Parameter_TimestampField*) lt *Parameter_FractionalValue**Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $expand"
+      RequirementId="REQ-WA103-QO29.1"
+      MetallicLevel="Platinum"
+      Capability="Expandability ($expand)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO29.1.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*"
+    />
+
+    <Request
+      TestDescription="Query Support: $expand media photo count"
+      RequirementId="REQ-WA103-QO29.2"
+      MetallicLevel="Platinum"
+      Capability="Expandability ($expand)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO29.2.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*&amp;$filter=PhotosCount gt 0"
+    />
+
+    <Request
+      TestDescription="Query Support: $expand required field"
+      RequirementId="REQ-WA103-QO29.3"
+      MetallicLevel="Platinum"
+      Capability="Expandability ($expand)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO29.3.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField**Parameter_RequiredParametersFilter*"
+    />
+
+    <Request
+      TestDescription="Support Literals: $any"
+      RequirementId="REQ-WA103-QM3"
+      MetallicLevel="Platinum"
+      Capability="Query functions"
+      WebAPIReference="2.4.6"
+      OutputFile="REQ-WA103-QM3.json"
+      Url="*ClientSettings_WebAPIURI*/$any?$top=1"
+    />
+
+    <Request
+      TestDescription="Support Literals: $all"
+      RequirementId="REQ-WA103-QM4"
+      MetallicLevel="Platinum"
+      Capability="Query functions"
+      WebAPIReference="2.4.6"
+      OutputFile="REQ-WA103-QM4_All.json"
+      Url="*ClientSettings_WebAPIURI*/$all?$top=1"
+    />
+
+    <Request
+      TestDescription="Support GeoSpatial Search Implementation"
+      RequirementId="REQ-WA103-QM5.1"
+      MetallicLevel="Platinum"
+      Capability="Query functions"
+      WebAPIReference="2.4.7"
+      OutputFile="REQ-WA103-QM5_GeoSpatialLongLat_PointGeo.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_GeoSpatialField* ne null and geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue*"
+    />
+
+    <Request
+      TestDescription="Support GeoSpatial Search Implementation"
+      RequirementId="REQ-WA103-QM5.2"
+      MetallicLevel="Platinum"
+      Capability="Query functions"
+      WebAPIReference="2.4.7"
+      OutputFile="REQ-WA103-QM5_GeoSpatialLongLat_LatGT1_PointGeo.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_GeoSpatialField* ne null and geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue* and *Parameter_GeoSpatialLatitudeField* gt 1"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - Grouping: ()"
+      RequirementId="REQ-WA103-QO12"
+      MetallicLevel="Platinum"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO12_Grouping.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_FilterIntegerField* ne null and (*Parameter_FilterIntegerField* ge *Parameter_FilterIntegerValueLow* and *Parameter_FilterIntegerField* le *Parameter_FilterIntegerValueHigh*) and (*Parameter_FilterIntegerField* lt *Parameter_FilterIntegerValueHigh* and *Parameter_FilterIntegerField* gt *Parameter_FilterIntegerValueLow*)*Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - String: contains"
+      RequirementId="REQ-WA103-QO13"
+      MetallicLevel="Platinum"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO13.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_ContainsField* ne null and contains(*Parameter_ContainsField*,'*Parameter_ContainsValue*')*Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - String: endswith"
+      RequirementId="REQ-WA103-QO14"
+      MetallicLevel="Platinum"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO14_EndsWith.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_EndsWithField* ne null and endswith(*Parameter_EndsWithField*,'*Parameter_EndsWithValue*')*Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - String: startswith"
+      RequirementId="REQ-WA103-QO15"
+      MetallicLevel="Platinum"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO15_StartsWith.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_StartsWithField* ne null and startswith(*Parameter_StartsWithField*,'*Parameter_StartsWithValue*')*Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - String: tolower"
+      RequirementId="REQ-WA103-QO16"
+      MetallicLevel="Platinum"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO16_ToLowerEQ.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_ToLowerField* ne null and tolower(*Parameter_ToLowerField*) eq '*Parameter_ToLowerValue*'*Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Query Support: $filter - String: toupper"
+      RequirementId="REQ-WA103-QO17"
+      MetallicLevel="Platinum"
+      Capability="Filterability ($filter)"
+      WebAPIReference="2.4.4"
+      OutputFile="REQ-WA103-QO17_ToUpperEQ.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_SelectList*&amp;$filter=*Parameter_ToUpperField* ne null and toupper(*Parameter_ToUpperField*) eq '*Parameter_ToUpperValue*'*Parameter_RequiredParameters*"
+    />
+
+    <Request
+      TestDescription="Service Endpoint"
+      RequirementId="REQ-WA103-END1"
+      MetallicLevel="Core"
+      Capability="Core"
+      WebAPIReference=""
+      OutputFile="REQ-WA103-END1_Service.json"
+      Url="*ClientSettings_WebAPIURI*/"
+    />
+
+
+    <!-- RESPONSE CODE SUPPORT -->
+    <Request
+      TestDescription="200 OK Request"
+      RequirementId="REQ-WA103-RC3"
+      MetallicLevel="Core"
+      Capability="Core"
+      WebAPIReference="2.5.2"
+      OutputFile="REQ-WA103-RC05_200OKRequest.json"
+      Url="ClientSettings_WebAPIURI*/*Parameter_200_OK*"
+    />
+
+    <Request
+      TestDescription="400 Bad Request"
+      RequirementId="REQ-WA103-RC5"
+      MetallicLevel="Core"
+      Capability="Core"
+      WebAPIReference="2.5.2"
+      OutputFile="REQ-WA103-RC05_400BadRequest.json"
+      Url="ClientSettings_WebAPIURI*/*Parameter_400BadRequest*"
+    />
+
+    <Request
+      TestDescription="403 Forbidden Request"
+      RequirementId="REQ-WA103-RC06"
+      MetallicLevel="Core"
+      Capability="Core"
+      WebAPIReference="2.5.2"
+      OutputFile="REQ-WA103-RC06_403Forbidden_Generic.json"
+      Url="ClientSettings_WebAPIURI*/*Parameter_403Forbidden*"
+    />
+
+    <Request
+      TestDescription="404 Not Found Request"
+      RequirementId="REQ-WA103-RC07"
+      MetallicLevel="Core"
+      Capability="Core"
+      WebAPIReference="2.5.2"
+      OutputFile="REQ-WA103-RC07_404NotFound.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_404NotFound*"
+    />
+
+    <Request
+      TestDescription="501 Not Implemented Request"
+      RequirementId="REQ-WA103-RC11"
+      MetallicLevel="Core"
+      Capability="Core"
+      WebAPIReference="2.5.2"
+      OutputFile="REQ-WA103-RC11_501NotImplemented.json"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_501NotImplemented*"
+    />
+
+  </Requests>
+</OutputScript>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
-  Generic RESOScript Test File - DTD Follows
+
+  >>> To be used as a template for Web API Server 1.0.2 Platinum Certification <<<
 
   NOTES:
     * Anything marked REQUIRED should be filled in.

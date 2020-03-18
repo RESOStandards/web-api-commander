@@ -109,8 +109,9 @@ Please see subsequent sections for how to use bearer tokens to accomplish tasks 
 [discussed elsewhere in this README](#automated-web-api-testing-beta).
 
 Client credentials (OAuth2) are supported in RESOScript files. Please contact josh@reso.org if you are wanting 
-certification using this mechanism. See [generic.resoscript](https://github.com/RESOStandards/web-api-commander/blob/master/generic.resoscript) 
-for client credentials parameters. Note that this has not been tested extensively and is in pre-alpha.
+certification using this mechanism. See [generic.resoscript](https://github.com/RESOStandards/web-api-commander/blob/master/generic.resoscript) for a Platinum
+RESOScript template and [generic.gold.resoscript](https://github.com/RESOStandards/web-api-commander/blob/master/generic.gold.resoscript) for Gold
+on how to use client credentials parameters. Note that this has not been tested extensively and is in pre-alpha.
 
 
 ## Getting Metadata
@@ -317,7 +318,8 @@ The XML DTD for this schema is as follows:
 
 Currently in development is the ability for the Commander to be able to perform fully-automated Web API testing, 
 upon being provided a valid RESOScript file with parameters for the given server. 
-See [the generic RESOScript template for more info](./generic.resoscript).
+See [the generic RESOScript template for more info](./generic.resoscript) for a Platinum RESOScript template, and 
+[generic.gold.resoscript](https://github.com/RESOStandards/web-api-commander/blob/master/generic.gold.resoscript) for Gold.
 
 ### Cucumber Feature Specifications
 
