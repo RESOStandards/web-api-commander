@@ -8,7 +8,7 @@ Feature: Web API Server 1.0.2 Certification
     Given a RESOScript file was provided
     And Client Settings and Parameters were read from the file
     And an OData client was successfully created from the given RESOScript
-    And the OData client uses either Authorization Codes or Client Credentials
+    And the OData client uses authorization_code or client_credentials for authentication
 
 
   #######################################

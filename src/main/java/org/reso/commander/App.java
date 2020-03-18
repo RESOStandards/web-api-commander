@@ -21,10 +21,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-import static org.reso.commander.Commander.NOT_OK;
-import static org.reso.commander.Commander.OK;
+import static org.reso.commander.Commander.*;
 
 /**
  * Entry point of the RESO Web API Commander, which is a command line OData client that uses the Java Olingo
@@ -65,7 +65,7 @@ public class App {
         authorizationUri = null, tokenUri = null, redirectUri = null, scope = null;
     String inputFilename, outputFile, uri;
     boolean useEdmEnabledClient;
-    int limit;
+    int pageLimit, pageSize;
 
     //created with the commanderBuilder throughout the initialization body
     Commander commander;
@@ -83,7 +83,8 @@ public class App {
       outputFile = cmd.getOptionValue(APP_OPTIONS.OUTPUT_FILE, null);
       uri = cmd.getOptionValue(APP_OPTIONS.URI, null);
       ContentType contentType = Commander.getContentType(cmd.getOptionValue(APP_OPTIONS.CONTENT_TYPE, null));
-      limit = Integer.parseInt(cmd.getOptionValue(APP_OPTIONS.LIMIT, "10")); //pass -1 to get all pages
+      pageLimit = Integer.parseInt(cmd.getOptionValue(APP_OPTIONS.PAGE_LIMIT, DEFAULT_PAGE_LIMIT.toString())); //pass -1 to get all pages
+      pageSize = Integer.parseInt(cmd.getOptionValue(APP_OPTIONS.PAGE_SIZE, DEFAULT_PAGE_SIZE.toString()));
 
       // using the edmEnabledClient requires the serviceRoot for schema validation, which is performed
       // against the payload each time the request is made when enabled.
@@ -239,7 +240,7 @@ public class App {
 
         LOG.info(generateReport(STATS, metadata, directoryName + outputPath));
 
-        System.exit(0); //terminate the program after the batch completes
+        System.exit(OK); //terminate the program after the batch completes
       }
 
       /* otherwise, not a batch request...
@@ -260,8 +261,11 @@ public class App {
         APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GET_ENTITIES);
 
         //function delegate to handle updating the status
-        final Function<Integer, Void> updateStatus = count -> {
-          System.out.print("|" + count.toString());
+        AtomicInteger pageCount = new AtomicInteger(1); //1-based counting
+        final Function<ClientEntitySet, Void> resultsSerializer = clientEntitySet -> {
+          //TODO: very primitive progress meter, replace
+          System.out.print("|" + clientEntitySet.getEntities().size());
+          commander.serializeEntitySet(clientEntitySet, "page" + pageCount.getAndIncrement() + "-" + outputFile, contentType);
           return null;
         };
 
@@ -270,14 +274,10 @@ public class App {
          * then serviceRoot is required, and results fetched from uri are validated against the server's
          * published metadata.
          *status
-         * Results are written to outputFile.
+         * Results are written to outputFileName.
          */
         try {
-          ClientEntitySet results = commander.getEntitySet(uri, limit, updateStatus);
-
-          if (results != null) {
-            commander.serializeEntitySet(results, outputFile, contentType);
-          }
+          commander.getPagedEntitySet(uri, pageLimit, pageSize, resultsSerializer);
         } catch (Exception ex) {
           System.exit(NOT_OK);
           LOG.error(ex.toString());
@@ -288,8 +288,8 @@ public class App {
 
         commander.saveGetRequest(uri, outputFile);
 
-      } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.CONVERT_EDMX_TO_OAI)) {
-        APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.CONVERT_EDMX_TO_OAI);
+      } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.CONVERT_EDMX_TO_OPEN_API)) {
+        APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.CONVERT_EDMX_TO_OPEN_API);
 
         //converts metadata in input source file to output file
         commander.convertEDMXToSwagger(inputFilename);
@@ -499,7 +499,8 @@ public class App {
     static String INPUT_FILE = "inputFile";
     static String OUTPUT_FILE = "outputFile";
     static String URI = "uri";
-    static String LIMIT = "limit";
+    static String PAGE_LIMIT = "pageLimit";
+    static String PAGE_SIZE = "pageSize";
     static String ENTITY_NAME = "entityName";
     static String USE_EDM_ENABLED_CLIENT = "useEdmEnabledClient";
     static String CONTENT_TYPE = "contentType";
@@ -512,7 +513,7 @@ public class App {
       static String VALIDATE_METADATA = "validateMetadata";
       static String GET_ENTITIES = "getEntities";
       static String SAVE_RAW_GET_REQUEST = "saveRawGetRequest";
-      static String CONVERT_EDMX_TO_OAI = "convertEDMXtoOAI";
+      static String CONVERT_EDMX_TO_OPEN_API = "convertEDMXtoOpenAPI";
     }
 
     /**
@@ -538,7 +539,7 @@ public class App {
         validationResponse = validateOptions(cmd, BEARER_TOKEN, URI, OUTPUT_FILE);
       } else if (action.matches(ACTIONS.SAVE_RAW_GET_REQUEST)) {
         validationResponse = validateOptions(cmd, BEARER_TOKEN, URI, OUTPUT_FILE);
-      } else if (action.matches(ACTIONS.CONVERT_EDMX_TO_OAI)) {
+      } else if (action.matches(ACTIONS.CONVERT_EDMX_TO_OPEN_API)) {
         validationResponse = validateOptions(cmd, INPUT_FILE);
       }
 
@@ -599,9 +600,14 @@ public class App {
           .desc("URI for raw request. Use 'single quotes' to enclose.")
           .build();
 
-      Option limit = Option.builder()
-          .argName("l").longOpt(LIMIT).hasArg()
-          .desc("The number of records to fetch, or -1 to fetch all.")
+      Option pageLimit = Option.builder()
+          .argName("l").longOpt(PAGE_LIMIT).hasArg()
+          .desc("The number of pages to fetch, or -1 to fetch all.")
+          .build();
+
+      Option pageSize = Option.builder()
+          .argName("s").longOpt(PAGE_SIZE).hasArg()
+          .desc("The number of pages to fetch, or -1 to fetch all.")
           .build();
 
       Option entityName = Option.builder()
@@ -631,27 +637,29 @@ public class App {
               .desc("Fetches metadata from <serviceRoot> using <bearerToken> and saves results in <outputFile>.").build())
           .addOption(Option.builder().argName("g").longOpt(ACTIONS.GET_ENTITIES)
               .desc("Executes GET on <uri> using the given <bearerToken> and optional <serviceRoot> when " +
-                  "--useEdmEnabledClient is specified. Optionally takes a <limit>, which will fetch that number " +
-                  "of results. Pass --limit -1 to fetch all results.").build())
+                  "--useEdmEnabledClient is specified. Optionally takes a --pageLimit parameter, default " + PAGE_LIMIT + " , which will fetch that number " +
+                  "of pages. Pass --pageLimit -1 to fetch all pages. " +
+                  "Also takes a --pageSize parameter, default " + PAGE_SIZE + ", which lets you specify the page size.").build())
           .addOption(Option.builder().argName("v").longOpt(ACTIONS.VALIDATE_METADATA)
               .desc("Validates previously-fetched metadata in the <inputFile> path.").build())
           .addOption(Option.builder().argName("w").longOpt(ACTIONS.SAVE_RAW_GET_REQUEST)
               .desc("Performs GET from <requestURI> using the given <bearerToken> and saves output to <outputFile>.").build())
-          .addOption(Option.builder().argName("c").longOpt(ACTIONS.CONVERT_EDMX_TO_OAI)
-              .desc("Converts EDMX in <inputFile> to OAI, saving it in <inputFile>.swagger.json").build());
+          .addOption(Option.builder().argName("c").longOpt(ACTIONS.CONVERT_EDMX_TO_OPEN_API)
+              .desc("Converts EDMX in <inputFile> to Open API, saving it in <inputFile>.swagger.json").build());
 
       return new Options()
-          .addOption(helpOption)
-          .addOption(hostNameOption)
-          .addOption(bearerTokenOption)
-          .addOption(inputFileOption)
-          .addOption(outputFileOption)
-          .addOption(limit)
-          .addOption(entityName)
-          .addOption(useEdmEnabledClient)
-          .addOption(uriOption)
-          .addOption(contentType)
-          .addOptionGroup(actions);
+        .addOption(helpOption)
+        .addOption(hostNameOption)
+        .addOption(bearerTokenOption)
+        .addOption(inputFileOption)
+        .addOption(outputFileOption)
+        .addOption(pageLimit)
+        .addOption(pageSize)
+        .addOption(entityName)
+        .addOption(useEdmEnabledClient)
+        .addOption(uriOption)
+        .addOption(contentType)
+        .addOptionGroup(actions);
     }
   }
 

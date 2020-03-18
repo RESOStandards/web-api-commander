@@ -224,7 +224,7 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * Ensures that the client either uses Authorization Codes or Client Credentials
      */
-    And("^the OData client uses either Authorization Codes or Client Credentials$", () -> {
+    And("^the OData client uses authorization_code or client_credentials for authentication$", () -> {
       assertNotNull(commander.get());
       assertTrue("ERROR: Commander must either have a valid Authorization Code or Client Credentials configuration.",
           commander.get().isTokenClient() || commander.get().isOAuthClient() && commander.get().hasValidAuthConfig());

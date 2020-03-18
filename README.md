@@ -68,7 +68,7 @@ usage: java -jar web-api-commander
     --bearerToken <b>       Bearer token to be used with the request.
     --contentType <t>       Results format: JSON (default),
                             JSON_NO_METADATA, JSON_FULL_METADATA, XML.
-    --convertEDMXtoOAI      Converts EDMX in <inputFile> to OAI, saving it
+    --convertEDMXtoOpenAPI  Converts EDMX in <inputFile> to Open API, saving it
                             in <inputFile>.swagger.json
     --entityName <n>        The name of the entity to fetch, e.g.
                             Property.
@@ -221,7 +221,7 @@ representations like Integers.
 The EDMX converter may be called as follows:
 
 ```
-$ java -jar web-api-commander.jar --convertEDMXtoOAI --inputFile <i>
+$ java -jar web-api-commander.jar --convertEDMXtoOpenAPI --inputFile <i>
 ``` 
 
 Any errors will be displayed, and the output file is automatically created by appending `.swagger.json` to
