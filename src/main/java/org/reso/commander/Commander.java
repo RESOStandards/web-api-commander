@@ -380,6 +380,7 @@ public class Commander {
       uriBuilder.setHost(url.getHost());
       if (url.getPath() != null) uriBuilder.setPath(url.getPath());
       if (url.getQuery() != null) uriBuilder.setCustomQuery(url.getQuery());
+      if (url.getPort() >= 0) uriBuilder.setPort(url.getPort());
       return uriBuilder.build();
     } catch (Exception ex) {
       LOG.error("ERROR in prepareURI: " + ex.toString());
