@@ -216,9 +216,7 @@ public class WebAPIServer_1_0_2 implements En {
       commander.set(new Commander.Builder()
           .clientId(clientId)
           .clientSecret(clientSecret)
-          .authorizationUri(authorizationUri)
           .tokenUri(tokenUri)
-          .redirectUri(redirectUri)
           .scope(scope)
           .serviceRoot(serviceRoot)
           .bearerToken(bearerToken)
@@ -232,7 +230,7 @@ public class WebAPIServer_1_0_2 implements En {
     And("^the OData client uses authorization_code or client_credentials for authentication$", () -> {
       assertNotNull(commander.get());
       assertTrue("ERROR: Commander must either have a valid Authorization Code or Client Credentials configuration.",
-          commander.get().isTokenClient() || commander.get().isOAuthClient() && commander.get().hasValidAuthConfig());
+          commander.get().isTokenClient() || (commander.get().isOAuthClient() && commander.get().hasValidAuthConfig()));
 
       if (commander.get().isTokenClient()) {
         LOG.info("Authentication Type: authorization_code");
@@ -295,6 +293,8 @@ public class WebAPIServer_1_0_2 implements En {
       try {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(responseData.get().getBytes());
         xmlMetadata.set(commander.get().getClient().getDeserializer(ContentType.APPLICATION_XML).toMetadata(byteArrayInputStream));
+
+        LOG.info("XML Metadata is \n" + responseData.get());
 
         boolean isValid = commander.get().validateMetadata(xmlMetadata.get());
         LOG.info("XML Metadata is " + (isValid ? "valid" : "invalid") + "!");
@@ -471,6 +471,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the response is valid XML$", () -> {
       try {
+        if (showResponses) LOG.info("XML Response is: " + responseData.get());
         assertTrue("ERROR: invalid XML response!", Commander.validateXML(responseData.get()));
         LOG.info("Response is valid XML!");
       } catch (Exception ex) {

@@ -104,9 +104,7 @@ public class App {
 
         clientId = settings.getClientSettings().get(ClientSettings.CLIENT_IDENTIFICATION);
         clientSecret = settings.getClientSettings().get(ClientSettings.CLIENT_SECRET);
-        authorizationUri = settings.getClientSettings().get(ClientSettings.AUTHORIZATION_URI);
         tokenUri = settings.getClientSettings().get(ClientSettings.TOKEN_URI);
-        redirectUri = settings.getClientSettings().get(ClientSettings.REDIRECT_URI);
         scope = settings.getClientSettings().get(ClientSettings.CLIENT_SCOPE);
 
         LOG.debug("Service root is: " + serviceRoot);
@@ -114,15 +112,17 @@ public class App {
         //otherwise, load from command line
         serviceRoot = cmd.getOptionValue(APP_OPTIONS.SERVICE_ROOT, null);
         bearerToken = cmd.getOptionValue(APP_OPTIONS.BEARER_TOKEN, null);
+        clientId = cmd.getOptionValue(ClientSettings.CLIENT_IDENTIFICATION, null);
+        clientSecret = cmd.getOptionValue(ClientSettings.CLIENT_SECRET, null);
+        tokenUri = cmd.getOptionValue(ClientSettings.TOKEN_URI, null);
+        scope = cmd.getOptionValue(ClientSettings.CLIENT_SCOPE, null);
       }
 
       //create Commander instance
       commander = commanderBuilder
           .clientId(clientId)
           .clientSecret(clientSecret)
-          .authorizationUri(authorizationUri)
           .tokenUri(tokenUri)
-          .redirectUri(redirectUri)
           .scope(scope)
           .serviceRoot(serviceRoot)
           .bearerToken(bearerToken)

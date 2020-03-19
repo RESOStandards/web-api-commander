@@ -19,6 +19,7 @@ import org.reso.auth.OAuth2HttpClientFactory;
 import org.reso.auth.TokenHttpClientFactory;
 import org.xml.sax.*;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Source;
@@ -26,13 +27,12 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.SchemaFactory;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * URI
@@ -72,7 +72,7 @@ public class Commander {
    * @return true if the given xmlString is valid and false otherwise.
    */
   public static boolean validateXML(String xmlString) {
-    return validateXML(new ByteArrayInputStream(xmlString.getBytes(UTF_8)));
+    return validateXML(new ByteArrayInputStream(xmlString.getBytes()));
   }
 
   /**
@@ -81,18 +81,27 @@ public class Commander {
    * @return true if the given inputStream has valid XML, false otherwise.
    */
   public static boolean validateXML(InputStream inputStream) {
-    SAXParserFactory factory = SAXParserFactory.newInstance();
-    factory.setValidating(false);
-    factory.setNamespaceAware(true);
-
     try {
+      SAXParserFactory factory = SAXParserFactory.newInstance();
+      factory.setValidating(false); //turn off expectation for having DTD in DOCTYPE tag
+      factory.setNamespaceAware(true);
+
+      factory.setSchema(SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(new StreamSource[]{
+          new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream("edm.4.0.3.xsd")),
+          new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream("edmx.4.0.3.xsd"))
+      }));
+
       SAXParser parser = factory.newSAXParser();
       XMLReader reader = parser.getXMLReader();
       reader.setErrorHandler(new SimpleErrorHandler());
       InputSource inputSource = new InputSource();
       inputSource.setByteStream(inputStream);
-      reader.parse(inputSource);
-      return true;
+      try {
+        reader.parse(inputSource);
+        return true;
+      } catch (SAXException saxEx) {
+        return false;
+      }
     } catch (Exception ex) {
       LOG.error(ex);
     }
@@ -216,8 +225,7 @@ public class Commander {
     if (isOAuthClient()) {
       return getTokenUri() != null && getTokenUri().length() > 0
           && clientId != null && clientId.length() > 0
-          && clientSecret != null && clientSecret.length() > 0
-          && getTokenUri() != null && getTokenUri().length() > 0;
+          && clientSecret != null && clientSecret.length() > 0;
     }
     return false;
   }
@@ -558,15 +566,17 @@ public class Commander {
 
   public static class SimpleErrorHandler implements ErrorHandler {
     public void warning(SAXParseException e) throws SAXException {
-      System.out.println(e.getMessage());
+      LOG.warn(e.getMessage());
     }
 
     public void error(SAXParseException e) throws SAXException {
-      System.out.println(e.getMessage());
+      LOG.error(e.getMessage());
+      throw new SAXException();
     }
 
     public void fatalError(SAXParseException e) throws SAXException {
-      System.out.println(e.getMessage());
+      LOG.fatal(e.getCause().getMessage());
+      throw new SAXException();
     }
   }
 
@@ -601,18 +611,8 @@ public class Commander {
       return this;
     }
 
-    public Builder authorizationUri(String authorizationUri) {
-      this.authorizationUri = authorizationUri;
-      return this;
-    }
-
     public Builder tokenUri(String tokenUri) {
       this.tokenUri = tokenUri;
-      return this;
-    }
-
-    public Builder redirectUri(String redirectURI) {
-      this.redirectUri = redirectURI;
       return this;
     }
 
@@ -639,10 +639,10 @@ public class Commander {
       commander.useEdmEnabledClient = this.useEdmEnabledClient;
 
       //items required for OAuth client
-      commander.isOAuthClient = clientId != null && clientId.length() > 0 &&
-          clientSecret != null && clientSecret.length() > 0 &&
-          authorizationUri != null && authorizationUri.length() > 0 &&
-          tokenUri != null && tokenUri.length() > 0;
+      commander.isOAuthClient =
+          clientId != null && clientId.length() > 0
+          && clientSecret != null && clientSecret.length() > 0
+          && tokenUri != null && tokenUri.length() > 0;
 
       //items required for token client
       commander.isTokenClient = bearerToken != null && bearerToken.length() > 0;
@@ -655,8 +655,7 @@ public class Commander {
       }
 
       if (commander.isOAuthClient) {
-        commander.getClient().getConfiguration().setHttpClientFactory(new OAuth2HttpClientFactory(
-            clientId, clientSecret, authorizationUri, tokenUri, redirectUri, scope));
+        commander.getClient().getConfiguration().setHttpClientFactory(new OAuth2HttpClientFactory(clientId, clientSecret, tokenUri, scope));
       } else if (commander.isTokenClient) {
         commander.getClient().getConfiguration().setHttpClientFactory(new TokenHttpClientFactory(bearerToken));
       }
