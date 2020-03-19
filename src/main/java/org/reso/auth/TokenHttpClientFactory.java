@@ -3,6 +3,7 @@ package org.reso.auth;
 import org.apache.http.Header;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
@@ -34,7 +35,7 @@ public class TokenHttpClientFactory extends AbstractHttpClientFactory {
   }
 
   @Override
-  public HttpClient create(final HttpMethod method, final URI uri) {
+  public CloseableHttpClient create(final HttpMethod method, final URI uri) {
     BasicHeader authHeader = new BasicHeader("Authorization", "Bearer " + token);
     List<Header> headers = new ArrayList<>();
     headers.add(authHeader);

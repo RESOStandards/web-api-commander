@@ -97,7 +97,7 @@
           Service Configuration
     ############################################################-->
 
-    <!-- REQUIRED: Core - The DataSystems endpoint being tested
+    <!-- Optional: Core - The DataSystem endpoint being tested
     NOTE: the FULL DataSystems URL is required as it might not be relative to the Service Root.
           This will likely change in future revisions. -->
     <Parameter Name="EndpointDataSystem" Value="REQUIRED: YOUR DATA SYSTEMS ENDPOINT GOES HERE" />

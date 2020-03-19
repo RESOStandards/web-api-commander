@@ -172,7 +172,7 @@ public class WebAPIServer_1_0_2 implements En {
         throw sex;
       } catch (Exception ex) {
         fail("ERROR: unhandled Exception in executeGetRequest()!\n" + ex.toString());
-        throw ex;
+        //throw ex;
       }
       return null;
     };
@@ -471,7 +471,6 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the response is valid XML$", () -> {
       try {
-        if (showResponses) LOG.info("XML Response is: " + responseData.get());
         assertTrue("ERROR: invalid XML response!", Commander.validateXML(responseData.get()));
         LOG.info("Response is valid XML!");
       } catch (Exception ex) {

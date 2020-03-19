@@ -10,8 +10,8 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.LogManager;
@@ -38,7 +38,18 @@ public class OAuth2HttpClientFactory extends AbstractHttpClientFactory {
   private String tokenUri;
   private String scope;
   private String accessToken;
+  private Integer expiresIn;
 
+  final static String EXPIRES_IN = "expires_in";
+  final static String ACCESS_TOKEN = "access_token";
+
+  /**
+   * Creates an OAuth2 client for making HTTP requests using Client Credentials
+   * @param clientId the client Id of the consumer
+   * @param clientSecret the client secret of the consumer
+   * @param tokenUri the token uri of the server to connect to
+   * @param scope (optional) scope
+   */
   public OAuth2HttpClientFactory(String clientId, String clientSecret, String tokenUri, String scope) {
     this.clientId = clientId;
     this.clientSecret = clientSecret;
@@ -72,40 +83,38 @@ public class OAuth2HttpClientFactory extends AbstractHttpClientFactory {
       if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
         String inputLine;
         BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         while ((inputLine = in.readLine()) != null) {
           buffer.append(inputLine);
         }
         in.close();
-        //print in String
-        System.out.println(buffer.toString());
 
         //Read JSON response and print
         ObjectMapper mapper = new ObjectMapper();
         JsonNode responseData = mapper.readTree(buffer.toString());
 
-        String token = responseData.get("access_token").textValue();
-        assert(token != null);
+        if (responseData.get(ACCESS_TOKEN) != null) {
+          accessToken = responseData.get(ACCESS_TOKEN).asText();
+        }
+        assert(accessToken != null);
 
-        accessToken = token;
-
-        response.close();
+        if (responseData.get(EXPIRES_IN) != null) {
+          expiresIn = responseData.get(EXPIRES_IN).asInt();
+        }
       }
-
+      response.close();
     } catch (Exception e) {
       throw new OAuth2Exception(e);
     }
   }
 
   @Override
-  public HttpClient create(HttpMethod method, URI uri) {
+  public CloseableHttpClient create(HttpMethod method, URI uri) {
     assert(accessToken != null);
 
     BasicHeader authHeader = new BasicHeader("Authorization", "Bearer " + accessToken);
     List<Header> headers = new ArrayList<>();
     headers.add(authHeader);
-
-    connectionManager = new BasicHttpClientConnectionManager();
 
     return HttpClientBuilder.create()
         .setUserAgent(USER_AGENT)
