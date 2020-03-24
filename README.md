@@ -19,13 +19,13 @@ the Apache Olingo library to provide the following functionality:
   * [Cucumber Feature Specifications](#cucumber-feature-specifications)
   * [Testing Environment](#testing-environment)
   * [Web API Usage](#web-api-usage)
-    - [Running Web API Tests with the Gradle Wrapper](#running-web-api-tests-with-the-gradle-wrapper)
-    - [Convenience Methods for Web API 1.0.2 Server Gold and Platinum Certification (Recommended)](#convenience-methods-for-web-api-102-server-gold-and-platinum-certification-recommended)
+  * [Running Web API Tests with the Gradle Wrapper](#running-web-api-tests-with-the-gradle-wrapper)
+  * [Convenience Methods for Web API 1.0.2 Server Gold and Platinum Certification (Recommended)](#convenience-methods-for-web-api-102-server-gold-and-platinum-certification-recommended)
   * [Web API Program Output](#web-api-program-output)
 - [Automated Data Dictionary Testing (In Development)](#automated-data-dictionary-testing-in-development)
   * [Data Dictionary Usage](#data-dictionary-usage)
-    - [Running Data Dictionary Tests with the Gradle Wrapper](#running-data-dictionary-tests-with-the-gradle-wrapper)
-    - [Convenience Methods for Data Dictionary 1.5 and 1.6 Certification (Recommended)](#convenience-methods-for-data-dictionary-15-and-16-certification-recommended) 
+  * [Running Data Dictionary Tests with the Gradle Wrapper](#running-data-dictionary-tests-with-the-gradle-wrapper)
+  * [Convenience Methods for Data Dictionary 1.5 and 1.6 Certification (Recommended)](#convenience-methods-for-data-dictionary-15-and-16-certification-recommended) 
   * [Data Ditionary Program Output](#data-dictionary-program-output)
 - [Docker](#docker)
 - [Logging](#logging)
@@ -381,7 +381,7 @@ which also means you'll have a fresh copy of the latest code to execute.
 
 To refresh the code after you have downloaded it, issue the command `$ git pull` in the root of the directory that was just created. 
  
-#### Running Web API Tests with the Gradle Wrapper
+### Running Web API Tests with the Gradle Wrapper
 The [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) provides a convenient way to automatically install Gradle when running tests. 
 
 After you have cloned the repository, as shown in the previous step, change into the directory containing 
@@ -532,7 +532,7 @@ with the development process.
 
 The Commander may be run in automated testing mode for Data Dictionary 1.5 and 1.6 Certifications using a terminal.
  
-#### Running Data Dictionary Tests with the Gradle Wrapper
+### Running Data Dictionary Tests with the Gradle Wrapper
 The [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) 
 provides a convenient way to automatically install Gradle when running tests. 
 
