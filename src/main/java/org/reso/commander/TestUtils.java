@@ -2,9 +2,16 @@ package org.reso.commander;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.Header;
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.olingo.client.api.communication.ODataClientErrorException;
+import org.apache.olingo.client.api.communication.ODataServerErrorException;
+import org.apache.olingo.client.api.communication.request.retrieve.ODataEntitySetRequest;
+import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
+import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
+import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
@@ -15,12 +22,14 @@ import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmTimeOfDay;
+import org.reso.models.Request;
 import org.reso.models.Settings;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -32,13 +41,108 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.restassured.path.json.JsonPath.from;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public final class TestUtils {
   public static final String JSON_VALUE_PATH = "value";
   public static final String HEADER_ODATA_VERSION = "OData-Version";
   private static final Logger LOG = LogManager.getLogger(TestUtils.class);
+
+  /**
+   * Encapsulates Commander Requests and Responses during runtime
+   */
+  public static final class CommanderWrapper {
+    //TODO: Wrap in Commander Request/Response object
+    public AtomicReference<Commander> commander = new AtomicReference<>();
+    public AtomicReference<ODataRawResponse> oDataRawResponse = new AtomicReference<>();
+    public AtomicReference<Request> request = new AtomicReference<>();
+    public AtomicReference<URI> requestUri = new AtomicReference<>();
+    public AtomicReference<Integer> responseCode = new AtomicReference<>();
+    public AtomicReference<String> responseData = new AtomicReference<>();
+    public AtomicReference<String> initialResponseData = new AtomicReference<>(); //used if two result sets need to be compared
+    public AtomicReference<ODataRawRequest> rawRequest = new AtomicReference<>();
+
+    public AtomicReference<ODataClientErrorException> oDataClientErrorException = new AtomicReference<>();
+    public AtomicReference<ODataServerErrorException> oDataServerErrorException = new AtomicReference<>();
+    public AtomicReference<String> serverODataHeaderVersion = new AtomicReference<>();
+    public AtomicReference<Boolean> testAppliesToServerODataHeaderVersion = new AtomicReference<>();
+
+    public AtomicReference<ODataEntitySetRequest<ClientEntitySet>> clientEntitySetRequest = new AtomicReference<>();
+    public AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
+    public AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
+  }
+
+  /**
+   * Creates a Runnable to reset the state of the given CommanderWrapper
+   * @param wrapper the CommanderWrapper to reset
+   * @return a Runnable that can be called
+   */
+  public static Runnable buildWrapperResetRunnable(final CommanderWrapper wrapper){
+    return new Runnable() {
+      @Override
+      public void run() {
+        wrapper.oDataRawResponse.set(null);
+        wrapper.request.set(null);
+        wrapper.responseCode.set(null);
+        wrapper.responseData.set(null);
+        wrapper.initialResponseData.set(null);
+        wrapper.rawRequest.set(null);
+        wrapper.oDataClientErrorException.set(null);
+        wrapper.oDataServerErrorException.set(null);
+        wrapper.serverODataHeaderVersion.set(null);
+        wrapper.testAppliesToServerODataHeaderVersion.set(false);
+      }
+    };
+  }
+
+  /**
+   * Used to prepare URIs given that the input queryStrings can sometimes contain special characters
+   * that need to be ensured that they be processed.
+   * @param queryString the queryString to prepare
+   * @return the prepared URI with special characters in the queryString processed.
+   */
+  public static URI prepareUri(final String queryString) {
+    /* replace spaces with %20 */
+    return URI.create(
+        queryString.replace(" ", "%20")
+        /* add other handlers here */
+    );
+  }
+
+  /**
+   * Executes HTTP GET request and sets the expected local variables in the given CommanderWrapper
+   * Handles exceptions and sets response codes as well.
+   * @param uri the URI to make requests to
+   * @param wrapper the CommanderWrapper to execute the requests in
+   * @return a CommanderWrapper containing the final state of the request.
+   */
+  public static CommanderWrapper executeGetRequest(final URI uri, final CommanderWrapper wrapper) {
+    LOG.info("Request URI: " + uri);
+    try {
+      wrapper.rawRequest.set(wrapper.commander.get().getClient().getRetrieveRequestFactory().getRawRequest(uri));
+      wrapper.oDataRawResponse.set(wrapper.rawRequest.get().execute());
+      wrapper.responseData.set(TestUtils.convertInputStreamToString(wrapper.oDataRawResponse.get().getRawResponse()));
+      wrapper.serverODataHeaderVersion.set(wrapper.oDataRawResponse.get().getHeader(HEADER_ODATA_VERSION).toString());
+      wrapper.responseCode.set(wrapper.oDataRawResponse.get().getStatusCode());
+      LOG.info("Request succeeded..." + wrapper.responseData.get().getBytes().length + " bytes received.");
+    } catch (ODataClientErrorException cex) {
+      LOG.debug("ODataClientErrorException caught. Check tests for asserted conditions...");
+      wrapper.oDataClientErrorException.set(cex);
+      wrapper.serverODataHeaderVersion.set(TestUtils.getHeaderData(HEADER_ODATA_VERSION, cex.getHeaderInfo()));
+      wrapper.responseCode.set(cex.getStatusLine().getStatusCode());
+    } catch (ODataServerErrorException ode) {
+      LOG.debug("ODataServerErrorException thrown in executeGetRequest. Check tests for asserted conditions...");
+      //TODO: look for better ways to do this in Olingo or open PR
+      if (ode.getMessage().contains(Integer.toString(HttpStatus.SC_NOT_IMPLEMENTED))) {
+        wrapper.responseCode.set(HttpStatus.SC_NOT_IMPLEMENTED);
+      }
+      wrapper.oDataServerErrorException.set(ode);
+    } catch (Exception ex) {
+      fail("ERROR: unhandled Exception in executeGetRequest()!\n" + ex.toString());
+      //throw ex;
+    }
+    return wrapper;
+  }
 
   /**
    * Finds the default entity container for the given configuration.

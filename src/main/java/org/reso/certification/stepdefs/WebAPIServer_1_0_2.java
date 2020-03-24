@@ -12,10 +12,6 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
-import org.apache.olingo.client.api.communication.ODataServerErrorException;
-import org.apache.olingo.client.api.communication.request.retrieve.ODataEntitySetRequest;
-import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
-import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.data.ResWrap;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
@@ -30,13 +26,11 @@ import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.commander.Commander;
 import org.reso.commander.TestUtils;
 import org.reso.models.ClientSettings;
-import org.reso.models.Request;
 import org.reso.models.Settings;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.net.URI;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -44,7 +38,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
@@ -54,6 +47,8 @@ import static org.reso.commander.TestUtils.Operators.*;
 public class WebAPIServer_1_0_2 implements En {
   private static final Logger LOG = LogManager.getLogger(WebAPIServer_1_0_2.class);
   private static final  String FIELD_SEPARATOR = ",", PRETTY_FIELD_SEPARATOR = FIELD_SEPARATOR + " ";
+  private static final String SHOW_RESPONSES = "showResponses";
+  private static final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES));
 
   private static Settings settings;
 
@@ -64,119 +59,16 @@ public class WebAPIServer_1_0_2 implements En {
   private String serviceRoot, bearerToken, clientId, clientSecret, authorizationUri, tokenUri, redirectUri, scope;
   private String pathToRESOScript;
 
-  /**
-   * Accessors used for running one-off tests that have dependent metadata tests
-   * @param commander the commander instance to make the request with.
-   * @return the XMLMetadata for the given request.
+  /*
+   * Used to store a static instance of the CommanderWrapper class
    */
-  private static XMLMetadata getXMLMetadata(Commander commander) {
-    if (xmlMetadata.get() == null) {
-      xmlMetadata.set(commander.getXMLMetadata());
-    }
-    return xmlMetadata.get();
-  }
+  private static AtomicReference<CommanderWrapper> wrapper = new AtomicReference<>(new TestUtils.CommanderWrapper());
 
   /**
-   * Accessors used for running one-off tests that have dependent metadata tests
-   * @param commander the commander instance to make the request with.
-   * @return the Edm for the given request.
+   * Entry point to the Web API Server tests
    */
-  private static Edm getEdmMetadata(Commander commander) {
-    if (edm.get() == null) {
-      edm.set(commander.getEdm());
-    }
-    return edm.get();
-  }
-
   public WebAPIServer_1_0_2() {
-
-    //TODO: split into separate test files and parallelize to remove the need for Atomic "globals"
-    AtomicReference<Commander> commander = new AtomicReference<>();
-    AtomicReference<ODataRawResponse> oDataRawResponse = new AtomicReference<>();
-    AtomicReference<Request> request = new AtomicReference<>();
-    AtomicReference<URI> requestUri = new AtomicReference<>();
-    AtomicReference<Integer> responseCode = new AtomicReference<>();
-    AtomicReference<String> responseData = new AtomicReference<>();
-    AtomicReference<String> initialResponseData = new AtomicReference<>(); //used if two result sets need to be compared
-    AtomicReference<ODataRawRequest> rawRequest = new AtomicReference<>();
-
-    AtomicReference<ODataClientErrorException> oDataClientErrorException = new AtomicReference<>();
-    AtomicReference<String> serverODataHeaderVersion = new AtomicReference<>();
-    AtomicReference<Boolean> testAppliesToServerODataHeaderVersion = new AtomicReference<>();
-
-    AtomicReference<ODataEntitySetRequest<ClientEntitySet>> clientEntitySetRequest = new AtomicReference<>();
-    AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
-    AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
-
-    final boolean showResponses = Boolean.parseBoolean(System.getProperty("showResponses"));
-
-    /*
-     * Instance Utility Methods - must precede usage
-     */
-
-    /*
-     * Resets the local instance state used during test time.
-     * NOTE: you should add any local variables you need reset between tests here.
-     *
-     * TODO: refactor into collection of AtomicReference<T>
-     */
-    Runnable resetRequestState = () -> {
-      oDataRawResponse.set(null);
-      request.set(null);
-      responseCode.set(null);
-      responseData.set(null);
-      initialResponseData.set(null);
-      rawRequest.set(null);
-      oDataClientErrorException.set(null);
-      serverODataHeaderVersion.set(null);
-      testAppliesToServerODataHeaderVersion.set(false);
-    };
-
-    /*
-     * This is used to prepare the URI coming from the raw RESOScript file to handle special characters
-     * needing to be processed prior to being converted to a valid URI.
-     */
-    Function<String, URI> prepareUri = queryString -> URI.create(
-        /* replace spaces with %20 */
-        queryString.replace(" ", "%20")
-
-        /* add other handlers here */
-    );
-
-    /*
-     * Executes HTTP GET request and sets the expected local variables.
-     * Handles exceptions and sets response codes.
-     */
-    Function<URI, Void> executeGetRequest = (URI uri) -> {
-      LOG.info("Request URI: " + uri);
-      try {
-        rawRequest.set(commander.get().getClient().getRetrieveRequestFactory().getRawRequest(uri));
-        oDataRawResponse.set(rawRequest.get().execute());
-        responseData.set(TestUtils.convertInputStreamToString(oDataRawResponse.get().getRawResponse()));
-        serverODataHeaderVersion.set(oDataRawResponse.get().getHeader(HEADER_ODATA_VERSION).toString());
-        responseCode.set(oDataRawResponse.get().getStatusCode());
-        LOG.info("Request succeeded..." + responseData.get().getBytes().length + " bytes received.");
-      } catch (ODataClientErrorException cex) {
-        LOG.debug("ODataClientErrorException caught. Check tests for asserted conditions...");
-        oDataClientErrorException.set(cex);
-        serverODataHeaderVersion.set(TestUtils.getHeaderData(HEADER_ODATA_VERSION, cex.getHeaderInfo()));
-        responseCode.set(cex.getStatusLine().getStatusCode());
-      } catch (ODataServerErrorException sex) {
-        LOG.debug("ODataServerErrorException thrown in executeGetRequest. Check tests for asserted conditions...");
-        //TODO: look for better ways to do this in Olingo or open PR
-        if (sex.getMessage().contains(Integer.toString(HttpStatus.SC_NOT_IMPLEMENTED))) {
-          responseCode.set(HttpStatus.SC_NOT_IMPLEMENTED);
-          return null;
-        }
-        fail("ERROR: unhandled ODataServerErrorException in executeGetRequest()!\n" + sex.toString());
-        throw sex;
-      } catch (Exception ex) {
-        fail("ERROR: unhandled Exception in executeGetRequest()!\n" + ex.toString());
-        //throw ex;
-      }
-      return null;
-    };
-
+    
     /*
      * Background
      */
@@ -212,29 +104,31 @@ public class WebAPIServer_1_0_2 implements En {
 
       LOG.info("Service root is: " + serviceRoot);
 
-      //create Commander instance
-      commander.set(new Commander.Builder()
-          .clientId(clientId)
-          .clientSecret(clientSecret)
-          .tokenUri(tokenUri)
-          .scope(scope)
-          .serviceRoot(serviceRoot)
-          .bearerToken(bearerToken)
-          .useEdmEnabledClient(true)
-          .build());
+      if (wrapper.get().commander.get() == null) {
+        //create Commander instance
+        wrapper.get().commander.set(new Commander.Builder()
+            .clientId(clientId)
+            .clientSecret(clientSecret)
+            .tokenUri(tokenUri)
+            .scope(scope)
+            .serviceRoot(serviceRoot)
+            .bearerToken(bearerToken)
+            .useEdmEnabledClient(true)
+            .build());
+      }
     });
 
     /*
      * Ensures that the client either uses Authorization Codes or Client Credentials
      */
     And("^the OData client uses authorization_code or client_credentials for authentication$", () -> {
-      assertNotNull(commander.get());
+      assertNotNull(wrapper.get().commander.get());
       assertTrue("ERROR: Commander must either have a valid Authorization Code or Client Credentials configuration.",
-          commander.get().isTokenClient() || (commander.get().isOAuthClient() && commander.get().hasValidAuthConfig()));
+          wrapper.get().commander.get().isTokenClient() || (wrapper.get().commander.get().isOAuthClient() && wrapper.get().commander.get().hasValidAuthConfig()));
 
-      if (commander.get().isTokenClient()) {
+      if (wrapper.get().commander.get().isTokenClient()) {
         LOG.info("Authentication Type: authorization_code");
-      } else if (commander.get().isOAuthClient()) {
+      } else if (wrapper.get().commander.get().isOAuthClient()) {
         LOG.info("Authentication Type: client_credentials");
       }
     });
@@ -243,7 +137,7 @@ public class WebAPIServer_1_0_2 implements En {
      * REQ-WA103-END2 - validate DataSystem endpoint, if present.
      */
     And("^the results match the expected DataSystem JSON schema$", () -> {
-      if (responseCode.get() == HttpStatus.SC_OK && responseData.get() != null) {
+      if (wrapper.get().responseCode.get() == HttpStatus.SC_OK && wrapper.get().responseData.get() != null) {
         try {
           JsonSchemaFactory factory = JsonSchemaFactory.getInstance();
           InputStream is = Thread.currentThread().getContextClassLoader()
@@ -251,7 +145,7 @@ public class WebAPIServer_1_0_2 implements En {
           JsonSchema schema = factory.getSchema(is);
 
           ObjectMapper mapper = new ObjectMapper();
-          JsonNode node = mapper.readTree(responseData.get());
+          JsonNode node = mapper.readTree(wrapper.get().responseData.get());
 
           if (node.findPath(JSON_VALUE_PATH).size() > 0) {
             Set<ValidationMessage> errors = schema.validate(node);
@@ -275,7 +169,7 @@ public class WebAPIServer_1_0_2 implements En {
       assertNotNull("ERROR: No Entity Data Model (Edm) Exists!", edm.get());
 
       try {
-        boolean isValid = commander.get().validateMetadata(edm.get());
+        boolean isValid = wrapper.get().commander.get().validateMetadata(edm.get());
         LOG.info("Edm Metadata is " + (isValid ? "valid" : "invalid") + "!");
         assertTrue("Edm Metadata at the given service root is not valid! " + serviceRoot, isValid);
       } catch (Exception ex) {
@@ -288,15 +182,15 @@ public class WebAPIServer_1_0_2 implements En {
      * XMLMetadata Validator
      */
     And("^the XML metadata returned by the server are valid$", () -> {
-      assertNotNull("ERROR: No Response Data exists to convert to XML Metadata!", responseData.get());
+      assertNotNull("ERROR: No Response Data exists to convert to XML Metadata!", wrapper.get().responseData.get());
 
       try {
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(responseData.get().getBytes());
-        xmlMetadata.set(commander.get().getClient().getDeserializer(ContentType.APPLICATION_XML).toMetadata(byteArrayInputStream));
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(wrapper.get().responseData.get().getBytes());
+        xmlMetadata.set(wrapper.get().commander.get().getClient().getDeserializer(ContentType.APPLICATION_XML).toMetadata(byteArrayInputStream));
 
-        LOG.info("XML Metadata is \n" + responseData.get());
+        if (showResponses) LOG.info("XML Metadata is \n" + wrapper.get().responseData.get());
 
-        boolean isValid = commander.get().validateMetadata(xmlMetadata.get());
+        boolean isValid = wrapper.get().commander.get().validateMetadata(xmlMetadata.get());
         LOG.info("XML Metadata is " + (isValid ? "valid" : "invalid") + "!");
         assertTrue("ERROR: XML Metadata at the given service root is not valid! " + serviceRoot, isValid);
       } catch (Exception ex) {
@@ -311,7 +205,7 @@ public class WebAPIServer_1_0_2 implements En {
     And("^the provided \"([^\"]*)\" is returned in \"([^\"]*)\"$", (String parameterUniqueIdValue, String parameterUniqueId) -> {
       try {
         String expectedValueAsString = Settings.resolveParametersString(parameterUniqueIdValue, settings), resolvedValueAsString = null;
-        Object resolvedValue = from(responseData.get()).get(Settings.resolveParametersString(parameterUniqueId, settings));
+        Object resolvedValue = from(wrapper.get().responseData.get()).get(Settings.resolveParametersString(parameterUniqueId, settings));
 
         //both of the inputs should be present
         assertNotNull(expectedValueAsString);
@@ -344,7 +238,7 @@ public class WebAPIServer_1_0_2 implements En {
 
         AtomicInteger numResults = new AtomicInteger();
         //iterate over the items and count the number of fields with data to determine whether there are data present
-        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(wrapper.get().responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           if (item != null) {
             numResults.getAndIncrement();
             fieldList.forEach(field -> {
@@ -376,7 +270,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the results contain at most \"([^\"]*)\" records$", (String parameterTopCount) -> {
       try {
-        List<String> items = from(responseData.get()).getList(JSON_VALUE_PATH);
+        List<String> items = from(wrapper.get().responseData.get()).getList(JSON_VALUE_PATH);
         AtomicInteger numResults = new AtomicInteger(items.size());
 
         int topCount = Integer.parseInt(Settings.resolveParametersString(parameterTopCount, settings));
@@ -400,20 +294,20 @@ public class WebAPIServer_1_0_2 implements En {
         LOG.info("Skip count is: " + skipCount);
 
         //preserve initial response data for later comparisons
-        initialResponseData.set(responseData.get());
+        wrapper.get().initialResponseData.set(wrapper.get().responseData.get());
 
         //TODO: convert to OData filter factory
-        requestUri.set(Commander.prepareURI(Settings.resolveParameters(settings.getRequestById(requirementId), settings).getUrl()
+        wrapper.get().requestUri.set(Commander.prepareURI(Settings.resolveParameters(settings.getRequestById(requirementId), settings).getUrl()
             + "&" + Commander.ODATA_QUERY_OPTIONS.SKIP +"=" + skipCount));
-        executeGetRequest.apply(requestUri.get());
+        wrapper.set(executeGetRequest(wrapper.get().requestUri.get(), wrapper.get()));
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
     });
     And("^data in the \"([^\"]*)\" fields are different in the second request than in the first$", (String parameterUniqueId) -> {
       try {
-        List<POJONode> l1 = from(initialResponseData.get()).getJsonObject(JSON_VALUE_PATH);
-        List<POJONode> l2 = from(responseData.get()).getJsonObject(JSON_VALUE_PATH);
+        List<POJONode> l1 = from(wrapper.get().initialResponseData.get()).getJsonObject(JSON_VALUE_PATH);
+        List<POJONode> l2 = from(wrapper.get().responseData.get()).getJsonObject(JSON_VALUE_PATH);
 
         int combinedCount = l1.size() + l2.size();
         Set<POJONode> combined = new LinkedHashSet<>(l1);
@@ -441,11 +335,11 @@ public class WebAPIServer_1_0_2 implements En {
     When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", (String requestId) -> {
       try {
         //reset local state each time a get request is run
-        resetRequestState.run();
+        buildWrapperResetRunnable(wrapper.get()).run();
 
         LOG.info("Request ID: " + requestId);
-        requestUri.set(Commander.prepareURI(Settings.resolveParameters(settings.getRequestById(requestId), settings).getUrl()));
-        executeGetRequest.apply(requestUri.get());
+        wrapper.get().requestUri.set(Commander.prepareURI(Settings.resolveParameters(settings.getRequestById(requestId), settings).getUrl()));
+        wrapper.set(executeGetRequest(wrapper.get().requestUri.get(), wrapper.get()));
       } catch (Exception ex) {
         LOG.debug("Exception was thrown in " + this.getClass() + ": " + ex.toString());
       }
@@ -456,11 +350,11 @@ public class WebAPIServer_1_0_2 implements En {
      */
     Then("^the server responds with a status code of (\\d+)$", (Integer assertedResponseCode) -> {
       try {
-        LOG.info("Asserted Response Code: " + assertedResponseCode + ", Server Response Code: " + responseCode);
-        assertTrue(responseCode.get() > 0 && assertedResponseCode > 0);
+        LOG.info("Asserted Response Code: " + assertedResponseCode + ", Server Response Code: " + wrapper.get().responseCode);
+        assertTrue(wrapper.get().responseCode.get() > 0 && assertedResponseCode > 0);
 
         assertEquals("ERROR: asserted response code does not match the one returned from the server!",
-            assertedResponseCode.intValue(), responseCode.get().intValue());
+            assertedResponseCode.intValue(), wrapper.get().responseCode.get().intValue());
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
@@ -471,7 +365,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the response is valid XML$", () -> {
       try {
-        assertTrue("ERROR: invalid XML response!", Commander.validateXML(responseData.get()));
+        assertTrue("ERROR: invalid XML response!", Commander.validateXML(wrapper.get().responseData.get()));
         LOG.info("Response is valid XML!");
       } catch (Exception ex) {
         fail(ex.getMessage());
@@ -483,10 +377,10 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the response is valid JSON$", () -> {
       try {
-        assertTrue("ERROR: invalid JSON response!", TestUtils.isValidJson(responseData.get()));
+        assertTrue("ERROR: invalid JSON response!", TestUtils.isValidJson(wrapper.get().responseData.get()));
         LOG.info("Response is valid JSON!");
 
-        if (showResponses) LOG.info("Response: " + new ObjectMapper().readTree(responseData.get()).toPrettyString());
+        if (showResponses) LOG.info("Response: " + new ObjectMapper().readTree(wrapper.get().responseData.get()).toPrettyString());
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
@@ -499,13 +393,13 @@ public class WebAPIServer_1_0_2 implements En {
      */
     Then("^the server responds with a status code of (\\d+) if the server headers report OData version \"([^\"]*)\"$", (Integer assertedHttpResponseCode, String assertedODataVersion) -> {
       try {
-        boolean versionsMatch = serverODataHeaderVersion.get().equals(assertedODataVersion),
-            responseCodesMatch = responseCode.get().intValue() == assertedHttpResponseCode.intValue();
+        boolean versionsMatch = wrapper.get().serverODataHeaderVersion.get().equals(assertedODataVersion),
+                responseCodesMatch = wrapper.get().responseCode.get().intValue() == assertedHttpResponseCode.intValue();
 
-        LOG.info("Asserted OData Version: " + assertedODataVersion + ", Server Version: " + serverODataHeaderVersion.get());
+        LOG.info("Asserted OData Version: " + assertedODataVersion + ", Server Version: " + wrapper.get().serverODataHeaderVersion.get());
 
         if (versionsMatch) {
-          LOG.info("Asserted Response Code: " + assertedHttpResponseCode + ", Response code: " + responseCode.get());
+          LOG.info("Asserted Response Code: " + assertedHttpResponseCode + ", Response code: " + wrapper.get().responseCode.get());
           assertTrue("ERROR: asserted response code does not match the one returned from the server!", responseCodesMatch);
         }
       } catch (Exception ex) {
@@ -532,7 +426,7 @@ public class WebAPIServer_1_0_2 implements En {
         AtomicReference<Integer> fieldValue = new AtomicReference<>();
 
         //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
-        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(wrapper.get().responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           fieldValue.set(Integer.parseInt(item.get(fieldName).toString()));
           result.set(result.get() && TestUtils.compare(fieldValue.get(), op, assertedValue));
         });
@@ -548,7 +442,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the response has results$", () -> {
       try {
-        int count = from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).size();
+        int count = from(wrapper.get().responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).size();
         LOG.info("Results count is: " + count);
         assertTrue("ERROR: no results returned from the server!", count > 0);
       } catch (Exception ex) {
@@ -562,7 +456,7 @@ public class WebAPIServer_1_0_2 implements En {
     And("^the response has singleton results in \"([^\"]*)\"", (String parameterFieldName) -> {
       try {
         String value = Settings.resolveParametersString(parameterFieldName, settings);
-        boolean isPresent = from(responseData.get()).get() != null;
+        boolean isPresent = from(wrapper.get().responseData.get()).get() != null;
         LOG.info("Response value is: " + value);
         LOG.info("IsPresent: " + isPresent);
         assertTrue("ERROR: singleton results not found for '" + value + "'!", isPresent);
@@ -576,7 +470,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the number of results is less than or equal to \"([^\"]*)\"$", (String limitField) -> {
       try {
-        int count = from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).size(),
+        int count = from(wrapper.get().responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).size(),
             limit = Integer.parseInt(Settings.resolveParametersString(limitField, settings));
         LOG.info("Results count is: " + count + ", Limit is: " + limit);
         assertTrue("ERROR: number of results exceeds that specified in '" + limitField + "'!", count <= limit);
@@ -606,7 +500,7 @@ public class WebAPIServer_1_0_2 implements En {
             rhsValue = new AtomicReference<>();
 
         //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
-        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(wrapper.get().responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           lhsValue.set(Integer.parseInt(item.get(fieldName).toString()));
           rhsValue.set(Integer.parseInt(item.get(fieldName).toString()));
 
@@ -641,7 +535,7 @@ public class WebAPIServer_1_0_2 implements En {
         assertedValue.set(TestUtils.parseDateFromEdmDateString(Settings.resolveParametersString(parameterAssertedValue, settings)));
         LOG.info("Asserted value is: " + assertedValue.get().toString());
 
-        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(wrapper.get().responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           try {
             fieldValue.set(TestUtils.parseDateFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
             assertTrue(TestUtils.compare(fieldValue.get(), op, assertedValue.get()));
@@ -666,7 +560,7 @@ public class WebAPIServer_1_0_2 implements En {
         assertedValue.set(TestUtils.parseTimeOfDayFromEdmTimeOfDayString(Settings.resolveParametersString(parameterAssertedValue, settings)));
         LOG.info("Asserted value is: " + assertedValue.get().toString());
 
-        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(wrapper.get().responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           try {
             fieldValue.set(TestUtils.parseTimeOfDayFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
             assertTrue(TestUtils.compare(fieldValue.get(), op, assertedValue.get()));
@@ -684,7 +578,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^DateTimeOffset data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
       try {
-        TestUtils.assertDateTimeOffset(parameterFieldName, op, parameterAssertedValue, responseData.get(), settings);
+        TestUtils.assertDateTimeOffset(parameterFieldName, op, parameterAssertedValue, wrapper.get().responseData.get(), settings);
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
@@ -695,7 +589,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^DateTimeOffset data in \"([^\"]*)\" \"([^\"]*)\" now\\(\\)$", (String parameterFieldName, String op) -> {
       try {
-        TestUtils.assertDateTimeOffset(parameterFieldName, op, Timestamp.from(Instant.now()), responseData.get(), settings);
+        TestUtils.assertDateTimeOffset(parameterFieldName, op, Timestamp.from(Instant.now()), wrapper.get().responseData.get(), settings);
       } catch (Exception ex) {
         fail(ex.getMessage());
       }
@@ -715,7 +609,7 @@ public class WebAPIServer_1_0_2 implements En {
         assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, settings));
         LOG.info("Asserted value is: " + assertedValue.get());
 
-        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(wrapper.get().responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           fieldValue.set(item.get(fieldName).toString());
           result.set(fieldValue.get().contentEquals(assertedValue.get()));
           LOG.info("Assert True: " + fieldValue.get() + " equals " + assertedValue.get() + " ==> " + result.get());
@@ -741,7 +635,7 @@ public class WebAPIServer_1_0_2 implements En {
         assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, settings));
         LOG.info("Asserted value is: " + assertedValue.get());
 
-        from(responseData.get()).getList(JSON_VALUE_PATH, ObjectNode.class).forEach(item -> {
+        from(wrapper.get().responseData.get()).getList(JSON_VALUE_PATH, ObjectNode.class).forEach(item -> {
           fieldValue.set(item.get(fieldName).toString());
           result.set(fieldValue.get().contains(assertedValue.get()));
           LOG.info("Assert True: " + fieldValue.get() + " has " + assertedValue.get() + " ==> " + result.get());
@@ -768,7 +662,7 @@ public class WebAPIServer_1_0_2 implements En {
         AtomicReference<Timestamp> currentValue = new AtomicReference<>();
         AtomicInteger count = new AtomicInteger(0);
 
-        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(wrapper.get().responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           try {
             if (count.get() == 0) {
               initialValue.set(TestUtils.parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
@@ -805,7 +699,7 @@ public class WebAPIServer_1_0_2 implements En {
         assertedValue.set(Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, settings)));
         LOG.info("Asserted value is: " + assertedValue.get());
 
-        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(wrapper.get().responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           try {
             fieldValue.set(TestUtils.getDatePart(datePart.get(), item.get(fieldName)));
             assertTrue(TestUtils.compare(fieldValue.get(), operator.get(), assertedValue.get()));
@@ -834,7 +728,7 @@ public class WebAPIServer_1_0_2 implements En {
           assertedValue.set(Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, settings)));
           LOG.info("Asserted value is: " + assertedValue.get().toString());
 
-          from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+          from(wrapper.get().responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
             try {
               fieldValue.set(TestUtils.getTimestampPart(datePart.get(), item.get(fieldName).toString()));
               assertTrue(TestUtils.compare(fieldValue.get(), operator.get(), assertedValue.get()));
@@ -859,7 +753,7 @@ public class WebAPIServer_1_0_2 implements En {
         AtomicReference<String> assertedValue = new AtomicReference<>(Settings.resolveParametersString(parameterAssertedValue, settings));
         AtomicReference<String> operator = new AtomicReference<>(op.toLowerCase());
 
-        from(responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(wrapper.get().responseData.get()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           assertTrue(TestUtils.compare(item.get(fieldName).toString(), operator.get(), assertedValue.get()));
         });
       } catch (Exception ex) {
@@ -925,17 +819,17 @@ public class WebAPIServer_1_0_2 implements En {
      */
     When("^a default entity container exists for the service root in \"([^\"]*)\"$", (String clientSettingsServiceRoot) -> {
       final String serviceRoot = Settings.resolveParametersString(clientSettingsServiceRoot, settings);
-      assertEquals("ERROR: given service root doesn't match the one configured in the Commander", serviceRoot, commander.get().getServiceRoot());
+      assertEquals("ERROR: given service root doesn't match the one configured in the Commander", serviceRoot, wrapper.get().commander.get().getServiceRoot());
 
       try {
-        ODataRetrieveResponse<Edm> oDataRetrieveResponse = commander.get().getODataRetrieveEdmResponse();
-        responseCode.set(oDataRetrieveResponse.getStatusCode());
+        ODataRetrieveResponse<Edm> oDataRetrieveResponse = wrapper.get().commander.get().getODataRetrieveEdmResponse();
+        wrapper.get().responseCode.set(oDataRetrieveResponse.getStatusCode());
         edm.set(oDataRetrieveResponse.getBody());
 
         assertNotNull("ERROR: could not find default entity container for given service root: " + serviceRoot, edm.get().getEntityContainer());
         LOG.info("Found Default Entity Container: '" + edm.get().getEntityContainer().getNamespace() + "'");
       } catch (ODataClientErrorException cex) {
-        responseCode.set(cex.getStatusLine().getStatusCode());
+        wrapper.get().responseCode.set(cex.getStatusLine().getStatusCode());
         fail(cex.getMessage());
       } catch (Exception ex) {
         fail(ex.getMessage());
@@ -947,14 +841,14 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^XML Metadata are requested from the service root in \"([^\"]*)\"$", (String clientSettingsServiceRoot) -> {
       final String serviceRoot = Settings.resolveParametersString(clientSettingsServiceRoot, settings);
-      assertEquals("ERROR: given service root doesn't match the one configured in the Commander", serviceRoot, commander.get().getServiceRoot());
+      assertEquals("ERROR: given service root doesn't match the one configured in the Commander", serviceRoot, wrapper.get().commander.get().getServiceRoot());
 
       try {
-        xmlMetadata.set(commander.get().getXMLMetadata());
+        xmlMetadata.set(wrapper.get().commander.get().getXMLMetadata());
         assertNotNull("ERROR: could not find valid XML Metadata for given service root: " + serviceRoot, xmlMetadata.get());
         LOG.info("XML Metadata retrieved from: " + serviceRoot);
       } catch (ODataClientErrorException cex) {
-        responseCode.set(cex.getStatusLine().getStatusCode());
+        wrapper.get().responseCode.set(cex.getStatusLine().getStatusCode());
         fail(cex.getMessage());
       } catch (Exception ex) {
         fail(ex.getMessage());
@@ -968,7 +862,7 @@ public class WebAPIServer_1_0_2 implements En {
       String resourceName = Settings.resolveParametersString(parameterEndpointResource, settings);
 
       List<CsdlNavigationProperty> navigationProperties
-          = TestUtils.findNavigationPropertiesForEntityTypeName(getEdmMetadata(commander.get()), getXMLMetadata(commander.get()), resourceName);
+          = TestUtils.findNavigationPropertiesForEntityTypeName(wrapper.get().commander.get().getEdm(), wrapper.get().commander.get().getXMLMetadata(), resourceName);
 
       assertTrue("ERROR: no navigation properties found for the given '" + resourceName + "' resource!",
           navigationProperties.size() > 0);
@@ -988,7 +882,7 @@ public class WebAPIServer_1_0_2 implements En {
       String expandField = Settings.resolveParametersString(parameterExpandField, settings);
       assertFalse("ERROR: no expand field found for " + parameterExpandField, expandField.isEmpty());
 
-      ClientEntitySet results = commander.get().getClient().getRetrieveRequestFactory().getEntitySetRequest(requestUri.get()).execute().getBody();
+      ClientEntitySet results = wrapper.get().commander.get().getClient().getRetrieveRequestFactory().getEntitySetRequest(wrapper.get().requestUri.get()).execute().getBody();
 
       LOG.info("Results count is: " + results.getEntities().size());
       AtomicInteger counter = new AtomicInteger();
@@ -1061,18 +955,18 @@ public class WebAPIServer_1_0_2 implements En {
 
       LOG.info("Request Id: " + parameterRequestId);
       try {
-        requestUri.set(prepareUri.apply(uriString));
-        clientEntitySetRequest.set(commander.get().getClient().getRetrieveRequestFactory().getEntitySetRequest(requestUri.get()));
+        wrapper.get().requestUri.set(prepareUri(uriString));
+        wrapper.get().clientEntitySetRequest.set(wrapper.get().commander.get().getClient().getRetrieveRequestFactory().getEntitySetRequest(wrapper.get().requestUri.get()));
         LOG.info("OData Client Request being made to: " + uriString);
-        clientEntitySetResponse.set(clientEntitySetRequest.get().execute());
+        wrapper.get().clientEntitySetResponse.set(wrapper.get().clientEntitySetRequest.get().execute());
 
-        responseCode.set(clientEntitySetResponse.get().getStatusCode());
+        wrapper.get().responseCode.set(wrapper.get().clientEntitySetResponse.get().getStatusCode());
 
-        ResWrap<EntityCollection> coll = (commander.get().getClient().getDeserializer(ContentType.JSON).toEntitySet(clientEntitySetResponse.get().getRawResponse()));
-        clientEntitySet.set(commander.get().getClient().getBinder().getODataEntitySet(coll));
+        ResWrap<EntityCollection> coll = (wrapper.get().commander.get().getClient().getDeserializer(ContentType.JSON).toEntitySet(wrapper.get().clientEntitySetResponse.get().getRawResponse()));
+        wrapper.get().clientEntitySet.set(wrapper.get().commander.get().getClient().getBinder().getODataEntitySet(coll));
       } catch (ODataClientErrorException cex) {
-        oDataClientErrorException.set(cex);
-        responseCode.set(cex.getStatusLine().getStatusCode());
+        wrapper.get().oDataClientErrorException.set(cex);
+        wrapper.get().responseCode.set(cex.getStatusLine().getStatusCode());
       } catch (Exception ex) {
         fail(ex.toString());
       }
@@ -1088,18 +982,18 @@ public class WebAPIServer_1_0_2 implements En {
       Integer fieldValue = Integer.parseInt(Settings.resolveParametersString(parameterFieldValue, settings));
       assertNotNull(fieldValue);
 
-      clientEntitySet.get().getEntities().forEach(entity -> {
+      wrapper.get().clientEntitySet.get().getEntities().forEach(entity -> {
         assertTrue(compare((Integer)entity.getProperty(fieldName).getValue().asPrimitive().toValue(), op, fieldValue));
       });
 
     });
 
     And("^the OData client response has client entity set data$", () -> {
-      assertNotNull("ERROR: no entity collection returned in response!", clientEntitySet.get());
-      assertTrue("ERROR: no results returned!", clientEntitySet.get().getCount() > 0);
+      assertNotNull("ERROR: no entity collection returned in response!", wrapper.get().clientEntitySet.get());
+      assertTrue("ERROR: no results returned!", wrapper.get().clientEntitySet.get().getCount() > 0);
 
       if (showResponses) {
-        clientEntitySet.get().getEntities().forEach(entity -> {
+        wrapper.get().clientEntitySet.get().getEntities().forEach(entity -> {
           LOG.info("Entity Type is: " + entity.getTypeName());
           entity.getProperties().forEach(property -> LOG.info("\tProperty: " + property.toString()));
         });

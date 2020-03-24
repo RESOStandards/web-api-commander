@@ -46,20 +46,20 @@ public class Commander {
   public static final Integer DEFAULT_PAGE_SIZE = 10;
   public static final Integer DEFAULT_PAGE_LIMIT = 1;
   private static final Logger LOG = LogManager.getLogger(Commander.class);
-  String bearerToken;
-  String clientId;
-  String clientSecret;
-  String authorizationUri;
-  String tokenUri;
-  String redirectUri;
-  String scope;
-  boolean isTokenClient, isOAuthClient;
+  private static String bearerToken;
+  private static String clientId;
+  private static String clientSecret;
+  private static String authorizationUri;
+  private static String tokenUri;
+  private static String redirectUri;
+  private static String scope;
+  private static boolean isTokenClient, isOAuthClient;
   //one instance of client per Commander. See Builder
-  private ODataClient client;
-  private boolean useEdmEnabledClient;
-  private String serviceRoot;
-  private Edm edm;
-  private XMLMetadata xmlMetadata;
+  private static ODataClient client;
+  private static boolean useEdmEnabledClient;
+  private static String serviceRoot;
+  private static Edm edm;
+  private static XMLMetadata xmlMetadata;
 
   //private constructor for internal use, use Builder to construct instances
   private Commander() {
@@ -628,24 +628,24 @@ public class Commander {
 
     public Commander build() {
       Commander commander = new Commander();
-      commander.serviceRoot = this.serviceRoot;
-      commander.bearerToken = this.bearerToken;
-      commander.clientId = this.clientId;
-      commander.clientSecret = this.clientSecret;
-      commander.authorizationUri = this.authorizationUri;
-      commander.tokenUri = this.tokenUri;
-      commander.redirectUri = this.redirectUri;
-      commander.scope = this.scope;
-      commander.useEdmEnabledClient = this.useEdmEnabledClient;
+      Commander.serviceRoot = this.serviceRoot;
+      Commander.bearerToken = this.bearerToken;
+      Commander.clientId = this.clientId;
+      Commander.clientSecret = this.clientSecret;
+      Commander.authorizationUri = this.authorizationUri;
+      Commander.tokenUri = this.tokenUri;
+      Commander.redirectUri = this.redirectUri;
+      Commander.scope = this.scope;
+      Commander.useEdmEnabledClient = this.useEdmEnabledClient;
 
       //items required for OAuth client
-      commander.isOAuthClient =
+      isOAuthClient =
           clientId != null && clientId.length() > 0
           && clientSecret != null && clientSecret.length() > 0
           && tokenUri != null && tokenUri.length() > 0;
 
       //items required for token client
-      commander.isTokenClient = bearerToken != null && bearerToken.length() > 0;
+      isTokenClient = bearerToken != null && bearerToken.length() > 0;
 
       LOG.debug("\nUsing EdmEnabledClient: " + useEdmEnabledClient + "...");
       if (useEdmEnabledClient) {
@@ -654,9 +654,9 @@ public class Commander {
         commander.setClient(ODataClientFactory.getClient());
       }
 
-      if (commander.isOAuthClient) {
+      if (isOAuthClient) {
         commander.getClient().getConfiguration().setHttpClientFactory(new OAuth2HttpClientFactory(clientId, clientSecret, tokenUri, scope));
-      } else if (commander.isTokenClient) {
+      } else if (isTokenClient) {
         commander.getClient().getConfiguration().setHttpClientFactory(new TokenHttpClientFactory(bearerToken));
       }
       return commander;
