@@ -6,6 +6,7 @@ The RESO Web API Commander is a command line Java application that uses
 the Apache Olingo library to provide the following functionality:
 
 - [Getting Started](#getting-started)
+- [Using the Commander as a Web API Client](#using-the-commander-as-a-web-api-client)
 - [Display Help](#display-help)
 - [Authentication](#authentication)
 - [Getting Metadata](#getting-metadata)
@@ -18,9 +19,13 @@ the Apache Olingo library to provide the following functionality:
   * [Cucumber Feature Specifications](#cucumber-feature-specifications)
   * [Testing Environment](#testing-environment)
   * [Web API Usage](#web-api-usage)
+    - [Running Web API Tests with the Gradle Wrapper](#running-web-api-tests-with-the-gradle-wrapper)
+    - [Convenience Methods for Web API 1.0.2 Server Gold and Platinum Certification (Recommended)](#convenience-methods-for-web-api-102-server-gold-and-platinum-certification-recommended)
   * [Web API Program Output](#web-api-program-output)
-- [Automated Data Dictionary Testing (pre-alpha)](#automated-web-api-testing-alpha)
+- [Automated Data Dictionary Testing (In Development)](#automated-data-dictionary-testing-in-development)
   * [Data Dictionary Usage](#data-dictionary-usage)
+    - [Running Data Dictionary Tests with the Gradle Wrapper](#running-data-dictionary-tests-with-the-gradle-wrapper)
+    - [Convenience Methods for Data Dictionary 1.5 and 1.6 Certification (Recommended)](#convenience-methods-for-data-dictionary-15-and-16-certification-recommended) 
   * [Data Ditionary Program Output](#data-dictionary-program-output)
 - [Docker](#docker)
 - [Logging](#logging)
@@ -28,10 +33,17 @@ the Apache Olingo library to provide the following functionality:
 - [Coming Soon](#coming-soon)
 
 ## Getting Started
-### [Download Commander JAR (Java 1.8.0+)](https://github.com/RESOStandards/web-api-commander/tree/master/build/libs)
-Your operating system probably already has Java, but you need 1.8.0 to run the Commander. 
 
-To check, type: 
+There are essentially two ways to run the Commander:
+* [As a Web API Client](#using-the-commander-as-a-web-api-client) 
+* As an automated testing tool for the [Web API](#web-api-usage) or [Data Dictionary](#data-dictionary-usage)
+
+
+### Using the Commander as a Web API Client 
+
+Your operating system probably already has Java installed, but you need 1.8.0 to run the Commander. 
+
+To check your version, type: 
 
 ```
 $ java -version
@@ -52,6 +64,9 @@ If you don't see something similar to this, with 1.8.0, or an error, you may hav
 
 [Oracle's SE Development kit may also be used](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html), but there may be additional licensing terms to accept.
 
+Once you have done this, you can [download the Commander JAR file](https://github.com/RESOStandards/web-api-commander/tree/master/build/libs) 
+and use it for the operations which support using the Commander as a Web API client. 
+For automated testing, see [here](#automated-web-api-testing-beta) instead. 
 
 ## Display Help
 
@@ -366,25 +381,19 @@ which also means you'll have a fresh copy of the latest code to execute.
 
 To refresh the code after you have downloaded it, issue the command `$ git pull` in the root of the directory that was just created. 
  
-#### Running with the Gradle Wrapper
-The Gradle wrapper provides a convenient way to automatically install Gradle when running tests. 
+#### Running Web API Tests with the Gradle Wrapper
+The [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) provides a convenient way to automatically install Gradle when running tests. 
 
-After you have cloned the repository, the task you run will depend on the level of Web API 1.0.2 Server Certification 
-you're interested in. 
+After you have cloned the repository, as shown in the previous step, change into the directory containing 
+the source code from GitHub. Convenience methods have been provided for the various certification tasks. 
 
-Before you do that, however, you'll want to make sure that you are running the 6.2.2 version of Gradle.
+The task you run will depend on the metallic level of Web API 1.0.2 Server Certification you're interested in. 
+RESOScript Templates have been created for both [Gold](generic.gold.resoscript) and [Platinum](generic.resoscript). 
 
-In the project directory, perform one of the following steps:
+Prior to using the Commander for automated testing, you need to ensure your RESOScript has been created. 
+See instructions in the previously mentioned files for more information. 
 
-##### MacOS or Linux 
-```$ ./gradlew wrapper --gradle-version 6.2.2 --distribution-type all```
-
-##### Windows
-```C:\path\to\web-api-commander> gradlew wrapper --gradle-version 6.2.2 --distribution-type all```
-
-You should see a success message. For more information, [see here](https://docs.gradle.org/current/userguide/gradle_wrapper.html).
-
-### Convenience Methods for Web API 1.0.2 Gold and Platinum Certification (Recommended)
+### Convenience Methods for Web API 1.0.2 Server Gold and Platinum Certification (Recommended)
 While you may use tags to filter tests as you choose, explained in the next section, it's convenient
 to be able to run a predefined set of tests for Gold or Platinum certification. 
 
@@ -515,52 +524,26 @@ This shows configuration parameters, requests, and responses in a lightweight-ma
 
 Detailed information will be added to a local `./commander.log` file at runtime.
 
+## Automated Data Dictionary Testing (In Development)
+Note that this feature is in development and not ready for use. Please contact josh@reso.org if you'd like to help
+with the development process. 
+
 ### Data Dictionary Usage
 
-The Commander may be run in automated testing mode for Data Dictionary 1.5 and 1.6 Certifications using a terminal. 
-
-You do not need to use the Commander JAR file mentioned elsewhere in this step. 
-Instead, you will run the tests using Gradle for automation against a clean copy of the latest Commander code.
-
-You will need to download the source code so you can run Gradle in the root of the directory. 
-This assumes that you also have Java 8 (1.8.0) installed, as mentioned elsewhere in this [`README`](#getting-started).
-
-First, change into the directory you want to work in and clone the Commander repository. 
-You will need to have Git installed. Chances are you already do, to check, open a command line and type `git` and if it's present, 
-it will print some info about the app. If not, [there are instructions here](https://git-scm.com/downloads).
-
-##### MacOS or Linux
-```
-$ git clone https://github.com/RESOStandards/web-api-commander.git
-```
-
-##### Windows
-```
-C:\> git clone https://github.com/RESOStandards/web-api-commander.git
-```
-
-This will clone the repository into a directory called web-api-commander relative to whatever directory you're currently in, 
-which also means you'll have a fresh copy of the latest code to execute. 
-
-To refresh the code after you have downloaded it, issue the command `$ git pull` in the root of the directory that was just created. 
+The Commander may be run in automated testing mode for Data Dictionary 1.5 and 1.6 Certifications using a terminal.
  
-#### Running with the Gradle Wrapper
-The Gradle wrapper provides a convenient way to automatically install Gradle when running tests. 
+#### Running Data Dictionary Tests with the Gradle Wrapper
+The [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) 
+provides a convenient way to automatically install Gradle when running tests. 
 
-After you have cloned the repository, the task you run will depend on the level of Data Dictionary Certification 
-you're interested in. 
+After you have cloned the repository, as shown in the previous step, change into the directory containing 
+the source code from GitHub. Convenience methods have been provided for the various certification tasks. 
 
-Before you do that, however, you'll want to make sure that you are running the 6.2.2 version of Gradle.
+The task you run will depend on the metallic level of Data Dictionary Certification you're interested in. 
 
-In the project directory, perform one of the following steps:
+Prior to using the Commander for automated testing, you need to ensure your RESOScript has been created. Contact 
+josh@reso.org for more information regarding Data Dictionary testing, as it's still in development.
 
-##### MacOS or Linux 
-```$ ./gradlew wrapper --gradle-version 6.2.2 --distribution-type all```
-
-##### Windows
-```C:\path\to\web-api-commander> gradlew wrapper --gradle-version 6.2.2 --distribution-type all```
-
-You should see a success message. For more information, [see here](https://docs.gradle.org/current/userguide/gradle_wrapper.html).
 
 ### Convenience Methods for Data Dictionary 1.5 and 1.6 Certification (Recommended)
 While you may use tags to filter tests as you choose, explained in the next section, it's convenient
