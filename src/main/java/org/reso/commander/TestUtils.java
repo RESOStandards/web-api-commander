@@ -51,7 +51,7 @@ public final class TestUtils {
   /**
    * Encapsulates Commander Requests and Responses during runtime
    */
-  public static final class CommanderWrapper {
+  public static final class TestContainer {
     //TODO: Wrap in Commander Request/Response object
     public AtomicReference<Commander> commander = new AtomicReference<>();
     public AtomicReference<ODataRawResponse> oDataRawResponse = new AtomicReference<>();
@@ -70,30 +70,25 @@ public final class TestUtils {
     public AtomicReference<ODataEntitySetRequest<ClientEntitySet>> clientEntitySetRequest = new AtomicReference<>();
     public AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
     public AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
+
+
+    /**
+     * Resets the state of the test container
+     */
+    public void resetState() {
+      oDataRawResponse.set(null);
+      request.set(null);
+      responseCode.set(null);
+      responseData.set(null);
+      initialResponseData.set(null);
+      rawRequest.set(null);
+      oDataClientErrorException.set(null);
+      oDataServerErrorException.set(null);
+      serverODataHeaderVersion.set(null);
+      testAppliesToServerODataHeaderVersion.set(false);
+    }
   }
 
-  /**
-   * Creates a Runnable to reset the state of the given CommanderWrapper
-   * @param wrapper the CommanderWrapper to reset
-   * @return a Runnable that can be called
-   */
-  public static Runnable buildWrapperResetRunnable(final CommanderWrapper wrapper){
-    return new Runnable() {
-      @Override
-      public void run() {
-        wrapper.oDataRawResponse.set(null);
-        wrapper.request.set(null);
-        wrapper.responseCode.set(null);
-        wrapper.responseData.set(null);
-        wrapper.initialResponseData.set(null);
-        wrapper.rawRequest.set(null);
-        wrapper.oDataClientErrorException.set(null);
-        wrapper.oDataServerErrorException.set(null);
-        wrapper.serverODataHeaderVersion.set(null);
-        wrapper.testAppliesToServerODataHeaderVersion.set(false);
-      }
-    };
-  }
 
   /**
    * Used to prepare URIs given that the input queryStrings can sometimes contain special characters
@@ -110,38 +105,38 @@ public final class TestUtils {
   }
 
   /**
-   * Executes HTTP GET request and sets the expected local variables in the given CommanderWrapper
+   * Executes HTTP GET request and sets the expected local variables in the given TestContainer
    * Handles exceptions and sets response codes as well.
    * @param uri the URI to make requests to
-   * @param wrapper the CommanderWrapper to execute the requests in
-   * @return a CommanderWrapper containing the final state of the request.
+   * @param container the TestContainer to execute the requests in
+   * @return a TestContainer containing the final state of the request.
    */
-  public static CommanderWrapper executeGetRequest(final URI uri, final CommanderWrapper wrapper) {
+  public static TestContainer executeGetRequest(final URI uri, TestContainer container) {
     LOG.info("Request URI: " + uri);
     try {
-      wrapper.rawRequest.set(wrapper.commander.get().getClient().getRetrieveRequestFactory().getRawRequest(uri));
-      wrapper.oDataRawResponse.set(wrapper.rawRequest.get().execute());
-      wrapper.responseData.set(TestUtils.convertInputStreamToString(wrapper.oDataRawResponse.get().getRawResponse()));
-      wrapper.serverODataHeaderVersion.set(wrapper.oDataRawResponse.get().getHeader(HEADER_ODATA_VERSION).toString());
-      wrapper.responseCode.set(wrapper.oDataRawResponse.get().getStatusCode());
-      LOG.info("Request succeeded..." + wrapper.responseData.get().getBytes().length + " bytes received.");
+      container.rawRequest.set(container.commander.get().getClient().getRetrieveRequestFactory().getRawRequest(uri));
+      container.oDataRawResponse.set(container.rawRequest.get().execute());
+      container.responseData.set(TestUtils.convertInputStreamToString(container.oDataRawResponse.get().getRawResponse()));
+      container.serverODataHeaderVersion.set(container.oDataRawResponse.get().getHeader(HEADER_ODATA_VERSION).toString());
+      container.responseCode.set(container.oDataRawResponse.get().getStatusCode());
+      LOG.info("Request succeeded..." + container.responseData.get().getBytes().length + " bytes received.");
     } catch (ODataClientErrorException cex) {
       LOG.debug("ODataClientErrorException caught. Check tests for asserted conditions...");
-      wrapper.oDataClientErrorException.set(cex);
-      wrapper.serverODataHeaderVersion.set(TestUtils.getHeaderData(HEADER_ODATA_VERSION, cex.getHeaderInfo()));
-      wrapper.responseCode.set(cex.getStatusLine().getStatusCode());
+      container.oDataClientErrorException.set(cex);
+      container.serverODataHeaderVersion.set(TestUtils.getHeaderData(HEADER_ODATA_VERSION, cex.getHeaderInfo()));
+      container.responseCode.set(cex.getStatusLine().getStatusCode());
     } catch (ODataServerErrorException ode) {
       LOG.debug("ODataServerErrorException thrown in executeGetRequest. Check tests for asserted conditions...");
       //TODO: look for better ways to do this in Olingo or open PR
       if (ode.getMessage().contains(Integer.toString(HttpStatus.SC_NOT_IMPLEMENTED))) {
-        wrapper.responseCode.set(HttpStatus.SC_NOT_IMPLEMENTED);
+        container.responseCode.set(HttpStatus.SC_NOT_IMPLEMENTED);
       }
-      wrapper.oDataServerErrorException.set(ode);
+      container.oDataServerErrorException.set(ode);
     } catch (Exception ex) {
       fail("ERROR: unhandled Exception in executeGetRequest()!\n" + ex.toString());
       //throw ex;
     }
-    return wrapper;
+    return container;
   }
 
   /**
