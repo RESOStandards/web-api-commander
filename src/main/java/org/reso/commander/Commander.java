@@ -1,6 +1,7 @@
 package org.reso.commander;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -8,10 +9,12 @@ import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.communication.request.retrieve.EdmMetadataRequest;
+import org.apache.olingo.client.api.communication.request.retrieve.XMLMetadataRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
+import org.apache.olingo.client.api.serialization.ODataSerializerException;
 import org.apache.olingo.client.core.ODataClientFactory;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -45,7 +48,13 @@ public class Commander {
   public static final int NOT_OK = 1;
   public static final Integer DEFAULT_PAGE_SIZE = 10;
   public static final Integer DEFAULT_PAGE_LIMIT = 1;
+  public static final String REPORT_DIVIDER = "==============================================================";
+  public static final String REPORT_DIVIDER_SMALL = "===========================";
+  public static final String RESOSCRIPT_EXTENSION = ".resoscript";
+  public static final String EDMX_EXTENSION = ".xml";
   private static final Logger LOG = LogManager.getLogger(Commander.class);
+  private static final String EDM_4_0_3_XSD = "edm.4.0.3.xsd",
+      EDMX_4_0_3_XSD = "edmx.4.0.3.xsd";
   private static String bearerToken;
   private static String clientId;
   private static String clientSecret;
@@ -54,20 +63,21 @@ public class Commander {
   private static String redirectUri;
   private static String scope;
   private static boolean isTokenClient, isOAuthClient;
-  //one instance of client per Commander. See Builder
   private static ODataClient client;
   private static boolean useEdmEnabledClient;
   private static String serviceRoot;
   private static Edm edm;
   private static XMLMetadata xmlMetadata;
 
+
   //private constructor for internal use, use Builder to construct instances
   private Commander() {
-    ; //private constructor, should not be used. Use Builder instead.
+    //private constructor, should not be used. Use Builder instead.
   }
 
   /**
    * Uses an XML validator to validate that the given string contains valid XML.
+   *
    * @param xmlString the string containing the XML to validate.
    * @return true if the given xmlString is valid and false otherwise.
    */
@@ -76,7 +86,19 @@ public class Commander {
   }
 
   /**
+   * Validates XML for the given xmlMetadata item
+   *
+   * @param xmlMetadata the XML metadata to validate
+   * @return true if valid, false otherwise
+   * @throws ODataSerializerException if the given XML metadata could not be serialized
+   */
+  public static boolean validateXML(XMLMetadata xmlMetadata) throws ODataSerializerException {
+    return validateXML(serializeXMLMetadataToXMLString(xmlMetadata));
+  }
+
+  /**
    * Uses an XML validator to validate that the given inputStream contains valid XML.
+   *
    * @param inputStream the input stream to check.
    * @return true if the given inputStream has valid XML, false otherwise.
    */
@@ -87,8 +109,8 @@ public class Commander {
       factory.setNamespaceAware(true);
 
       factory.setSchema(SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(new StreamSource[]{
-          new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream("edm.4.0.3.xsd")),
-          new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream("edmx.4.0.3.xsd"))
+          new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream(EDM_4_0_3_XSD)),
+          new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream(EDMX_4_0_3_XSD))
       }));
 
       SAXParser parser = factory.newSAXParser();
@@ -110,6 +132,7 @@ public class Commander {
 
   /**
    * Prepares a URI for an OData request
+   *
    * @param uriString the uri string to use for the request
    * @return the prepared URI
    */
@@ -145,24 +168,18 @@ public class Commander {
         JSON_FULL_METADATA = "JSON_FULL_METADATA",
         XML = "XML";
 
-    ContentType defaultType = ContentType.JSON;
-    ContentType type;
+    ContentType type = ContentType.JSON;
 
-    if (contentType == null) {
-      return defaultType;
-    } else {
-      if (contentType.matches(JSON)) {
-        type = ContentType.JSON;
-      } else if (contentType.matches(JSON_NO_METADATA)) {
-        type = ContentType.JSON_NO_METADATA;
-      } else if (contentType.matches(JSON_FULL_METADATA)) {
-        type = ContentType.JSON_FULL_METADATA;
-      } else if (contentType.matches(XML)) {
-        type = ContentType.APPLICATION_XML;
-      } else {
-        type = ContentType.JSON;
-      }
+    if (contentType.matches(JSON)) {
+      type = ContentType.JSON;
+    } else if (contentType.matches(JSON_NO_METADATA)) {
+      type = ContentType.JSON_NO_METADATA;
+    } else if (contentType.matches(JSON_FULL_METADATA)) {
+      type = ContentType.JSON_FULL_METADATA;
+    } else if (contentType.matches(XML)) {
+      type = ContentType.APPLICATION_XML;
     }
+
     return type;
   }
 
@@ -196,12 +213,70 @@ public class Commander {
     return null;
   }
 
+  /**
+   * Serializes XML Metadata to an XML string
+   *
+   * @param xmlMetadata the metadata to serialize
+   * @return a String containing the metadata
+   * @throws ODataSerializerException
+   */
+  private static String serializeXMLMetadataToXMLString(XMLMetadata xmlMetadata) throws ODataSerializerException {
+    StringWriter writer = new StringWriter();
+    client.getSerializer(ContentType.APPLICATION_XML).write(writer, xmlMetadata);
+    return writer.getBuffer().toString();
+  }
+
+  /**
+   * Metadata Pretty Printer
+   *
+   * @param metadata any metadata in Edm format
+   */
+  public static String getMetadataReport(Edm metadata) {
+    StringBuilder reportBuilder = new StringBuilder();
+
+    reportBuilder.append("\n\n" + REPORT_DIVIDER);
+    reportBuilder.append("\nMetadata Report");
+    reportBuilder.append("\n" + REPORT_DIVIDER);
+
+    //Note: other treatments may be added to this summary info
+    metadata.getSchemas().forEach(schema -> {
+      reportBuilder.append("\n\nNamespace: ").append(schema.getNamespace());
+      reportBuilder.append("\n" + REPORT_DIVIDER_SMALL);
+
+      schema.getTypeDefinitions().forEach(a ->
+          reportBuilder.append("\n\n\tType Definition:").append(a.getName()));
+
+      schema.getEntityTypes().forEach(a -> {
+        reportBuilder.append("\n\n\tEntity Type: ").append(a.getName());
+        a.getKeyPropertyRefs().forEach(ref ->
+            reportBuilder.append("\n\t\tKey Field: ").append(ref.getName()));
+        a.getPropertyNames().forEach(n -> reportBuilder.append("\n\t\tName: ").append(n));
+      });
+
+      schema.getEnumTypes().forEach(a -> {
+        reportBuilder.append("\n\n\tEnum Type: ").append(a.getName());
+        a.getMemberNames().forEach(n -> reportBuilder.append("\n\t\tName: ").append(n));
+      });
+
+      schema.getComplexTypes().forEach(a ->
+          reportBuilder.append("\n\n\tComplex Entity Type: ").append(a.getFullQualifiedName().getFullQualifiedNameAsString()));
+
+      schema.getAnnotationGroups().forEach(a ->
+          reportBuilder.append("\n\n\tAnnotation: ").append(a.getQualifier()).append(", Target Path: ").append(a.getTargetPath()));
+
+      schema.getTerms().forEach(a ->
+          reportBuilder.append("\n\n\tTerm: ").append(a.getFullQualifiedName().getFullQualifiedNameAsString()));
+    });
+
+    return reportBuilder.toString();
+  }
+
   public ODataClient getClient() {
-    return this.client;
+    return client;
   }
 
   public void setClient(ODataClient client) {
-    this.client = client;
+    Commander.client = client;
   }
 
   public String getTokenUri() {
@@ -231,42 +306,22 @@ public class Commander {
   }
 
   /**
-   * Gets server metadata in Edm format.
-   *
-   * @return
-   * @implNote the data in this item are cached in the commander once fetched
-   */
-  public Edm getEdm() {
-    if (edm == null) {
-      edm = getODataRetrieveEdmResponse().getBody();
-    }
-    return edm;
-  }
-
-  /**
-   * Gets server metadata in XMLMetadata format.
-   *
-   * @return XMLMetadata representation of the server metadata.
-   * @implNote the data in this item are cached in the commander once fetched
-   */
-  public XMLMetadata getXMLMetadata() {
-    if (xmlMetadata == null) {
-      EdmMetadataRequest metadataRequest = client.getRetrieveRequestFactory().getMetadataRequest(serviceRoot);
-      LOG.info("Fetching XMLMetadata with OData Client from: " + metadataRequest.getURI().toString());
-      xmlMetadata = metadataRequest.getXMLMetadata();
-    }
-    return xmlMetadata;
-  }
-
-  /**
-   * Used to contain the response for the request as well as get metadata.
+   * Prepares an Edm Metadata request
    *
    * @return the OData response retrieved from the server when making the request.
    */
-  public ODataRetrieveResponse<Edm> getODataRetrieveEdmResponse() {
-    EdmMetadataRequest metadataRequest = client.getRetrieveRequestFactory().getMetadataRequest(serviceRoot);
-    LOG.info("Fetching Edm with OData Client from: " + metadataRequest.getURI().toString());
-    return metadataRequest.execute();
+  public EdmMetadataRequest prepareEdmMetadataRequest() {
+    EdmMetadataRequest request = getClient().getRetrieveRequestFactory().getMetadataRequest(getServiceRoot());
+    request.addCustomHeader(HttpHeaders.CONTENT_TYPE, null);
+    request.addCustomHeader(HttpHeaders.ACCEPT, null);
+    return request;
+  }
+
+  public XMLMetadataRequest prepareXMLMetadataRequest() {
+    XMLMetadataRequest request = getClient().getRetrieveRequestFactory().getXMLMetadataRequest(getServiceRoot());
+    request.addCustomHeader(HttpHeaders.CONTENT_TYPE, null);
+    request.addCustomHeader(HttpHeaders.ACCEPT, null);
+    return request;
   }
 
   /**
@@ -290,13 +345,9 @@ public class Commander {
    * @param metadata       the metadata to save.
    * @param outputFileName the file name to output the metadata to.
    */
-  public void saveMetadata(Edm metadata, String outputFileName) {
-    try {
-      FileWriter writer = new FileWriter(outputFileName);
-      client.getSerializer(ContentType.APPLICATION_XML).write(writer, metadata);
-    } catch (Exception ex) {
-      LOG.error(ex.getStackTrace());
-    }
+  public void saveMetadata(Edm metadata, String outputFileName) throws IOException, ODataSerializerException {
+    FileWriter writer = new FileWriter(outputFileName);
+    client.getSerializer(ContentType.APPLICATION_XML).write(writer, metadata);
   }
 
   /**
@@ -351,6 +402,7 @@ public class Commander {
 
   /**
    * Ensures that the input stream contains valid XMLMetadata.
+   *
    * @param inputStream the input stream containing the metadata to validate.
    * @return true if the given input stream contains valid XML Metadata, false otherwise.
    */
@@ -384,6 +436,7 @@ public class Commander {
 
   /**
    * Boolean to determine whether this Commander instance is a token client.
+   *
    * @return true if the commander instance is a token client, false otherwise.
    */
   public boolean isTokenClient() {
@@ -392,6 +445,7 @@ public class Commander {
 
   /**
    * Boolean to determine whether this Commander instance is an OAuth2 client.
+   *
    * @return true if the commander instance is an OAuth2 client credentials client, false otherwise.
    */
   public boolean isOAuthClient() {
@@ -641,8 +695,8 @@ public class Commander {
       //items required for OAuth client
       isOAuthClient =
           clientId != null && clientId.length() > 0
-          && clientSecret != null && clientSecret.length() > 0
-          && tokenUri != null && tokenUri.length() > 0;
+              && clientSecret != null && clientSecret.length() > 0
+              && tokenUri != null && tokenUri.length() > 0;
 
       //items required for token client
       isTokenClient = bearerToken != null && bearerToken.length() > 0;

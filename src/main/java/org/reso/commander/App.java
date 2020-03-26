@@ -42,10 +42,6 @@ public class App {
 
   private static final Logger LOG = LogManager.getLogger(App.class);
 
-  private static final String DIVIDER = "==============================================================";
-  private static final String SMALL_DIVIDER = "===========================";
-  private static final String RESOSCRIPT_EXTENSION = ".resoscript";
-  private static final String EDMX_EXTENSION = ".xml";
   private static final String OUTPUT_DIR = "user.dir";
 
   public static void main(String[] params) {
@@ -132,18 +128,18 @@ public class App {
       if (cmd.hasOption(APP_OPTIONS.ACTIONS.RUN_RESOSCRIPT)) {
         int numRequests = settings.getRequests().size();
 
-        LOG.info(DIVIDER);
+        LOG.info(REPORT_DIVIDER);
         LOG.info("Web API Commander Starting... Press <ctrl+c> at any time to exit.");
-        LOG.info(DIVIDER);
+        LOG.info(REPORT_DIVIDER);
 
         LOG.info("Running " + numRequests + " Request(s)");
         LOG.info("RESOScript: " + inputFilename);
-        LOG.info(DIVIDER + "\n\n");
+        LOG.info(REPORT_DIVIDER + "\n\n");
 
         //put in local directory rather than relative to where the input file is
         String directoryName = System.getProperty(OUTPUT_DIR),
             outputPath = inputFilename
-                .substring(inputFilename.contains(File.separator) ? inputFilename.lastIndexOf(File.separator) : 0, inputFilename.length())
+                .substring(inputFilename.contains(File.separator) ? inputFilename.lastIndexOf(File.separator) : 0)
                 .replace(RESOSCRIPT_EXTENSION, "") + "-" + getTimestamp(new Date());
 
         String resolvedUrl = null;
@@ -160,9 +156,9 @@ public class App {
             request = settings.getRequestsAsList().get(i);
 
             //TODO: create dynamic JUnit (or similar) test runner
-            LOG.info(SMALL_DIVIDER);
+            LOG.info(REPORT_DIVIDER_SMALL);
             LOG.info("Request: #" + (i + 1));
-            LOG.info(SMALL_DIVIDER);
+            LOG.info(REPORT_DIVIDER_SMALL);
 
             if (request.getRequestId() != null && request.getRequestId().length() > 0) {
               LOG.info("Request Id: " + request.getRequestId());
@@ -193,9 +189,9 @@ public class App {
           LOG.info("\n  ");
         }
 
-        LOG.info(DIVIDER);
+        LOG.info(REPORT_DIVIDER);
         LOG.info("RESOScript Complete!");
-        LOG.info(DIVIDER + "\n");
+        LOG.info(REPORT_DIVIDER + "\n");
 
         System.exit(OK); //terminate the program after the batch completes
       }
@@ -206,7 +202,7 @@ public class App {
       if (cmd.hasOption(APP_OPTIONS.ACTIONS.GET_METADATA)) {
         APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GET_METADATA);
 
-        metadata = commander.getEdm();
+        metadata = commander.prepareEdmMetadataRequest().execute().getBody();
         getMetadataReport(metadata);
 
       } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.VALIDATE_METADATA)) {
@@ -308,11 +304,12 @@ public class App {
 
   /**
    * Generates totals report from aggregates.
+   *
    * @param totalRequestCount total request count
-   * @param numSucceeded num requests succeeded
-   * @param numFailed num requests failed
-   * @param numSkipped num requests skipped
-   * @param numIncomplete num requests incomplete
+   * @param numSucceeded      num requests succeeded
+   * @param numFailed         num requests failed
+   * @param numSkipped        num requests skipped
+   * @param numIncomplete     num requests incomplete
    * @return a string containing the report.
    */
   private static String generateTotalsReport(int totalRequestCount, int numSucceeded, int numFailed, int numSkipped, int numIncomplete) {
@@ -326,48 +323,14 @@ public class App {
   }
 
   /**
-   * Metadata Pretty Printer
+   * Gets a formatted date string for the given date.
    *
-   * @param metadata any metadata in Edm format
+   * @param date the date to format
+   * @return date string in yyyyMMddHHMMssS format
    */
-  private static String getMetadataReport(Edm metadata) {
-    StringBuilder reportBuilder = new StringBuilder();
-
-    reportBuilder.append("\n\n" + DIVIDER);
-    reportBuilder.append("\nMetadata Report");
-    reportBuilder.append("\n" + DIVIDER);
-
-    //Note: other treatments may be added to this summary info
-    metadata.getSchemas().forEach(schema -> {
-      reportBuilder.append("\n\nNamespace: ").append(schema.getNamespace());
-      reportBuilder.append("\n" + SMALL_DIVIDER);
-
-      schema.getTypeDefinitions().forEach(a ->
-          reportBuilder.append("\n\n\tType Definition:").append(a.getName()));
-
-      schema.getEntityTypes().forEach(a -> {
-        reportBuilder.append("\n\n\tEntity Type: ").append(a.getName());
-        a.getKeyPropertyRefs().forEach(ref ->
-            reportBuilder.append("\n\t\tKey Field: ").append(ref.getName()));
-        a.getPropertyNames().forEach(n -> reportBuilder.append("\n\t\tName: ").append(n));
-      });
-
-      schema.getEnumTypes().forEach(a -> {
-        reportBuilder.append("\n\n\tEnum Type: ").append(a.getName());
-        a.getMemberNames().forEach(n -> reportBuilder.append("\n\t\tName: ").append(n));
-      });
-
-      schema.getComplexTypes().forEach(a ->
-          reportBuilder.append("\n\n\tComplex Entity Type: ").append(a.getFullQualifiedName().getFullQualifiedNameAsString()));
-
-      schema.getAnnotationGroups().forEach(a ->
-          reportBuilder.append("\n\n\tAnnotation: ").append(a.getQualifier()).append(", Target Path: ").append(a.getTargetPath()));
-
-      schema.getTerms().forEach(a ->
-          reportBuilder.append("\n\n\tTerm: ").append(a.getFullQualifiedName().getFullQualifiedNameAsString()));
-    });
-
-    return reportBuilder.toString();
+  private static String getTimestamp(Date date) {
+    DateFormat df = new SimpleDateFormat("yyyyMMddHHMMssS");
+    return df.format(date);
   }
 
   /**
@@ -387,16 +350,6 @@ public class App {
     static String USE_EDM_ENABLED_CLIENT = "useEdmEnabledClient";
     static String CONTENT_TYPE = "contentType";
     static String HELP = "help";
-
-    static class ACTIONS {
-      //actions
-      static String RUN_RESOSCRIPT = "runRESOScript";
-      static String GET_METADATA = "getMetadata";
-      static String VALIDATE_METADATA = "validateMetadata";
-      static String GET_ENTITIES = "getEntities";
-      static String SAVE_RAW_GET_REQUEST = "saveRawGetRequest";
-      static String CONVERT_EDMX_TO_OPEN_API = "convertEDMXtoOpenAPI";
-    }
 
     /**
      * Validates options for the various actions exposed in App.
@@ -530,28 +483,28 @@ public class App {
               .desc("Converts EDMX in <inputFile> to Open API, saving it in <inputFile>.swagger.json").build());
 
       return new Options()
-        .addOption(helpOption)
-        .addOption(hostNameOption)
-        .addOption(bearerTokenOption)
-        .addOption(inputFileOption)
-        .addOption(outputFileOption)
-        .addOption(pageLimit)
-        .addOption(pageSize)
-        .addOption(entityName)
-        .addOption(useEdmEnabledClient)
-        .addOption(uriOption)
-        .addOption(contentType)
-        .addOptionGroup(actions);
+          .addOption(helpOption)
+          .addOption(hostNameOption)
+          .addOption(bearerTokenOption)
+          .addOption(inputFileOption)
+          .addOption(outputFileOption)
+          .addOption(pageLimit)
+          .addOption(pageSize)
+          .addOption(entityName)
+          .addOption(useEdmEnabledClient)
+          .addOption(uriOption)
+          .addOption(contentType)
+          .addOptionGroup(actions);
     }
-  }
 
-  /**
-   * Gets a formatted date string for the given date.
-   * @param date the date to format
-   * @return date string in yyyyMMddHHMMssS format
-   */
-  private static String getTimestamp(Date date) {
-    DateFormat df = new SimpleDateFormat("yyyyMMddHHMMssS");
-    return df.format(date);
+    static class ACTIONS {
+      //actions
+      static String RUN_RESOSCRIPT = "runRESOScript";
+      static String GET_METADATA = "getMetadata";
+      static String VALIDATE_METADATA = "validateMetadata";
+      static String GET_ENTITIES = "getEntities";
+      static String SAVE_RAW_GET_REQUEST = "saveRawGetRequest";
+      static String CONVERT_EDMX_TO_OPEN_API = "convertEDMXtoOpenAPI";
+    }
   }
 }

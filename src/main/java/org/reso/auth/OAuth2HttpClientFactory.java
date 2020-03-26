@@ -29,10 +29,10 @@ import java.util.List;
 
 public class OAuth2HttpClientFactory extends AbstractHttpClientFactory {
 
+  final static String EXPIRES_IN = "expires_in";
+  final static String ACCESS_TOKEN = "access_token";
   private static final Logger LOG = LogManager.getLogger(OAuth2HttpClientFactory.class);
-
   HttpClientConnectionManager connectionManager = null;
-
   private String clientId;
   private String clientSecret;
   private String tokenUri;
@@ -40,15 +40,13 @@ public class OAuth2HttpClientFactory extends AbstractHttpClientFactory {
   private String accessToken;
   private Integer expiresIn;
 
-  final static String EXPIRES_IN = "expires_in";
-  final static String ACCESS_TOKEN = "access_token";
-
   /**
    * Creates an OAuth2 client for making HTTP requests using Client Credentials
-   * @param clientId the client Id of the consumer
+   *
+   * @param clientId     the client Id of the consumer
    * @param clientSecret the client secret of the consumer
-   * @param tokenUri the token uri of the server to connect to
-   * @param scope (optional) scope
+   * @param tokenUri     the token uri of the server to connect to
+   * @param scope        (optional) scope
    */
   public OAuth2HttpClientFactory(String clientId, String clientSecret, String tokenUri, String scope) {
     this.clientId = clientId;
@@ -96,7 +94,7 @@ public class OAuth2HttpClientFactory extends AbstractHttpClientFactory {
         if (responseData.get(ACCESS_TOKEN) != null) {
           accessToken = responseData.get(ACCESS_TOKEN).asText();
         }
-        assert(accessToken != null);
+        assert (accessToken != null);
 
         if (responseData.get(EXPIRES_IN) != null) {
           expiresIn = responseData.get(EXPIRES_IN).asInt();
@@ -110,7 +108,7 @@ public class OAuth2HttpClientFactory extends AbstractHttpClientFactory {
 
   @Override
   public CloseableHttpClient create(HttpMethod method, URI uri) {
-    assert(accessToken != null);
+    assert (accessToken != null);
 
     BasicHeader authHeader = new BasicHeader("Authorization", "Bearer " + accessToken);
     List<Header> headers = new ArrayList<>();
@@ -126,7 +124,7 @@ public class OAuth2HttpClientFactory extends AbstractHttpClientFactory {
   @Override
   public void close(HttpClient httpClient) {
     try {
-      connectionManager.shutdown();
+      if (connectionManager != null) connectionManager.shutdown();
     } catch (Exception ex) {
       LOG.error(ex.toString());
     }

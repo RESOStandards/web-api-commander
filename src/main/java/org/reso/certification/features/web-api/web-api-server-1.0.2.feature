@@ -7,8 +7,8 @@ Feature: Web API Server 1.0.2 Certification
   Background:
     Given a RESOScript file was provided
     And Client Settings and Parameters were read from the file
-    And an OData client was successfully created from the given RESOScript
-    And the OData client uses authorization_code or client_credentials for authentication
+    And a test environment was successfully created from the given RESOScript
+    And the test environment uses an authorization_code or client_credentials for authentication
 
 
   #######################################
@@ -16,12 +16,13 @@ Feature: Web API Server 1.0.2 Certification
   #######################################
   @REQ-WA103-END3 @core @2.4.1 @core-endorsement @metadata
   Scenario: REQ-WA103-END3 - Request and Validate Server Metadata
-    When a GET request is made to the resolved Url in "REQ-WA103-END3"
+    When XML Metadata are requested from the service root in "ClientSettings_WebAPIURI"
     Then the server responds with a status code of 200
-    And the response is valid XML
     And the XML metadata returned by the server are valid
-    And a default entity container exists for the service root in "ClientSettings_WebAPIURI"
+    And Edm metadata are requested from the service root in "ClientSettings_WebAPIURI"
+    Then the server responds with a status code of 200
     And the Edm metadata returned by the server are valid
+    And the metadata contains a valid service document
     And the metadata contains the "Parameter_EndpointResource" resource
     And the given "Parameter_EndpointResource" resource exists within "Parameter_DD17_WellKnownResourceList"
     And the metadata contains at least one resource from "Parameter_WebAPI102_RequiredResourceList"

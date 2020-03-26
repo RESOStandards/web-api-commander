@@ -2,16 +2,9 @@ package org.reso.commander;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.Header;
-import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.olingo.client.api.communication.ODataClientErrorException;
-import org.apache.olingo.client.api.communication.ODataServerErrorException;
-import org.apache.olingo.client.api.communication.request.retrieve.ODataEntitySetRequest;
-import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
-import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
-import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
@@ -22,7 +15,6 @@ import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmTimeOfDay;
-import org.reso.models.Request;
 import org.reso.models.Settings;
 
 import java.io.BufferedReader;
@@ -41,7 +33,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.restassured.path.json.JsonPath.from;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public final class TestUtils {
   public static final String JSON_VALUE_PATH = "value";
@@ -49,50 +42,9 @@ public final class TestUtils {
   private static final Logger LOG = LogManager.getLogger(TestUtils.class);
 
   /**
-   * Encapsulates Commander Requests and Responses during runtime
-   */
-  public static final class TestContainer {
-    //TODO: Wrap in Commander Request/Response object
-    public AtomicReference<Commander> commander = new AtomicReference<>();
-    public AtomicReference<ODataRawResponse> oDataRawResponse = new AtomicReference<>();
-    public AtomicReference<Request> request = new AtomicReference<>();
-    public AtomicReference<URI> requestUri = new AtomicReference<>();
-    public AtomicReference<Integer> responseCode = new AtomicReference<>();
-    public AtomicReference<String> responseData = new AtomicReference<>();
-    public AtomicReference<String> initialResponseData = new AtomicReference<>(); //used if two result sets need to be compared
-    public AtomicReference<ODataRawRequest> rawRequest = new AtomicReference<>();
-
-    public AtomicReference<ODataClientErrorException> oDataClientErrorException = new AtomicReference<>();
-    public AtomicReference<ODataServerErrorException> oDataServerErrorException = new AtomicReference<>();
-    public AtomicReference<String> serverODataHeaderVersion = new AtomicReference<>();
-    public AtomicReference<Boolean> testAppliesToServerODataHeaderVersion = new AtomicReference<>();
-
-    public AtomicReference<ODataEntitySetRequest<ClientEntitySet>> clientEntitySetRequest = new AtomicReference<>();
-    public AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
-    public AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
-
-
-    /**
-     * Resets the state of the test container
-     */
-    public void resetState() {
-      oDataRawResponse.set(null);
-      request.set(null);
-      responseCode.set(null);
-      responseData.set(null);
-      initialResponseData.set(null);
-      rawRequest.set(null);
-      oDataClientErrorException.set(null);
-      oDataServerErrorException.set(null);
-      serverODataHeaderVersion.set(null);
-      testAppliesToServerODataHeaderVersion.set(false);
-    }
-  }
-
-
-  /**
    * Used to prepare URIs given that the input queryStrings can sometimes contain special characters
    * that need to be ensured that they be processed.
+   *
    * @param queryString the queryString to prepare
    * @return the prepared URI with special characters in the queryString processed.
    */
@@ -102,41 +54,6 @@ public final class TestUtils {
         queryString.replace(" ", "%20")
         /* add other handlers here */
     );
-  }
-
-  /**
-   * Executes HTTP GET request and sets the expected local variables in the given TestContainer
-   * Handles exceptions and sets response codes as well.
-   * @param uri the URI to make requests to
-   * @param container the TestContainer to execute the requests in
-   * @return a TestContainer containing the final state of the request.
-   */
-  public static TestContainer executeGetRequest(final URI uri, TestContainer container) {
-    LOG.info("Request URI: " + uri);
-    try {
-      container.rawRequest.set(container.commander.get().getClient().getRetrieveRequestFactory().getRawRequest(uri));
-      container.oDataRawResponse.set(container.rawRequest.get().execute());
-      container.responseData.set(TestUtils.convertInputStreamToString(container.oDataRawResponse.get().getRawResponse()));
-      container.serverODataHeaderVersion.set(container.oDataRawResponse.get().getHeader(HEADER_ODATA_VERSION).toString());
-      container.responseCode.set(container.oDataRawResponse.get().getStatusCode());
-      LOG.info("Request succeeded..." + container.responseData.get().getBytes().length + " bytes received.");
-    } catch (ODataClientErrorException cex) {
-      LOG.debug("ODataClientErrorException caught. Check tests for asserted conditions...");
-      container.oDataClientErrorException.set(cex);
-      container.serverODataHeaderVersion.set(TestUtils.getHeaderData(HEADER_ODATA_VERSION, cex.getHeaderInfo()));
-      container.responseCode.set(cex.getStatusLine().getStatusCode());
-    } catch (ODataServerErrorException ode) {
-      LOG.debug("ODataServerErrorException thrown in executeGetRequest. Check tests for asserted conditions...");
-      //TODO: look for better ways to do this in Olingo or open PR
-      if (ode.getMessage().contains(Integer.toString(HttpStatus.SC_NOT_IMPLEMENTED))) {
-        container.responseCode.set(HttpStatus.SC_NOT_IMPLEMENTED);
-      }
-      container.oDataServerErrorException.set(ode);
-    } catch (Exception ex) {
-      fail("ERROR: unhandled Exception in executeGetRequest()!\n" + ex.toString());
-      //throw ex;
-    }
-    return container;
   }
 
   /**

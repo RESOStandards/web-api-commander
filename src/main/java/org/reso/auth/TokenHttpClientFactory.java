@@ -20,14 +20,13 @@ import java.util.List;
  * Extends AbstractHttpClientFactory with one that can accept tokens passed in to make requests.
  */
 public class TokenHttpClientFactory extends AbstractHttpClientFactory {
-  String token;
-
   private static final Logger LOG = LogManager.getLogger(TokenHttpClientFactory.class);
-
+  String token;
   HttpClientConnectionManager connectionManager = null;
 
   /**
    * Constructor for use with tokens.
+   *
    * @param token the token to be used for server requests.
    */
   public TokenHttpClientFactory(String token) {

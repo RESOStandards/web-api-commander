@@ -1,7 +1,10 @@
 package org.reso.models;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The settings class contains all the settings a server can have, which currently means the following:
@@ -9,7 +12,9 @@ import java.util.*;
  * * parameters - arbitrary collection of user-defined parameters
  * * requests - list of requests, one filter string per request, corresponding to a saved search
  */
-public class  Settings {
+public class Settings {
+  public static final String CLIENT_SETTING_PREFIX = "ClientSettings_";
+  public static final String PARAMETER_PREFIX = "Parameter_";
   private ClientSettings clientSettings;
   private Parameters parameters;
   private Map<Request, Request> requests;
@@ -26,7 +31,8 @@ public class  Settings {
    * @param settings the settings to write.
    * @param filename the filename to save settings to.
    */
-  public static void saveToRESOScript(Settings settings, String filename) { /* TODO */ ; }
+  public static void saveToRESOScript(Settings settings, String filename) { /* TODO */
+  }
 
   /**
    * Loads and returns settings from the given file.
@@ -46,9 +52,6 @@ public class  Settings {
     return settings;
   }
 
-  public static final String CLIENT_SETTING_PREFIX = "ClientSettings_";
-  public static final String PARAMETER_PREFIX = "Parameter_";
-
   /**
    * Resolves the parameters in request with parameters.
    *
@@ -62,8 +65,9 @@ public class  Settings {
 
   /**
    * Resolves URIs containing special RESOScript parameters of the form *Parameter_X* and *ClientSettings_Y*
+   *
    * @param parameterString the parameter string to resolve, possibly containing nested parameter settings
-   * @param settings the settings to use to resolve the parameters
+   * @param settings        the settings to use to resolve the parameters
    * @return the resolved parameter string
    */
   public static String resolveParametersString(String parameterString, Settings settings) {
@@ -128,6 +132,7 @@ public class  Settings {
 
   /**
    * Requests getter.
+   *
    * @return The request map that was loaded, indexed by request name.
    */
   public Map<Request, Request> getRequests() {
@@ -135,7 +140,18 @@ public class  Settings {
   }
 
   /**
+   * Requests setter.
+   *
+   * @param requests a list of requests to create the request map from
+   */
+  private void setRequests(List<Request> requests) {
+    this.requests = new LinkedHashMap<Request, Request>();
+    requests.forEach(request -> this.requests.put(request, request));
+  }
+
+  /**
    * Requests getter.
+   *
    * @return The request map that was loaded, indexed by request name.
    */
   public Request getRequestById(String requestId) {
@@ -158,15 +174,5 @@ public class  Settings {
    */
   public List<Request> getRequestsAsList() {
     return new ArrayList<>(requests.values());
-  }
-
-  /**
-   * Requests setter.
-   *
-   * @param requests a list of requests to create the request map from
-   */
-  private void setRequests(List<Request> requests) {
-    this.requests = new LinkedHashMap<Request, Request>();
-    requests.forEach(request -> this.requests.put(request, request));
   }
 }
