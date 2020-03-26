@@ -117,7 +117,7 @@ public class WebAPIServer_1_0_2 implements En {
             if (errors.size() > 0) LOG.error("ERROR: JSON Schema validation errors were found!");
             errors.forEach(LOG::error);
 
-            assertEquals(0, errors.size());
+            assertEquals("ERROR: JSON Schema validation produced errors!", 0, errors.size());
             LOG.info("DataSystem response matches reference schema!");
           }
         } catch (Exception ex) {
@@ -318,6 +318,7 @@ public class WebAPIServer_1_0_2 implements En {
         LOG.info("Request ID: " + requestId);
         getTestContainer().setRequestUri(Commander.prepareURI(Settings.resolveParameters(
             getTestContainer().getSettings().getRequestById(requestId), getTestContainer().getSettings()).getUrl()));
+        LOG.info("Request URI: " + getTestContainer().getRequestUri().toString());
         getTestContainer().executePreparedGetRequest();
       } catch (Exception ex) {
         LOG.debug("Exception was thrown in " + this.getClass() + ": " + ex.toString());
@@ -332,8 +333,12 @@ public class WebAPIServer_1_0_2 implements En {
         LOG.info("Asserted Response Code: " + assertedResponseCode + ", Server Response Code: " + getTestContainer().getResponseCode());
         assertTrue(getTestContainer().getResponseCode() > 0 && assertedResponseCode > 0);
 
-        assertEquals("ERROR: asserted response code does not match the one returned from the server!",
-            assertedResponseCode.intValue(), getTestContainer().getResponseCode().intValue());
+        if (assertedResponseCode.intValue() != getTestContainer().getResponseCode().intValue()) {
+          if (getTestContainer().getODataClientErrorException() != null) {
+            LOG.error("OData Client Exception: " + getTestContainer().getODataClientErrorException().getODataError().getMessage());
+          }
+          fail("ERROR: asserted response code does not match the one returned from the server!");
+        }
       } catch (Exception ex) {
         fail(ex.toString());
       }
