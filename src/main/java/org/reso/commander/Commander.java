@@ -55,6 +55,7 @@ public class Commander {
   private static final Logger LOG = LogManager.getLogger(Commander.class);
   private static final String EDM_4_0_3_XSD = "edm.4.0.3.xsd",
       EDMX_4_0_3_XSD = "edmx.4.0.3.xsd";
+
   private static String bearerToken;
   private static String clientId;
   private static String clientSecret;
@@ -69,8 +70,6 @@ public class Commander {
   private static Edm edm;
   private static XMLMetadata xmlMetadata;
 
-
-  //private constructor for internal use, use Builder to construct instances
   private Commander() {
     //private constructor, should not be used. Use Builder instead.
   }
@@ -271,18 +270,34 @@ public class Commander {
     return reportBuilder.toString();
   }
 
+  /**
+   * OData client getter
+   * @return the OData client for the current Commander instance
+   */
   public ODataClient getClient() {
     return client;
   }
 
+  /**
+   * OData client setter
+   * @param client sets the current Commander instance to use the given client
+   */
   public void setClient(ODataClient client) {
     Commander.client = client;
   }
 
+  /**
+   * Token URI getter
+   * @return the tokenUri used by the current Commander instance, or null
+   */
   public String getTokenUri() {
     return tokenUri;
   }
 
+  /**
+   * Service Root getter
+   * @return the serviceRoot used by the current Commander instance, or null
+   */
   public String getServiceRoot() {
     return serviceRoot;
   }
@@ -307,8 +322,7 @@ public class Commander {
 
   /**
    * Prepares an Edm Metadata request
-   *
-   * @return the OData response retrieved from the server when making the request.
+   * @return a prepared Edm metadata request
    */
   public EdmMetadataRequest prepareEdmMetadataRequest() {
     EdmMetadataRequest request = getClient().getRetrieveRequestFactory().getMetadataRequest(getServiceRoot());
@@ -317,6 +331,10 @@ public class Commander {
     return request;
   }
 
+  /**
+   * Prepares an XML Metadata request
+   * @return a prepared XML Metadata request
+   */
   public XMLMetadataRequest prepareXMLMetadataRequest() {
     XMLMetadataRequest request = getClient().getRetrieveRequestFactory().getXMLMetadataRequest(getServiceRoot());
     request.addCustomHeader(HttpHeaders.CONTENT_TYPE, null);
@@ -613,11 +631,17 @@ public class Commander {
     serializeEntitySet(entitySet, outputFilePath, ContentType.JSON);
   }
 
+  /**
+   * Constants for OData query parameters
+   */
   public static final class ODATA_QUERY_OPTIONS {
     public static final String TOP = "$top";
     public static final String SKIP = "$skip";
   }
 
+  /**
+   * Error handler class for SAX parser
+   */
   public static class SimpleErrorHandler implements ErrorHandler {
     public void warning(SAXParseException e) throws SAXException {
       LOG.warn(e.getMessage());
@@ -641,45 +665,89 @@ public class Commander {
     String serviceRoot, bearerToken, clientId, clientSecret, authorizationUri, tokenUri, redirectUri, scope;
     boolean useEdmEnabledClient;
 
+    /**
+     * Default constructor
+     */
     public Builder() {
       this.useEdmEnabledClient = false;
     }
 
+    /**
+     * Service root setter
+     * @param serviceRoot the Web API service root
+     * @return a Builder containing the given Web API service root
+     */
     public Builder serviceRoot(String serviceRoot) {
       this.serviceRoot = serviceRoot;
       return this;
     }
 
+    /**
+     * Bearer token setter
+     * @param bearerToken the token to use to connect to the server
+     * @return a Builder set with the given bearerToken
+     */
     public Builder bearerToken(String bearerToken) {
       this.bearerToken = bearerToken;
       return this;
     }
 
+    /**
+     * Client Identification setter
+     * @param clientId the OAuth2 client_id to use to authenticate against the server
+     * @return a Builder set with the given clientId
+     */
     public Builder clientId(String clientId) {
       this.clientId = clientId;
       return this;
     }
 
+    /**
+     * Client Secret setter
+     * @param clientSecret the OAuth2 client_secret to use to authenticate against the server
+     * @return a Builder set with the given clientSecret
+     */
     public Builder clientSecret(String clientSecret) {
       this.clientSecret = clientSecret;
       return this;
     }
 
+    /**
+     * Token URI setter
+     * @param tokenUri the OAuth2 token_uri to use to authenticate against the server
+     * @return a Builder set with the given tokenUri
+     */
     public Builder tokenUri(String tokenUri) {
       this.tokenUri = tokenUri;
       return this;
     }
 
+    /**
+     * Scope setter
+     * @param scope the OAuth2 scope to use to authenticate against the server
+     * @return a Builder set with the given scope
+     */
     public Builder scope(String scope) {
       this.scope = scope;
       return this;
     }
 
+    /**
+     * Use EDM Enabled Client setter - turns on additional OData query, payload, and metadata
+     * checking in the underlying Olingo client library.
+     *
+     * @param useEdmEnabledClient true if the EdmEnabledClient is to be used, false otherwise.
+     * @return a Builder set with EdmEnabledClient property set
+     */
     public Builder useEdmEnabledClient(boolean useEdmEnabledClient) {
       this.useEdmEnabledClient = useEdmEnabledClient;
       return this;
     }
 
+    /**
+     * Commander builder is used to create instances of the RESO Commander, which should not be instantiated directly.
+     * @return a Commander instantiated with the given properties set
+     */
     public Commander build() {
       Commander commander = new Commander();
       Commander.serviceRoot = this.serviceRoot;
