@@ -167,7 +167,12 @@ public class Commander {
         JSON_FULL_METADATA = "JSON_FULL_METADATA",
         XML = "XML";
 
-    ContentType type = ContentType.JSON;
+    final ContentType DEFAULT_CONTENT_TYPE = ContentType.JSON;
+    ContentType type = DEFAULT_CONTENT_TYPE;
+
+    if (contentType == null) {
+      return type;
+    }
 
     if (contentType.matches(JSON)) {
       type = ContentType.JSON;

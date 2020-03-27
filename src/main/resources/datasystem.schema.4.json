@@ -4,7 +4,6 @@
   "title": "The Root Schema of the DataSystem resource",
   "description": "The root schema comprises the entire JSON document.",
   "required": [
-    "@odata.context",
     "value"
   ],
   "properties": {

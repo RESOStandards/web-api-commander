@@ -50,7 +50,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
-    And data are present in fields contained within "Parameter_SelectList"
+    And data are present for fields contained within the given "Parameter_SelectList"
 
   @REQ-WA103-QR4 @core @2.4.2 @client-paging-endorsement
   Scenario: REQ-WA103-QR4 - Query Support: $top
@@ -58,6 +58,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And the number of results is less than or equal to "Parameter_TopCount"
 
   @REQ-WA103-QR5 @core @2.4.2 @query-support-endorsement
@@ -66,10 +67,12 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And a GET request is made to the resolved Url in "REQ-WA103-QR5" with $skip="Parameter_TopCount"
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And data in the "Parameter_KeyOrKeyNumeric" fields are different in the second request than in the first
 
   @REQ-WA103-QO1.1 @core @2.4.4 @core-endorsement @OData-4.0
@@ -98,6 +101,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And Integer data in "Parameter_FilterIntegerField" "eq" "Parameter_FilterIntegerValueLow"
 
   @REQ-WA103-QO3 @core @2.4.4 @filterability-endorsement
@@ -106,6 +110,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And Integer data in "Parameter_FilterIntegerField" "ne" "Parameter_FilterIntegerValueLow"
 
   @REQ-WA103-QO4 @core @2.4.4 @filterability-endorsement
@@ -114,6 +119,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And Integer data in "Parameter_FilterIntegerField" "gt" "Parameter_FilterIntegerValueLow"
 
   @REQ-WA103-QO5 @core @2.4.4 @filterability-endorsement
@@ -122,6 +128,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And Integer data in "Parameter_FilterIntegerField" "ge" "Parameter_FilterIntegerValueLow"
 
   @REQ-WA103-QO6 @core @2.4.4 @filterability-endorsement
@@ -130,6 +137,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And Integer data in "Parameter_FilterIntegerField" "lt" "Parameter_FilterIntegerValueLow"
 
   @REQ-WA103-QO7 @core @2.4.4 @filterability-endorsement
@@ -138,6 +146,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And Integer data in "Parameter_FilterIntegerField" "le" "Parameter_FilterIntegerValueLow"
 
   @REQ-WA103-QO9 @core @2.4.4 @filterability-endorsement
@@ -146,6 +155,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And Integer data in "Parameter_FilterIntegerField" "gt" "Parameter_FilterIntegerValueLow" "and" "lt" "Parameter_FilterIntegerValueHigh"
 
   @REQ-WA103-QO10 @core @2.4.4 @filterability-endorsement
@@ -154,6 +164,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And Integer data in "Parameter_FilterIntegerField" "gt" "Parameter_FilterIntegerValueLow" "or" "lt" "Parameter_FilterIntegerValueHigh"
 
   @REQ-WA103-QO11 @core @2.4.4 @filterability-endorsement
@@ -162,6 +173,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And Integer data in "Parameter_FilterNotField" "ne" "Parameter_FilterNotValue"
 
   @REQ-WA103-QO25 @core @2.4.4 @filterability-endorsement
@@ -170,6 +182,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And Date data in "Parameter_TimestampField" "gt" "Parameter_DateValue"
 
   @REQ-WA103-QO26 @core @2.4.4 @filterability-endorsement
@@ -178,6 +191,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And TimeOfDay data in "Parameter_TimestampField" "lt" "Parameter_TimeValue"
 
   @REQ-WA103-QO26.2 @core @2.4.4 @filterability-endorsement
@@ -186,6 +200,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And DateTimeOffset data in "Parameter_TimestampField" "lt" "Parameter_DateTimeValue"
 
   @REQ-WA103-QO27 @core @2.4.4 @filterability-endorsement
@@ -194,6 +209,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And DateTimeOffset data in "Parameter_TimestampField" "le" now()
 
 
@@ -242,6 +258,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And Single Valued Enumeration Data in "Parameter_SingleValueLookupField" has "Parameter_SingleLookupValue"
 
   @REQ-WA103-QM8 @bronze @2.4.10 @filterability-endorsement
@@ -250,6 +267,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And Multiple Valued Enumeration Data in "Parameter_MultipleValueLookupField" has "Parameter_MultipleLookupValue1"
 
   @REQ-WA103-QM8.2 @bronze @2.4.10 @filterability-endorsement
@@ -258,6 +276,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And Multiple Valued Enumeration Data in "Parameter_MultipleValueLookupField" has "Parameter_MultipleLookupValue1"
     And Multiple Valued Enumeration Data in "Parameter_MultipleValueLookupField" has "Parameter_MultipleLookupValue2"
 
@@ -267,6 +286,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And Single Valued Enumeration Data in "Parameter_FilterHasField" has "Parameter_FilterHasLookupValue"
 
   @REQ-WA103-QO28.1 @bronze @2.4.4 @sortability-endorsement
@@ -275,6 +295,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And DateTimeOffset data in "Parameter_TimestampField" is sorted in "asc" order
 
   @REQ-WA103-QO28.2 @bronze @2.4.4 @sortability-endorsement
@@ -283,6 +304,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And DateTimeOffset data in "Parameter_TimestampField" is sorted in "asc" order
 
   @REQ-WA103-QO28.3 @bronze @2.4.4 @sortability-endorsement
@@ -291,6 +313,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And DateTimeOffset data in "Parameter_TimestampField" is sorted in "desc" order
 
   @REQ-WA103-QO28.4 @bronze @2.4.4 @sortability-endorsement
@@ -299,6 +322,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And DateTimeOffset data in "Parameter_TimestampField" is sorted in "desc" order
 
 
@@ -312,6 +336,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And "year" data in Date Field "Parameter_DateField" "eq" "Parameter_YearValue"
 
   @REQ-WA103-QO18.2 @gold @2.4.4 @filterability-endorsement
@@ -320,6 +345,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And "year" data in Timestamp Field "Parameter_TimestampField" "eq" "Parameter_YearValue"
 
   @REQ-WA103-QO19.1 @gold @2.4.4 @filterability-endorsement
@@ -328,6 +354,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And "month" data in Date Field "Parameter_DateField" "eq" "Parameter_MonthValue"
 
   @REQ-WA103-QO19.2 @gold @2.4.4 @filterability-endorsement
@@ -336,6 +363,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And "month" data in Timestamp Field "Parameter_TimestampField" "eq" "Parameter_MonthValue"
 
   @REQ-WA103-QO20.1 @gold @2.4.4 @filterability-endorsement
@@ -344,6 +372,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And "day" data in Date Field "Parameter_DateField" "eq" "Parameter_DayValue"
 
   @REQ-WA103-QO20.2 @gold @2.4.4 @filterability-endorsement
@@ -352,6 +381,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And "day" data in Timestamp Field "Parameter_TimestampField" "eq" "Parameter_DayValue"
 
   @REQ-WA103-QO21 @gold @2.4.4 @filterability-endorsement
@@ -360,6 +390,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And "hour" data in Timestamp Field "Parameter_TimestampField" "eq" "Parameter_HourValue"
 
   @REQ-WA103-QO22 @gold @2.4.4 @filterability-endorsement
@@ -368,6 +399,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And "minute" data in Timestamp Field "Parameter_TimestampField" "gt" "Parameter_MinuteValue"
 
   @REQ-WA103-QO23 @gold @2.4.4 @filterability-endorsement
@@ -376,6 +408,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And "second" data in Timestamp Field "Parameter_TimestampField" "lt" "Parameter_SecondValue"
 
   @REQ-WA103-QO24 @gold @2.4.4 @filterability-endorsement
@@ -384,6 +417,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And "fractional" data in Timestamp Field "Parameter_TimestampField" "lt" "Parameter_FractionalValue"
 
   #######################################
@@ -396,6 +430,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And String data in "Parameter_ContainsField" "contains" "Parameter_ContainsValue"
 
   @REQ-WA103-QO14 @platinum @2.4.4 @filterability-endorsement
@@ -404,6 +439,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And String data in "Parameter_EndsWithField" "endswith" "Parameter_EndsWithValue"
 
   @REQ-WA103-QO15 @platinum @2.4.4 @filterability-endorsement
@@ -412,6 +448,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And String data in "Parameter_StartsWithField" "startswith" "Parameter_StartsWithValue"
 
   @REQ-WA103-QO16 @platinum @2.4.4 @filterability-endorsement
@@ -420,6 +457,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And String data in "Parameter_ToLowerField" "tolower" "Parameter_ToLowerValue"
 
   @REQ-WA103-QO17 @platinum @2.4.4 @filterability-endorsement
@@ -428,6 +466,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
     And String data in "Parameter_ToUpperField" "toupper" "Parameter_ToUpperValue"
 
   @REQ-WA103-QO29.1 @platinum @2.4.4 @expandability-endorsement
@@ -436,8 +475,8 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
-    And data are present in fields contained within "Parameter_SelectList"
-    And data are present within the expanded field "Parameter_ExpandField"
+    And data are present for fields contained within the given "Parameter_SelectList"
+    And data and type information exist in the results and within the given "Parameter_ExpandField"
     And an OData NavigationProperty exists for the given "Parameter_EndpointResource"
     And the expanded data were found in the related resource
 
@@ -447,6 +486,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
 
   @REQ-WA103-QO29.3 @platinum @2.4.4 @expandability-endorsement @todo
   Scenario: REQ-WA103-QO29.3 - Query Support: $expand required field (TODO)
@@ -454,6 +494,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
 
   @REQ-WA103-QM3 @platinum @2.4.6 @queryability-endorsement @todo
   Scenario: REQ-WA103-QM3 - Support Literals: any() Lambda Expression (TODO)
@@ -461,6 +502,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
 
   @REQ-WA103-QM4 @platinum @2.4.6 @queryability-endorsement @todo
   Scenario: REQ-WA103-QM4 - Query Support Literals: all() Lambda Operator (TODO)
@@ -468,6 +510,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
 
   @REQ-WA103-QM5.1 @platinum @2.4.7 @queryability-endorsement @geospatial @todo
   Scenario: REQ-WA103-QM5.1 - Query Support: GeoSpatial Search Implementation (TODO)
@@ -475,6 +518,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
 
   @REQ-WA103-QM5.2 @platinum @2.4.7 @queryability-endorsement @geospatial @todo
   Scenario: REQ-WA103-QM5.2 - Query Support: GeoSpatial Search Implementation (TODO)
@@ -482,6 +526,7 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 200
     And the response is valid JSON
     And the response has results
+    And data are present for fields contained within the given "Parameter_SelectList"
 
   @REQ-WA103-QO12 @platinum @2.4.4 @filterability-endorsement @filterability-endorsement
   Scenario: REQ-WA103-QO12 - Query Support: $filter - Grouping: filter (ge, le) and (gt, lt) and expect (gt, lt)

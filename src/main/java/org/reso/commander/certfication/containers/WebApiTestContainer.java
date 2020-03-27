@@ -12,15 +12,18 @@ import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.commons.api.edm.Edm;
+import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.commander.Commander;
 import org.reso.commander.TestUtils;
 import org.reso.models.ClientSettings;
+import org.reso.models.Parameters;
 import org.reso.models.Request;
 import org.reso.models.Settings;
 
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.reso.commander.TestUtils.HEADER_ODATA_VERSION;
 
@@ -60,7 +63,7 @@ public final class WebApiTestContainer implements TestContainer {
 
 
   public void initialize() {
-    setServiceRoot(getSettings().getClientSettings().get(ClientSettings.WEB_API_URI));
+    setServiceRoot(getSettings().getClientSettings().get(ClientSettings.SERVICE_ROOT));
 
     //TODO: add base64 un-encode when applicable
     setBearerToken(getSettings().getClientSettings().get(ClientSettings.BEARER_TOKEN));
@@ -86,9 +89,26 @@ public final class WebApiTestContainer implements TestContainer {
           .scope(getScope())
           .serviceRoot(getServiceRoot())
           .bearerToken(getBearerToken())
-          .useEdmEnabledClient(true)
+          .useEdmEnabledClient(shouldUseEdmClient())
           .build());
     }
+  }
+
+  /**
+   * If the server is using a DataSystem endpoint that's not rooted at the Service Root, the EDM client
+   * will fail the request. Cannot use the Edm client for those that do.
+   *
+   * @return true if the Olingo Edm client should be used, false otherwise.
+   */
+  private boolean shouldUseEdmClient() {
+    /* Cannot use EdmEnabled client with a server that has a DataSystem endpoint that's not rooted at the Service Root */
+    String dataSystemEndpoint = getSettings().getParameters().getValue(Parameters.WELL_KNOWN.DATASYSTEM_ENDPOINT),
+        serviceRoot = getSettings().getClientSettings().get(ClientSettings.SERVICE_ROOT);
+
+    assertNotNull("ERROR: " + Parameters.WELL_KNOWN.DATASYSTEM_ENDPOINT + " cannot be null!", dataSystemEndpoint);
+    assertNotNull("ERROR: " + ClientSettings.SERVICE_ROOT + " cannot be null!", serviceRoot);
+
+    return dataSystemEndpoint.startsWith(serviceRoot);
   }
 
   /**
@@ -114,6 +134,7 @@ public final class WebApiTestContainer implements TestContainer {
   public void executePreparedGetRequest() {
     try {
       setRawRequest(getCommander().getClient().getRetrieveRequestFactory().getRawRequest(getRequestUri()));
+      getRawRequest().setFormat(ContentType.JSON.toContentTypeString());
       setODataRawResponse(getRawRequest().execute());
       setResponseData(TestUtils.convertInputStreamToString(getODataRawResponse().getRawResponse()));
       setServerODataHeaderVersion(getODataRawResponse().getHeader(HEADER_ODATA_VERSION).toString());

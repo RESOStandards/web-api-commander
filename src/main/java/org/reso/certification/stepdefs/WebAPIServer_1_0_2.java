@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,6 +38,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
+import static org.reso.commander.Commander.REPORT_DIVIDER;
+import static org.reso.commander.Commander.REPORT_DIVIDER_SMALL;
 import static org.reso.commander.TestUtils.*;
 import static org.reso.commander.TestUtils.Operators.*;
 
@@ -209,10 +212,14 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * REQ-WA103-QR3 - $select
      */
-    And("^data are present in fields contained within \"([^\"]*)\"$", (String parameterSelectList) -> {
+    And("^data are present for fields contained within the given \"([^\"]*)\"$", (String parameterSelectList) -> {
       try {
         AtomicInteger numFieldsWithData = new AtomicInteger();
         List<String> fieldList = new ArrayList<>(Arrays.asList(Settings.resolveParametersString(parameterSelectList, getTestContainer().getSettings()).split(FIELD_SEPARATOR)));
+
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(1);
+        double fill = 0;
 
         AtomicInteger numResults = new AtomicInteger();
         //iterate over the items and count the number of fields with data to determine whether there are data present
@@ -230,8 +237,10 @@ public class WebAPIServer_1_0_2 implements En {
         LOG.info("Number of Results: " + numResults.get());
         LOG.info("Number of Fields: " + fieldList.size());
         LOG.info("Fields with Data: " + numFieldsWithData.get());
-        if (numFieldsWithData.get() > 0) {
-          LOG.info("Percent Fill: " + ((numResults.get() * fieldList.size()) / (1.0 * numFieldsWithData.get()) * 100) + "%");
+
+        if (numResults.get() > 0 && fieldList.size() > 0) {
+          fill = ((100.0 * numFieldsWithData.get()) / (numResults.get() * fieldList.size()));
+          LOG.info("Percent Fill: " + df.format(fill) + "%");
         } else {
           LOG.info("Percent Fill: 0% - no fields with data found!");
         }
@@ -282,6 +291,7 @@ public class WebAPIServer_1_0_2 implements En {
         fail(ex.toString());
       }
     });
+
     And("^data in the \"([^\"]*)\" fields are different in the second request than in the first$", (String parameterUniqueId) -> {
       try {
         List<POJONode> l1 = from(getTestContainer().getInitialResponseData()).getJsonObject(JSON_VALUE_PATH);
@@ -310,19 +320,9 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * GET request by requirementId (see generic.resoscript)
      */
-    When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", (String requestId) -> {
-      try {
-        //reset local state each time a get request is run
-        getTestContainer().resetState();
+    When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", (String requirementId) -> executeGetRequest(requirementId));
 
-        LOG.info("Request ID: " + requestId);
-        getTestContainer().setRequestUri(Commander.prepareURI(Settings.resolveParameters(
-            getTestContainer().getSettings().getRequestById(requestId), getTestContainer().getSettings()).getUrl()));
-        LOG.info("Request URI: " + getTestContainer().getRequestUri().toString());
-        getTestContainer().executePreparedGetRequest();
-      } catch (Exception ex) {
-        LOG.debug("Exception was thrown in " + this.getClass() + ": " + ex.toString());
-      }
+    When("^a GET request is made to the resolved Url in \"([^\"]*)\" without service root validation$", (String requirementId) -> {
     });
 
     /*
@@ -871,26 +871,41 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * Checks to see whether the expanded field has data
      */
-    And("^data are present within the expanded field \"([^\"]*)\"$", (String parameterExpandField) -> {
+    And("^data and type information exist in the results and within the given \"([^\"]*)\"$", (String parameterExpandField) -> {
       String expandField = Settings.resolveParametersString(parameterExpandField, getTestContainer().getSettings());
       assertFalse("ERROR: no expand field found for " + parameterExpandField, expandField.isEmpty());
 
-      ClientEntitySet results = getTestContainer().getCommander().getClient().getRetrieveRequestFactory().getEntitySetRequest(getTestContainer().getRequestUri()).execute().getBody();
+      ClientEntitySet results = getTestContainer().getCommander().getClient().getRetrieveRequestFactory()
+              .getEntitySetRequest(getTestContainer().getRequestUri()).execute().getBody();
 
       LOG.info("Results count is: " + results.getEntities().size());
       AtomicInteger counter = new AtomicInteger();
       results.getEntities().forEach(clientEntity -> {
-        if (showResponses) LOG.info("\nItem #" + counter.getAndIncrement());
+        //counter is only used for display and not logic
+        if (showResponses) LOG.info("\nRecord #" + counter.getAndIncrement());
 
         clientEntity.getProperties().forEach(clientProperty -> {
-          if (showResponses) {
+          assertNotNull("ERROR: field name cannot be null!", clientProperty.getName());
+
+          if (clientProperty.getName().equals(expandField)) {
+            assertNotNull("ERROR: '" + parameterExpandField + "' contains no data!", clientProperty.getValue());
+
+            LOG.info("\tExpanded Field Name: " + expandField);
+            clientProperty.getValue().asComplex().forEach(expandedClientProperty -> {
+              assertNotNull("ERROR: field name cannot be null!", expandedClientProperty.getName());
+              assertNotNull("ERROR: data type could not be found for " + expandedClientProperty.getName(), expandedClientProperty.getValue().getTypeName());
+              LOG.info("\t\tField Name: " + expandedClientProperty.getName());
+              LOG.info("\t\tField Value: " + expandedClientProperty.getValue().toString());
+              LOG.info("\t\tType Name: " + expandedClientProperty.getValue().getTypeName());
+              LOG.info("\t\t" + REPORT_DIVIDER_SMALL);
+            });
+          } else {
+
             LOG.info("\tField Name: " + clientProperty.getName());
             LOG.info("\tField Value: " + clientProperty.getValue().toString());
             LOG.info("\tType Name: " + clientProperty.getValue().getTypeName());
-            LOG.info("\n");
+            LOG.info("\t" + REPORT_DIVIDER);
           }
-          assertNotNull("ERROR: '" + parameterExpandField + "' not found in results!", clientProperty.getName());
-          assertNotNull("ERROR: '" + parameterExpandField + "' contains no data!", clientProperty.getValue());
           assertNotNull("ERROR: data type could not be found for " + clientProperty.getName(), clientProperty.getValue().getTypeName());
         });
       });
@@ -993,6 +1008,24 @@ public class WebAPIServer_1_0_2 implements En {
         });
       }
     });
+  }
+
+  /*
+   * Execute Get Request Wrapper
+   */
+  void executeGetRequest(String requestId) {
+    try {
+      //reset local state each time a get request is run
+      getTestContainer().resetState();
+
+      LOG.info("Request ID: " + requestId);
+      getTestContainer().setRequestUri(Commander.prepareURI(Settings.resolveParameters(
+          getTestContainer().getSettings().getRequestById(requestId), getTestContainer().getSettings()).getUrl()));
+      LOG.info("Request URI: " + getTestContainer().getRequestUri().toString());
+      getTestContainer().executePreparedGetRequest();
+    } catch (Exception ex) {
+      LOG.debug("Exception was thrown in " + this.getClass() + ": " + ex.toString());
+    }
   }
 
   static WebApiTestContainer getTestContainer() {

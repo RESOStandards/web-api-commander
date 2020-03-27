@@ -89,7 +89,7 @@ public class App {
         settings = Settings.loadFromRESOScript(new File(inputFilename));
         LOG.debug("RESOScript loaded successfully!");
 
-        serviceRoot = settings.getClientSettings().get(ClientSettings.WEB_API_URI);
+        serviceRoot = settings.getClientSettings().get(ClientSettings.SERVICE_ROOT);
         LOG.debug("Service Root is:" + serviceRoot);
 
         //TODO: add base64 un-encode when applicable

@@ -22,7 +22,7 @@ public class ClientSettings {
       SERVER_NAME = "ServerName",
       VENDOR_NAME = "VendorName",
       LAST_MODIFIED_TIMESTAMP = "LastModifiedTimestamp",
-      WEB_API_URI = "WebAPIURI",
+      SERVICE_ROOT = "WebAPIURI",
       AUTHORIZATION_URI = "AuthorizationURI",
       TOKEN_URI = "TokenURI",
       REDIRECT_URI = "RedirectURI",
@@ -40,7 +40,7 @@ public class ClientSettings {
 
   public static final String[] supportedClientSettings = {
       SERVER_ID, SERVER_NAME, VENDOR_NAME, LAST_MODIFIED_TIMESTAMP,
-      WEB_API_URI, AUTHORIZATION_URI, TOKEN_URI, REDIRECT_URI,
+      SERVICE_ROOT, AUTHORIZATION_URI, TOKEN_URI, REDIRECT_URI,
       AUTHENTICATION_TYPE, BEARER_TOKEN, CLIENT_IDENTIFICATION,
       CLIENT_SECRET, USERNAME, PASSWORD, CLIENT_SCOPE,
       VERSION, PRE_AUTHENTICATE, SERVER_NAME, RESULTS_DIRECTORY, SCRIPT_FILE};
