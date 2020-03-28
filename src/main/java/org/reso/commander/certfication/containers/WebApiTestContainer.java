@@ -44,6 +44,21 @@ public final class WebApiTestContainer implements TestContainer {
   public static final String DOLLAR_SIGN = "$";
   public static final String PRETTY_FIELD_SEPARATOR = FIELD_SEPARATOR + SINGLE_SPACE;
 
+  public static final class ODATA_QUERY_PARAMS {
+      private static String format = DOLLAR_SIGN + "%s";
+
+      //TODO: add additional items as needed, and see if there's a lib for this in Olingo
+      public static final String
+        COUNT   = String.format(format, QueryOption.COUNT),
+        EXPAND  = String.format(format, QueryOption.EXPAND),
+        FILTER  = String.format(format, QueryOption.FILTER),
+        ORDERBY = String.format(format, QueryOption.ORDERBY),
+        SELECT  = String.format(format, QueryOption.SELECT),
+        SEARCH  = String.format(format, QueryOption.SEARCH),
+        SKIP    = String.format(format, QueryOption.SKIP),
+        TOP     = String.format(format, QueryOption.TOP);
+  }
+
   private AtomicReference<Commander> commander = new AtomicReference<>();
   private AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
   private AtomicReference<Edm> edm = new AtomicReference<>();
@@ -198,10 +213,9 @@ public final class WebApiTestContainer implements TestContainer {
   }
 
   public Collection<String> getSelectList() {
-    final String SELECT_OPERATOR = DOLLAR_SIGN + QueryOption.SELECT.toString();
     Arrays.stream(getRequestUri().getQuery().split(AMPERSAND)).forEach(fragment -> {
       if (fragment.contains(QueryOption.SELECT.toString())) {
-        selectList.set(fragment.replace(SELECT_OPERATOR, EMPTY_STRING).replace(EQUALS, EMPTY_STRING));
+        selectList.set(fragment.replace(ODATA_QUERY_PARAMS.SELECT, EMPTY_STRING).replace(EQUALS, EMPTY_STRING));
       }
     });
 

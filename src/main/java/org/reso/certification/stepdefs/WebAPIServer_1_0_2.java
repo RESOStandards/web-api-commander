@@ -80,14 +80,14 @@ public class WebAPIServer_1_0_2 implements En {
       LOG.info("RESOScript loaded successfully!");
     });
 
-    Given("^a test environment was successfully created from the given RESOScript$", () -> {
+    Given("^a test container was successfully created from the given RESOScript$", () -> {
       getTestContainer().initialize();
     });
 
     /*
      * Ensures that the client either uses Authorization Codes or Client Credentials
      */
-    And("^the test environment uses an authorization_code or client_credentials for authentication$", () -> {
+    And("^the test container uses an authorization_code or client_credentials for authentication$", () -> {
       assertNotNull(getTestContainer().getCommander());
       assertTrue("ERROR: Commander must either have a valid Authorization Code or Client Credentials configuration.",
           getTestContainer().getCommander().isTokenClient() || (getTestContainer().getCommander().isOAuthClient() && getTestContainer().getCommander().hasValidAuthConfig()));
@@ -289,7 +289,7 @@ public class WebAPIServer_1_0_2 implements En {
         //TODO: convert to OData filter factory
         getTestContainer().setRequestUri(Commander.prepareURI(
             Settings.resolveParameters(getTestContainer().getSettings().getRequest(requestId), getTestContainer().getSettings()).getUrl()
-            + AMPERSAND + DOLLAR_SIGN + QueryOption.SKIP.toString() + EQUALS + skipCount));
+            + AMPERSAND + ODATA_QUERY_PARAMS.SKIP + EQUALS + skipCount));
         getTestContainer().executePreparedGetRequest();
       } catch (Exception ex) {
         fail(ex.toString());
@@ -816,6 +816,7 @@ public class WebAPIServer_1_0_2 implements En {
       final String serviceRoot = Settings.resolveParametersString(clientSettingsServiceRoot, getTestContainer().getSettings());
       assertEquals("ERROR: given service root doesn't match the one configured in the Commander", serviceRoot, getTestContainer().getCommander().getServiceRoot());
 
+      LOG.info("Requesting XML Metadata from: " + serviceRoot);
       try {
         assertNotNull("ERROR: could not find valid XML Metadata for given service root: " + serviceRoot, getTestContainer().getXMLMetadata());
       } catch (ODataClientErrorException cex) {
@@ -833,8 +834,10 @@ public class WebAPIServer_1_0_2 implements En {
       final String serviceRoot = Settings.resolveParametersString(clientSettingsServiceRoot, getTestContainer().getSettings());
       assertEquals("ERROR: given service root doesn't match the one configured in the Commander", serviceRoot, getTestContainer().getCommander().getServiceRoot());
 
+      LOG.info("Requesting Edm Metadata from: " + serviceRoot);
       try {
         assertNotNull("ERROR: could not find valid Edm Metadata for given service root: " + serviceRoot, getTestContainer().getEdm());
+        if (showResponses) LOG.info(Commander.getMetadataReport(getTestContainer().getEdm()));
       } catch (ODataClientErrorException cex) {
         getTestContainer().setResponseCode(cex.getStatusLine().getStatusCode());
         fail(cex.toString());
@@ -881,27 +884,32 @@ public class WebAPIServer_1_0_2 implements En {
 
         clientEntity.getProperties().forEach(clientProperty -> {
           assertNotNull("ERROR: field name cannot be null!", clientProperty.getName());
-
+          assertNotNull("ERROR: data type could not be found for " + clientProperty.getName() + "! "
+              + "\nCheck the NavigationProperty for your $expand field.", clientProperty.getValue().getTypeName());
           if (clientProperty.getName().equals(expandField)) {
             assertNotNull("ERROR: '" + parameterExpandField + "' contains no data!", clientProperty.getValue());
 
             LOG.info("\tExpanded Field Name: " + expandField);
             clientProperty.getValue().asComplex().forEach(expandedClientProperty -> {
               assertNotNull("ERROR: field name cannot be null!", expandedClientProperty.getName());
-              assertNotNull("ERROR: data type could not be found for " + expandedClientProperty.getName(), expandedClientProperty.getValue().getTypeName());
-              LOG.info("\t\tField Name: " + expandedClientProperty.getName());
-              LOG.info("\t\tField Value: " + expandedClientProperty.getValue().toString());
-              LOG.info("\t\tType Name: " + expandedClientProperty.getValue().getTypeName());
-              LOG.info("\t\t" + REPORT_DIVIDER_SMALL);
+              assertNotNull("ERROR: data type could not be found for: " + expandedClientProperty.getName(),
+                  expandedClientProperty.getValue().getTypeName());
+
+              if (expandedClientProperty.getValue().asPrimitive().toValue() != null) {
+                LOG.info("\t\tField Name: " + expandedClientProperty.getName());
+                LOG.info("\t\tField Value: " + expandedClientProperty.getValue().toString());
+                LOG.info("\t\tType Name: " + expandedClientProperty.getValue().getTypeName());
+                LOG.info("\t\t" + REPORT_DIVIDER_SMALL);
+              }
+
             });
           } else {
-
             LOG.info("\tField Name: " + clientProperty.getName());
             LOG.info("\tField Value: " + clientProperty.getValue().toString());
             LOG.info("\tType Name: " + clientProperty.getValue().getTypeName());
             LOG.info("\t" + REPORT_DIVIDER);
           }
-          assertNotNull("ERROR: data type could not be found for " + clientProperty.getName(), clientProperty.getValue().getTypeName());
+
         });
       });
     });

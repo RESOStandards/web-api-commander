@@ -521,19 +521,19 @@
     <Request
       RequestId="REQ-WA103-QO29.1"
       OutputFile="REQ-WA103-QO29.1.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*"
     />
 
     <Request
       RequestId="REQ-WA103-QO29.2"
       OutputFile="REQ-WA103-QO29.2.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*&amp;$filter=PhotosCount gt 0"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*&amp;$filter=PhotosCount gt 0"
     />
 
     <Request
       RequestId="REQ-WA103-QO29.3"
       OutputFile="REQ-WA103-QO29.3.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField**Parameter_RequiredParametersFilter*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField**Parameter_RequiredParametersFilter*"
     />
 
     <Request

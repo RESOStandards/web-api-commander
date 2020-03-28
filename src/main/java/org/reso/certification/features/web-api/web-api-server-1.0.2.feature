@@ -7,8 +7,8 @@ Feature: Web API Server 1.0.2 Certification
   Background:
     Given a RESOScript file was provided
     And Client Settings and Parameters were read from the file
-    And a test environment was successfully created from the given RESOScript
-    And the test environment uses an authorization_code or client_credentials for authentication
+    And a test container was successfully created from the given RESOScript
+    And the test container uses an authorization_code or client_credentials for authentication
 
 
   #######################################

@@ -251,28 +251,44 @@ public class Commander {
       reportBuilder.append("\n" + REPORT_DIVIDER_SMALL);
 
       schema.getTypeDefinitions().forEach(a ->
-          reportBuilder.append("\n\n\tType Definition:").append(a.getName()));
+          reportBuilder.append("\nType Definition:").append(a.getName()));
 
       schema.getEntityTypes().forEach(a -> {
-        reportBuilder.append("\n\n\tEntity Type: ").append(a.getName());
+        reportBuilder.append("\nEntity Type: ").append(a.getName());
         a.getKeyPropertyRefs().forEach(ref ->
-            reportBuilder.append("\n\t\tKey Field: ").append(ref.getName()));
-        a.getPropertyNames().forEach(n -> reportBuilder.append("\n\t\tName: ").append(n));
+            reportBuilder.append("\n\tKey Field: ").append(ref.getName()));
+        a.getPropertyNames().forEach(n -> reportBuilder.append("\n\tName: ").append(n));
       });
 
-      schema.getEnumTypes().forEach(a -> {
-        reportBuilder.append("\n\n\tEnum Type: ").append(a.getName());
-        a.getMemberNames().forEach(n -> reportBuilder.append("\n\t\tName: ").append(n));
+      schema.getEnumTypes().forEach(edmEnumType -> {
+        reportBuilder.append("\nEnum Type: ")
+            .append(edmEnumType.getName())
+            .append(" (").append(schema.getNamespace()).append(", ")
+            .append(edmEnumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString())
+            .append(")");
+
+        edmEnumType.getMemberNames().forEach(n -> {
+          reportBuilder
+            .append("\n\tName: ").append(n);
+
+          if (edmEnumType.getMember(n).getAnnotations().size() > 0) {
+            reportBuilder
+                .append("\n\tAnnotations: ")
+                .append(edmEnumType.getMember(n).getAnnotations().toString())
+                .append("\n\n");
+          }
+
+        });
       });
 
       schema.getComplexTypes().forEach(a ->
-          reportBuilder.append("\n\n\tComplex Entity Type: ").append(a.getFullQualifiedName().getFullQualifiedNameAsString()));
+          reportBuilder.append("\nComplex Entity Type: ").append(a.getFullQualifiedName().getFullQualifiedNameAsString()));
 
       schema.getAnnotationGroups().forEach(a ->
-          reportBuilder.append("\n\n\tAnnotation: ").append(a.getQualifier()).append(", Target Path: ").append(a.getTargetPath()));
+          reportBuilder.append("\nAnnotation: ").append(a.getQualifier()).append(", Target Path: ").append(a.getTargetPath()));
 
       schema.getTerms().forEach(a ->
-          reportBuilder.append("\n\n\tTerm: ").append(a.getFullQualifiedName().getFullQualifiedNameAsString()));
+          reportBuilder.append("\nTerm: ").append(a.getFullQualifiedName().getFullQualifiedNameAsString()));
     });
 
     return reportBuilder.toString();
