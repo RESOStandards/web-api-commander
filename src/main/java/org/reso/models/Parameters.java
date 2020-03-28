@@ -73,7 +73,8 @@ public class Parameters {
 
   public static final class WELL_KNOWN {
     public static final String
-        RESOURCE_ENDPOINT = "EndpointResource",
-        DATASYSTEM_ENDPOINT = "EndpointDataSystem";
+        RESOURCE_NAME = "EndpointResource",
+        DATASYSTEM_ENDPOINT = "EndpointDataSystem",
+        EXPAND_FIELD = "ExpandField";
   }
 }

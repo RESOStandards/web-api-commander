@@ -11,7 +11,9 @@ import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
+import org.apache.olingo.client.api.uri.QueryOption;
 import org.apache.olingo.commons.api.edm.Edm;
+import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.commander.Commander;
 import org.reso.commander.TestUtils;
@@ -21,10 +23,13 @@ import org.reso.models.Request;
 import org.reso.models.Settings;
 
 import java.net.URI;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static org.reso.commander.Commander.AMPERSAND;
+import static org.reso.commander.Commander.EQUALS;
 import static org.reso.commander.TestUtils.HEADER_ODATA_VERSION;
 
 /**
@@ -33,7 +38,30 @@ import static org.reso.commander.TestUtils.HEADER_ODATA_VERSION;
 public final class WebApiTestContainer implements TestContainer {
   private static final Logger LOG = LogManager.getLogger(WebApiTestContainer.class);
 
+  public static final String FIELD_SEPARATOR = ",";
+  public static final String EMPTY_STRING = "";
+  public static final String SINGLE_SPACE = " ";
+  public static final String DOLLAR_SIGN = "$";
+  public static final String PRETTY_FIELD_SEPARATOR = FIELD_SEPARATOR + SINGLE_SPACE;
+
   private AtomicReference<Commander> commander = new AtomicReference<>();
+  private AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
+  private AtomicReference<Edm> edm = new AtomicReference<>();
+  private AtomicReference<Settings> settings = new AtomicReference<>();
+  private AtomicReference<String> serviceRoot = new AtomicReference<>();
+  private AtomicReference<String> bearerToken = new AtomicReference<>();
+  private AtomicReference<String> clientId = new AtomicReference<>();
+  private AtomicReference<String> clientSecret = new AtomicReference<>();
+  private AtomicReference<String> authorizationUri = new AtomicReference<>();
+  private AtomicReference<String> tokenUri = new AtomicReference<>();
+  private AtomicReference<String> redirectUri = new AtomicReference<>();
+  private AtomicReference<String> scope = new AtomicReference<>();
+  private AtomicReference<String> pathToRESOScript = new AtomicReference<>();
+  private AtomicReference<Map<String, CsdlProperty>> fieldMap = new AtomicReference<>(new HashMap<>());
+
+
+  // request instance variables - these get reset with every request
+  private AtomicReference<String> selectList = new AtomicReference<>();
   private AtomicReference<ODataRawResponse> oDataRawResponse = new AtomicReference<>();
   private AtomicReference<Request> request = new AtomicReference<>();
   private AtomicReference<URI> requestUri = new AtomicReference<>();
@@ -48,19 +76,6 @@ public final class WebApiTestContainer implements TestContainer {
   private AtomicReference<ODataEntitySetRequest<ClientEntitySet>> clientEntitySetRequest = new AtomicReference<>();
   private AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
   private AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
-  private AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
-  private AtomicReference<Edm> edm = new AtomicReference<>();
-  private AtomicReference<Settings> settings = new AtomicReference<>();
-  private AtomicReference<String> serviceRoot = new AtomicReference<>();
-  private AtomicReference<String> bearerToken = new AtomicReference<>();
-  private AtomicReference<String> clientId = new AtomicReference<>();
-  private AtomicReference<String> clientSecret = new AtomicReference<>();
-  private AtomicReference<String> authorizationUri = new AtomicReference<>();
-  private AtomicReference<String> tokenUri = new AtomicReference<>();
-  private AtomicReference<String> redirectUri = new AtomicReference<>();
-  private AtomicReference<String> scope = new AtomicReference<>();
-  private AtomicReference<String> pathToRESOScript = new AtomicReference<>();
-
 
   public void initialize() {
     setServiceRoot(getSettings().getClientSettings().get(ClientSettings.SERVICE_ROOT));
@@ -92,6 +107,11 @@ public final class WebApiTestContainer implements TestContainer {
           .useEdmEnabledClient(shouldUseEdmClient())
           .build());
     }
+
+    //build a map of all of the discovered fields on the server for the given resource by field name
+    //this can also be used to look up type information
+    TestUtils.findEntityTypesForEntityTypeName(getEdm(), getXMLMetadata(), getSettings().getParameters().getValue(Parameters.WELL_KNOWN.RESOURCE_NAME))
+        .forEach(csdlProperty -> fieldMap.get().put(csdlProperty.getName(), csdlProperty));
   }
 
   /**
@@ -158,12 +178,58 @@ public final class WebApiTestContainer implements TestContainer {
     }
   }
 
+  /**
+   * Gets OData Csdl for given field
+   *
+   * @param fieldName the name of the field to retrieve metadata about
+   * @return the metadata for the given field
+   */
+  public CsdlProperty getCsdlForFieldName(String fieldName) {
+    return fieldMap.get().get(fieldName);
+  }
+
+  /**
+   * Csdl property getter
+   *
+   * @return gets the local collection of Csdl Properties
+   */
+  public Collection<CsdlProperty> getCsdlProperties() {
+    return fieldMap.get().values();
+  }
+
+  public Collection<String> getSelectList() {
+    final String SELECT_OPERATOR = DOLLAR_SIGN + QueryOption.SELECT.toString();
+    Arrays.stream(getRequestUri().getQuery().split(AMPERSAND)).forEach(fragment -> {
+      if (fragment.contains(QueryOption.SELECT.toString())) {
+        selectList.set(fragment.replace(SELECT_OPERATOR, EMPTY_STRING).replace(EQUALS, EMPTY_STRING));
+      }
+    });
+
+    return new ArrayList<>(Arrays.asList(selectList.get().split(FIELD_SEPARATOR)));
+  }
+
+  /**
+   * Settings getter
+   * @return local settings instance
+   */
   public Settings getSettings() {
     return settings.get();
   }
 
+  /**
+   * Settings setter
+   * @param settings sets local settings instance to the given settings
+   */
   public void setSettings(Settings settings) {
     this.settings.set(settings);
+  }
+
+  /**
+   * Gets the Expand field from the RESOScript
+   * @return the configured Expand field
+   */
+  public String getExpandField() {
+    return getSettings().getParameters().getValue(Parameters.WELL_KNOWN.EXPAND_FIELD);
   }
 
   /**
@@ -218,6 +284,10 @@ public final class WebApiTestContainer implements TestContainer {
 
   public void setRequest(Request request) {
     this.request.set(request);
+  }
+
+  public void setRequest(String requestId) {
+    setRequest(getSettings().getRequest(requestId));
   }
 
   public URI getRequestUri() {

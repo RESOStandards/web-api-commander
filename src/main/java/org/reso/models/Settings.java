@@ -17,7 +17,7 @@ public class Settings {
   public static final String PARAMETER_PREFIX = "Parameter_";
   private ClientSettings clientSettings;
   private Parameters parameters;
-  private Map<Request, Request> requests;
+  private Map<String, Request> requests;
 
   public Settings() {
     clientSettings = new ClientSettings();
@@ -135,7 +135,7 @@ public class Settings {
    *
    * @return The request map that was loaded, indexed by request name.
    */
-  public Map<Request, Request> getRequests() {
+  public Map<String, Request> getRequests() {
     return requests;
   }
 
@@ -145,8 +145,8 @@ public class Settings {
    * @param requests a list of requests to create the request map from
    */
   private void setRequests(List<Request> requests) {
-    this.requests = new LinkedHashMap<Request, Request>();
-    requests.forEach(request -> this.requests.put(request, request));
+    this.requests = new LinkedHashMap<String, Request>();
+    requests.forEach(request -> this.requests.put(request.getRequestId(), request));
   }
 
   /**
@@ -154,17 +154,8 @@ public class Settings {
    *
    * @return The request map that was loaded, indexed by request name.
    */
-  public Request getRequestById(String requestId) {
-    Request found = null;
-    for (Map.Entry<Request, Request> entry : getRequests().entrySet()) {
-      Request key = entry.getKey();
-      Request value = entry.getValue();
-      if (key.getRequestId().contentEquals(requestId)) {
-        found = value;
-        break;
-      }
-    }
-    return found;
+  public Request getRequest(String requestId) {
+    return getRequests().get(requestId);
   }
 
   /**

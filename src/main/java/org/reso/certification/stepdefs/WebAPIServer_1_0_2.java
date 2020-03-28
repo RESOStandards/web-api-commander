@@ -14,15 +14,16 @@ import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.data.ResWrap;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
+import org.apache.olingo.client.api.uri.QueryOption;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
-import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.commander.Commander;
 import org.reso.commander.TestUtils;
 import org.reso.commander.certfication.containers.WebApiTestContainer;
+import org.reso.models.Request;
 import org.reso.models.Settings;
 
 import java.io.File;
@@ -38,18 +39,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
-import static org.reso.commander.Commander.REPORT_DIVIDER;
-import static org.reso.commander.Commander.REPORT_DIVIDER_SMALL;
+import static org.reso.commander.Commander.*;
 import static org.reso.commander.TestUtils.*;
 import static org.reso.commander.TestUtils.Operators.*;
+import static org.reso.commander.certfication.containers.WebApiTestContainer.*;
 
 /**
  * Contains the glue code for the Web API Server 1.0.2 Platinum Certification
  */
 public class WebAPIServer_1_0_2 implements En {
   private static final Logger LOG = LogManager.getLogger(WebAPIServer_1_0_2.class);
-  private static final String FIELD_SEPARATOR = ",";
-  private static final String PRETTY_FIELD_SEPARATOR = FIELD_SEPARATOR + " ";
   private static final String SHOW_RESPONSES = "showResponses";
   private static final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES));
 
@@ -212,34 +211,36 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * REQ-WA103-QR3 - $select
      */
-    And("^data are present for fields contained within the given \"([^\"]*)\"$", (String parameterSelectList) -> {
+    And("^data are present for fields contained within the given select list$", () -> {
       try {
         AtomicInteger numFieldsWithData = new AtomicInteger();
-        List<String> fieldList = new ArrayList<>(Arrays.asList(Settings.resolveParametersString(parameterSelectList, getTestContainer().getSettings()).split(FIELD_SEPARATOR)));
 
         DecimalFormat df = new DecimalFormat();
         df.setMaximumFractionDigits(1);
         double fill = 0;
 
+        assertNotNull("ERROR: no fields found within the given $select list. Check request Id: " + getTestContainer().getRequest().getRequestId() + " in your .resoscript file!",
+            getTestContainer().getSelectList());
+
+        LOG.info(QueryOption.SELECT + " list is: " + getTestContainer().getSelectList() );
+
         AtomicInteger numResults = new AtomicInteger();
         //iterate over the items and count the number of fields with data to determine whether there are data present
         from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-          if (item != null) {
-            numResults.getAndIncrement();
-            fieldList.forEach(field -> {
-              if (item.get(field) != null) {
-                numFieldsWithData.getAndIncrement();
-              }
-            });
-          }
+          numResults.getAndIncrement();
+          getTestContainer().getSelectList().forEach(field -> {
+            if (item.get(field) != null) {
+              numFieldsWithData.getAndIncrement();
+            }
+          });
         });
 
         LOG.info("Number of Results: " + numResults.get());
-        LOG.info("Number of Fields: " + fieldList.size());
+        LOG.info("Number of Fields: " + getTestContainer().getSelectList().size());
         LOG.info("Fields with Data: " + numFieldsWithData.get());
 
-        if (numResults.get() > 0 && fieldList.size() > 0) {
-          fill = ((100.0 * numFieldsWithData.get()) / (numResults.get() * fieldList.size()));
+        if (numResults.get() > 0 && getTestContainer().getSelectList().size() > 0) {
+          fill = ((100.0 * numFieldsWithData.get()) / (numResults.get() * getTestContainer().getSelectList().size()));
           LOG.info("Percent Fill: " + df.format(fill) + "%");
         } else {
           LOG.info("Percent Fill: 0% - no fields with data found!");
@@ -275,17 +276,20 @@ public class WebAPIServer_1_0_2 implements En {
      * REQ-WA103-QR5 - $skip
      * $skip=*Parameter_TopCount*
      */
-    And("^a GET request is made to the resolved Url in \"([^\"]*)\" with \\$skip=\"([^\"]*)\"$", (String requirementId, String parameterTopCount) -> {
+    And("^a GET request is made to the resolved Url in \"([^\"]*)\" with \\$skip=\"([^\"]*)\"$", (String requestId, String parameterTopCount) -> {
       try {
         int skipCount = Integer.parseInt(Settings.resolveParametersString(parameterTopCount, getTestContainer().getSettings()));
         LOG.info("Skip count is: " + skipCount);
+
+        getTestContainer().setRequest(requestId);
 
         //preserve initial response data for later comparisons
         getTestContainer().setInitialResponseData(getTestContainer().getResponseData());
 
         //TODO: convert to OData filter factory
-        getTestContainer().setRequestUri(Commander.prepareURI(Settings.resolveParameters(getTestContainer().getSettings().getRequestById(requirementId), getTestContainer().getSettings()).getUrl()
-            + "&" + Commander.ODATA_QUERY_OPTIONS.SKIP + "=" + skipCount));
+        getTestContainer().setRequestUri(Commander.prepareURI(
+            Settings.resolveParameters(getTestContainer().getSettings().getRequest(requestId), getTestContainer().getSettings()).getUrl()
+            + AMPERSAND + DOLLAR_SIGN + QueryOption.SKIP.toString() + EQUALS + skipCount));
         getTestContainer().executePreparedGetRequest();
       } catch (Exception ex) {
         fail(ex.toString());
@@ -320,10 +324,7 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * GET request by requirementId (see generic.resoscript)
      */
-    When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", (String requirementId) -> executeGetRequest(requirementId));
-
-    When("^a GET request is made to the resolved Url in \"([^\"]*)\" without service root validation$", (String requirementId) -> {
-    });
+    When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", this::executeGetRequest);
 
     /*
      * Assert response code
@@ -774,23 +775,17 @@ public class WebAPIServer_1_0_2 implements En {
      * Ensures that the server metadata for the given resource in parameterResourceName contains
      * all of the fields in the given parameterSelectList.
      */
-    And("^resource metadata for \"([^\"]*)\" contains the fields in \"([^\"]*)\"$", (String parameterResourceName, String parameterSelectList) -> {
-      final String selectList = Settings.resolveParametersString(parameterSelectList, getTestContainer().getSettings());
-
+    And("^resource metadata for \"([^\"]*)\" contains the fields in the given select list$", (String parameterResourceName) -> {
       try {
         final String resourceName = Settings.resolveParametersString(parameterResourceName, getTestContainer().getSettings());
-        List<String> fieldNames = Arrays.asList(selectList.split(FIELD_SEPARATOR));
 
-        //create field lookup
-        Map<String, CsdlProperty> fieldMap = new HashMap<>();
-        TestUtils.findEntityTypesForEntityTypeName(getTestContainer().getEdm(), getTestContainer().getXMLMetadata(), resourceName)
-            .forEach(csdlProperty -> fieldMap.put(csdlProperty.getName(), csdlProperty));
-
-        LOG.info("Searching metadata for fields in given select list: " + selectList);
-        fieldNames.forEach(fieldName -> {
-          //trim string just in case spaces were used after the commas
-          assertNotNull("ERROR: Field name '" + fieldName + "' is not present in server metadata!", fieldMap.get(fieldName.trim()));
-          LOG.info("Found: '" + fieldName.trim() + "'");
+        LOG.info("Searching metadata for fields in given select list: " + getTestContainer().getSelectList().toString());
+        getTestContainer().getSelectList().forEach(fieldName -> {
+          //need to skip the expand field when looking through the metadata
+          if (!fieldName.contentEquals(getTestContainer().getExpandField())) {
+            assertNotNull("ERROR: Field name '" + fieldName + "' is not present in server metadata!", getTestContainer().getCsdlForFieldName(fieldName));
+            LOG.info("Found: '" + fieldName.trim() + "'");
+          }
         });
       } catch (Exception ex) {
         fail(ex.toString());
@@ -924,10 +919,12 @@ public class WebAPIServer_1_0_2 implements En {
      * Checks the Standard Resources requirement from Section 2.6 of the Web API specification
      */
     And("^the metadata contains at least one resource from \"([^\"]*)\"$", (String parameterRequiredResourceList) -> {
-      String requiredResourceString = Settings.resolveParametersString(parameterRequiredResourceList, getTestContainer().getSettings()).replace(" ", "");
-      List<String> requiredResources = Arrays.asList(requiredResourceString.split(","));
+      String requiredResourceString =
+          Settings.resolveParametersString(parameterRequiredResourceList, getTestContainer().getSettings()).replace(SINGLE_SPACE, EMPTY_STRING);
+      List<String> requiredResources = Arrays.asList(requiredResourceString.split(FIELD_SEPARATOR));
 
-      LOG.info("Searching the default entity container for one of the following Standard Resources: " + requiredResourceString.replace(FIELD_SEPARATOR, PRETTY_FIELD_SEPARATOR));
+      LOG.info("Searching the default entity container for one of the following Standard Resources: "
+          + requiredResourceString.replace(FIELD_SEPARATOR, PRETTY_FIELD_SEPARATOR));
 
       AtomicBoolean found = new AtomicBoolean(false);
       requiredResources.forEach(requiredResource -> {
@@ -958,12 +955,14 @@ public class WebAPIServer_1_0_2 implements En {
     });
 
 
-    When("^a GET request is made to the resolved Url in \"([^\"]*)\" using the OData Client$", (String parameterRequestId) -> {
-      String uriString = Settings.resolveParameters(getTestContainer().getSettings().getRequestById(parameterRequestId), getTestContainer().getSettings()).getUrl();
-      assertTrue("ERROR: the resolved Url in '" + parameterRequestId + "' was invalid!", uriString != null && uriString.length() > 0);
+    When("^a GET request is made to the resolved Url in \"([^\"]*)\" using the OData Client$", (String requestId) -> {
+      Request request = getTestContainer().getSettings().getRequest(requestId);
+      String uriString = Settings.resolveParameters(request, getTestContainer().getSettings()).getUrl();
+      assertTrue("ERROR: the resolved Url in '" + requestId + "' was invalid!", uriString != null && uriString.length() > 0);
 
-      LOG.info("Request Id: " + parameterRequestId);
+      LOG.info("Request Id: " + requestId);
       try {
+        getTestContainer().setRequest(request);
         getTestContainer().setRequestUri(prepareUri(uriString));
         getTestContainer().setClientEntitySetRequest(getTestContainer().getCommander().getClient().getRetrieveRequestFactory().getEntitySetRequest(getTestContainer().getRequestUri()));
         LOG.info("OData Client Request being made to: " + uriString);
@@ -1018,9 +1017,12 @@ public class WebAPIServer_1_0_2 implements En {
       //reset local state each time a get request is run
       getTestContainer().resetState();
 
+      assertNotNull("ERROR: request Id cannot be null!", requestId);
+      getTestContainer().setRequest(getTestContainer().getSettings().getRequest(requestId));
       LOG.info("Request ID: " + requestId);
+
       getTestContainer().setRequestUri(Commander.prepareURI(Settings.resolveParameters(
-          getTestContainer().getSettings().getRequestById(requestId), getTestContainer().getSettings()).getUrl()));
+          getTestContainer().getSettings().getRequest(requestId), getTestContainer().getSettings()).getUrl()));
       LOG.info("Request URI: " + getTestContainer().getRequestUri().toString());
       getTestContainer().executePreparedGetRequest();
     } catch (Exception ex) {

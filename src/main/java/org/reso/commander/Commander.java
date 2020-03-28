@@ -15,6 +15,7 @@ import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.client.api.serialization.ODataSerializerException;
+import org.apache.olingo.client.api.uri.QueryOption;
 import org.apache.olingo.client.core.ODataClientFactory;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -38,7 +39,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 /**
- * URI
  * Most of the work done by the WebAPI commander is done by this class. Its public methods are, therefore,
  * the ones the Client programmer is expected to use.
  */
@@ -46,6 +46,9 @@ public class Commander {
   //TODO move to utils class
   public static final int OK = 0;
   public static final int NOT_OK = 1;
+  public static final String AMPERSAND = "&"; //TODO: find the corresponding query params constant for this
+  public static final String EQUALS = "="; //TODO: find the corresponding query params constant for this
+
   public static final Integer DEFAULT_PAGE_SIZE = 10;
   public static final Integer DEFAULT_PAGE_LIMIT = 1;
   public static final String REPORT_DIVIDER = "==============================================================";
@@ -53,8 +56,7 @@ public class Commander {
   public static final String RESOSCRIPT_EXTENSION = ".resoscript";
   public static final String EDMX_EXTENSION = ".xml";
   private static final Logger LOG = LogManager.getLogger(Commander.class);
-  private static final String EDM_4_0_3_XSD = "edm.4.0.3.xsd",
-      EDMX_4_0_3_XSD = "edmx.4.0.3.xsd";
+  private static final String EDM_4_0_3_XSD = "edm.4.0.3.xsd", EDMX_4_0_3_XSD = "edmx.4.0.3.xsd";
 
   private static String bearerToken;
   private static String clientId;
@@ -104,7 +106,7 @@ public class Commander {
   public static boolean validateXML(InputStream inputStream) {
     try {
       SAXParserFactory factory = SAXParserFactory.newInstance();
-      factory.setValidating(false); //turn off expectation for having DTD in DOCTYPE tag
+      factory.setValidating(false); //turn off expectation of having DTD in DOCTYPE tag
       factory.setNamespaceAware(true);
 
       factory.setSchema(SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(new StreamSource[]{
@@ -121,6 +123,7 @@ public class Commander {
         reader.parse(inputSource);
         return true;
       } catch (SAXException saxEx) {
+        LOG.error(saxEx);
         return false;
       }
     } catch (Exception ex) {
@@ -203,8 +206,8 @@ public class Commander {
       if (requestUri != null && requestUri.length() > 0 && preparedUri != null) {
         uriBuilder = new URIBuilder(preparedUri);
 
-        if (skip != null && skip > 0) uriBuilder.setParameter(ODATA_QUERY_OPTIONS.SKIP, skip.toString());
-        uriBuilder.setParameter(ODATA_QUERY_OPTIONS.TOP, pageSize == null || pageSize == 0 ? DEFAULT_PAGE_SIZE.toString() : pageSize.toString());
+        if (skip != null && skip > 0) uriBuilder.setParameter(QueryOption.SKIP.toString(), skip.toString());
+        uriBuilder.setParameter(QueryOption.TOP.toString(), pageSize == null || pageSize == 0 ? DEFAULT_PAGE_SIZE.toString() : pageSize.toString());
 
         URI uri = uriBuilder.build();
         LOG.debug("URI created: " + uri.toString());
@@ -637,14 +640,6 @@ public class Commander {
   }
 
   /**
-   * Constants for OData query parameters
-   */
-  public static final class ODATA_QUERY_OPTIONS {
-    public static final String TOP = "$top";
-    public static final String SKIP = "$skip";
-  }
-
-  /**
    * Error handler class for SAX parser
    */
   public static class SimpleErrorHandler implements ErrorHandler {
@@ -766,8 +761,7 @@ public class Commander {
       Commander.useEdmEnabledClient = this.useEdmEnabledClient;
 
       //items required for OAuth client
-      isOAuthClient =
-          clientId != null && clientId.length() > 0
+      isOAuthClient = clientId != null && clientId.length() > 0
               && clientSecret != null && clientSecret.length() > 0
               && tokenUri != null && tokenUri.length() > 0;
 
