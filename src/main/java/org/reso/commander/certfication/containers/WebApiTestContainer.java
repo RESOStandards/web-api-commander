@@ -92,6 +92,27 @@ public final class WebApiTestContainer implements TestContainer {
   private AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
   private AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
 
+  /**
+   * Resets the state of the test container
+   */
+  public void resetState() {
+    clientEntitySetRequest.set(null);
+    clientEntitySetResponse.set(null);
+    clientEntitySet.set(null);
+    oDataRawResponse.set(null);
+    request.set(null);
+    requestUri.set(null);
+    responseCode.set(null);
+    responseData.set(null);
+    initialResponseData.set(null);
+    rawRequest.set(null);
+    oDataClientErrorException.set(null);
+    oDataServerErrorException.set(null);
+    serverODataHeaderVersion.set(null);
+    selectList.set(null);
+    testAppliesToServerODataHeaderVersion.set(false);
+  }
+
   public void initialize() {
     setServiceRoot(getSettings().getClientSettings().get(ClientSettings.SERVICE_ROOT));
 
@@ -147,22 +168,6 @@ public final class WebApiTestContainer implements TestContainer {
   }
 
   /**
-   * Resets the state of the test container
-   */
-  public void resetState() {
-    oDataRawResponse.set(null);
-    request.set(null);
-    responseCode.set(null);
-    responseData.set(null);
-    initialResponseData.set(null);
-    rawRequest.set(null);
-    oDataClientErrorException.set(null);
-    oDataServerErrorException.set(null);
-    serverODataHeaderVersion.set(null);
-    testAppliesToServerODataHeaderVersion.set(false);
-  }
-
-  /**
    * Executes HTTP GET request and sets the expected local variables in the WebApiTestContainer
    * Handles exceptions and sets response codes as well.
    */
@@ -172,14 +177,14 @@ public final class WebApiTestContainer implements TestContainer {
       getRawRequest().setFormat(ContentType.JSON.toContentTypeString());
       setODataRawResponse(getRawRequest().execute());
       setResponseData(TestUtils.convertInputStreamToString(getODataRawResponse().getRawResponse()));
-      setServerODataHeaderVersion(getODataRawResponse().getHeader(HEADER_ODATA_VERSION).toString());
+      setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, getODataRawResponse()));
       setResponseCode(getODataRawResponse().getStatusCode());
       LOG.info("Request succeeded..." + getResponseData().getBytes().length + " bytes received.");
     } catch (ODataClientErrorException cex) {
       LOG.debug("ODataClientErrorException caught. Check tests for asserted conditions...");
       LOG.debug(cex);
       setODataClientErrorException(cex);
-      setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, cex.getHeaderInfo()));
+      setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, Arrays.asList(cex.getHeaderInfo())));
       setResponseCode(cex.getStatusLine().getStatusCode());
     } catch (ODataServerErrorException ode) {
       LOG.debug("ODataServerErrorException thrown in executeGetRequest. Check tests for asserted conditions...");
@@ -256,6 +261,7 @@ public final class WebApiTestContainer implements TestContainer {
     if (edm.get() == null) {
       ODataRetrieveResponse<Edm> response = getCommander().prepareEdmMetadataRequest().execute();
       responseCode.set(response.getStatusCode());
+      setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, response));
       edm.set(response.getBody());
     }
     return edm.get();
@@ -271,6 +277,7 @@ public final class WebApiTestContainer implements TestContainer {
     if (xmlMetadata.get() == null) {
       ODataRetrieveResponse<XMLMetadata> response = getCommander().prepareXMLMetadataRequest().execute();
       responseCode.set(response.getStatusCode());
+      setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, response));
       xmlMetadata.set(response.getBody());
     }
     return xmlMetadata.get();
@@ -361,7 +368,7 @@ public final class WebApiTestContainer implements TestContainer {
   }
 
   public String getServerODataHeaderVersion() {
-    return serverODataHeaderVersion.get();
+    return this.serverODataHeaderVersion.get();
   }
 
   public void setServerODataHeaderVersion(String serverODataHeaderVersion) {

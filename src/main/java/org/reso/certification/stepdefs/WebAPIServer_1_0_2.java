@@ -324,7 +324,7 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * GET request by requirementId (see generic.resoscript)
      */
-    When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", this::executeGetRequest);
+    When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", this::prepareAndExecuteGetRequest);
 
     /*
      * Assert response code
@@ -336,7 +336,13 @@ public class WebAPIServer_1_0_2 implements En {
 
         if (assertedResponseCode.intValue() != getTestContainer().getResponseCode().intValue()) {
           if (getTestContainer().getODataClientErrorException() != null) {
-            LOG.error("OData Client Exception: " + getTestContainer().getODataClientErrorException().getODataError().getMessage());
+            if (getTestContainer().getODataClientErrorException().getODataError().getMessage() != null) {
+              LOG.error("Request failed with the following message: "
+                  + getTestContainer().getODataClientErrorException().getODataError().getMessage());
+            } else if (getTestContainer().getODataClientErrorException() != null) {
+              LOG.error("Request failed with the following message: "
+                  + getTestContainer().getODataClientErrorException().getMessage());
+            }
           }
           fail("ERROR: asserted response code does not match the one returned from the server!");
         }
@@ -377,7 +383,7 @@ public class WebAPIServer_1_0_2 implements En {
      *
      * TODO: make a general Header assertion function
      */
-    Then("^the server responds with a status code of (\\d+) if the server headers report OData version \"([^\"]*)\"$", (Integer assertedHttpResponseCode, String assertedODataVersion) -> {
+    Then("^the server responds with a status code of (\\d+) if the server reports OData-Version \"([^\"]*)\"$", (Integer assertedHttpResponseCode, String assertedODataVersion) -> {
       try {
         boolean versionsMatch = getTestContainer().getServerODataHeaderVersion().equals(assertedODataVersion),
             responseCodesMatch = getTestContainer().getResponseCode().intValue() == assertedHttpResponseCode.intValue();
@@ -387,6 +393,8 @@ public class WebAPIServer_1_0_2 implements En {
         if (versionsMatch) {
           LOG.info("Asserted Response Code: " + assertedHttpResponseCode + ", Response code: " + getTestContainer().getResponseCode());
           assertTrue("ERROR: asserted response code does not match the one returned from the server!", responseCodesMatch);
+        } else {
+          LOG.info("Test skipped! Only applies when the asserted version matches the reported server version.");
         }
       } catch (Exception ex) {
         //Don't fail tests like in other cases because get requests may generate exceptions that we want to
@@ -428,8 +436,8 @@ public class WebAPIServer_1_0_2 implements En {
     And("^the response has results$", () -> {
       try {
         int count = from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).size();
+        assertTrue("ERROR: no results were found in the '" + JSON_VALUE_PATH + "' path of the JSON response!", count > 0);
         LOG.info("Results count is: " + count);
-        assertTrue("ERROR: no results returned from the server!", count > 0);
       } catch (Exception ex) {
         fail(ex.toString());
       }
@@ -782,7 +790,7 @@ public class WebAPIServer_1_0_2 implements En {
         LOG.info("Searching metadata for fields in given select list: " + getTestContainer().getSelectList().toString());
         getTestContainer().getSelectList().forEach(fieldName -> {
           //need to skip the expand field when looking through the metadata
-          if (!fieldName.contentEquals(getTestContainer().getExpandField())) {
+          if (getTestContainer().getExpandField() == null || !fieldName.contentEquals(getTestContainer().getExpandField())) {
             assertNotNull("ERROR: Field name '" + fieldName + "' is not present in server metadata!", getTestContainer().getCsdlForFieldName(fieldName));
             LOG.info("Found: '" + fieldName.trim() + "'");
           }
@@ -1015,12 +1023,32 @@ public class WebAPIServer_1_0_2 implements En {
         });
       }
     });
+
+    /*
+     * Ensures that the server reports one of the currently supported version headers, being 4.0 or 4.01 at the time of writing
+     * TODO: add additional items for additional subsequent OData versions, as released
+     */
+    And("^the server has an OData-Version header value of \"([^\"]*)\" or \"([^\"]*)\"$", (String val1, String val2) -> {
+      assertNotNull("ERROR: must enter a first value", val1);
+      assertNotNull("ERROR: must enter a second value", val2);
+
+      assertNotNull("ERROR: must specify an 'OData-Version' in the response header!"
+          + "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Toc453752225" ,
+          getTestContainer().getServerODataHeaderVersion());
+
+      LOG.info("Reported OData-Version header value: '" + getTestContainer().getServerODataHeaderVersion() + "'");
+
+      assertTrue("ERROR: the 'OData-Version' response header must either be '" + val1 + "' or '" + val2 + "' (without quotes).",
+          getTestContainer().getServerODataHeaderVersion().contentEquals(val1)
+              || getTestContainer().getServerODataHeaderVersion().contentEquals(val2) );
+    });
+
   }
 
   /*
    * Execute Get Request Wrapper
    */
-  void executeGetRequest(String requestId) {
+  void prepareAndExecuteGetRequest(String requestId) {
     try {
       //reset local state each time a get request is run
       getTestContainer().resetState();
@@ -1029,9 +1057,12 @@ public class WebAPIServer_1_0_2 implements En {
       getTestContainer().setRequest(getTestContainer().getSettings().getRequest(requestId));
       LOG.info("Request ID: " + requestId);
 
+      //prepare request URI
       getTestContainer().setRequestUri(Commander.prepareURI(Settings.resolveParameters(
           getTestContainer().getSettings().getRequest(requestId), getTestContainer().getSettings()).getUrl()));
       LOG.info("Request URI: " + getTestContainer().getRequestUri().toString());
+
+      //execute request
       getTestContainer().executePreparedGetRequest();
     } catch (Exception ex) {
       LOG.debug("Exception was thrown in " + this.getClass() + ": " + ex.toString());
