@@ -5,6 +5,7 @@ import org.apache.http.Header;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
+import org.apache.olingo.client.api.communication.response.ODataResponse;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
@@ -27,9 +28,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.Year;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.restassured.path.json.JsonPath.from;
@@ -319,7 +318,13 @@ public final class TestUtils {
     return convertInputStreamToString(oDataRawResponse.getRawResponse());
   }
 
-  public static String getHeaderData(String key, Header[] headers) {
+  /**
+   * Helper method to find headers with a given key in an an array of headers
+   * @param key the header to get
+   * @param headers an array containing Header objects
+   * @return the value of the header with key, or null
+   */
+  public static String getHeaderData(String key, Collection<Header> headers) {
     String data = null;
 
     for (Header header : headers) {
@@ -328,6 +333,24 @@ public final class TestUtils {
       }
     }
     return data;
+  }
+
+  /**
+   * Helper method to unpack headers from a raw OData response
+   * @param key the header to get
+   * @param oDataResponse the OData raw response from the request
+   * @return the value of the header with key, or null
+   */
+  public static String getHeaderData(String key, ODataResponse oDataResponse) {
+    if (key == null || oDataResponse.getHeader(key) == null) return null;
+    ArrayList<String> result = new ArrayList<>(oDataResponse.getHeader(key));
+
+    if (result.size() > 0) {
+      return result.get(0);
+    } else {
+      return null;
+    }
+
   }
 
   /**
