@@ -891,11 +891,12 @@ public class WebAPIServer_1_0_2 implements En {
         if (showResponses) LOG.info("\nRecord #" + counter.getAndIncrement());
 
         clientEntity.getProperties().forEach(clientProperty -> {
-          assertNotNull("ERROR: field name cannot be null!", clientProperty.getName());
-          assertNotNull("ERROR: data type could not be found for " + clientProperty.getName() + "! "
-              + "\nCheck the NavigationProperty for your $expand field.", clientProperty.getValue().getTypeName());
           if (clientProperty.getName().equals(expandField)) {
-            assertNotNull("ERROR: '" + parameterExpandField + "' contains no data!", clientProperty.getValue());
+          // There may be nothing to expand, empty or null is a valid result
+            if (clientProperty.hasNullValue()) return;
+
+            assertNotNull("ERROR: data type could not be found for " + clientProperty.getName() + "! "
+              + "\nCheck the NavigationProperty for your $expand field.", clientProperty.getValue().getTypeName());
 
             LOG.info("\tExpanded Field Name: " + expandField);
             clientProperty.getValue().asComplex().forEach(expandedClientProperty -> {
