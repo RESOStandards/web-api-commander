@@ -811,7 +811,6 @@ public class WebAPIServer_1_0_2 implements En {
         getTestContainer().setResponseCode(cex.getStatusLine().getStatusCode());
         fail(cex.toString());
       } catch (IllegalArgumentException aex) {
-        if (showResponses) LOG.info("Invalid Metadata Retrieved: " + getTestContainer().getODataClientErrorException());
         fail("ERROR: " + aex.toString() + "\n"
             + (aex.getCause() != null && aex.getCause().getLocalizedMessage() != null ? aex.getCause().getLocalizedMessage() : ""));
       } catch (Exception ex) {
