@@ -158,27 +158,6 @@ public class WebAPIServer_1_0_2 implements En {
       }
     });
 
-//    /*
-//     * XMLMetadata Validator
-//     */
-//    And("^the XML metadata returned by the server are valid$", () -> {
-//      assertNotNull("ERROR: No Response Data exists to convert to XML Metadata!", getTestContainer().responseData.get());
-//
-//      try {
-//        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(getTestContainer().responseData.get().getBytes());
-//        xmlMetadata.set(getTestContainer().commander.get().getClient().getDeserializer(ContentType.APPLICATION_XML).toMetadata(byteArrayInputStream));
-//
-//        if (showResponses) LOG.info("XML Metadata is: \n" + getTestContainer().responseData.get());
-//
-//        boolean isValid = getTestContainer().commander.get().validateMetadata(getTestContainer().getXmlMetadata());
-//        LOG.info("XML Metadata is " + (isValid ? "valid" : "invalid") + "!");
-//        assertTrue("ERROR: XML Metadata at the given service root is not valid! " + serviceRoot, isValid);
-//      } catch (Exception ex) {
-//        fail("ERROR: could not validate XML Metadata!\n" + ex.toString());
-//      }
-//    });
-
-
     /*
      * REQ-WA103-QR1
      */
@@ -420,6 +399,7 @@ public class WebAPIServer_1_0_2 implements En {
 
         //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
         from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+          assertNotNull("ERROR: '" + fieldName + "' cannot be null!", item.get(fieldName));
           fieldValue.set(Integer.parseInt(item.get(fieldName).toString()));
           result.set(result.get() && TestUtils.compare(fieldValue.get(), op, assertedValue));
         });
@@ -830,6 +810,10 @@ public class WebAPIServer_1_0_2 implements En {
       } catch (ODataClientErrorException cex) {
         getTestContainer().setResponseCode(cex.getStatusLine().getStatusCode());
         fail(cex.toString());
+      } catch (IllegalArgumentException aex) {
+        if (showResponses) LOG.info("Invalid Metadata Retrieved: " + getTestContainer().getODataClientErrorException());
+        fail("ERROR: " + aex.toString() + "\n"
+            + (aex.getCause() != null && aex.getCause().getLocalizedMessage() != null ? aex.getCause().getLocalizedMessage() : ""));
       } catch (Exception ex) {
         fail(ex.toString());
       }

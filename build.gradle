@@ -91,8 +91,7 @@ task testWebApiServer_1_0_2_Gold() {
           'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
           'src/main/java/org/reso/certification/features/web-api',
           '--tags',
-          'not @platinum'
-              + (systemProperties.get('cucumber.filter.tags') != null ? ' and ' + systemProperties.get('cucumber.filter.tags') : '')
+          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0 ? 'not @platinum and ' + systemProperties.get('cucumber.filter.tags') : 'not @platinum')
       ]
     }
   }
@@ -142,8 +141,7 @@ task testDataDictionary_1_5() {
           'org.reso.certification.stepdefs#DataDictionary',
           'src/main/java/org/reso/certification/features/data-dictionary',
           '--tags',
-          '@DD1.5'
-              + (systemProperties.get('cucumber.filter.tags') != null ? ' and ' + systemProperties.get('cucumber.filter.tags') : '')
+          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0 ? '@DD1.5 and ' + systemProperties.get('cucumber.filter.tags') : '@DD1.5')
       ]
     }
   }
@@ -169,8 +167,7 @@ task testDataDictionary_1_6() {
           'org.reso.certification.stepdefs#DataDictionary',
           'src/main/java/org/reso/certification/features/data-dictionary',
           '--tags',
-          '@DD1.6'
-              + (systemProperties.get('cucumber.filter.tags') != null ? ' and ' + systemProperties.get('cucumber.filter.tags') : '')
+          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0 ? '@DD1.6 and ' + systemProperties.get('cucumber.filter.tags') : '@DD1.6')
       ]
     }
   }

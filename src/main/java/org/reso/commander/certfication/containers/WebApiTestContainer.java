@@ -26,8 +26,7 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.reso.commander.Commander.AMPERSAND;
 import static org.reso.commander.Commander.EQUALS;
 import static org.reso.commander.TestUtils.HEADER_ODATA_VERSION;
@@ -43,6 +42,21 @@ public final class WebApiTestContainer implements TestContainer {
   public static final String SINGLE_SPACE = " ";
   public static final String DOLLAR_SIGN = "$";
   public static final String PRETTY_FIELD_SEPARATOR = FIELD_SEPARATOR + SINGLE_SPACE;
+
+  public Map<String, CsdlProperty> getFieldMap() {
+    if (fieldMap.get() == null) {
+      fieldMap.set(new HashMap<>());
+
+      LOG.info("Building Field Map...this may take a moment depending on size of metadata and connection speed.");
+      //build a map of all of the discovered fields on the server for the given resource by field name
+      //this can also be used to look up type information
+      TestUtils.findEntityTypesForEntityTypeName(getEdm(), getXMLMetadata(), getSettings().getParameters().getValue(Parameters.WELL_KNOWN.RESOURCE_NAME))
+          .forEach(csdlProperty -> fieldMap.get().put(csdlProperty.getName(), csdlProperty));
+      assertTrue("ERROR: No field were found in the server's metatdata!", fieldMap.get().size() > 0);
+      LOG.info("Metadata Field Map created!");
+    }
+    return fieldMap.get();
+  }
 
   public static final class ODATA_QUERY_PARAMS {
       private static String format = DOLLAR_SIGN + "%s";
@@ -72,7 +86,7 @@ public final class WebApiTestContainer implements TestContainer {
   private AtomicReference<String> redirectUri = new AtomicReference<>();
   private AtomicReference<String> scope = new AtomicReference<>();
   private AtomicReference<String> pathToRESOScript = new AtomicReference<>();
-  private AtomicReference<Map<String, CsdlProperty>> fieldMap = new AtomicReference<>(new HashMap<>());
+  private AtomicReference<Map<String, CsdlProperty>> fieldMap = new AtomicReference<>();
 
 
   // request instance variables - these get reset with every request
@@ -143,11 +157,6 @@ public final class WebApiTestContainer implements TestContainer {
           .useEdmEnabledClient(shouldUseEdmClient())
           .build());
     }
-
-    //build a map of all of the discovered fields on the server for the given resource by field name
-    //this can also be used to look up type information
-    TestUtils.findEntityTypesForEntityTypeName(getEdm(), getXMLMetadata(), getSettings().getParameters().getValue(Parameters.WELL_KNOWN.RESOURCE_NAME))
-        .forEach(csdlProperty -> fieldMap.get().put(csdlProperty.getName(), csdlProperty));
   }
 
   /**
@@ -205,7 +214,7 @@ public final class WebApiTestContainer implements TestContainer {
    * @return the metadata for the given field
    */
   public CsdlProperty getCsdlForFieldName(String fieldName) {
-    return fieldMap.get().get(fieldName);
+    return getFieldMap().get(fieldName);
   }
 
   /**
@@ -214,7 +223,7 @@ public final class WebApiTestContainer implements TestContainer {
    * @return gets the local collection of Csdl Properties
    */
   public Collection<CsdlProperty> getCsdlProperties() {
-    return fieldMap.get().values();
+    return getFieldMap().values();
   }
 
   public Collection<String> getSelectList() {
@@ -255,7 +264,7 @@ public final class WebApiTestContainer implements TestContainer {
    * Gets server metadata in Edm format.
    *
    * @return
-   * @implNote the data in this item are cached in the commander once fetched
+   * @implNote the data in this item are cached in the test container once fetched
    */
   public Edm getEdm() {
     if (edm.get() == null) {
@@ -271,7 +280,7 @@ public final class WebApiTestContainer implements TestContainer {
    * Gets server metadata in XMLMetadata format.
    *
    * @return XMLMetadata representation of the server metadata.
-   * @implNote the data in this item are cached in the commander once fetched
+   * @implNote the data in this item are cached in the test container once fetched
    */
   public XMLMetadata getXMLMetadata() {
     if (xmlMetadata.get() == null) {

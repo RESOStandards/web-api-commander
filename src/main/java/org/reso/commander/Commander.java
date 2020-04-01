@@ -56,7 +56,7 @@ public class Commander {
   public static final String RESOSCRIPT_EXTENSION = ".resoscript";
   public static final String EDMX_EXTENSION = ".xml";
   private static final Logger LOG = LogManager.getLogger(Commander.class);
-  private static final String EDM_4_0_3_XSD = "edm.4.0.3.xsd", EDMX_4_0_3_XSD = "edmx.4.0.3.xsd";
+  private static final String EDM_4_0_3_XSD = "edm.4.0.errata03.xsd", EDMX_4_0_3_XSD = "edmx.4.0.errata03.xsd";
 
   private static String bearerToken;
   private static String clientId;
@@ -267,18 +267,7 @@ public class Commander {
             .append(edmEnumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString())
             .append(")");
 
-        edmEnumType.getMemberNames().forEach(n -> {
-          reportBuilder
-            .append("\n\tName: ").append(n);
-
-          if (edmEnumType.getMember(n).getAnnotations().size() > 0) {
-            reportBuilder
-                .append("\n\tAnnotations: ")
-                .append(edmEnumType.getMember(n).getAnnotations().toString())
-                .append("\n\n");
-          }
-
-        });
+        edmEnumType.getMemberNames().forEach(n -> reportBuilder.append("\n\tName: ").append(n));
       });
 
       schema.getComplexTypes().forEach(a ->
@@ -450,9 +439,14 @@ public class Commander {
    */
   public boolean validateMetadata(InputStream inputStream) {
     try {
-      // deserialize metadata from given file
-      XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).toMetadata(inputStream);
-      return validateMetadata(metadata);
+      String xmlString = TestUtils.convertInputStreamToString(inputStream);
+
+      //require the XML Document to be valid XML before trying to validate it with the OData validator
+      if (validateXML(xmlString)) {
+        // deserialize metadata from given file
+        XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).toMetadata(new ByteArrayInputStream(xmlString.getBytes()));
+        return validateMetadata(metadata);
+      }
     } catch (Exception ex) {
       LOG.error("ERROR in validateMetadata! " + ex.toString());
     }
