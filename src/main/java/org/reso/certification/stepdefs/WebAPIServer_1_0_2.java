@@ -28,6 +28,7 @@ import org.reso.models.Settings;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
@@ -415,9 +416,9 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the response has results$", () -> {
       try {
-        int count = from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).size();
-        assertTrue("ERROR: no results were found in the '" + JSON_VALUE_PATH + "' path of the JSON response!", count > 0);
-        LOG.info("Results count is: " + count);
+        assertTrue("ERROR: no results were found in the '" + JSON_VALUE_PATH + "' path of the JSON response!",
+            from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, Map.class).size() > 0);
+        LOG.info("Results count is: " + from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, Map.class).get(0).size());
       } catch (Exception ex) {
         fail(ex.toString());
       }
@@ -811,10 +812,30 @@ public class WebAPIServer_1_0_2 implements En {
         getTestContainer().setResponseCode(cex.getStatusLine().getStatusCode());
         fail(cex.toString());
       } catch (IllegalArgumentException aex) {
-        fail("ERROR: " + aex.toString() + "\n"
-            + (aex.getCause() != null && aex.getCause().getLocalizedMessage() != null ? aex.getCause().getLocalizedMessage() : ""));
+
+        try {
+          StringWriter xmlStringWriter = new StringWriter();
+          String xmlString = getTestContainer().getCommander()
+              .executeRawRequest(Settings.resolveParameters(getTestContainer().getSettings().getRequest(Request.WELL_KNOWN.METADATA_ENDPOINT), getTestContainer().getSettings())
+                  .getUrl());
+
+          if (!validateXML(xmlString)) {
+            if (!xmlString.startsWith("<?xml")) {
+              fail("ERROR: XML Response missing opening XML tag.\n"
+                  + "\tTry adding: '<?xml version=\"1.0\" encoding=\"utf-8?\">' to your XML document");
+            }
+          } else {
+            fail("ERROR: " + aex.toString() + "\n"
+                + (aex.getCause() != null && aex.getCause().getLocalizedMessage() != null
+                ? aex.getCause().getLocalizedMessage() : EMPTY_STRING));
+          }
+
+        } catch (Exception inner) {
+          fail("ERROR: " + inner.toString());
+        }
+
       } catch (Exception ex) {
-        fail(ex.toString());
+        fail("ERROR: "+ ex.toString());
       }
     });
 

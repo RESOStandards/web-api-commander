@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.communication.request.retrieve.EdmMetadataRequest;
+import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.XMLMetadataRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
@@ -529,6 +530,25 @@ public class Commander {
       System.exit(NOT_OK);
     }
     return responseCode;
+  }
+
+  /**
+   * Executes a raw OData request in the current commander instance without trying to intepret the results
+   * @param requestUri the URI to make the request to
+   * @return a string containing the serialized response, or null
+   */
+  public String executeRawRequest(String requestUri) {
+    String data = null;
+    if (requestUri != null) {
+      try {
+        ODataRawRequest request = getClient().getRetrieveRequestFactory().getRawRequest(URI.create(requestUri));
+        ODataRawResponse response = request.execute();
+        data = TestUtils.convertInputStreamToString(response.getRawResponse());
+      } catch (Exception ex) {
+        LOG.error(ex);
+      }
+    }
+    return data;
   }
 
   /**

@@ -16,7 +16,8 @@ Feature: Web API Server 1.0.2 Certification
   #######################################
   @REQ-WA103-END3 @core @2.4.1 @core-endorsement @metadata
   Scenario: REQ-WA103-END3 - Request and Validate Server Metadata
-    When XML Metadata are requested from the service root in "ClientSettings_WebAPIURI"
+    When the given "Parameter_EndpointResource" resource exists within "Parameter_DD17_WellKnownResourceList"
+    And XML Metadata are requested from the service root in "ClientSettings_WebAPIURI"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the XML metadata returned by the server are valid
@@ -26,7 +27,6 @@ Feature: Web API Server 1.0.2 Certification
     And the Edm metadata returned by the server are valid
     And the metadata contains a valid service document
     And the metadata contains the "Parameter_EndpointResource" resource
-    And the given "Parameter_EndpointResource" resource exists within "Parameter_DD17_WellKnownResourceList"
     And the metadata contains at least one resource from "Parameter_WebAPI102_RequiredResourceList"
 
   @REQ-WA103-END2 @core @2.4.1 @core-endorsement @datasystem

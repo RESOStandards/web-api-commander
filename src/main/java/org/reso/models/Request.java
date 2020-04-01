@@ -237,4 +237,9 @@ public class Request {
     static final String URL = "Url";
     static final String REQUEST_ID = "RequestId";
   }
+
+  public static final class WELL_KNOWN {
+    public static final String
+      METADATA_ENDPOINT = "REQ-WA103-END3";
+  }
 }
