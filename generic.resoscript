@@ -196,7 +196,7 @@
 
     <!-- Platinum - GeoSpatial query values -->
     <Parameter Name="GeoSpatialDistanceValue" Value="1000" />
-    <Parameter Name="SRID" Value="0" />
+    <Parameter Name="SRID" Value="4326" />
 
 
     <!--
