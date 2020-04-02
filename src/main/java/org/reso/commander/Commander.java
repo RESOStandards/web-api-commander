@@ -110,15 +110,13 @@ public class Commander {
       XMLReader reader = parser.getXMLReader();
       reader.setErrorHandler(new SimpleErrorHandler());
       InputSource inputSource = new InputSource(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
-      try {
-        if (inputSource != null) {
-          reader.parse(inputSource);
-          return true;
-        }
-      } catch (SAXException saxEx) {
-        if (saxEx.getMessage() != null) {
-          LOG.error(saxEx);
-        }
+
+      reader.parse(inputSource);
+      return true;
+
+    } catch (SAXException saxEx) {
+      if (saxEx.getMessage() != null) {
+        LOG.error(saxEx);
       }
     } catch (Exception ex) {
       LOG.error(ex);
