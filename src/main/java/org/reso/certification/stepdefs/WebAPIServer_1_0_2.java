@@ -51,7 +51,7 @@ import static org.reso.commander.certfication.containers.WebApiTestContainer.*;
 public class WebAPIServer_1_0_2 implements En {
   private static final Logger LOG = LogManager.getLogger(WebAPIServer_1_0_2.class);
   private static final String SHOW_RESPONSES = "showResponses";
-  private static final String XML_DOC_STRING = "<?xml version=\"1.0\" encoding=\"utf-8?\">";
+  private static final String XML_DOC_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>";
 
 
   //extract any params here

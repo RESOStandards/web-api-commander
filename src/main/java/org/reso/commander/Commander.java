@@ -36,6 +36,7 @@ import javax.xml.validation.SchemaFactory;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -78,16 +79,6 @@ public class Commander {
   }
 
   /**
-   * Uses an XML validator to validate that the given string contains valid XML.
-   *
-   * @param xmlString the string containing the XML to validate.
-   * @return true if the given xmlString is valid and false otherwise.
-   */
-  public static boolean validateXML(String xmlString) {
-    return validateXML(new ByteArrayInputStream(xmlString.getBytes()));
-  }
-
-  /**
    * Validates XML for the given xmlMetadata item
    *
    * @param xmlMetadata the XML metadata to validate
@@ -99,12 +90,12 @@ public class Commander {
   }
 
   /**
-   * Uses an XML validator to validate that the given inputStream contains valid XML.
+   * Uses an XML validator to validate that the given string contains valid XML.
    *
-   * @param inputStream the input stream to check.
-   * @return true if the given inputStream has valid XML, false otherwise.
+   * @param xmlString the string containing the XML to validate.
+   * @return true if the given xmlString is valid and false otherwise.
    */
-  public static boolean validateXML(InputStream inputStream) {
+  public static boolean validateXML(final String xmlString) {
     try {
       SAXParserFactory factory = SAXParserFactory.newInstance();
       factory.setValidating(false); //turn off expectation of having DTD in DOCTYPE tag
@@ -118,14 +109,16 @@ public class Commander {
       SAXParser parser = factory.newSAXParser();
       XMLReader reader = parser.getXMLReader();
       reader.setErrorHandler(new SimpleErrorHandler());
-      InputSource inputSource = new InputSource();
-      inputSource.setByteStream(inputStream);
+      InputSource inputSource = new InputSource(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
       try {
-        reader.parse(inputSource);
-        return true;
+        if (inputSource != null) {
+          reader.parse(inputSource);
+          return true;
+        }
       } catch (SAXException saxEx) {
-        LOG.error(saxEx);
-        return false;
+        if (saxEx.getMessage() != null) {
+          LOG.error(saxEx);
+        }
       }
     } catch (Exception ex) {
       LOG.error(ex);
@@ -446,7 +439,13 @@ public class Commander {
       if (validateXML(xmlString)) {
         // deserialize metadata from given file
         XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).toMetadata(new ByteArrayInputStream(xmlString.getBytes()));
-        return validateMetadata(metadata);
+        if (metadata != null) {
+          return validateMetadata(metadata);
+        } else {
+          LOG.error("ERROR: no valid metadata was found!");
+          return false;
+        }
+
       }
     } catch (Exception ex) {
       LOG.error("ERROR in validateMetadata! " + ex.toString());
@@ -462,10 +461,9 @@ public class Commander {
    */
   public boolean validateMetadata(String pathToEdmx) {
     try {
-      // deserialize metadata from given file
       return validateMetadata(new FileInputStream(pathToEdmx));
     } catch (Exception ex) {
-      LOG.error("Error occurred while validating metadata.\nPath was:" + pathToEdmx);
+      LOG.error("ERROR: could not validate metadata.\nPath was:" + pathToEdmx);
       LOG.error(ex.getMessage());
     }
     return false;

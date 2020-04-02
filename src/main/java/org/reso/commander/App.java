@@ -273,13 +273,16 @@ public class App {
      *    See Commander#validateMetadata for more info.
      */
     LOG.info("Checking Metadata for validity...");
-    if (commander.validateMetadata(inputFilename)) {
-      LOG.info("Valid Metadata!");
-      return true;
-    } else {
-      LOG.error("Invalid Metadata!");
-      return false;
+    try {
+      if (commander.validateMetadata(inputFilename)) {
+        LOG.info("Valid Metadata!");
+        return true;
+      }
+    } catch (Exception ex) {
+      LOG.error(ex);
     }
+    LOG.error("Invalid Metadata!");
+    return false;
   }
 
   /**
