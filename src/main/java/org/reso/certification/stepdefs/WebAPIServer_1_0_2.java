@@ -28,7 +28,6 @@ import org.reso.models.Settings;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
@@ -44,6 +43,7 @@ import static org.reso.commander.Commander.*;
 import static org.reso.commander.TestUtils.*;
 import static org.reso.commander.TestUtils.Operators.*;
 import static org.reso.commander.certfication.containers.WebApiTestContainer.*;
+import static org.reso.common.ErrorMsg.getDefaultErrorMessage;
 
 /**
  * Contains the glue code for the Web API Server 1.0.2 Platinum Certification
@@ -51,7 +51,6 @@ import static org.reso.commander.certfication.containers.WebApiTestContainer.*;
 public class WebAPIServer_1_0_2 implements En {
   private static final Logger LOG = LogManager.getLogger(WebAPIServer_1_0_2.class);
   private static final String SHOW_RESPONSES = "showResponses";
-  private static final String XML_DOC_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>";
 
 
   //extract any params here
@@ -328,7 +327,7 @@ public class WebAPIServer_1_0_2 implements En {
                   + getTestContainer().getODataClientErrorException().getMessage());
             }
           }
-          fail("ERROR: asserted response code does not match the one returned from the server!");
+          fail("ERROR: asserted response code (" + assertedResponseCode + ") does not match the one returned from the server (" + getTestContainer().getResponseCode()+ ")!");
         }
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex.toString()));
@@ -340,7 +339,7 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the response is valid XML$", () -> {
       try {
-        assertTrue("ERROR: invalid XML response!", Commander.validateXML(getTestContainer().getXMLMetadata()));
+        assertTrue("ERROR: invalid XML response!", Commander.validateXML(getTestContainer().getResponseData()));
         LOG.info("Response is valid XML!");
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex.toString()));
@@ -816,28 +815,7 @@ public class WebAPIServer_1_0_2 implements En {
         getTestContainer().setResponseCode(cex.getStatusLine().getStatusCode());
         fail(cex.toString());
       } catch (IllegalArgumentException aex) {
-
-        try {
-          StringWriter xmlStringWriter = new StringWriter();
-          String xmlString = getTestContainer().getCommander()
-              .executeRawRequest(Settings.resolveParameters(getTestContainer().getSettings().getRequest(Request.WELL_KNOWN.METADATA_ENDPOINT), getTestContainer().getSettings())
-                  .getUrl());
-
-          if (!validateXML(xmlString)) {
-            if (!xmlString.startsWith("<?xml")) {
-              fail("ERROR: XML Response missing opening XML tag.\n"
-                  + "\tTry adding: '" + XML_DOC_STRING + "' to your XML document");
-            }
-          } else {
-            fail("ERROR: " + aex.toString() + "\n"
-                + (aex.getCause() != null && aex.getCause().getLocalizedMessage() != null
-                ? aex.getCause().getLocalizedMessage() : EMPTY_STRING));
-          }
-
-        } catch (Exception inner) {
-          fail("ERROR: " + inner.toString());
-        }
-
+        fail(getDefaultErrorMessage(aex.toString()));
       } catch (Exception ex) {
         fail("ERROR: "+ ex.toString());
       }
@@ -1075,15 +1053,6 @@ public class WebAPIServer_1_0_2 implements En {
     } catch (Exception ex) {
       LOG.debug("Exception was thrown in " + this.getClass() + ": " + ex.toString());
     }
-  }
-
-  private static final String ERROR_MESSAGE_TEMPLATE = "ERROR: %s";
-  private static String formatErrorMessage(final String template, final String... msgs) {
-    return String.format(template, (Object) msgs);
-  }
-
-  private static String getDefaultErrorMessage(final String msg) {
-    return formatErrorMessage(ERROR_MESSAGE_TEMPLATE, msg);
   }
 
   static WebApiTestContainer getTestContainer() {

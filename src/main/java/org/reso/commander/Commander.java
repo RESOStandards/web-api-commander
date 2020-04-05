@@ -45,7 +45,8 @@ import java.util.function.Function;
  * the ones the Client programmer is expected to use.
  */
 public class Commander {
-  //TODO move to utils class
+  private static final Logger LOG = LogManager.getLogger(Commander.class);
+
   public static final int OK = 0;
   public static final int NOT_OK = 1;
   public static final String AMPERSAND = "&"; //TODO: find the corresponding query params constant for this
@@ -57,7 +58,7 @@ public class Commander {
   public static final String REPORT_DIVIDER_SMALL = "===========================";
   public static final String RESOSCRIPT_EXTENSION = ".resoscript";
   public static final String EDMX_EXTENSION = ".xml";
-  private static final Logger LOG = LogManager.getLogger(Commander.class);
+
   private static final String EDM_4_0_3_XSD = "edm.4.0.errata03.xsd", EDMX_4_0_3_XSD = "edmx.4.0.errata03.xsd";
 
   private static String bearerToken;
@@ -102,8 +103,8 @@ public class Commander {
       factory.setNamespaceAware(true);
 
       factory.setSchema(SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(new StreamSource[]{
-          new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream(EDM_4_0_3_XSD)),
-          new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream(EDMX_4_0_3_XSD))
+        new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream(EDM_4_0_3_XSD)),
+        new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream(EDMX_4_0_3_XSD))
       }));
 
       SAXParser parser = factory.newSAXParser();
@@ -113,7 +114,6 @@ public class Commander {
 
       reader.parse(inputSource);
       return true;
-
     } catch (SAXException saxEx) {
       if (saxEx.getMessage() != null) {
         LOG.error(saxEx);
@@ -433,6 +433,8 @@ public class Commander {
     try {
       String xmlString = TestUtils.convertInputStreamToString(inputStream);
 
+      if (xmlString == null) return false;
+
       //require the XML Document to be valid XML before trying to validate it with the OData validator
       if (validateXML(xmlString)) {
         // deserialize metadata from given file
@@ -443,7 +445,6 @@ public class Commander {
           LOG.error("ERROR: no valid metadata was found!");
           return false;
         }
-
       }
     } catch (Exception ex) {
       LOG.error("ERROR in validateMetadata! " + ex.toString());
