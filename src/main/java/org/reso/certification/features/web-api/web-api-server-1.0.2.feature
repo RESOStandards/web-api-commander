@@ -19,7 +19,7 @@ Feature: Web API Server 1.0.2 Certification
     When XML Metadata are requested from the service root in "ClientSettings_WebAPIURI"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
-    And the response is valid XML
+    And the XML Metadata response is valid XML
     And the XML metadata returned by the server are valid
     And Edm metadata are requested from the service root in "ClientSettings_WebAPIURI"
     Then the server responds with a status code of 200

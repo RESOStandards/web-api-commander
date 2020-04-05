@@ -61,6 +61,10 @@ public final class WebApiTestContainer implements TestContainer {
     return fieldMap.get();
   }
 
+  public String getXMLResponseData() {
+    return xmlResponseData.get();
+  }
+
   public static final class ODATA_QUERY_PARAMS {
       private static String format = DOLLAR_SIGN + "%s";
 
@@ -90,6 +94,7 @@ public final class WebApiTestContainer implements TestContainer {
   private AtomicReference<String> scope = new AtomicReference<>();
   private AtomicReference<String> pathToRESOScript = new AtomicReference<>();
   private AtomicReference<Map<String, CsdlProperty>> fieldMap = new AtomicReference<>();
+  private AtomicReference<String> xmlResponseData = new AtomicReference<>();
 
 
   // request instance variables - these get reset with every request
@@ -300,11 +305,11 @@ public final class WebApiTestContainer implements TestContainer {
         request.setFormat(ContentType.JSON.toContentTypeString());
 
         ODataRawResponse response = request.execute();
-        responseData.set(TestUtils.convertInputStreamToString(response.getRawResponse()));
+        xmlResponseData.set(TestUtils.convertInputStreamToString(response.getRawResponse()));
 
         //deserialize response into XML Metadata - will throw an exception if metadata are in valid
         XMLMetadata metadata = getCommander().getClient().getDeserializer(ContentType.APPLICATION_XML)
-            .toMetadata(new ByteArrayInputStream(responseData.get().getBytes(StandardCharsets.UTF_8)));
+            .toMetadata(new ByteArrayInputStream(xmlResponseData.get().getBytes(StandardCharsets.UTF_8)));
 
         responseCode.set(response.getStatusCode());
         setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, response));

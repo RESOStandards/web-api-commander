@@ -43,6 +43,7 @@ import static org.reso.commander.Commander.*;
 import static org.reso.commander.TestUtils.*;
 import static org.reso.commander.TestUtils.Operators.*;
 import static org.reso.commander.certfication.containers.WebApiTestContainer.*;
+import static org.reso.common.ErrorMsg.getAssertResponseCodeErrorMessage;
 import static org.reso.common.ErrorMsg.getDefaultErrorMessage;
 
 /**
@@ -127,7 +128,7 @@ public class WebAPIServer_1_0_2 implements En {
             LOG.info("DataSystem response matches reference schema!");
           }
         } catch (Exception ex) {
-          fail(getDefaultErrorMessage(ex.toString()));
+          fail(getDefaultErrorMessage(ex));
         }
       }
     });
@@ -187,7 +188,7 @@ public class WebAPIServer_1_0_2 implements En {
           assertEquals("ERROR: the given String value is not equal to the value found on the server!", expectedValueAsString, resolvedValue.toString());
         }
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -230,7 +231,7 @@ public class WebAPIServer_1_0_2 implements En {
         }
         assertTrue("ERROR: no fields with data could be found from the given $select list!", numFieldsWithData.get() > 0);
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -250,7 +251,7 @@ public class WebAPIServer_1_0_2 implements En {
         assertTrue("ERROR: results count must be greater than zero and less than " + parameterTopCount + "!",
             numResults.get() > 0 && numResults.get() <= topCount);
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -275,7 +276,7 @@ public class WebAPIServer_1_0_2 implements En {
             + AMPERSAND + ODATA_QUERY_PARAMS.SKIP + EQUALS + skipCount));
         getTestContainer().executePreparedGetRequest();
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -296,7 +297,7 @@ public class WebAPIServer_1_0_2 implements En {
 
         assertEquals("ERROR: repeated data found, expected unique data on each page!", combinedCount, combined.size());
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -327,22 +328,22 @@ public class WebAPIServer_1_0_2 implements En {
                   + getTestContainer().getODataClientErrorException().getMessage());
             }
           }
-          fail("ERROR: asserted response code (" + assertedResponseCode + ") does not match the one returned from the server (" + getTestContainer().getResponseCode()+ ")!");
+          fail(getAssertResponseCodeErrorMessage(assertedResponseCode, getTestContainer().getResponseCode()));
         }
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
     /*
      * validate XML wrapper
      */
-    And("^the response is valid XML$", () -> {
+    And("^the XML Metadata response is valid XML$", () -> {
       try {
-        assertTrue("ERROR: invalid XML response!", Commander.validateXML(getTestContainer().getResponseData()));
+        assertTrue("ERROR: invalid XML response!", Commander.validateXML(getTestContainer().getXMLResponseData()));
         LOG.info("Response is valid XML!");
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -357,7 +358,7 @@ public class WebAPIServer_1_0_2 implements En {
         if (showResponses)
           LOG.info("Response: " + new ObjectMapper().readTree(getTestContainer().getResponseData()).toPrettyString());
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -375,7 +376,7 @@ public class WebAPIServer_1_0_2 implements En {
 
         if (versionsMatch) {
           LOG.info("Asserted Response Code: " + assertedHttpResponseCode + ", Response code: " + getTestContainer().getResponseCode());
-          assertTrue("ERROR: asserted response code does not match the one returned from the server!", responseCodesMatch);
+          assertTrue("ERROR: asserted response code (" + assertedHttpResponseCode + ") does not match the one returned from the server (" + getTestContainer().getResponseCode() + ") !", responseCodesMatch);
         } else {
           LOG.info("Test skipped! Only applies when the asserted version matches the reported server version.");
         }
@@ -410,7 +411,7 @@ public class WebAPIServer_1_0_2 implements En {
 
         assertTrue(result.get());
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -423,7 +424,7 @@ public class WebAPIServer_1_0_2 implements En {
             from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, Map.class).size() > 0);
         LOG.info("Results count is: " + from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, Map.class).get(0).size());
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -438,7 +439,7 @@ public class WebAPIServer_1_0_2 implements En {
         LOG.info("Response value is: " + value);
         LOG.info("Is Present: " + isPresent);
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -452,7 +453,7 @@ public class WebAPIServer_1_0_2 implements En {
         LOG.info("Results count is: " + count + ", Limit is: " + limit);
         assertTrue("ERROR: number of results exceeds that specified in '" + limitField + "'!", count <= limit);
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -496,7 +497,7 @@ public class WebAPIServer_1_0_2 implements En {
           }
         });
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -517,11 +518,11 @@ public class WebAPIServer_1_0_2 implements En {
             fieldValue.set(TestUtils.parseDateFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
             assertTrue(TestUtils.compare(fieldValue.get(), op, assertedValue.get()));
           } catch (Exception ex) {
-            fail(getDefaultErrorMessage(ex.toString()));
+            fail(getDefaultErrorMessage(ex));
           }
         });
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -546,7 +547,7 @@ public class WebAPIServer_1_0_2 implements En {
           }
         });
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -557,7 +558,7 @@ public class WebAPIServer_1_0_2 implements En {
       try {
         TestUtils.assertDateTimeOffset(parameterFieldName, op, parameterAssertedValue, getTestContainer().getResponseData(), getTestContainer().getSettings());
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -568,7 +569,7 @@ public class WebAPIServer_1_0_2 implements En {
       try {
         TestUtils.assertDateTimeOffset(parameterFieldName, op, Timestamp.from(Instant.now()), getTestContainer().getResponseData(), getTestContainer().getSettings());
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -593,7 +594,7 @@ public class WebAPIServer_1_0_2 implements En {
           assertTrue(result.get());
         });
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -619,7 +620,7 @@ public class WebAPIServer_1_0_2 implements En {
           assertTrue(result.get());
         });
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -658,7 +659,7 @@ public class WebAPIServer_1_0_2 implements En {
           }
         });
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -681,11 +682,11 @@ public class WebAPIServer_1_0_2 implements En {
             fieldValue.set(TestUtils.getDatePart(datePart.get(), item.get(fieldName)));
             assertTrue(TestUtils.compare(fieldValue.get(), operator.get(), assertedValue.get()));
           } catch (Exception ex) {
-            fail(getDefaultErrorMessage(ex.toString()));
+            fail(getDefaultErrorMessage(ex));
           }
         });
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -710,14 +711,14 @@ public class WebAPIServer_1_0_2 implements En {
               fieldValue.set(TestUtils.getTimestampPart(datePart.get(), item.get(fieldName).toString()));
               assertTrue(TestUtils.compare(fieldValue.get(), operator.get(), assertedValue.get()));
             } catch (Exception ex) {
-              fail(getDefaultErrorMessage(ex.toString()));
+              fail(getDefaultErrorMessage(ex));
             }
           });
         } catch (Exception ex) {
-          fail(getDefaultErrorMessage(ex.toString()));
+          fail(getDefaultErrorMessage(ex));
         }
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -734,7 +735,7 @@ public class WebAPIServer_1_0_2 implements En {
           assertTrue(TestUtils.compare(item.get(fieldName).toString(), operator.get(), assertedValue.get()));
         });
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -759,7 +760,7 @@ public class WebAPIServer_1_0_2 implements En {
         LOG.info("Found EntityContainer for the given resource: '" + resourceName + "'");
 
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -780,7 +781,7 @@ public class WebAPIServer_1_0_2 implements En {
           }
         });
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -797,7 +798,7 @@ public class WebAPIServer_1_0_2 implements En {
         getTestContainer().setResponseCode(cex.getStatusLine().getStatusCode());
         fail(cex.toString());
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -836,7 +837,7 @@ public class WebAPIServer_1_0_2 implements En {
         getTestContainer().setResponseCode(cex.getStatusLine().getStatusCode());
         fail(cex.toString());
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -978,7 +979,7 @@ public class WebAPIServer_1_0_2 implements En {
         getTestContainer().setODataClientErrorException(cex);
         getTestContainer().setResponseCode(cex.getStatusLine().getStatusCode());
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex.toString()));
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
