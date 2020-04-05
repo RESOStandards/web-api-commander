@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.communication.request.retrieve.EdmMetadataRequest;
+import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.XMLMetadataRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
@@ -35,6 +36,7 @@ import javax.xml.validation.SchemaFactory;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -43,7 +45,8 @@ import java.util.function.Function;
  * the ones the Client programmer is expected to use.
  */
 public class Commander {
-  //TODO move to utils class
+  private static final Logger LOG = LogManager.getLogger(Commander.class);
+
   public static final int OK = 0;
   public static final int NOT_OK = 1;
   public static final String AMPERSAND = "&"; //TODO: find the corresponding query params constant for this
@@ -55,8 +58,8 @@ public class Commander {
   public static final String REPORT_DIVIDER_SMALL = "===========================";
   public static final String RESOSCRIPT_EXTENSION = ".resoscript";
   public static final String EDMX_EXTENSION = ".xml";
-  private static final Logger LOG = LogManager.getLogger(Commander.class);
-  private static final String EDM_4_0_3_XSD = "edm.4.0.3.xsd", EDMX_4_0_3_XSD = "edmx.4.0.3.xsd";
+
+  private static final String EDM_4_0_3_XSD = "edm.4.0.errata03.xsd", EDMX_4_0_3_XSD = "edmx.4.0.errata03.xsd";
 
   private static String bearerToken;
   private static String clientId;
@@ -77,16 +80,6 @@ public class Commander {
   }
 
   /**
-   * Uses an XML validator to validate that the given string contains valid XML.
-   *
-   * @param xmlString the string containing the XML to validate.
-   * @return true if the given xmlString is valid and false otherwise.
-   */
-  public static boolean validateXML(String xmlString) {
-    return validateXML(new ByteArrayInputStream(xmlString.getBytes()));
-  }
-
-  /**
    * Validates XML for the given xmlMetadata item
    *
    * @param xmlMetadata the XML metadata to validate
@@ -98,33 +91,32 @@ public class Commander {
   }
 
   /**
-   * Uses an XML validator to validate that the given inputStream contains valid XML.
+   * Uses an XML validator to validate that the given string contains valid XML.
    *
-   * @param inputStream the input stream to check.
-   * @return true if the given inputStream has valid XML, false otherwise.
+   * @param xmlString the string containing the XML to validate.
+   * @return true if the given xmlString is valid and false otherwise.
    */
-  public static boolean validateXML(InputStream inputStream) {
+  public static boolean validateXML(final String xmlString) {
     try {
       SAXParserFactory factory = SAXParserFactory.newInstance();
       factory.setValidating(false); //turn off expectation of having DTD in DOCTYPE tag
       factory.setNamespaceAware(true);
 
       factory.setSchema(SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(new StreamSource[]{
-          new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream(EDM_4_0_3_XSD)),
-          new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream(EDMX_4_0_3_XSD))
+        new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream(EDM_4_0_3_XSD)),
+        new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream(EDMX_4_0_3_XSD))
       }));
 
       SAXParser parser = factory.newSAXParser();
       XMLReader reader = parser.getXMLReader();
       reader.setErrorHandler(new SimpleErrorHandler());
-      InputSource inputSource = new InputSource();
-      inputSource.setByteStream(inputStream);
-      try {
-        reader.parse(inputSource);
-        return true;
-      } catch (SAXException saxEx) {
+      InputSource inputSource = new InputSource(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
+
+      reader.parse(inputSource);
+      return true;
+    } catch (SAXException saxEx) {
+      if (saxEx.getMessage() != null) {
         LOG.error(saxEx);
-        return false;
       }
     } catch (Exception ex) {
       LOG.error(ex);
@@ -267,18 +259,7 @@ public class Commander {
             .append(edmEnumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString())
             .append(")");
 
-        edmEnumType.getMemberNames().forEach(n -> {
-          reportBuilder
-            .append("\n\tName: ").append(n);
-
-          if (edmEnumType.getMember(n).getAnnotations().size() > 0) {
-            reportBuilder
-                .append("\n\tAnnotations: ")
-                .append(edmEnumType.getMember(n).getAnnotations().toString())
-                .append("\n\n");
-          }
-
-        });
+        edmEnumType.getMemberNames().forEach(n -> reportBuilder.append("\n\tName: ").append(n));
       });
 
       schema.getComplexTypes().forEach(a ->
@@ -450,9 +431,21 @@ public class Commander {
    */
   public boolean validateMetadata(InputStream inputStream) {
     try {
-      // deserialize metadata from given file
-      XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).toMetadata(inputStream);
-      return validateMetadata(metadata);
+      String xmlString = TestUtils.convertInputStreamToString(inputStream);
+
+      if (xmlString == null) return false;
+
+      //require the XML Document to be valid XML before trying to validate it with the OData validator
+      if (validateXML(xmlString)) {
+        // deserialize metadata from given file
+        XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).toMetadata(new ByteArrayInputStream(xmlString.getBytes()));
+        if (metadata != null) {
+          return validateMetadata(metadata);
+        } else {
+          LOG.error("ERROR: no valid metadata was found!");
+          return false;
+        }
+      }
     } catch (Exception ex) {
       LOG.error("ERROR in validateMetadata! " + ex.toString());
     }
@@ -467,10 +460,9 @@ public class Commander {
    */
   public boolean validateMetadata(String pathToEdmx) {
     try {
-      // deserialize metadata from given file
       return validateMetadata(new FileInputStream(pathToEdmx));
     } catch (Exception ex) {
-      LOG.error("Error occurred while validating metadata.\nPath was:" + pathToEdmx);
+      LOG.error("ERROR: could not validate metadata.\nPath was:" + pathToEdmx);
       LOG.error(ex.getMessage());
     }
     return false;
@@ -535,6 +527,25 @@ public class Commander {
       System.exit(NOT_OK);
     }
     return responseCode;
+  }
+
+  /**
+   * Executes a raw OData request in the current commander instance without trying to intepret the results
+   * @param requestUri the URI to make the request to
+   * @return a string containing the serialized response, or null
+   */
+  public String executeRawRequest(String requestUri) {
+    String data = null;
+    if (requestUri != null) {
+      try {
+        ODataRawRequest request = getClient().getRetrieveRequestFactory().getRawRequest(URI.create(requestUri));
+        ODataRawResponse response = request.execute();
+        data = TestUtils.convertInputStreamToString(response.getRawResponse());
+      } catch (Exception ex) {
+        LOG.error(ex);
+      }
+    }
+    return data;
   }
 
   /**

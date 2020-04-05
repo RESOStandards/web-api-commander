@@ -44,7 +44,7 @@
   ############################################################-->
 
   <!-- The current version of this RESOScript -->
-  <RESOScriptVersion>2.0.0</RESOScriptVersion>
+  <RESOScriptVersion>2.0.1</RESOScriptVersion>
 
 
   <!--
@@ -287,253 +287,253 @@
     <Request
       RequestId="REQ-WA103-QR1"
       OutputFile="REQ-WA103-QR1.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*(*Parameter_KeyOrKeyNumericValue*)?$select=*Parameter_KeyOrKeyNumericField*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*(*Parameter_KeyOrKeyNumericValue*)?$select=*Parameter_KeyOrKeyNumericField*,*Parameter_KeyOrKeyNumericField*"
     />
 
     <Request
       RequestId="REQ-WA103-QR3"
       OutputFile="REQ-WA103-QR3.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QR4"
       OutputFile="REQ-WA103-QR4.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QR5"
       OutputFile="REQ-WA103-QR5.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO1.1"
       OutputFile="REQ-WA103-QO1.1.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$SeLeCt=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* eq *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$SeLeCt=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* eq *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO1.2"
       OutputFile="REQ-WA103-QO1.2.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_IntegerField*&amp;$FiLtEr=*Parameter_IntegerField* ne null and *Parameter_IntegerField* eq *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$FiLtEr=*Parameter_IntegerField* eq *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO1.3"
       OutputFile="REQ-WA103-QO1.3.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*&amp;$OrDeRbY=*Parameter_IntegerField* asc"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*&amp;$OrDeRbY=*Parameter_IntegerField* asc"
     />
 
     <Request
       RequestId="REQ-WA103-QO1.4"
       OutputFile="REQ-WA103-QO1.4.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*&amp;$oRdErBy=*Parameter_IntegerField* desc"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*&amp;$oRdErBy=*Parameter_IntegerField* desc"
     />
 
     <Request
       RequestId="REQ-WA103-QO2"
       OutputFile="REQ-WA103-QO2"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* eq *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* eq *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO3"
       OutputFile="REQ-WA103-QO3"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* ne null and *Parameter_IntegerField* ne *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO4"
       OutputFile="REQ-WA103-QO4"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO5"
       OutputFile="REQ-WA103-QO5.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* ge *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ge *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO6"
       OutputFile="REQ-WA103-QO6.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* lt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* lt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO7"
       OutputFile="REQ-WA103-QO7.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* le *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* le *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO9"
       OutputFile="REQ-WA103-QO9.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* gt *Parameter_IntegerValueLow* and *Parameter_IntegerField* lt *Parameter_IntegerValueHigh**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* gt *Parameter_IntegerValueLow* and *Parameter_IntegerField* lt *Parameter_IntegerValueHigh**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO10"
       OutputFile="REQ-WA103-QO10.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* gt *Parameter_IntegerValueHigh* or *Parameter_IntegerField* lt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* gt *Parameter_IntegerValueHigh* or *Parameter_IntegerField* lt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO11"
       OutputFile="REQ-WA103-QO11.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and not(*Parameter_FilterNotField* le *Parameter_FilterNotValue*)*Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=not(*Parameter_FilterNotField* le *Parameter_FilterNotValue*)*Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO25"
       OutputFile="REQ-WA103-QO25.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* ne null and date(*Parameter_TimestampField*) gt *Parameter_DateValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_TimestampField*&amp;$filter=date(*Parameter_TimestampField*) gt *Parameter_DateValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO26"
       OutputFile="REQ-WA103-QO26.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* ne null and time(*Parameter_TimestampField*) lt *Parameter_TimeValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_TimestampField*&amp;$filter=time(*Parameter_TimestampField*) lt *Parameter_TimeValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO26.2"
       OutputFile="REQ-WA103-QO26.2.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* ne null and *Parameter_TimestampField* lt *Parameter_DateTimeValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* lt *Parameter_DateTimeValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO27"
       OutputFile="REQ-WA103-QO27.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* ne null and *Parameter_TimestampField* le now()*Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* le now()*Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QM7"
       OutputFile="REQ-WA103-QM7.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_SingleValueLookupField*&amp;$filter=*Parameter_SingleValueLookupField* ne null and *Parameter_SingleValueLookupField* has *Parameter_SingleValueLookupValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_KeyOrKeyNumericField*,*Parameter_SingleValueLookupField*&amp;$filter=*Parameter_SingleValueLookupField* has *Parameter_SingleValueLookupValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QM8"
       OutputFile="REQ-WA103-QM8.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* ne null and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_KeyOrKeyNumericField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QM8.2"
       OutputFile="REQ-WA103-QM8.2.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* ne null and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1* and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue2**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_KeyOrKeyNumericField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1* and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue2**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO8"
       OutputFile="REQ-WA103-QO8.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_FilterHasField*&amp;$filter=*Parameter_FilterHasField* ne null and *Parameter_FilterHasField* has *Parameter_FilterHasValueLookupValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_FilterHasField*&amp;$filter=*Parameter_FilterHasField* has *Parameter_FilterHasValueLookupValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO28.1"
       OutputFile="REQ-WA103-QO28.1.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_IntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc&amp;$filter=*Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO28.2"
       OutputFile="REQ-WA103-QO28.2.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_IntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc"
     />
 
     <Request
       RequestId="REQ-WA103-QO28.3"
       OutputFile="REQ-WA103-QO28.3.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_IntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc&amp;$filter=*Parameter_IntegerField* ne null and *Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc&amp;$filter=*Parameter_IntegerField* gt *Parameter_IntegerValueLow**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO28.4"
       OutputFile="REQ-WA103-QO28.4.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_IntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc"
     />
 
     <Request
       RequestId="REQ-WA103-QO18.1"
       OutputFile="REQ-WA103-QO18.1.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_DateField*&amp;$filter=*Parameter_DateField* ne null and year(*Parameter_DateField*) eq *Parameter_YearValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_DateField*&amp;$filter=year(*Parameter_DateField*) eq *Parameter_YearValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO18.2"
       OutputFile="REQ-WA103-QO18.2.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* ne null and year(*Parameter_TimestampField*) eq *Parameter_YearValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_TimestampField*&amp;$filter=year(*Parameter_TimestampField*) eq *Parameter_YearValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO19.1"
       OutputFile="REQ-WA103-QO19.1.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_DateField*&amp;$filter=*Parameter_DateField* ne null and month(*Parameter_DateField*) eq *Parameter_MonthValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_DateField*&amp;$filter=month(*Parameter_DateField*) eq *Parameter_MonthValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO19.2"
       OutputFile="REQ-WA103-QO19.2.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* ne null and month(*Parameter_TimestampField*) eq *Parameter_MonthValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_TimestampField*&amp;$filter=month(*Parameter_TimestampField*) eq *Parameter_MonthValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO20.1"
       OutputFile="REQ-WA103-QO20.1.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_DateField*&amp;$filter=*Parameter_DateField* ne null and day(*Parameter_DateField*) eq *Parameter_DayValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_DateField*&amp;$filter=day(*Parameter_DateField*) eq *Parameter_DayValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO20.2"
       OutputFile="REQ-WA103-QO20.2.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* ne null and day(*Parameter_TimestampField*) eq *Parameter_DayValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_TimestampField*&amp;$filter=day(*Parameter_TimestampField*) eq *Parameter_DayValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO21"
       OutputFile="REQ-WA103-QO21.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* ne null and hour(*Parameter_TimestampField*) eq *Parameter_HourValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_TimestampField*&amp;$filter=hour(*Parameter_TimestampField*) eq *Parameter_HourValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO22"
       OutputFile="REQ-WA103-QO22.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* ne null and minute(*Parameter_TimestampField*) gt *Parameter_MinuteValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_TimestampField*&amp;$filter=minute(*Parameter_TimestampField*) gt *Parameter_MinuteValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO23"
       OutputFile="REQ-WA103-QO23.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* ne null and second(*Parameter_TimestampField*) lt *Parameter_SecondValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_TimestampField*&amp;$filter=second(*Parameter_TimestampField*) lt *Parameter_SecondValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO24"
       OutputFile="REQ-WA103-QO24.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* ne null and fractionalseconds(*Parameter_TimestampField*) lt *Parameter_FractionalValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_TimestampField*&amp;$filter=fractionalseconds(*Parameter_TimestampField*) lt *Parameter_FractionalValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO29.1"
       OutputFile="REQ-WA103-QO29.1.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_KeyOrKeyNumericField*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*"
     />
 
     <Request
       RequestId="REQ-WA103-QO29.2"
       OutputFile="REQ-WA103-QO29.2.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*&amp;$filter=PhotosCount gt 0"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_KeyOrKeyNumericField*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*&amp;$filter=PhotosCount gt 0"
     />
 
     <Request
       RequestId="REQ-WA103-QO29.3"
       OutputFile="REQ-WA103-QO29.3.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField**Parameter_RequiredParametersFilter*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_KeyOrKeyNumericField*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField**Parameter_RequiredParametersFilter*"
     />
 
     <Request
@@ -551,49 +551,49 @@
     <Request
       RequestId="REQ-WA103-QM5.1"
       OutputFile="REQ-WA103-QM5_GeoSpatialLongLat_PointGeo.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_GeoSpatialField*&amp;$filter=geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_GeoSpatialField*&amp;$filter=geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue*"
     />
 
     <Request
       RequestId="REQ-WA103-QM5.2"
       OutputFile="REQ-WA103-QM5_GeoSpatialLongLat_LatGT1_PointGeo.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_GeoSpatialField*&amp;$filter=geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue* and *Parameter_GeoSpatialLatitudeField* gt 1"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_GeoSpatialField*&amp;$filter=geo.distance(*Parameter_GeoSpatialField*, geography'SRID=*Parameter_SRID*;POINT(*Parameter_GeoSpatialValue*)' le *Parameter_GeoSpatialDistanceValue* and *Parameter_GeoSpatialLatitudeField* gt 1"
     />
 
     <Request
       RequestId="REQ-WA103-QO12"
       OutputFile="REQ-WA103-QO12_Grouping.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne null and (*Parameter_IntegerField* ge *Parameter_IntegerValueLow* and *Parameter_IntegerField* le *Parameter_IntegerValueHigh*) and (*Parameter_IntegerField* lt *Parameter_IntegerValueHigh* and *Parameter_IntegerField* gt *Parameter_IntegerValueLow*)*Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_IntegerField*&amp;$filter=(*Parameter_IntegerField* ge *Parameter_IntegerValueLow* and *Parameter_IntegerField* le *Parameter_IntegerValueHigh*) and (*Parameter_IntegerField* lt *Parameter_IntegerValueHigh* and *Parameter_IntegerField* gt *Parameter_IntegerValueLow*)*Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO13"
       OutputFile="REQ-WA103-QO13.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_StringField*&amp;$filter=*Parameter_StringField* ne null and contains(*Parameter_StringField*,'*Parameter_ContainsValue*')*Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_StringField*&amp;$filter=contains(*Parameter_StringField*,'*Parameter_ContainsValue*')*Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO14"
       OutputFile="REQ-WA103-QO14_EndsWith.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_StringField*&amp;$filter=*Parameter_StringField* ne null and endswith(*Parameter_StringField*,'*Parameter_EndsWithValue*')*Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_StringField*&amp;$filter=endswith(*Parameter_StringField*,'*Parameter_EndsWithValue*')*Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO15"
       OutputFile="REQ-WA103-QO15_StartsWith.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_StringField*&amp;$filter=*Parameter_StringField* ne null and startswith(*Parameter_StringField*,'*Parameter_StartsWithValue*')*Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_StringField*&amp;$filter=startswith(*Parameter_StringField*,'*Parameter_StartsWithValue*')*Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO16"
       OutputFile="REQ-WA103-QO16_ToLowerEQ.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_StringField*&amp;$filter=*Parameter_StringField* ne null and tolower(*Parameter_StringField*) eq '*Parameter_ToLowerValue*'*Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_StringField*&amp;$filter=tolower(*Parameter_StringField*) eq '*Parameter_ToLowerValue*'*Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QO17"
       OutputFile="REQ-WA103-QO17_ToUpperEQ.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_StringField*&amp;$filter=*Parameter_StringField* ne null and toupper(*Parameter_StringField*) eq '*Parameter_ToUpperValue*'*Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_StringField*&amp;$filter=toupper(*Parameter_StringField*) eq '*Parameter_ToUpperValue*'*Parameter_RequiredParameters*"
     />
 
     <Request
@@ -633,6 +633,5 @@
       OutputFile="REQ-WA103-RC11_501NotImplemented.json"
       Url="*ClientSettings_WebAPIURI*/*Parameter_501NotImplemented*"
     />
-
   </Requests>
 </OutputScript>
