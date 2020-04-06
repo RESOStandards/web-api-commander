@@ -44,7 +44,7 @@
   ############################################################-->
 
   <!-- The current version of this RESOScript -->
-  <RESOScriptVersion>2.0.1</RESOScriptVersion>
+  <RESOScriptVersion>2.0.2</RESOScriptVersion>
 
 
   <!--
@@ -73,7 +73,7 @@
     <BearerToken><!-- REQUIRED: Your BearerToken goes here if using Access Tokens --></BearerToken>
 
     <!-- Grant Type: client_credentials -->
-    <!-- <AuthenticationType>client_credentials</AuthenticationType>-->
+    <AuthenticationType>client_credentials</AuthenticationType>
     <ClientIdentification><!-- REQUIRED: Your client_id value if using Client Credentials--></ClientIdentification>
     <ClientSecret><!-- REQUIRED: Your client_secret value if using Client Credentials--></ClientSecret>
     <TokenURI><!-- REQUIRED: Your token endpoint URI--></TokenURI>
@@ -123,8 +123,8 @@
 
     <!-- REQUIRED: Core - Enumerated Field for Single-Value Testing -->
     <Parameter Name="SingleValueLookupField" Value="PropertyType" />
-    <Parameter Name="SingleLookupValue" Value="Residential" />
     <Parameter Name="SingleValueLookupNamespace" Value="PropertyEnums.PropertyType" />
+    <Parameter Name="SingleLookupValue" Value="Residential" />
 
     <!-- REQUIRED: Core - Enumerated Field for Multi-value testing -->
     <Parameter Name="MultipleValueLookupField" Value="Appliances" />
@@ -173,15 +173,8 @@
     <!-- REQUIRED: 400 Bad Request - Adjust to something that produces a 400 response if this doesn't work -->
     <Parameter Name="400BadRequest" Value="*Parameter_EndpointResource*?$filter=BadField eq 'SoBad'" />
 
-    <!-- REQUIRED: 403 Forbidden - Set this to a restricted resource for the given credentials -->
-    <Parameter Name="403Forbidden" Value="Teams" />
-
     <!-- REQUIRED: 404 Not Found - You shouldn't need to change this -->
     <Parameter Name="404NotFound" Value="ResourceNotFound" />
-
-    <!-- REQUIRED: 501 Not Implemented - Set this to an OData query that hasn't been implemented on your server -->
-    <Parameter Name="501NotImplemented" Value="*Parameter_EndpointResource*?$search=red OR blue" />
-
 
     <!--
     ############################################################
@@ -213,8 +206,8 @@
     <Parameter Name="MultipleValueLookupValue1" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue1*'"/>
     <Parameter Name="MultipleValueLookupValue2" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue2*'" />
 
-    <Parameter Name="OptionalMetadataFormatParameter" Value="?$format=application/xml" />
-
+    <!-- OPTIONAL: Useful for testing the OData Format Parameter - Value="?$format=application/xml" -->
+    <Parameter Name="OptionalMetadataFormatParameter" Value="" />
 
     <!--
     ############################################################
@@ -226,7 +219,6 @@
     <Parameter Name="RequiredParametersFilter" Value="" />
 
   </Parameters>
-
 
   <!--
   ############################################################
@@ -502,21 +494,10 @@
     />
 
     <Request
-      RequestId="REQ-WA103-RC06"
-      OutputFile="REQ-WA103-RC06_403Forbidden_Generic.json"
-      Url="ClientSettings_WebAPIURI*/*Parameter_403Forbidden*"
-    />
-
-    <Request
       RequestId="REQ-WA103-RC07"
       OutputFile="REQ-WA103-RC07_404NotFound.json"
       Url="*ClientSettings_WebAPIURI*/*Parameter_404NotFound*"
     />
 
-    <Request
-      RequestId="REQ-WA103-RC11"
-      OutputFile="REQ-WA103-RC11_501NotImplemented.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_501NotImplemented*"
-    />
   </Requests>
 </OutputScript>
