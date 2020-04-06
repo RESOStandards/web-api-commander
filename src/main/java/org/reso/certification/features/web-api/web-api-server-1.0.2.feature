@@ -281,24 +281,11 @@ Feature: Web API Server 1.0.2 Certification
     Then the server responds with a status code of 400
     And the server has an OData-Version header value of "4.0" or "4.01"
 
-  @REQ-WA103-RC06 @core @2.5.2 @core-endorsement
-  Scenario: REQ-WA103-RC06 - 403 Forbidden Request
-    When a GET request is made to the resolved Url in "REQ-WA103-RC06"
-    Then the server responds with a status code of 403
-    And the server has an OData-Version header value of "4.0" or "4.01"
-
   @REQ-WA103-RC07 @core @2.5.2 @core-endorsement
   Scenario: REQ-WA103-RC07 - 404 Not Found Request
     When a GET request is made to the resolved Url in "REQ-WA103-RC07"
     Then the server responds with a status code of 404
     And the server has an OData-Version header value of "4.0" or "4.01"
-
-  @REQ-WA103-RC11 @core @2.5.2 @core-endorsement
-  Scenario: REQ-WA103-RC11 - 501 Not Implemented Request
-    When a GET request is made to the resolved Url in "REQ-WA103-RC11"
-    Then the server responds with a status code of 501
-    And the server has an OData-Version header value of "4.0" or "4.01"
-
 
   #######################################
   #  Bronze Tests
