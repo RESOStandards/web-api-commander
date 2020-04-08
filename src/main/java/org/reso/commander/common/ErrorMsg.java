@@ -1,6 +1,6 @@
-package org.reso.common;
+package org.reso.commander.common;
 
-import static org.reso.commander.certfication.containers.WebApiTestContainer.EMPTY_STRING;
+import static org.reso.commander.certfication.containers.WebApiTestContainer.SINGLE_SPACE;
 
 public final class ErrorMsg {
   private static final String ERROR_MESSAGE_TEMPLATE = "ERROR: %s";
@@ -12,7 +12,7 @@ public final class ErrorMsg {
    * @return a string containing the default error message for display
    */
   public static String getDefaultErrorMessage(final String... msgs) {
-    return String.format(ERROR_MESSAGE_TEMPLATE, String.join(EMPTY_STRING, msgs));
+    return String.format(ERROR_MESSAGE_TEMPLATE, String.join(SINGLE_SPACE, msgs));
   }
 
   /**
@@ -21,7 +21,7 @@ public final class ErrorMsg {
    * @return formatted error message using the default format
    */
   public static String getDefaultErrorMessage(final Exception ex) {
-    return String.format(ex.toString());
+    return getDefaultErrorMessage(ex.toString());
   }
 
   /**

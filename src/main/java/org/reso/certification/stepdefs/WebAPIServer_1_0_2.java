@@ -21,7 +21,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.commander.Commander;
-import org.reso.commander.TestUtils;
+import org.reso.commander.common.TestUtils;
 import org.reso.commander.certfication.containers.WebApiTestContainer;
 import org.reso.models.Request;
 import org.reso.models.Settings;
@@ -40,11 +40,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
 import static org.reso.commander.Commander.*;
-import static org.reso.commander.TestUtils.*;
-import static org.reso.commander.TestUtils.Operators.*;
+import static org.reso.commander.common.TestUtils.*;
+import static org.reso.commander.common.TestUtils.Operators.*;
 import static org.reso.commander.certfication.containers.WebApiTestContainer.*;
-import static org.reso.common.ErrorMsg.getAssertResponseCodeErrorMessage;
-import static org.reso.common.ErrorMsg.getDefaultErrorMessage;
+import static org.reso.commander.common.ErrorMsg.getAssertResponseCodeErrorMessage;
+import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 /**
  * Contains the glue code for the Web API Server 1.0.2 Platinum Certification
@@ -66,43 +66,8 @@ public class WebAPIServer_1_0_2 implements En {
    * Entry point to the Web API Server tests
    */
   public WebAPIServer_1_0_2() {
-
-    /*
-     * Background
-     */
-    Given("^a RESOScript file was provided$", () -> {
-      if (getTestContainer().getPathToRESOScript() == null) {
-        getTestContainer().setPathToRESOScript(System.getProperty("pathToRESOScript"));
-      }
-      assertNotNull("ERROR: pathToRESOScript must be present in command arguments, see README", getTestContainer().getPathToRESOScript());
-      LOG.info("Using RESOScript: " + getTestContainer().getPathToRESOScript());
-    });
-    And("^Client Settings and Parameters were read from the file$", () -> {
-      if (getTestContainer().getSettings() == null) {
-        getTestContainer().setSettings(Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript"))));
-      }
-      assertNotNull("ERROR: Settings could not be loaded.", getTestContainer().getSettings());
-      LOG.info("RESOScript loaded successfully!");
-    });
-
-    Given("^a test container was successfully created from the given RESOScript$", () -> {
-      getTestContainer().initialize();
-    });
-
-    /*
-     * Ensures that the client either uses Authorization Codes or Client Credentials
-     */
-    And("^the test container uses an authorization_code or client_credentials for authentication$", () -> {
-      assertNotNull(getTestContainer().getCommander());
-      assertTrue("ERROR: Commander must either have a valid Authorization Code or Client Credentials configuration.",
-          getTestContainer().getCommander().isTokenClient() || (getTestContainer().getCommander().isOAuthClient() && getTestContainer().getCommander().hasValidAuthConfig()));
-
-      if (getTestContainer().getCommander().isTokenClient()) {
-        LOG.info("Authentication Type: authorization_code");
-      } else if (getTestContainer().getCommander().isOAuthClient()) {
-        LOG.info("Authentication Type: client_credentials");
-      }
-    });
+    
+    runBackground();
 
     /*
      * REQ-WA103-END2 - validate DataSystem endpoint, if present.
@@ -141,6 +106,7 @@ public class WebAPIServer_1_0_2 implements En {
 
       try {
         boolean isValid = getTestContainer().getCommander().validateMetadata(getTestContainer().getEdm());
+        getTestContainer().setIsValidEdm(isValid);
         LOG.info("Edm Metadata is " + (isValid ? "valid" : "invalid") + "!");
         assertTrue("Edm Metadata at the given service root is not valid! " + getTestContainer().getServiceRoot(), isValid);
       } catch (Exception ex) {
@@ -151,11 +117,12 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * XML Metadata Validator
      */
-    And("^the XML metadata returned by the server are valid$", () -> {
+    And("^the XML Metadata returned by the server are valid$", () -> {
       assertNotNull("ERROR: XML Metadata (EDMX) Exists!", getTestContainer().getXMLMetadata());
 
       try {
         boolean isValid = getTestContainer().getCommander().validateMetadata(getTestContainer().getXMLMetadata());
+        getTestContainer().setIsValidXMLMetadata(isValid);
         LOG.info("XML Metadata is " + (isValid ? "valid" : "invalid") + "!");
         assertTrue("XML Metadata at the given service root is not valid! " + getTestContainer().getServiceRoot(), isValid);
       } catch (Exception ex) {
@@ -274,7 +241,7 @@ public class WebAPIServer_1_0_2 implements En {
         getTestContainer().setRequestUri(Commander.prepareURI(
             Settings.resolveParameters(getTestContainer().getSettings().getRequest(requestId), getTestContainer().getSettings()).getUrl()
             + AMPERSAND + ODATA_QUERY_PARAMS.SKIP + EQUALS + skipCount));
-        getTestContainer().executePreparedGetRequest();
+        getTestContainer().executePreparedRawGetRequest();
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -308,7 +275,7 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * GET request by requirementId (see generic.resoscript)
      */
-    When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", this::prepareAndExecuteGetRequest);
+    When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", this::prepareAndExecuteRawGetRequest);
 
     /*
      * Assert response code
@@ -339,8 +306,15 @@ public class WebAPIServer_1_0_2 implements En {
      * validate XML wrapper
      */
     And("^the XML Metadata response is valid XML$", () -> {
+      LOG.info("Validating XML Metadata response to ensure it's valid XML and matches OASIS OData XSDs...");
+      LOG.info( "See: https://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/schemas/");
+      assertNotNull("XML response data were not found in the test container! Please ensure the XML Metadata request succeeded.",
+          getTestContainer().getXMLResponseData());
+
       try {
-        assertTrue("ERROR: invalid XML response!", Commander.validateXML(getTestContainer().getXMLResponseData()));
+        boolean isValid = Commander.validateXML(getTestContainer().getXMLResponseData());
+        getTestContainer().setIsXMLMetadataValidXML(isValid);
+        assertTrue("ERROR: invalid XML response!", isValid);
         LOG.info("Response is valid XML!");
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
@@ -351,6 +325,9 @@ public class WebAPIServer_1_0_2 implements En {
      * validate JSON wrapper
      */
     And("^the response is valid JSON$", () -> {
+      assertNotNull(getDefaultErrorMessage("JSON response data were not found in the test container! Please ensure your request succeeded.",
+          getTestContainer().getResponseData()));
+
       try {
         assertTrue("ERROR: invalid JSON response!", TestUtils.isValidJson(getTestContainer().getResponseData()));
         LOG.info("Response is valid JSON!");
@@ -776,8 +753,12 @@ public class WebAPIServer_1_0_2 implements En {
         getTestContainer().getSelectList().forEach(fieldName -> {
           //need to skip the expand field when looking through the metadata
           if (getTestContainer().getExpandField() == null || !fieldName.contentEquals(getTestContainer().getExpandField())) {
-            assertNotNull("ERROR: Field name '" + fieldName + "' is not present in server metadata!", getTestContainer().getCsdlForFieldName(fieldName));
-            LOG.info("Found: '" + fieldName.trim() + "'");
+            try {
+              assertNotNull("ERROR: Field name '" + fieldName + "' is not present in server metadata!", getTestContainer().getCsdlForFieldName(fieldName));
+              LOG.info("Found: '" + fieldName.trim() + "'");
+            } catch (Exception ex) {
+              LOG.error(getDefaultErrorMessage(ex));
+            }
           }
         });
       } catch (Exception ex) {
@@ -807,18 +788,19 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^XML Metadata are requested from the service root in \"([^\"]*)\"$", (String clientSettingsServiceRoot) -> {
       final String serviceRoot = Settings.resolveParametersString(clientSettingsServiceRoot, getTestContainer().getSettings());
-      assertEquals("ERROR: given service root doesn't match the one configured in the Commander", serviceRoot, getTestContainer().getCommander().getServiceRoot());
+      assertEquals(getDefaultErrorMessage("given service root doesn't match the one configured in the Commander"),
+          serviceRoot,
+          getTestContainer().getCommander().getServiceRoot());
 
-      LOG.info("Requesting XML Metadata from: " + serviceRoot);
       try {
-        assertNotNull("ERROR: could not find valid XML Metadata for given service root: " + serviceRoot, getTestContainer().getXMLMetadata());
+        assertNotNull(getDefaultErrorMessage("could not find valid XML Metadata for given service root:", serviceRoot),
+            getTestContainer().getXMLMetadata());
+
       } catch (ODataClientErrorException cex) {
         getTestContainer().setResponseCode(cex.getStatusLine().getStatusCode());
-        fail(cex.toString());
-      } catch (IllegalArgumentException aex) {
-        fail(getDefaultErrorMessage(aex.toString()));
+        fail(getDefaultErrorMessage(cex));
       } catch (Exception ex) {
-        fail("ERROR: "+ ex.toString());
+        fail(getDefaultErrorMessage(ex));
       }
     });
 
@@ -932,8 +914,12 @@ public class WebAPIServer_1_0_2 implements En {
 
       AtomicBoolean found = new AtomicBoolean(false);
       requiredResources.forEach(requiredResource -> {
-        if (!found.get())
-          found.set(found.get() || getTestContainer().getEdm().getEntityContainer().getEntitySet(requiredResource) != null);
+        try {
+          if (!found.get())
+            found.set(found.get() || getTestContainer().getEdm().getEntityContainer().getEntitySet(requiredResource) != null);
+        } catch (Exception ex) {
+          fail(getDefaultErrorMessage(ex));
+        }
       });
 
       assertTrue("ERROR: could not find one of the following Standard Resource Names in the default entity container: " + requiredResourceString.replace(FIELD_SEPARATOR, PRETTY_FIELD_SEPARATOR),
@@ -1031,12 +1017,29 @@ public class WebAPIServer_1_0_2 implements En {
               || getTestContainer().getServerODataHeaderVersion().contentEquals(val2) );
     });
 
+    /*
+     * Ensures valid metadata have been retrieved from the server
+     */
+    Given("^valid metadata have been retrieved$", () -> {
+      if (getTestContainer().hasNotFetchedMetadata()) {
+        getTestContainer().setIsValidXMLMetadata(getTestContainer().getCommander().validateMetadata(getTestContainer().getXMLMetadata()));
+        getTestContainer().setIsXMLMetadataValidXML(Commander.validateXML(getTestContainer().getXMLResponseData()));
+
+        if (getTestContainer().getIsValidXMLMetadata() && getTestContainer().getIsXMLMetadataValidXML()) {
+          getTestContainer().setIsValidEdm(getTestContainer().getCommander().validateMetadata(getTestContainer().getEdm()));
+        }
+      }
+
+      assertTrue(getDefaultErrorMessage("Valid metadata could not be retrieved from the server! Please check the log for more information."),
+          getTestContainer().getIsMetadataValid());
+
+    });
   }
 
   /*
    * Execute Get Request Wrapper
    */
-  void prepareAndExecuteGetRequest(String requestId) {
+  void prepareAndExecuteRawGetRequest(String requestId) {
     try {
       //reset local state each time a get request is run
       getTestContainer().resetState();
@@ -1051,7 +1054,7 @@ public class WebAPIServer_1_0_2 implements En {
       LOG.info("Request URI: " + getTestContainer().getRequestUri().toString());
 
       //execute request
-      getTestContainer().executePreparedGetRequest();
+      getTestContainer().executePreparedRawGetRequest();
     } catch (Exception ex) {
       LOG.debug("Exception was thrown in " + this.getClass() + ": " + ex.toString());
     }
@@ -1059,5 +1062,48 @@ public class WebAPIServer_1_0_2 implements En {
 
   static WebApiTestContainer getTestContainer() {
     return container.get();
+  }
+
+  /**
+   * Contains background logic - make sure to update if the background changes
+   */
+  final void runBackground() {
+
+    /*
+     * Background
+     */
+    Given("^a RESOScript file was provided$", () -> {
+      if (getTestContainer().getPathToRESOScript() == null) {
+        getTestContainer().setPathToRESOScript(System.getProperty("pathToRESOScript"));
+      }
+      assertNotNull("ERROR: pathToRESOScript must be present in command arguments, see README", getTestContainer().getPathToRESOScript());
+      LOG.info("Using RESOScript: " + getTestContainer().getPathToRESOScript());
+    });
+    And("^Client Settings and Parameters were read from the file$", () -> {
+      if (getTestContainer().getSettings() == null) {
+        getTestContainer().setSettings(Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript"))));
+      }
+      assertNotNull("ERROR: Settings could not be loaded.", getTestContainer().getSettings());
+      LOG.info("RESOScript loaded successfully!");
+    });
+
+    Given("^a test container was successfully created from the given RESOScript$", () -> {
+      getTestContainer().initialize();
+    });
+
+    /*
+     * Ensures that the client either uses Authorization Codes or Client Credentials
+     */
+    And("^the test container uses an authorization_code or client_credentials for authentication$", () -> {
+      assertNotNull(getTestContainer().getCommander());
+      assertTrue("ERROR: Commander must either have a valid Authorization Code or Client Credentials configuration.",
+          getTestContainer().getCommander().isTokenClient() || (getTestContainer().getCommander().isOAuthClient() && getTestContainer().getCommander().hasValidAuthConfig()));
+
+      if (getTestContainer().getCommander().isTokenClient()) {
+        LOG.info("Authentication Type: authorization_code");
+      } else if (getTestContainer().getCommander().isOAuthClient()) {
+        LOG.info("Authentication Type: client_credentials");
+      }
+    });
   }
 }

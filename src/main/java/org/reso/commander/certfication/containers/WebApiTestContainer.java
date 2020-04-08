@@ -16,7 +16,7 @@ import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.commander.Commander;
-import org.reso.commander.TestUtils;
+import org.reso.commander.common.TestUtils;
 import org.reso.models.ClientSettings;
 import org.reso.models.Parameters;
 import org.reso.models.Request;
@@ -26,60 +26,25 @@ import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
 import static org.reso.commander.Commander.AMPERSAND;
 import static org.reso.commander.Commander.EQUALS;
-import static org.reso.commander.TestUtils.HEADER_ODATA_VERSION;
-import static org.reso.common.ErrorMsg.getDefaultErrorMessage;
+import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
+import static org.reso.commander.common.TestUtils.HEADER_ODATA_VERSION;
 
 /**
  * Encapsulates Commander Requests and Responses during runtime
  */
 public final class WebApiTestContainer implements TestContainer {
-  private static final Logger LOG = LogManager.getLogger(WebApiTestContainer.class);
-
   public static final String FIELD_SEPARATOR = ",";
   public static final String EMPTY_STRING = "";
   public static final String SINGLE_SPACE = " ";
   public static final String DOLLAR_SIGN = "$";
   public static final String PRETTY_FIELD_SEPARATOR = FIELD_SEPARATOR + SINGLE_SPACE;
-
-  public Map<String, CsdlProperty> getFieldMap() {
-    if (fieldMap.get() == null) {
-      fieldMap.set(new HashMap<>());
-
-      LOG.info("Building Field Map...this may take a moment depending on size of metadata and connection speed.");
-      //build a map of all of the discovered fields on the server for the given resource by field name
-      //this can also be used to look up type information
-      TestUtils.findEntityTypesForEntityTypeName(getEdm(), getXMLMetadata(), getSettings().getParameters().getValue(Parameters.WELL_KNOWN.RESOURCE_NAME))
-          .forEach(csdlProperty -> fieldMap.get().put(csdlProperty.getName(), csdlProperty));
-      assertTrue("ERROR: No field were found in the server's metadata!", fieldMap.get().size() > 0);
-      LOG.info("Metadata Field Map created!");
-    }
-    return fieldMap.get();
-  }
-
-  public String getXMLResponseData() {
-    return xmlResponseData.get();
-  }
-
-  public static final class ODATA_QUERY_PARAMS {
-      private static String format = DOLLAR_SIGN + "%s";
-
-      //TODO: add additional items as needed, and see if there's a lib for this in Olingo
-      public static final String
-        COUNT   = String.format(format, QueryOption.COUNT),
-        EXPAND  = String.format(format, QueryOption.EXPAND),
-        FILTER  = String.format(format, QueryOption.FILTER),
-        ORDERBY = String.format(format, QueryOption.ORDERBY),
-        SELECT  = String.format(format, QueryOption.SELECT),
-        SEARCH  = String.format(format, QueryOption.SEARCH),
-        SKIP    = String.format(format, QueryOption.SKIP),
-        TOP     = String.format(format, QueryOption.TOP);
-  }
-
+  private static final Logger LOG = LogManager.getLogger(WebApiTestContainer.class);
   private AtomicReference<Commander> commander = new AtomicReference<>();
   private AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
   private AtomicReference<Edm> edm = new AtomicReference<>();
@@ -96,6 +61,12 @@ public final class WebApiTestContainer implements TestContainer {
   private AtomicReference<Map<String, CsdlProperty>> fieldMap = new AtomicReference<>();
   private AtomicReference<String> xmlResponseData = new AtomicReference<>();
 
+  // Metadata state variables
+  private AtomicBoolean isValidXMLMetadata = new AtomicBoolean(false);
+  private AtomicBoolean isValidEdm = new AtomicBoolean(false);
+  private AtomicBoolean isXMLMetadataValidXML = new AtomicBoolean(false);
+  private AtomicBoolean hasXMLMetadataBeenRequested = new AtomicBoolean(false);
+  private AtomicBoolean hasEdmBeenRequested = new AtomicBoolean(false);
 
   // request instance variables - these get reset with every request
   private AtomicReference<String> selectList = new AtomicReference<>();
@@ -113,6 +84,25 @@ public final class WebApiTestContainer implements TestContainer {
   private AtomicReference<ODataEntitySetRequest<ClientEntitySet>> clientEntitySetRequest = new AtomicReference<>();
   private AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
   private AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
+
+  public Map<String, CsdlProperty> getFieldMap() throws Exception {
+    if (fieldMap.get() == null) {
+      fieldMap.set(new HashMap<>());
+
+      LOG.info("Building Field Map...this may take a moment depending on size of metadata and connection speed.");
+      //build a map of all of the discovered fields on the server for the given resource by field name
+      //this can also be used to look up type information
+      TestUtils.findEntityTypesForEntityTypeName(getEdm(), getXMLMetadata(), getSettings().getParameters().getValue(Parameters.WELL_KNOWN.RESOURCE_NAME))
+          .forEach(csdlProperty -> fieldMap.get().put(csdlProperty.getName(), csdlProperty));
+      assertTrue("ERROR: No field were found in the server's metadata!", fieldMap.get().size() > 0);
+      LOG.info("Metadata Field Map created!");
+    }
+    return fieldMap.get();
+  }
+
+  public String getXMLResponseData() {
+    return xmlResponseData.get();
+  }
 
   /**
    * Resets the state of the test container
@@ -188,7 +178,7 @@ public final class WebApiTestContainer implements TestContainer {
    * Executes HTTP GET request and sets the expected local variables in the WebApiTestContainer
    * Handles exceptions and sets response codes as well.
    */
-  public void executePreparedGetRequest() {
+  public void executePreparedRawGetRequest() throws Exception {
     try {
       setRawRequest(getCommander().getClient().getRetrieveRequestFactory().getRawRequest(getRequestUri()));
       getRawRequest().setFormat(ContentType.JSON.toContentTypeString());
@@ -197,21 +187,8 @@ public final class WebApiTestContainer implements TestContainer {
       setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, getODataRawResponse()));
       setResponseCode(getODataRawResponse().getStatusCode());
       LOG.info("Request succeeded..." + getResponseData().getBytes().length + " bytes received.");
-    } catch (ODataClientErrorException cex) {
-      LOG.debug("ODataClientErrorException caught. Check tests for asserted conditions...");
-      LOG.debug(cex);
-      setODataClientErrorException(cex);
-      setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, Arrays.asList(cex.getHeaderInfo())));
-      setResponseCode(cex.getStatusLine().getStatusCode());
-    } catch (ODataServerErrorException ode) {
-      LOG.debug("ODataServerErrorException thrown in executeGetRequest. Check tests for asserted conditions...");
-      //TODO: look for better ways to do this in Olingo or open PR
-      if (ode.getMessage().contains(Integer.toString(HttpStatus.SC_NOT_IMPLEMENTED))) {
-        setResponseCode(HttpStatus.SC_NOT_IMPLEMENTED);
-      }
-      setODataServerErrorException(ode);
     } catch (Exception ex) {
-      fail("ERROR: unhandled Exception in executeGetRequest()!\n" + ex.toString());
+      processODataRequestException(ex);
     }
   }
 
@@ -221,7 +198,7 @@ public final class WebApiTestContainer implements TestContainer {
    * @param fieldName the name of the field to retrieve metadata about
    * @return the metadata for the given field
    */
-  public CsdlProperty getCsdlForFieldName(String fieldName) {
+  public CsdlProperty getCsdlForFieldName(String fieldName) throws Exception {
     return getFieldMap().get(fieldName);
   }
 
@@ -230,22 +207,26 @@ public final class WebApiTestContainer implements TestContainer {
    *
    * @return gets the local collection of Csdl Properties
    */
-  public Collection<CsdlProperty> getCsdlProperties() {
+  public Collection<CsdlProperty> getCsdlProperties() throws Exception {
     return getFieldMap().values();
   }
 
+  /**
+   * Parses an OData $select list
+   * @return the de-duplicated set of select list items
+   */
   public Collection<String> getSelectList() {
     Arrays.stream(getRequestUri().getQuery().split(AMPERSAND)).forEach(fragment -> {
       if (fragment.contains(QueryOption.SELECT.toString())) {
         selectList.set(fragment.replace(ODATA_QUERY_PARAMS.SELECT, EMPTY_STRING).replace(EQUALS, EMPTY_STRING));
       }
     });
-
-    return new ArrayList<>(Arrays.asList(selectList.get().split(FIELD_SEPARATOR)));
+    return new LinkedHashSet<>((Arrays.asList(selectList.get().split(FIELD_SEPARATOR))));
   }
 
   /**
    * Settings getter
+   *
    * @return local settings instance
    */
   public Settings getSettings() {
@@ -254,6 +235,7 @@ public final class WebApiTestContainer implements TestContainer {
 
   /**
    * Settings setter
+   *
    * @param settings sets local settings instance to the given settings
    */
   public void setSettings(Settings settings) {
@@ -262,6 +244,7 @@ public final class WebApiTestContainer implements TestContainer {
 
   /**
    * Gets the Expand field from the RESOScript
+   *
    * @return the configured Expand field
    */
   public String getExpandField() {
@@ -274,19 +257,26 @@ public final class WebApiTestContainer implements TestContainer {
    * @return
    * @implNote the data in this item are cached in the test container once fetched
    */
-  public Edm getEdm() {
+  public Edm getEdm() throws Exception {
     if (edm.get() == null) {
-      ODataRetrieveResponse<Edm> response = getCommander().prepareEdmMetadataRequest().execute();
-      responseCode.set(response.getStatusCode());
-      setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, response));
-      edm.set(response.getBody());
+      try {
+        LOG.info("Requesting the entity data model (Edm) from service root at: " + getServiceRoot());
+        ODataRetrieveResponse<Edm> response = getCommander().prepareEdmMetadataRequest().execute();
+        responseCode.set(response.getStatusCode());
+        setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, response));
+        edm.set(response.getBody());
+      } catch(Exception ex){
+        processODataRequestException(ex);
+      } finally {
+        hasEdmBeenRequested.set(true);
+      }
     }
     return edm.get();
   }
 
   /**
    * Gets server metadata in XMLMetadata format.
-   *
+   * <p>
    * Note: this method takes a slightly different approach than getting XML Metadata did previously in that
    * rather than fetching the metadata directly from the server using the Olingo getXmlMetadata method,
    * we make a raw request instead so that we can capture the response string for XML validation, and
@@ -295,7 +285,7 @@ public final class WebApiTestContainer implements TestContainer {
    * @return XMLMetadata representation of the server metadata.
    * @implNote the data in this item are cached in the test container once fetched
    */
-  public XMLMetadata getXMLMetadata() {
+  public XMLMetadata getXMLMetadata() throws Exception {
     if (xmlMetadata.get() == null) {
       try {
         String requestUri = Settings.resolveParameters(getSettings().getRequest(Request.WELL_KNOWN.METADATA_ENDPOINT), getSettings()).getUrl();
@@ -304,20 +294,22 @@ public final class WebApiTestContainer implements TestContainer {
         ODataRawRequest request = getCommander().getClient().getRetrieveRequestFactory().getRawRequest(URI.create(requestUri));
         request.setFormat(ContentType.JSON.toContentTypeString());
 
+        LOG.info("Requesting XML Metadata from service root at: " + getServiceRoot());
         ODataRawResponse response = request.execute();
+        responseCode.set(response.getStatusCode());
+        setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, response));
+
         xmlResponseData.set(TestUtils.convertInputStreamToString(response.getRawResponse()));
 
         //deserialize response into XML Metadata - will throw an exception if metadata are in valid
         XMLMetadata metadata = getCommander().getClient().getDeserializer(ContentType.APPLICATION_XML)
             .toMetadata(new ByteArrayInputStream(xmlResponseData.get().getBytes(StandardCharsets.UTF_8)));
 
-        responseCode.set(response.getStatusCode());
-        setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, response));
-
         xmlMetadata.set(metadata);
-
       } catch (Exception ex) {
-        getDefaultErrorMessage(ex);
+        processODataRequestException(ex);
+      } finally {
+        hasXMLMetadataBeenRequested.set(true);
       }
     }
     return xmlMetadata.get();
@@ -517,5 +509,83 @@ public final class WebApiTestContainer implements TestContainer {
 
   public void setPathToRESOScript(String pathToRESOScript) {
     this.pathToRESOScript.set(pathToRESOScript);
+  }
+
+  private void processODataRequestException(Exception exception, boolean bubble) throws Exception {
+    if (exception instanceof ODataClientErrorException) processODataRequestException((ODataClientErrorException)exception);
+    else if (exception instanceof ODataServerErrorException) processODataRequestException(((ODataServerErrorException)exception));
+    else LOG.error(getDefaultErrorMessage(exception));
+
+    if (bubble) throw exception;
+  }
+
+  private void processODataRequestException(Exception exception) throws Exception {
+    processODataRequestException(exception, true);
+  }
+
+  private void processODataRequestException(ODataClientErrorException exception) {
+    LOG.debug("ODataClientErrorException caught. Check tests for asserted conditions...");
+    LOG.debug(exception);
+    setODataClientErrorException(exception);
+    setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, Arrays.asList(exception.getHeaderInfo())));
+    setResponseCode(exception.getStatusLine().getStatusCode());
+  }
+
+  private void processODataRequestException(ODataServerErrorException exception) {
+    LOG.debug("ODataServerErrorException thrown in executeGetRequest. Check tests for asserted conditions...");
+    //TODO: look for better ways to do this in Olingo or open PR
+    if (exception.getMessage().contains(Integer.toString(HttpStatus.SC_NOT_IMPLEMENTED))) {
+      setResponseCode(HttpStatus.SC_NOT_IMPLEMENTED);
+    }
+    setODataServerErrorException(exception);
+  }
+
+  public boolean getIsMetadataValid() {
+    return xmlMetadata.get() != null && getIsValidXMLMetadata()
+        && xmlResponseData.get() != null && getIsXMLMetadataValidXML()
+        && edm.get() != null && getIsValidEdm();
+  }
+
+  public boolean getIsValidXMLMetadata() {
+    return isValidXMLMetadata.get();
+  }
+
+  public void setIsValidXMLMetadata(boolean isValid) {
+    isValidXMLMetadata.set(isValid);
+  }
+
+  public boolean getIsValidEdm() {
+    return isValidEdm.get();
+  }
+
+  public void setIsValidEdm(boolean isValid) {
+    isValidEdm.set(isValid);
+  }
+
+  public boolean getIsXMLMetadataValidXML() {
+    return isXMLMetadataValidXML.get();
+  }
+
+  public void setIsXMLMetadataValidXML(boolean isValid) {
+    isXMLMetadataValidXML.set(isValid);
+  }
+
+  public boolean hasNotFetchedMetadata() {
+    return !hasXMLMetadataBeenRequested.get() && !hasEdmBeenRequested.get();
+  }
+
+  public static final class ODATA_QUERY_PARAMS {
+    private static String format = DOLLAR_SIGN + "%s";
+
+    //TODO: add additional items as needed, and see if there's a lib for this in Olingo
+    public static final String
+        COUNT = String.format(format, QueryOption.COUNT),
+        EXPAND = String.format(format, QueryOption.EXPAND),
+        FILTER = String.format(format, QueryOption.FILTER),
+        ORDERBY = String.format(format, QueryOption.ORDERBY),
+        SELECT = String.format(format, QueryOption.SELECT),
+        SEARCH = String.format(format, QueryOption.SEARCH),
+        SKIP = String.format(format, QueryOption.SKIP),
+        TOP = String.format(format, QueryOption.TOP);
   }
 }

@@ -22,6 +22,7 @@ import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.auth.OAuth2HttpClientFactory;
 import org.reso.auth.TokenHttpClientFactory;
+import org.reso.commander.common.TestUtils;
 import org.xml.sax.*;
 
 import javax.xml.XMLConstants;
@@ -77,17 +78,6 @@ public class Commander {
 
   private Commander() {
     //private constructor, should not be used. Use Builder instead.
-  }
-
-  /**
-   * Validates XML for the given xmlMetadata item
-   *
-   * @param xmlMetadata the XML metadata to validate
-   * @return true if valid, false otherwise
-   * @throws ODataSerializerException if the given XML metadata could not be serialized
-   */
-  public static boolean validateXML(XMLMetadata xmlMetadata) throws ODataSerializerException {
-    return validateXML(serializeXMLMetadataToXMLString(xmlMetadata));
   }
 
   /**
@@ -210,19 +200,6 @@ public class Commander {
       LOG.error("ERROR: " + ex.toString());
     }
     return null;
-  }
-
-  /**
-   * Serializes XML Metadata to an XML string
-   *
-   * @param xmlMetadata the metadata to serialize
-   * @return a String containing the metadata
-   * @throws ODataSerializerException
-   */
-  private static String serializeXMLMetadataToXMLString(XMLMetadata xmlMetadata) throws ODataSerializerException {
-    StringWriter writer = new StringWriter();
-    client.getSerializer(ContentType.APPLICATION_XML).write(writer, xmlMetadata);
-    return writer.getBuffer().toString();
   }
 
   /**
