@@ -22,14 +22,13 @@ import org.reso.models.Parameters;
 import org.reso.models.Request;
 import org.reso.models.Settings;
 
-import java.io.ByteArrayInputStream;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.reso.commander.Commander.AMPERSAND;
 import static org.reso.commander.Commander.EQUALS;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
@@ -300,12 +299,7 @@ public final class WebApiTestContainer implements TestContainer {
         setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, response));
 
         xmlResponseData.set(TestUtils.convertInputStreamToString(response.getRawResponse()));
-
-        //deserialize response into XML Metadata - will throw an exception if metadata are in valid
-        XMLMetadata metadata = getCommander().getClient().getDeserializer(ContentType.APPLICATION_XML)
-            .toMetadata(new ByteArrayInputStream(xmlResponseData.get().getBytes(StandardCharsets.UTF_8)));
-
-        xmlMetadata.set(metadata);
+        xmlMetadata.set(Commander.deserializeXMLMetadata(xmlResponseData.get(), getCommander().getClient()));
       } catch (Exception ex) {
         processODataRequestException(ex);
       } finally {

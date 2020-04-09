@@ -357,6 +357,16 @@ public class Commander {
    * @return true if the metadata is valid, meaning that it's also a valid OData 4 Service Document
    */
   public boolean validateMetadata(XMLMetadata metadata) {
+    return validateMetadata(metadata, client);
+  }
+
+  /**
+   * Static version of the metadata validator that can work with a given client
+   * @param metadata the XML Metadata to validate
+   * @param client the OData client to use for validation
+   * @return true if the given XML metadata is valid, false otherwise
+   */
+  public static boolean validateMetadata(XMLMetadata metadata, ODataClient client) {
     try {
       // call the probably-useless metadata validator. can't hurt though
       // SEE: https://github.com/apache/olingo-odata4/blob/master/lib/client-core/src/main/java/org/apache/olingo/client/core/serialization/ODataMetadataValidationImpl.java#L77-L116
@@ -383,10 +393,20 @@ public class Commander {
    * @return true if the metadata is valid, meaning that it's also a valid OData 4 Service Document
    */
   public boolean validateMetadata(Edm metadata) {
+    return validateMetadata(metadata, client);
+  }
+
+  /**
+   * Static version of the metadata validator that can work with a given client
+   * @param edm the Edm to validate
+   * @param client the OData client to use for validation
+   * @return true if the given XML metadata is valid, false otherwise
+   */
+  public static boolean validateMetadata(Edm edm, ODataClient client) {
     try {
       // call the probably-useless metadata validator. can't hurt though
       // SEE: https://github.com/apache/olingo-odata4/blob/master/lib/client-core/src/main/java/org/apache/olingo/client/core/serialization/ODataMetadataValidationImpl.java#L77-L116
-      client.metadataValidation().validateMetadata(metadata);
+      client.metadataValidation().validateMetadata(edm);
       //if Edm metadata are invalid, the previous line will throw an exception and this line won't be reached.
       return true;
     } catch (NullPointerException nex) {
@@ -406,7 +426,7 @@ public class Commander {
    * @param inputStream the input stream containing the metadata to validate.
    * @return true if the given input stream contains valid XML Metadata, false otherwise.
    */
-  public boolean validateMetadata(InputStream inputStream) {
+  public boolean validateXMLAndXMLMetadata(InputStream inputStream) {
     try {
       String xmlString = TestUtils.convertInputStreamToString(inputStream);
 
@@ -430,6 +450,31 @@ public class Commander {
   }
 
   /**
+   * Deserializes XML Metadata from a string
+   * @param xmlMetadataString a string containing XML Metadata
+   * @param client an instance of an OData Client
+   * @return the XML Metadata contained within the string
+   */
+  public static XMLMetadata deserializeXMLMetadata(String xmlMetadataString, ODataClient client) {
+    //deserialize response into XML Metadata - will throw an exception if metadata are invalid
+    return client.getDeserializer(ContentType.APPLICATION_XML)
+        .toMetadata(new ByteArrayInputStream(xmlMetadataString.getBytes(StandardCharsets.UTF_8)));
+  }
+
+  /**
+   * Deserializes Edm from XML Metadata
+   * @param xmlMetadataString a string containing XML metadata
+   * @param client an instance of an OData Client
+   * @return the Edm contained within the xmlMetadataString
+   *
+   * TODO: rewrite the separate Edm request in the Web API server test code to only make one request and convert
+   *       to Edm from the XML Metadata that was received.
+   */
+  public static Edm deserializeEdm(String xmlMetadataString, ODataClient client) {
+    return client.getReader().readMetadata(new ByteArrayInputStream(xmlMetadataString.getBytes(StandardCharsets.UTF_8)));
+  }
+
+  /**
    * Validates the given metadata contained in the given file path.
    *
    * @param pathToEdmx the path to look for metadata in. Assumes metadata is stored as XML.
@@ -437,7 +482,7 @@ public class Commander {
    */
   public boolean validateMetadata(String pathToEdmx) {
     try {
-      return validateMetadata(new FileInputStream(pathToEdmx));
+      return validateXMLAndXMLMetadata(new FileInputStream(pathToEdmx));
     } catch (Exception ex) {
       LOG.error("ERROR: could not validate metadata.\nPath was:" + pathToEdmx);
       LOG.error(ex.getMessage());
