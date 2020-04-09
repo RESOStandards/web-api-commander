@@ -290,11 +290,11 @@ public class Commander {
    * @return true if the auth config is valid, false otherwise.
    */
   public boolean hasValidAuthConfig() {
-    if (isTokenClient()) {
+    if (isAuthTokenClient()) {
       return bearerToken != null && bearerToken.length() > 0;
     }
 
-    if (isOAuthClient()) {
+    if (isOAuth2Client()) {
       return getTokenUri() != null && getTokenUri().length() > 0
           && clientId != null && clientId.length() > 0
           && clientSecret != null && clientSecret.length() > 0;
@@ -426,7 +426,7 @@ public class Commander {
    * @param inputStream the input stream containing the metadata to validate.
    * @return true if the given input stream contains valid XML Metadata, false otherwise.
    */
-  public boolean validateXMLAndXMLMetadata(InputStream inputStream) {
+  public boolean validateMetadata(InputStream inputStream) {
     try {
       String xmlString = TestUtils.convertInputStreamToString(inputStream);
 
@@ -482,7 +482,7 @@ public class Commander {
    */
   public boolean validateMetadata(String pathToEdmx) {
     try {
-      return validateXMLAndXMLMetadata(new FileInputStream(pathToEdmx));
+      return validateMetadata(new FileInputStream(pathToEdmx));
     } catch (Exception ex) {
       LOG.error("ERROR: could not validate metadata.\nPath was:" + pathToEdmx);
       LOG.error(ex.getMessage());
@@ -495,7 +495,7 @@ public class Commander {
    *
    * @return true if the commander instance is a token client, false otherwise.
    */
-  public boolean isTokenClient() {
+  public boolean isAuthTokenClient() {
     return isTokenClient;
   }
 
@@ -504,7 +504,7 @@ public class Commander {
    *
    * @return true if the commander instance is an OAuth2 client credentials client, false otherwise.
    */
-  public boolean isOAuthClient() {
+  public boolean isOAuth2Client() {
     return isOAuthClient;
   }
 

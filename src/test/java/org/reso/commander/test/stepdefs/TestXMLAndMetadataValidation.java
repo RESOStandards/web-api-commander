@@ -14,8 +14,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.Assert.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
-public class XMLAndMetadataValidation implements En {
-  private static final Logger LOG = LogManager.getLogger(XMLAndMetadataValidation.class);
+public class TestXMLAndMetadataValidation implements En {
+  private static final Logger LOG = LogManager.getLogger(TestXMLAndMetadataValidation.class);
   AtomicReference<String> xmlMetadataString = new AtomicReference<>();
   AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
   AtomicReference<Edm> edm = new AtomicReference<>();
@@ -26,14 +26,14 @@ public class XMLAndMetadataValidation implements En {
   AtomicBoolean isXMLMetadataValid = new AtomicBoolean(false);
   AtomicBoolean isEdmValid = new AtomicBoolean(false);
 
-  public XMLAndMetadataValidation()  {
+  public TestXMLAndMetadataValidation()  {
     //background
     runBackground();
 
     /*
      * loads a test resource to a local string object by name
      */
-    Given("^data were loaded from the sample resource \"([^\"]*)\"$", (String resourceName) -> {
+    Given("^metadata were loaded from the sample resource \"([^\"]*)\"$", (String resourceName) -> {
       assertNotNull(getDefaultErrorMessage("ERROR: resource name cannot be null!", resourceName));
 
       try {

@@ -22,7 +22,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.commander.Commander;
 import org.reso.commander.common.TestUtils;
-import org.reso.commander.certfication.containers.WebApiTestContainer;
+import org.reso.commander.certfication.containers.WebAPITestContainer;
 import org.reso.models.Request;
 import org.reso.models.Settings;
 
@@ -42,7 +42,7 @@ import static org.junit.Assert.*;
 import static org.reso.commander.Commander.*;
 import static org.reso.commander.common.TestUtils.*;
 import static org.reso.commander.common.TestUtils.Operators.*;
-import static org.reso.commander.certfication.containers.WebApiTestContainer.*;
+import static org.reso.commander.certfication.containers.WebAPITestContainer.*;
 import static org.reso.commander.common.ErrorMsg.getAssertResponseCodeErrorMessage;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
@@ -58,9 +58,9 @@ public class WebAPIServer_1_0_2 implements En {
   private static final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES));
 
   /*
-   * Used to store a static instance of the WebApiTestContainer class
+   * Used to store a static instance of the WebAPITestContainer class
    */
-  private static final AtomicReference<WebApiTestContainer> container = new AtomicReference<>(new WebApiTestContainer());
+  private static final AtomicReference<WebAPITestContainer> container = new AtomicReference<>(new WebAPITestContainer());
 
   /**
    * Entry point to the Web API Server tests
@@ -1060,7 +1060,7 @@ public class WebAPIServer_1_0_2 implements En {
     }
   }
 
-  static WebApiTestContainer getTestContainer() {
+  static WebAPITestContainer getTestContainer() {
     return container.get();
   }
 
@@ -1097,11 +1097,11 @@ public class WebAPIServer_1_0_2 implements En {
     And("^the test container uses an authorization_code or client_credentials for authentication$", () -> {
       assertNotNull(getTestContainer().getCommander());
       assertTrue("ERROR: Commander must either have a valid Authorization Code or Client Credentials configuration.",
-          getTestContainer().getCommander().isTokenClient() || (getTestContainer().getCommander().isOAuthClient() && getTestContainer().getCommander().hasValidAuthConfig()));
+          getTestContainer().getCommander().isAuthTokenClient() || (getTestContainer().getCommander().isOAuth2Client() && getTestContainer().getCommander().hasValidAuthConfig()));
 
-      if (getTestContainer().getCommander().isTokenClient()) {
+      if (getTestContainer().getCommander().isAuthTokenClient()) {
         LOG.info("Authentication Type: authorization_code");
-      } else if (getTestContainer().getCommander().isOAuthClient()) {
+      } else if (getTestContainer().getCommander().isOAuth2Client()) {
         LOG.info("Authentication Type: client_credentials");
       }
     });

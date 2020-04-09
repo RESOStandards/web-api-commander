@@ -54,7 +54,7 @@
   ############################################################-->
   <ClientSettings>
     <!-- URLS -->
-    <WebAPIURI></WebAPIURI>
+    <WebAPIURI>https://api.reso.org/OData</WebAPIURI>
 
     <!-- Credentials -->
 
@@ -70,7 +70,7 @@
 
     <!-- Grant Type: authorization_code -->
     <AuthenticationType>authorization_code</AuthenticationType>
-    <BearerToken><!-- REQUIRED: Your BearerToken goes here if using Access Tokens --></BearerToken>
+    <BearerToken>testTokenValue</BearerToken>
 
     <!-- Grant Type: client_credentials -->
     <AuthenticationType>client_credentials</AuthenticationType>
@@ -98,11 +98,11 @@
     ############################################################-->
 
     <!-- REQUIRED: Core - The name of the resource being tested. Should not be a path. -->
-    <Parameter Name="EndpointResource" Value="REQUIRED: YOUR RESOURCE GOES HERE, FOR EXAMPLE, Property" />
+    <Parameter Name="EndpointResource" Value="Property" />
 
     <!-- REQUIRED: Core - The DataSystems endpoint being tested
         NOTE: the FULL DataSystems URL is required as it might not be relative to the Service Root.-->
-    <Parameter Name="EndpointDataSystem" Value="REQUIRED: YOUR DATA SYSTEMS ENDPOINT GOES HERE" />
+    <Parameter Name="EndpointDataSystem" Value="https://api.reso.org/OData/DataSystem" />
 
     <!--
     ############################################################
@@ -117,7 +117,7 @@
     <!-- REQUIRED: Core - Provide a value for the KeyOrKeyNumeric from your server
                    NOTE: if you are using Key instead of KeyNumeric values, wrap your Key in quotes: 'myUniqueKey123'
     -->
-    <Parameter Name="KeyOrKeyNumericValue" Value="REQUIRED: YOUR KeyOrKeyNumericValue GOES HERE" />
+    <Parameter Name="KeyOrKeyNumericValue" Value="12345" />
 
     <!-- REQUIRED: Core - Integer Field. Should be one of: Type="Edm.Int16", Type="Edm.Int32", or Type="Edm.Int64" -->
     <Parameter Name="IntegerField" Value="BedroomsTotal" />
@@ -147,7 +147,7 @@
     <Parameter Name="GeoSpatialLatitudeField" Value="Latitude" />
     <Parameter Name="GeoSpatialLongitudeField" Value="Longitude" />
     <Parameter Name="GeoSpatialField" Value="Coordinates" />
-    <Parameter Name="GeoSpatialValue" Value="REQUIRED: YOUR COORDINATES GO HERE in Longitude Latitude format" /> <!-- "Longitude Latitude" -->
+    <Parameter Name="GeoSpatialValue" Value="120.34342 35.13123123" /> <!-- "Longitude Latitude" -->
 
     <!-- REQUIRED: New Fields for WS103 Testing -->
     <Parameter Name="ValueField" Value="AboveGradeFinishedArea" />

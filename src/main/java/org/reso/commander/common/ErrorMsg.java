@@ -1,6 +1,6 @@
 package org.reso.commander.common;
 
-import static org.reso.commander.certfication.containers.WebApiTestContainer.SINGLE_SPACE;
+import static org.reso.commander.certfication.containers.WebAPITestContainer.SINGLE_SPACE;
 
 public final class ErrorMsg {
   private static final String ERROR_MESSAGE_TEMPLATE = "ERROR: %s";
