@@ -26,11 +26,11 @@ public class TestWebAPITestContainer implements En {
         URL resource = getClass().getClassLoader().getResource(fileName);
         assertNotNull(getDefaultErrorMessage("was unable to find the given RESOScript:", fileName), resource);
 
-        testContainer.set(new WebAPITestContainer());
-        testContainer.get().setSettings(Settings.loadFromRESOScript(new File(resource.getFile())));
-        assertNotNull(getDefaultErrorMessage("could not load mock RESOScript: " + resource.getFile()), testContainer.get().getSettings());
+        setTestContainer(new WebAPITestContainer());
+        getTestContainer().setSettings(Settings.loadFromRESOScript(new File(resource.getFile())));
+        assertNotNull(getDefaultErrorMessage("could not load mock RESOScript: " + resource.getFile()), getTestContainer().getSettings());
 
-        testContainer.get().initialize();
+        getTestContainer().initialize();
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -41,28 +41,41 @@ public class TestWebAPITestContainer implements En {
      * auth settings validation
      */
     When("^an auth token is provided in \"([^\"]*)\"$", (String clientSettingsAuthToken) -> {
-      String token = Settings.resolveParametersString(clientSettingsAuthToken, testContainer.get().getSettings());
+      String token = Settings.resolveParametersString(clientSettingsAuthToken, getTestContainer().getSettings());
       assertNotNull(getDefaultErrorMessage("BearerToken is null in the ClientSettings section!"), token);
     });
 
     Then("^the Commander is created using auth token client mode$", () -> {
       assertTrue(getDefaultErrorMessage("expected auth token Commander client!"),
-          testContainer.get().getCommander().isAuthTokenClient());
+          getTestContainer().getCommander().isAuthTokenClient());
     });
 
     And("^the auth token has a value of \"([^\"]*)\"$", (String assertedTokenValue) -> {
       assertEquals(getDefaultErrorMessage("asserted token value is not equal to the one provided in the container!"),
-          assertedTokenValue, testContainer.get().getAuthToken());
+          assertedTokenValue, getTestContainer().getAuthToken());
     });
 
     And("^a Commander instance exists within the test container$", () -> {
       assertNotNull(getDefaultErrorMessage("Commander instance is null in the container!"),
-          testContainer.get().getCommander());
+          getTestContainer().getCommander());
     });
 
     But("^the Commander is not created using client credentials mode$", () -> {
       assertFalse(getDefaultErrorMessage("expected that the Commander was not using client credentials"),
-          testContainer.get().getCommander().isOAuth2Client());
+          getTestContainer().getCommander().isOAuth2Client());
     });
+
+    And("^Settings are present in the test container$", () -> {
+      assertNotNull(getDefaultErrorMessage("settings were not found in the Web API test container!"),
+          getTestContainer().getSettings());
+    });
+  }
+
+  private WebAPITestContainer getTestContainer() {
+    return testContainer.get();
+  }
+
+  private void setTestContainer(WebAPITestContainer testContainer) {
+    this.testContainer.set(testContainer);
   }
 }
