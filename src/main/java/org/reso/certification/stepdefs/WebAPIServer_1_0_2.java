@@ -68,6 +68,13 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^the results match the expected DataSystem JSON schema$", getTestContainer()::validateDataSystem);
 
+
+    And("^the XML Metadata returned by the server contains Edm metadata$", () -> {
+      getTestContainer().setEdm(
+          Commander.deserializeEdm(getTestContainer().getXMLResponseData(), getTestContainer().getCommander().getClient())
+      );
+    });
+
     /*
      * Edm Metadata Validator
      */
@@ -738,25 +745,6 @@ public class WebAPIServer_1_0_2 implements En {
     });
 
     /*
-     * Edm Metadata getter
-     */
-    And("^Edm metadata are requested from the service root in \"([^\"]*)\"$", (String clientSettingsServiceRoot) -> {
-      final String serviceRoot = Settings.resolveParametersString(clientSettingsServiceRoot, getTestContainer().getSettings());
-      assertEquals("ERROR: given service root doesn't match the one configured in the Commander", serviceRoot, getTestContainer().getCommander().getServiceRoot());
-
-      LOG.info("Requesting Edm Metadata from: " + serviceRoot);
-      try {
-        assertNotNull("ERROR: could not find valid Edm Metadata for given service root: " + serviceRoot, getTestContainer().getEdm());
-        if (showResponses) LOG.info(Commander.getMetadataReport(getTestContainer().getEdm()));
-      } catch (ODataClientErrorException cex) {
-        getTestContainer().setResponseCode(cex.getStatusLine().getStatusCode());
-        fail(cex.toString());
-      } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex));
-      }
-    });
-
-    /*
      * Tests whether a navigation property can be found in the given resource name.
      */
     And("^an OData NavigationProperty exists for the given \"([^\"]*)\"$", (String parameterEndpointResource) -> {
@@ -954,17 +942,11 @@ public class WebAPIServer_1_0_2 implements En {
      * Ensures valid metadata have been retrieved from the server
      */
     Given("^valid metadata have been retrieved$", () -> {
-      if (getTestContainer().hasNotFetchedMetadata()) {
-        getTestContainer().setIsValidXMLMetadata(getTestContainer().getCommander().validateMetadata(getTestContainer().getXMLMetadata()));
-        getTestContainer().setIsXMLMetadataValidXML(Commander.validateXML(getTestContainer().getXMLResponseData()));
-
-        if (getTestContainer().getIsValidXMLMetadata() && getTestContainer().getIsXMLMetadataValidXML()) {
-          getTestContainer().setIsValidEdm(getTestContainer().getCommander().validateMetadata(getTestContainer().getEdm()));
-        }
+      if (!getTestContainer().haveMetadataBeenRequested()) {
+       getTestContainer().validateMetadata();
       }
-
       assertTrue(getDefaultErrorMessage("Valid metadata could not be retrieved from the server! Please check the log for more information."),
-          getTestContainer().getIsMetadataValid());
+          getTestContainer().hasValidMetadata());
 
     });
   }

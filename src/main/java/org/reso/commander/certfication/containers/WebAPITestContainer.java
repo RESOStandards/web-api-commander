@@ -557,17 +557,27 @@ public final class WebAPITestContainer implements TestContainer {
     setODataServerErrorException(exception);
   }
 
-  public boolean getIsMetadataValid() {
+  public final boolean hasValidMetadata() {
     return xmlMetadata.get() != null && getIsValidXMLMetadata()
         && xmlResponseData.get() != null && getIsXMLMetadataValidXML()
         && edm.get() != null && getIsValidEdm();
+  }
+
+  public final void validateMetadata() {
+    validateXMLMetadataXML();
+
+    setXMLMetadata(Commander.deserializeXMLMetadata(getXMLResponseData(), getCommander().getClient()));
+    validateXMLMetadata();
+
+    setEdm(Commander.deserializeEdm(getXMLResponseData(), getCommander().getClient()));
+    validateEdm();
   }
 
   public boolean getIsValidXMLMetadata() {
     return isValidXMLMetadata.get();
   }
 
-  public void setIsValidXMLMetadata(boolean isValid) {
+  private void setIsValidXMLMetadata(boolean isValid) {
     isValidXMLMetadata.set(isValid);
   }
 
@@ -575,7 +585,7 @@ public final class WebAPITestContainer implements TestContainer {
     return isValidEdm.get();
   }
 
-  public void setIsValidEdm(boolean isValid) {
+  private void setIsValidEdm(boolean isValid) {
     isValidEdm.set(isValid);
   }
 
@@ -583,12 +593,12 @@ public final class WebAPITestContainer implements TestContainer {
     return isXMLMetadataValidXML.get();
   }
 
-  public void setIsXMLMetadataValidXML(boolean isValid) {
+  private void setAreXMLMetadataValidXML(boolean isValid) {
     isXMLMetadataValidXML.set(isValid);
   }
 
-  public boolean hasNotFetchedMetadata() {
-    return !hasXMLMetadataBeenRequested.get() && !hasEdmBeenRequested.get();
+  public boolean haveMetadataBeenRequested() {
+    return hasXMLMetadataBeenRequested.get() && hasEdmBeenRequested.get();
   }
 
   public boolean getShowResponses() {
@@ -655,7 +665,7 @@ public final class WebAPITestContainer implements TestContainer {
 
     try {
       boolean isValid = Commander.validateXML(getXMLResponseData());
-      setIsXMLMetadataValidXML(isValid);
+      setAreXMLMetadataValidXML(isValid);
       LOG.info("XMLMetadata string is " + (isValid ? "valid" : "invalid") + " XML!");
     } catch (Exception ex) {
       fail(getDefaultErrorMessage(ex));

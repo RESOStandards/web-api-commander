@@ -21,9 +21,7 @@ Feature: Web API Server 1.0.2 Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the XML Metadata response is valid XML
     And the XML Metadata returned by the server are valid
-    And Edm metadata are requested from the service root in "ClientSettings_WebAPIURI"
-    Then the server responds with a status code of 200
-    And the server has an OData-Version header value of "4.0" or "4.01"
+    And the XML Metadata returned by the server contains Edm metadata
     And the Edm metadata returned by the server are valid
     And the metadata contains a valid service document
     And the given "Parameter_EndpointResource" resource exists within "Parameter_DD17_WellKnownResourceList"
@@ -304,14 +302,16 @@ Feature: Web API Server 1.0.2 Certification
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-RC5"
     Then the server responds with a status code of 400
-    And the server has an OData-Version header value of "4.0" or "4.01"
+    # Disable this check for now until Olingo-1380 is fixed - see: https://issues.apache.org/jira/browse/OLINGO-1380
+    # And the server has an OData-Version header value of "4.0" or "4.01"
 
   @REQ-WA103-RC07 @core @2.5.2 @core-endorsement
   Scenario: REQ-WA103-RC07 - 404 Not Found Request
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-RC07"
     Then the server responds with a status code of 404
-    And the server has an OData-Version header value of "4.0" or "4.01"
+    # Disable this check for now until Olingo-1380 is fixed - see: https://issues.apache.org/jira/browse/OLINGO-1380
+    # And the server has an OData-Version header value of "4.0" or "4.01"
 
   #######################################
   #  Bronze Tests

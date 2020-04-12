@@ -14,6 +14,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.Assert.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
+/**
+ * Tests metadata validation methods
+ */
 public class TestXMLAndMetadataValidation implements En {
   private static final Logger LOG = LogManager.getLogger(TestXMLAndMetadataValidation.class);
   AtomicReference<String> xmlMetadataString = new AtomicReference<>();

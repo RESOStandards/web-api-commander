@@ -1,7 +1,6 @@
 package org.reso.commander.test.stepdefs;
 
 import io.cucumber.java8.En;
-import org.reso.commander.Commander;
 import org.reso.commander.certfication.containers.WebAPITestContainer;
 import org.reso.commander.common.TestUtils;
 import org.reso.models.Settings;
@@ -45,14 +44,6 @@ public class TestWebAPITestContainer implements En {
         getTestContainer().setResponseCode(200);
 
         getTestContainer().setXMLResponseData(xmlMetadataString);
-        getTestContainer().validateXMLMetadataXML();
-
-        getTestContainer().setXMLMetadata(Commander.deserializeXMLMetadata(xmlMetadataString, getTestContainer().getCommander().getClient()));
-        getTestContainer().validateXMLMetadata();
-
-        getTestContainer().setEdm(Commander.deserializeEdm(xmlMetadataString, getTestContainer().getCommander().getClient()));
-        getTestContainer().validateEdm();
-
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -91,12 +82,14 @@ public class TestWebAPITestContainer implements En {
           getTestContainer().getSettings());
     });
     Then("^metadata are valid$", () -> {
+      getTestContainer().validateMetadata();
       assertTrue(getDefaultErrorMessage("getIsMetadataValid() returned false when true was expected!"),
-          getTestContainer().getIsMetadataValid());
+          getTestContainer().hasValidMetadata());
     });
     Then("^metadata are invalid$", () -> {
+      getTestContainer().validateMetadata();
       assertFalse(getDefaultErrorMessage("getIsMetadataValid() returned true when false was expected!"),
-          getTestContainer().getIsMetadataValid());
+          getTestContainer().hasValidMetadata());
     });
 
 
