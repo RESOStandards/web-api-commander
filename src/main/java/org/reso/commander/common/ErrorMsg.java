@@ -8,6 +8,7 @@ public final class ErrorMsg {
 
   /**
    * Formats the given items with the default error message
+   *
    * @param msgs the list of messages to display
    * @return a string containing the default error message for display
    */
@@ -17,6 +18,7 @@ public final class ErrorMsg {
 
   /**
    * Formats error message using the default template
+   *
    * @param ex the exception whose toString() method should be called
    * @return formatted error message using the default format
    */
@@ -26,8 +28,9 @@ public final class ErrorMsg {
 
   /**
    * Specialized Assert code formatter
+   *
    * @param assertedResponseCode the response code that was asserted
-   * @param serverResponseCode the server response code that was returned
+   * @param serverResponseCode   the server response code that was returned
    * @return the formatted error message for this case
    */
   public static String getAssertResponseCodeErrorMessage(final Integer assertedResponseCode, final Integer serverResponseCode) {

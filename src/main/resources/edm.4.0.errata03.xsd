@@ -70,7 +70,9 @@ Overview:
   prose specification document take precedence.
 
 -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:edm="http://docs.oasis-open.org/odata/ns/edm" elementFormDefault="qualified" attributeFormDefault="unqualified" targetNamespace="http://docs.oasis-open.org/odata/ns/edm">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:edm="http://docs.oasis-open.org/odata/ns/edm"
+           elementFormDefault="qualified" attributeFormDefault="unqualified"
+           targetNamespace="http://docs.oasis-open.org/odata/ns/edm">
   <xs:annotation>
     <xs:documentation xml:lang="en">
       Entity Data Model part of the Common Schema Definition Language
@@ -570,7 +572,8 @@ Overview:
     <xs:restriction base="xs:NCName">
       <xs:maxLength value="511"/>
       <!--  one or more SimpleIdentifiers separated by dots  -->
-      <xs:pattern value="[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}(\.[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}){0,}"/>
+      <xs:pattern
+        value="[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}(\.[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}){0,}"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="TQualifiedName">
@@ -578,7 +581,8 @@ Overview:
       <!--
        a NamespaceName followed by a dot and a SimpleIdentifier
       -->
-      <xs:pattern value="[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}(\.[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}){1,}"/>
+      <xs:pattern
+        value="[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}(\.[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}){1,}"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="TEnumMemberList">
@@ -591,7 +595,8 @@ Overview:
           <!--
            The below pattern represents the allowed identifiers in the ECMAScript specification plus the '.' for namespace qualification and the Collection() wrapper
           -->
-          <xs:pattern value="Collection\([\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}(\.[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}){1,}\)"/>
+          <xs:pattern
+            value="Collection\([\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}(\.[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}){1,}\)"/>
         </xs:restriction>
       </xs:simpleType>
     </xs:union>
@@ -601,7 +606,8 @@ Overview:
       <!--
        The below pattern represents the allowed identifiers in the ECMAScript specification plus the '.' for namespace qualification and the '/' for path segment separation
       -->
-      <xs:pattern value="[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}([\./][\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}){0,}"/>
+      <xs:pattern
+        value="[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}([\./][\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}){0,}"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="TPathWithTermSegments">
@@ -613,7 +619,8 @@ Overview:
        The below pattern represents the allowed identifiers in the ECMAScript specification plus the '/' for path segment separation and
                  the '.' for namespace qualification inside the segments.
       -->
-      <xs:pattern value="@?[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}(([\./#@]|/@)[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}){0,}(/$count)?"/>
+      <xs:pattern
+        value="@?[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}(([\./#@]|/@)[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]{0,}){0,}(/$count)?"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="TClientFunction">
@@ -796,7 +803,8 @@ Overview:
   <!--  binary data in base64url encoding  -->
   <xs:simpleType name="binary">
     <xs:restriction base="xs:string">
-      <xs:pattern value="([A-Za-z0-9_\-]{4})*([A-Za-z0-9_\-]{3}[A-Za-z0-9_\-]|[A-Za-z0-9_\-]{2}[AEIMQUYcgkosw048]=?|[A-Za-z0-9_\-][AQgw](==)?)?"/>
+      <xs:pattern
+        value="([A-Za-z0-9_\-]{4})*([A-Za-z0-9_\-]{3}[A-Za-z0-9_\-]|[A-Za-z0-9_\-]{2}[AEIMQUYcgkosw048]=?|[A-Za-z0-9_\-][AQgw](==)?)?"/>
     </xs:restriction>
   </xs:simpleType>
   <!-- boolean without 0 and 1  -->

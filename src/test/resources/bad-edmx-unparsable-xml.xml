@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
   <edmx:DataServices>
     <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="org.reso.metadata.Resources">
       <EntityType Name="Property">
@@ -7,7 +7,7 @@
           <PropertyRef Name="ListingKey"/>
         </Key>
         <Property Name="ListingKey" Type="Edm.String" MaxLength="255" Nullable="false"/>
-        <Property Name="ListingId" Type="Edm.String" MaxLength="255" />
+        <Property Name="ListingId" Type="Edm.String" MaxLength="255"/>
       </EntityType>
     </Schema>
     <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Default">
@@ -16,5 +16,5 @@
       </EntityContainer>
     </Schema>
   </edmx:DataServices>
-<!--  NOTE: intentionally stray character-->'
+  <!--  NOTE: intentionally stray character-->'
 </edmx:Edmx>

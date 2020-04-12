@@ -48,8 +48,10 @@ import java.util.function.Function;
 public class Commander {
   public static final int OK = 0;
   public static final int NOT_OK = 1;
-  public static final String AMPERSAND = "&"; //TODO: find the corresponding query params constant for this
-  public static final String EQUALS = "="; //TODO: find the corresponding query params constant for this
+  //TODO: find the corresponding query params constant for this
+  public static final String AMPERSAND = "&";
+  //TODO: find the corresponding query params constant for this
+  public static final String EQUALS = "=";
   public static final Integer DEFAULT_PAGE_SIZE = 10;
   public static final Integer DEFAULT_PAGE_LIMIT = 1;
   public static final String REPORT_DIVIDER = "==============================================================";
@@ -86,7 +88,9 @@ public class Commander {
   public static boolean validateXML(final String xmlString) {
     try {
       SAXParserFactory factory = SAXParserFactory.newInstance();
-      factory.setValidating(false); //turn off expectation of having DTD in DOCTYPE tag
+
+      //turn off expectation of having DTD in DOCTYPE tag
+      factory.setValidating(false);
       factory.setNamespaceAware(true);
 
       factory.setSchema(SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(new StreamSource[]{
@@ -379,7 +383,6 @@ public class Commander {
     FileWriter writer = new FileWriter(outputFileName);
     client.getSerializer(ContentType.APPLICATION_XML).write(writer, metadata);
   }
-
 
   /**
    * Static version of the metadata validator that can work with a given client

@@ -1,7 +1,9 @@
 package org.reso.commander.test.stepdefs;
 
 import io.cucumber.java8.En;
+import org.reso.commander.Commander;
 import org.reso.commander.certfication.containers.WebAPITestContainer;
+import org.reso.commander.common.TestUtils;
 import org.reso.models.Settings;
 
 import java.io.File;
@@ -14,8 +16,6 @@ import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public class TestWebAPITestContainer implements En {
   AtomicReference<WebAPITestContainer> testContainer = new AtomicReference<>();
-  AtomicReference<Settings> settings = new AtomicReference<>();
-  AtomicReference<String> authToken = new AtomicReference<>();
 
   public TestWebAPITestContainer() {
 
@@ -36,6 +36,27 @@ public class TestWebAPITestContainer implements En {
       }
     });
 
+    And("^sample metadata from \"([^\"]*)\" are loaded into the test container$", (String resourceName) -> {
+      assertNotNull(getDefaultErrorMessage("resourceName cannot be null!"), resourceName);
+
+      try {
+        String xmlMetadataString = TestUtils.convertInputStreamToString(getClass().getClassLoader().getResourceAsStream(resourceName));
+        assertNotNull(getDefaultErrorMessage("could not load resourceName:", resourceName), xmlMetadataString);
+        getTestContainer().setResponseCode(200);
+
+        getTestContainer().setXMLResponseData(xmlMetadataString);
+        getTestContainer().validateXMLMetadataXML();
+
+        getTestContainer().setXMLMetadata(Commander.deserializeXMLMetadata(xmlMetadataString, getTestContainer().getCommander().getClient()));
+        getTestContainer().validateXMLMetadata();
+
+        getTestContainer().setEdm(Commander.deserializeEdm(xmlMetadataString, getTestContainer().getCommander().getClient()));
+        getTestContainer().validateEdm();
+
+      } catch (Exception ex) {
+        fail(getDefaultErrorMessage(ex));
+      }
+    });
 
     /*
      * auth settings validation
@@ -69,6 +90,16 @@ public class TestWebAPITestContainer implements En {
       assertNotNull(getDefaultErrorMessage("settings were not found in the Web API test container!"),
           getTestContainer().getSettings());
     });
+    Then("^metadata are valid$", () -> {
+      assertTrue(getDefaultErrorMessage("getIsMetadataValid() returned false when true was expected!"),
+          getTestContainer().getIsMetadataValid());
+    });
+    Then("^metadata are invalid$", () -> {
+      assertFalse(getDefaultErrorMessage("getIsMetadataValid() returned true when false was expected!"),
+          getTestContainer().getIsMetadataValid());
+    });
+
+
   }
 
   private WebAPITestContainer getTestContainer() {

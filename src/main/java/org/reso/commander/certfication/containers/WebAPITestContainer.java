@@ -1,5 +1,10 @@
 package org.reso.commander.certfication.containers;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.ValidationMessage;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,17 +27,18 @@ import org.reso.models.Parameters;
 import org.reso.models.Request;
 import org.reso.models.Settings;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.reso.commander.Commander.AMPERSAND;
 import static org.reso.commander.Commander.EQUALS;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.HEADER_ODATA_VERSION;
+import static org.reso.commander.common.TestUtils.JSON_VALUE_PATH;
 
 /**
  * Encapsulates Commander Requests and Responses during runtime
@@ -45,45 +51,46 @@ public final class WebAPITestContainer implements TestContainer {
   public static final String PRETTY_FIELD_SEPARATOR = FIELD_SEPARATOR + SINGLE_SPACE;
   private static final Logger LOG = LogManager.getLogger(WebAPITestContainer.class);
 
-  private AtomicReference<Commander> commander = new AtomicReference<>();
-  private AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
-  private AtomicReference<Edm> edm = new AtomicReference<>();
-  private AtomicReference<Settings> settings = new AtomicReference<>();
-  private AtomicReference<String> serviceRoot = new AtomicReference<>();
-  private AtomicReference<String> bearerToken = new AtomicReference<>();
-  private AtomicReference<String> clientId = new AtomicReference<>();
-  private AtomicReference<String> clientSecret = new AtomicReference<>();
-  private AtomicReference<String> authorizationUri = new AtomicReference<>();
-  private AtomicReference<String> tokenUri = new AtomicReference<>();
-  private AtomicReference<String> redirectUri = new AtomicReference<>();
-  private AtomicReference<String> scope = new AtomicReference<>();
-  private AtomicReference<String> pathToRESOScript = new AtomicReference<>();
-  private AtomicReference<Map<String, CsdlProperty>> fieldMap = new AtomicReference<>();
-  private AtomicReference<String> xmlResponseData = new AtomicReference<>();
+  private final AtomicReference<Commander> commander = new AtomicReference<>();
+  private final AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
+  private final AtomicReference<Edm> edm = new AtomicReference<>();
+  private final AtomicReference<Settings> settings = new AtomicReference<>();
+  private final AtomicReference<String> serviceRoot = new AtomicReference<>();
+  private final AtomicReference<String> bearerToken = new AtomicReference<>();
+  private final AtomicReference<String> clientId = new AtomicReference<>();
+  private final AtomicReference<String> clientSecret = new AtomicReference<>();
+  private final AtomicReference<String> authorizationUri = new AtomicReference<>();
+  private final AtomicReference<String> tokenUri = new AtomicReference<>();
+  private final AtomicReference<String> redirectUri = new AtomicReference<>();
+  private final AtomicReference<String> scope = new AtomicReference<>();
+  private final AtomicReference<String> pathToRESOScript = new AtomicReference<>();
+  private final AtomicReference<Map<String, CsdlProperty>> fieldMap = new AtomicReference<>();
+  private final AtomicReference<String> xmlResponseData = new AtomicReference<>();
+  private final AtomicBoolean showResponses = new AtomicBoolean(false);
 
   // Metadata state variables
-  private AtomicBoolean isValidXMLMetadata = new AtomicBoolean(false);
-  private AtomicBoolean isValidEdm = new AtomicBoolean(false);
-  private AtomicBoolean isXMLMetadataValidXML = new AtomicBoolean(false);
-  private AtomicBoolean hasXMLMetadataBeenRequested = new AtomicBoolean(false);
-  private AtomicBoolean hasEdmBeenRequested = new AtomicBoolean(false);
+  private final AtomicBoolean isValidXMLMetadata = new AtomicBoolean(false);
+  private final AtomicBoolean isValidEdm = new AtomicBoolean(false);
+  private final AtomicBoolean isXMLMetadataValidXML = new AtomicBoolean(false);
+  private final AtomicBoolean hasXMLMetadataBeenRequested = new AtomicBoolean(false);
+  private final AtomicBoolean hasEdmBeenRequested = new AtomicBoolean(false);
 
   // request instance variables - these get reset with every request
-  private AtomicReference<String> selectList = new AtomicReference<>();
-  private AtomicReference<ODataRawResponse> oDataRawResponse = new AtomicReference<>();
-  private AtomicReference<Request> request = new AtomicReference<>();
-  private AtomicReference<URI> requestUri = new AtomicReference<>();
-  private AtomicReference<Integer> responseCode = new AtomicReference<>();
-  private AtomicReference<String> responseData = new AtomicReference<>();
-  private AtomicReference<String> initialResponseData = new AtomicReference<>(); //used if two result sets need to be compared
-  private AtomicReference<ODataRawRequest> rawRequest = new AtomicReference<>();
-  private AtomicReference<ODataClientErrorException> oDataClientErrorException = new AtomicReference<>();
-  private AtomicReference<ODataServerErrorException> oDataServerErrorException = new AtomicReference<>();
-  private AtomicReference<String> serverODataHeaderVersion = new AtomicReference<>();
-  private AtomicReference<Boolean> testAppliesToServerODataHeaderVersion = new AtomicReference<>();
-  private AtomicReference<ODataEntitySetRequest<ClientEntitySet>> clientEntitySetRequest = new AtomicReference<>();
-  private AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
-  private AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
+  private final AtomicReference<String> selectList = new AtomicReference<>();
+  private final AtomicReference<ODataRawResponse> oDataRawResponse = new AtomicReference<>();
+  private final AtomicReference<Request> request = new AtomicReference<>();
+  private final AtomicReference<URI> requestUri = new AtomicReference<>();
+  private final AtomicReference<Integer> responseCode = new AtomicReference<>();
+  private final AtomicReference<String> responseData = new AtomicReference<>();
+  private final AtomicReference<String> initialResponseData = new AtomicReference<>(); //used if two result sets need to be compared
+  private final AtomicReference<ODataRawRequest> rawRequest = new AtomicReference<>();
+  private final AtomicReference<ODataClientErrorException> oDataClientErrorException = new AtomicReference<>();
+  private final AtomicReference<ODataServerErrorException> oDataServerErrorException = new AtomicReference<>();
+  private final AtomicReference<String> serverODataHeaderVersion = new AtomicReference<>();
+  private final AtomicReference<Boolean> testAppliesToServerODataHeaderVersion = new AtomicReference<>();
+  private final AtomicReference<ODataEntitySetRequest<ClientEntitySet>> clientEntitySetRequest = new AtomicReference<>();
+  private final AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
+  private final AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
 
   public Map<String, CsdlProperty> getFieldMap() throws Exception {
     if (fieldMap.get() == null) {
@@ -102,6 +109,10 @@ public final class WebAPITestContainer implements TestContainer {
 
   public String getXMLResponseData() {
     return xmlResponseData.get();
+  }
+
+  public void setXMLResponseData(String xmlResponseData) {
+    this.xmlResponseData.set(xmlResponseData);
   }
 
   /**
@@ -213,6 +224,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Parses an OData $select list
+   *
    * @return the de-duplicated set of select list items
    */
   public Collection<String> getSelectList() {
@@ -265,13 +277,17 @@ public final class WebAPITestContainer implements TestContainer {
         responseCode.set(response.getStatusCode());
         setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, response));
         edm.set(response.getBody());
-      } catch(Exception ex){
+      } catch (Exception ex) {
         processODataRequestException(ex);
       } finally {
         hasEdmBeenRequested.set(true);
       }
     }
     return edm.get();
+  }
+
+  public void setEdm(Edm edm) {
+    this.edm.set(edm);
   }
 
   /**
@@ -308,6 +324,10 @@ public final class WebAPITestContainer implements TestContainer {
       }
     }
     return xmlMetadata.get();
+  }
+
+  public void setXMLMetadata(XMLMetadata xmlMetadata) {
+    this.xmlMetadata.set(xmlMetadata);
   }
 
   public Commander getCommander() {
@@ -507,8 +527,10 @@ public final class WebAPITestContainer implements TestContainer {
   }
 
   private void processODataRequestException(Exception exception, boolean bubble) throws Exception {
-    if (exception instanceof ODataClientErrorException) processODataRequestException((ODataClientErrorException)exception);
-    else if (exception instanceof ODataServerErrorException) processODataRequestException(((ODataServerErrorException)exception));
+    if (exception instanceof ODataClientErrorException)
+      processODataRequestException((ODataClientErrorException) exception);
+    else if (exception instanceof ODataServerErrorException)
+      processODataRequestException(((ODataServerErrorException) exception));
     else LOG.error(getDefaultErrorMessage(exception));
 
     if (bubble) throw exception;
@@ -567,6 +589,93 @@ public final class WebAPITestContainer implements TestContainer {
 
   public boolean hasNotFetchedMetadata() {
     return !hasXMLMetadataBeenRequested.get() && !hasEdmBeenRequested.get();
+  }
+
+  public boolean getShowResponses() {
+    return showResponses.get();
+  }
+
+  public void setShowResponses(Boolean value) {
+    showResponses.set(value);
+  }
+
+  public void validateDataSystem() {
+    if (getResponseCode() == HttpStatus.SC_OK && this.getResponseData() != null) {
+      try {
+        JsonSchemaFactory factory = JsonSchemaFactory.getInstance();
+        InputStream is = Thread.currentThread().getContextClassLoader()
+            .getResourceAsStream("datasystem.schema.4.json");
+        JsonSchema schema = factory.getSchema(is);
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node = mapper.readTree(getResponseData());
+
+        if (node.findPath(JSON_VALUE_PATH).size() > 0) {
+          Set<ValidationMessage> errors = schema.validate(node);
+
+          if (errors.size() > 0) LOG.error("ERROR: JSON Schema validation errors were found!");
+          errors.forEach(LOG::error);
+
+          assertEquals("ERROR: JSON Schema validation produced errors!", 0, errors.size());
+          LOG.info("DataSystem response matches reference schema!");
+        }
+      } catch (Exception ex) {
+        fail(getDefaultErrorMessage(ex));
+      }
+    }
+  }
+
+  public void validateEdm() {
+    try {
+      assertNotNull("ERROR: No Entity Data Model (Edm) Exists!", getEdm());
+      boolean isValid = getCommander().validateMetadata(getEdm());
+      setIsValidEdm(isValid);
+      LOG.info("Edm Metadata is " + (isValid ? "valid" : "invalid") + "!");
+    } catch (Exception ex) {
+      fail("ERROR: could not validate Edm Metadata!\n" + ex.toString());
+    }
+  }
+
+  public void validateXMLMetadata() {
+    try {
+      assertNotNull("ERROR: XML Metadata (EDMX) Exists!", getXMLMetadata());
+      boolean isValid = getCommander().validateMetadata(getXMLMetadata());
+      setIsValidXMLMetadata(isValid);
+      LOG.info("XML Metadata is " + (isValid ? "valid" : "invalid") + "!");
+    } catch (Exception ex) {
+      fail("ERROR: could not validate XML Metadata!\n" + ex.toString());
+    }
+  }
+
+  public void validateXMLMetadataXML() {
+    LOG.info("Validating XML Metadata response to ensure it's valid XML and matches OASIS OData XSDs...");
+    LOG.info("See: https://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/schemas/");
+    assertNotNull("XML response data were not found in the test container! Please ensure the XML Metadata request succeeded.",
+        getXMLResponseData());
+
+    try {
+      boolean isValid = Commander.validateXML(getXMLResponseData());
+      setIsXMLMetadataValidXML(isValid);
+      LOG.info("XMLMetadata string is " + (isValid ? "valid" : "invalid") + " XML!");
+    } catch (Exception ex) {
+      fail(getDefaultErrorMessage(ex));
+    }
+  }
+
+  public void validateJSON() {
+    assertNotNull(getDefaultErrorMessage("JSON response data were not found in the test container! Please ensure your request succeeded.",
+        getResponseData()));
+
+    try {
+      assertTrue("ERROR: invalid JSON response!", TestUtils.isValidJson(getResponseData()));
+      LOG.info("Response is valid JSON!");
+
+      if (getShowResponses())
+        LOG.info("Response: " + new ObjectMapper().readTree(getResponseData()).toPrettyString());
+    } catch (Exception ex) {
+      fail(getDefaultErrorMessage(ex));
+    }
+
   }
 
   public static final class ODATA_QUERY_PARAMS {

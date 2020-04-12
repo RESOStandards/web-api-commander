@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
   <edmx:DataServices>
     <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="org.reso.metadata.Resources">
       <EntityType Name="Property">
-<!-- NOTE: intentionally removed keyfield to cause invalid Edmx -->
-<!--        <Key>-->
-<!--          <PropertyRef Name="ListingKey"/>-->
-<!--        </Key>-->
+        <!-- NOTE: intentionally removed keyfield to cause invalid Edmx -->
+        <!--        <Key>-->
+        <!--          <PropertyRef Name="ListingKey"/>-->
+        <!--        </Key>-->
         <Property Name="ListingKey" Type="Edm.String" MaxLength="255" Nullable="false"/>
-        <Property Name="ListingId" Type="Edm.String" MaxLength="255" />
+        <Property Name="ListingId" Type="Edm.String" MaxLength="255"/>
       </EntityType>
       <EnumType Name="FileAccess" UnderlyingType="Edm.Int32" IsFlags="true">
-        <Member Name="Read"   Value="1" />
-        <Member Name="Write"  Value="2" />
-        <Member Name="Create" Value="4" />
-        <Member Name="Delete" Value="8" />
+        <Member Name="Read" Value="1"/>
+        <Member Name="Write" Value="2"/>
+        <Member Name="Create" Value="4"/>
+        <Member Name="Delete" Value="8"/>
       </EnumType>
     </Schema>
     <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Default">

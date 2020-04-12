@@ -320,7 +320,8 @@ public final class TestUtils {
 
   /**
    * Helper method to find headers with a given key in an an array of headers
-   * @param key the header to get
+   *
+   * @param key     the header to get
    * @param headers an array containing Header objects
    * @return the value of the header with key, or null
    */
@@ -337,7 +338,8 @@ public final class TestUtils {
 
   /**
    * Helper method to unpack headers from a raw OData response
-   * @param key the header to get
+   *
+   * @param key           the header to get
    * @param oDataResponse the OData raw response from the request
    * @return the value of the header with key, or null
    */

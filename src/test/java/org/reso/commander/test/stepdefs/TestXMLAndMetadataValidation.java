@@ -26,9 +26,15 @@ public class TestXMLAndMetadataValidation implements En {
   AtomicBoolean isXMLMetadataValid = new AtomicBoolean(false);
   AtomicBoolean isEdmValid = new AtomicBoolean(false);
 
-  public TestXMLAndMetadataValidation()  {
-    //background
-    runBackground();
+  public TestXMLAndMetadataValidation() {
+
+    /*
+     * Background
+     */
+    Given("^an OData test client has been created$", () -> {
+      commander.set(Commander.Builder.class.newInstance().build());
+    });
+
 
     /*
      * loads a test resource to a local string object by name
@@ -103,11 +109,5 @@ public class TestXMLAndMetadataValidation implements En {
       assertFalse(getDefaultErrorMessage("expected Entity Data Model (Edm) to fail but it succeeded!"), isEdmValid.get());
     });
 
-  }
-
-  private void runBackground() {
-    Given("^an OData test client has been created$", () -> {
-      commander.set(Commander.Builder.class.newInstance().build());
-    });
   }
 }

@@ -1,4 +1,5 @@
 package org.reso.certification.stepdefs;
+
 import io.cucumber.java8.En;
 
 public class DataDictionary implements En {

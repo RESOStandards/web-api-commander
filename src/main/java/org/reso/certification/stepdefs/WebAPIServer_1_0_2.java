@@ -1,14 +1,8 @@
 package org.reso.certification.stepdefs;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.POJONode;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.ValidationMessage;
 import io.cucumber.java8.En;
-import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
@@ -21,13 +15,12 @@ import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.commander.Commander;
-import org.reso.commander.common.TestUtils;
 import org.reso.commander.certfication.containers.WebAPITestContainer;
+import org.reso.commander.common.TestUtils;
 import org.reso.models.Request;
 import org.reso.models.Settings;
 
 import java.io.File;
-import java.io.InputStream;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
@@ -40,11 +33,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
 import static org.reso.commander.Commander.*;
-import static org.reso.commander.common.TestUtils.*;
-import static org.reso.commander.common.TestUtils.Operators.*;
 import static org.reso.commander.certfication.containers.WebAPITestContainer.*;
 import static org.reso.commander.common.ErrorMsg.getAssertResponseCodeErrorMessage;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
+import static org.reso.commander.common.TestUtils.*;
+import static org.reso.commander.common.TestUtils.Operators.*;
 
 /**
  * Contains the glue code for the Web API Server 1.0.2 Platinum Certification
@@ -66,68 +59,31 @@ public class WebAPIServer_1_0_2 implements En {
    * Entry point to the Web API Server tests
    */
   public WebAPIServer_1_0_2() {
-    
+    getTestContainer().setShowResponses(showResponses);
+
     runBackground();
 
     /*
      * REQ-WA103-END2 - validate DataSystem endpoint, if present.
      */
-    And("^the results match the expected DataSystem JSON schema$", () -> {
-      if (getTestContainer().getResponseCode() == HttpStatus.SC_OK && getTestContainer().getResponseData() != null) {
-        try {
-          JsonSchemaFactory factory = JsonSchemaFactory.getInstance();
-          InputStream is = Thread.currentThread().getContextClassLoader()
-              .getResourceAsStream("datasystem.schema.4.json");
-          JsonSchema schema = factory.getSchema(is);
-
-          ObjectMapper mapper = new ObjectMapper();
-          JsonNode node = mapper.readTree(getTestContainer().getResponseData());
-
-          if (node.findPath(JSON_VALUE_PATH).size() > 0) {
-            Set<ValidationMessage> errors = schema.validate(node);
-
-            if (errors.size() > 0) LOG.error("ERROR: JSON Schema validation errors were found!");
-            errors.forEach(LOG::error);
-
-            assertEquals("ERROR: JSON Schema validation produced errors!", 0, errors.size());
-            LOG.info("DataSystem response matches reference schema!");
-          }
-        } catch (Exception ex) {
-          fail(getDefaultErrorMessage(ex));
-        }
-      }
-    });
+    And("^the results match the expected DataSystem JSON schema$", getTestContainer()::validateDataSystem);
 
     /*
      * Edm Metadata Validator
      */
     And("^the Edm metadata returned by the server are valid$", () -> {
-      assertNotNull("ERROR: No Entity Data Model (Edm) Exists!", getTestContainer().getEdm());
-
-      try {
-        boolean isValid = getTestContainer().getCommander().validateMetadata(getTestContainer().getEdm());
-        getTestContainer().setIsValidEdm(isValid);
-        LOG.info("Edm Metadata is " + (isValid ? "valid" : "invalid") + "!");
-        assertTrue("Edm Metadata at the given service root is not valid! " + getTestContainer().getServiceRoot(), isValid);
-      } catch (Exception ex) {
-        fail("ERROR: could not validate Edm Metadata!\n" + ex.toString());
-      }
+      getTestContainer().validateEdm();
+      assertTrue("Edm Metadata at the given service root is not valid! " + getTestContainer().getServiceRoot(),
+          getTestContainer().getIsValidEdm());
     });
 
     /*
      * XML Metadata Validator
      */
     And("^the XML Metadata returned by the server are valid$", () -> {
-      assertNotNull("ERROR: XML Metadata (EDMX) Exists!", getTestContainer().getXMLMetadata());
-
-      try {
-        boolean isValid = getTestContainer().getCommander().validateMetadata(getTestContainer().getXMLMetadata());
-        getTestContainer().setIsValidXMLMetadata(isValid);
-        LOG.info("XML Metadata is " + (isValid ? "valid" : "invalid") + "!");
-        assertTrue("XML Metadata at the given service root is not valid! " + getTestContainer().getServiceRoot(), isValid);
-      } catch (Exception ex) {
-        fail("ERROR: could not validate XML Metadata!\n" + ex.toString());
-      }
+      getTestContainer().validateXMLMetadata();
+      assertTrue("XML Metadata at the given service root is not valid! " + getTestContainer().getServiceRoot(),
+          getTestContainer().getIsValidXMLMetadata());
     });
 
     /*
@@ -136,7 +92,8 @@ public class WebAPIServer_1_0_2 implements En {
     And("^the provided \"([^\"]*)\" is returned in \"([^\"]*)\"$", (String parameterUniqueIdValue, String parameterUniqueId) -> {
       try {
         String expectedValueAsString = Settings.resolveParametersString(parameterUniqueIdValue, getTestContainer().getSettings());
-        Object resolvedValue = from(getTestContainer().getResponseData()).get(Settings.resolveParametersString(parameterUniqueId, getTestContainer().getSettings()));
+        Object resolvedValue = from(getTestContainer().getResponseData())
+            .get(Settings.resolveParametersString(parameterUniqueId, getTestContainer().getSettings()));
 
         //both of the inputs should be present
         assertNotNull(expectedValueAsString);
@@ -173,7 +130,7 @@ public class WebAPIServer_1_0_2 implements En {
         assertNotNull("ERROR: no fields found within the given $select list. Check request Id: " + getTestContainer().getRequest().getRequestId() + " in your .resoscript file!",
             getTestContainer().getSelectList());
 
-        LOG.info(QueryOption.SELECT + " list is: " + getTestContainer().getSelectList() );
+        LOG.info(QueryOption.SELECT + " list is: " + getTestContainer().getSelectList());
 
         AtomicInteger numResults = new AtomicInteger();
         //iterate over the items and count the number of fields with data to determine whether there are data present
@@ -240,7 +197,7 @@ public class WebAPIServer_1_0_2 implements En {
         //TODO: convert to OData filter factory
         getTestContainer().setRequestUri(Commander.prepareURI(
             Settings.resolveParameters(getTestContainer().getSettings().getRequest(requestId), getTestContainer().getSettings()).getUrl()
-            + AMPERSAND + ODATA_QUERY_PARAMS.SKIP + EQUALS + skipCount));
+                + AMPERSAND + ODATA_QUERY_PARAMS.SKIP + EQUALS + skipCount));
         getTestContainer().executePreparedRawGetRequest();
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
@@ -306,38 +263,14 @@ public class WebAPIServer_1_0_2 implements En {
      * validate XML wrapper
      */
     And("^the XML Metadata response is valid XML$", () -> {
-      LOG.info("Validating XML Metadata response to ensure it's valid XML and matches OASIS OData XSDs...");
-      LOG.info( "See: https://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/schemas/");
-      assertNotNull("XML response data were not found in the test container! Please ensure the XML Metadata request succeeded.",
-          getTestContainer().getXMLResponseData());
-
-      try {
-        boolean isValid = Commander.validateXML(getTestContainer().getXMLResponseData());
-        getTestContainer().setIsXMLMetadataValidXML(isValid);
-        assertTrue("ERROR: invalid XML response!", isValid);
-        LOG.info("Response is valid XML!");
-      } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex));
-      }
+      getTestContainer().validateXMLMetadataXML();
+      assertTrue("ERROR: invalid XML response!", getTestContainer().getIsXMLMetadataValidXML());
     });
 
     /*
      * validate JSON wrapper
      */
-    And("^the response is valid JSON$", () -> {
-      assertNotNull(getDefaultErrorMessage("JSON response data were not found in the test container! Please ensure your request succeeded.",
-          getTestContainer().getResponseData()));
-
-      try {
-        assertTrue("ERROR: invalid JSON response!", TestUtils.isValidJson(getTestContainer().getResponseData()));
-        LOG.info("Response is valid JSON!");
-
-        if (showResponses)
-          LOG.info("Response: " + new ObjectMapper().readTree(getTestContainer().getResponseData()).toPrettyString());
-      } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex));
-      }
-    });
+    And("^the response is valid JSON$", getTestContainer()::validateJSON);
 
     /*
      * Assert HTTP Response Code given asserted OData version
@@ -851,7 +784,7 @@ public class WebAPIServer_1_0_2 implements En {
       assertFalse("ERROR: no expand field found for " + parameterExpandField, expandField.isEmpty());
 
       ClientEntitySet results = getTestContainer().getCommander().getClient().getRetrieveRequestFactory()
-              .getEntitySetRequest(getTestContainer().getRequestUri()).execute().getBody();
+          .getEntitySetRequest(getTestContainer().getRequestUri()).execute().getBody();
 
       LOG.info("Results count is: " + results.getEntities().size());
       AtomicInteger counter = new AtomicInteger();
@@ -861,11 +794,11 @@ public class WebAPIServer_1_0_2 implements En {
 
         clientEntity.getProperties().forEach(clientProperty -> {
           if (clientProperty.getName().equals(expandField)) {
-          // There may be nothing to expand, empty or null is a valid result
+            // There may be nothing to expand, empty or null is a valid result
             if (clientProperty.hasNullValue()) return;
 
             assertNotNull("ERROR: data type could not be found for " + clientProperty.getName() + "! "
-              + "\nCheck the NavigationProperty for your $expand field.", clientProperty.getValue().getTypeName());
+                + "\nCheck the NavigationProperty for your $expand field.", clientProperty.getValue().getTypeName());
 
             LOG.info("\tExpanded Field Name: " + expandField);
             clientProperty.getValue().asComplex().forEach(expandedClientProperty -> {
@@ -1007,14 +940,14 @@ public class WebAPIServer_1_0_2 implements En {
       assertNotNull("ERROR: must enter a second value", val2);
 
       assertNotNull("ERROR: must specify an 'OData-Version' in the response header!"
-          + "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Toc453752225" ,
+              + "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Toc453752225",
           getTestContainer().getServerODataHeaderVersion());
 
       LOG.info("Reported OData-Version header value: '" + getTestContainer().getServerODataHeaderVersion() + "'");
 
       assertTrue("ERROR: the 'OData-Version' response header must either be '" + val1 + "' or '" + val2 + "' (without quotes).",
           getTestContainer().getServerODataHeaderVersion().contentEquals(val1)
-              || getTestContainer().getServerODataHeaderVersion().contentEquals(val2) );
+              || getTestContainer().getServerODataHeaderVersion().contentEquals(val2));
     });
 
     /*
@@ -1034,6 +967,10 @@ public class WebAPIServer_1_0_2 implements En {
           getTestContainer().getIsMetadataValid());
 
     });
+  }
+
+  static WebAPITestContainer getTestContainer() {
+    return container.get();
   }
 
   /*
@@ -1056,12 +993,8 @@ public class WebAPIServer_1_0_2 implements En {
       //execute request
       getTestContainer().executePreparedRawGetRequest();
     } catch (Exception ex) {
-      LOG.debug("Exception was thrown in " + this.getClass() + ": " + ex.toString());
+      LOG.info("Exception was thrown in " + this.getClass() + ": " + ex.toString());
     }
-  }
-
-  static WebAPITestContainer getTestContainer() {
-    return container.get();
   }
 
   /**

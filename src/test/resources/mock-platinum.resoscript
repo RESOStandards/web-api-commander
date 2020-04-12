@@ -79,7 +79,7 @@
     <TokenURI><!-- REQUIRED: Your token endpoint URI--></TokenURI>
     <ClientScope>
 
-    <!--OPTIONAL - your client scope. See: https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/ -->
+      <!--OPTIONAL - your client scope. See: https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/ -->
     </ClientScope>
 
   </ClientSettings>
@@ -98,11 +98,11 @@
     ############################################################-->
 
     <!-- REQUIRED: Core - The name of the resource being tested. Should not be a path. -->
-    <Parameter Name="EndpointResource" Value="Property" />
+    <Parameter Name="EndpointResource" Value="Property"/>
 
     <!-- REQUIRED: Core - The DataSystems endpoint being tested
         NOTE: the FULL DataSystems URL is required as it might not be relative to the Service Root.-->
-    <Parameter Name="EndpointDataSystem" Value="https://api.reso.org/OData/DataSystem" />
+    <Parameter Name="EndpointDataSystem" Value="https://api.reso.org/OData/DataSystem"/>
 
     <!--
     ############################################################
@@ -112,52 +112,53 @@
     <!-- Note: some of the required values already have sample values provided. See later sections for their values.-->
 
     <!-- REQUIRED: Core - Substitute key name from your Resource here, either Key or KeyNumeric -->
-    <Parameter Name="KeyOrKeyNumericField" Value="ListingKey" />
+    <Parameter Name="KeyOrKeyNumericField" Value="ListingKey"/>
 
     <!-- REQUIRED: Core - Provide a value for the KeyOrKeyNumeric from your server
                    NOTE: if you are using Key instead of KeyNumeric values, wrap your Key in quotes: 'myUniqueKey123'
     -->
-    <Parameter Name="KeyOrKeyNumericValue" Value="12345" />
+    <Parameter Name="KeyOrKeyNumericValue" Value="12345"/>
 
     <!-- REQUIRED: Core - Integer Field. Should be one of: Type="Edm.Int16", Type="Edm.Int32", or Type="Edm.Int64" -->
-    <Parameter Name="IntegerField" Value="BedroomsTotal" />
+    <Parameter Name="IntegerField" Value="BedroomsTotal"/>
 
     <!-- REQUIRED: Core - Enumerated Field for Single-Value Testing -->
-    <Parameter Name="SingleValueLookupField" Value="PropertyType" />
-    <Parameter Name="SingleLookupValue" Value="Residential" />
-    <Parameter Name="SingleValueLookupNamespace" Value="PropertyEnums.PropertyType" />
+    <Parameter Name="SingleValueLookupField" Value="PropertyType"/>
+    <Parameter Name="SingleLookupValue" Value="Residential"/>
+    <Parameter Name="SingleValueLookupNamespace" Value="PropertyEnums.PropertyType"/>
 
     <!-- REQUIRED: Core - Enumerated Field for Multi-value testing -->
-    <Parameter Name="MultipleValueLookupField" Value="Appliances" />
-    <Parameter Name="MultipleValueLookupNamespace" Value="PropertyEnums.Appliances" />
-    <Parameter Name="MultipleLookupValue1" Value="Refrigerator" />
-    <Parameter Name="MultipleLookupValue2" Value="Stacked" />
+    <Parameter Name="MultipleValueLookupField" Value="Appliances"/>
+    <Parameter Name="MultipleValueLookupNamespace" Value="PropertyEnums.Appliances"/>
+    <Parameter Name="MultipleLookupValue1" Value="Refrigerator"/>
+    <Parameter Name="MultipleLookupValue2" Value="Stacked"/>
 
     <!-- REQUIRED: Bronze - Date Field for comparisons. Should be Type="Edm.Date" -->
-    <Parameter Name="DateField" Value="ListingContractDate" />
-    <Parameter Name="TimestampField" Value="ModificationTimestamp" />
+    <Parameter Name="DateField" Value="ListingContractDate"/>
+    <Parameter Name="TimestampField" Value="ModificationTimestamp"/>
 
     <!-- REQUIRED: Platinum - String Field for comparisons. Should be Type="Edm.String" -->
-    <Parameter Name="StringField" Value="StreetName" />
+    <Parameter Name="StringField" Value="StreetName"/>
 
     <!-- REQUIRED: Platinum - Expand Testing -->
-    <Parameter Name="ExpandField" Value="ListAgent" />
+    <Parameter Name="ExpandField" Value="ListAgent"/>
 
     <!-- REQUIRED: Platinum - GeoSpatial Testing -->
-    <Parameter Name="GeoSpatialLatitudeField" Value="Latitude" />
-    <Parameter Name="GeoSpatialLongitudeField" Value="Longitude" />
-    <Parameter Name="GeoSpatialField" Value="Coordinates" />
-    <Parameter Name="GeoSpatialValue" Value="120.34342 35.13123123" /> <!-- "Longitude Latitude" -->
+    <Parameter Name="GeoSpatialLatitudeField" Value="Latitude"/>
+    <Parameter Name="GeoSpatialLongitudeField" Value="Longitude"/>
+    <Parameter Name="GeoSpatialField" Value="Coordinates"/>
+    <Parameter Name="GeoSpatialValue" Value="120.34342 35.13123123"/> <!-- "Longitude Latitude" -->
 
     <!-- REQUIRED: New Fields for WS103 Testing -->
-    <Parameter Name="ValueField" Value="AboveGradeFinishedArea" />
-    <Parameter Name="CastField" Value="AboveGradeFinishedArea" />
-    <Parameter Name="CastFieldValue" Value="YOUR CastFieldValue GOES HERE. FOR EXAMPLE, 1200" />
-    <Parameter Name="ConcatFieldOne" Value="StreetName" />
-    <Parameter Name="ConcatFieldOneValue" Value="REQUIRED: Your OneValue GOES HERE>" />
-    <Parameter Name="ConcatFieldTwo" Value="City" />
-    <Parameter Name="ConcatFieldTwoValue" Value="YOUR TwoValue GOES HERE" />
-    <Parameter Name="ConcatFieldBothValue" Value="Your OneValue: TwoValue GOES HERE" /> <!-- format: "OneValue: TwoValue" -->
+    <Parameter Name="ValueField" Value="AboveGradeFinishedArea"/>
+    <Parameter Name="CastField" Value="AboveGradeFinishedArea"/>
+    <Parameter Name="CastFieldValue" Value="YOUR CastFieldValue GOES HERE. FOR EXAMPLE, 1200"/>
+    <Parameter Name="ConcatFieldOne" Value="StreetName"/>
+    <Parameter Name="ConcatFieldOneValue" Value="REQUIRED: Your OneValue GOES HERE>"/>
+    <Parameter Name="ConcatFieldTwo" Value="City"/>
+    <Parameter Name="ConcatFieldTwoValue" Value="YOUR TwoValue GOES HERE"/>
+    <Parameter Name="ConcatFieldBothValue"
+               Value="Your OneValue: TwoValue GOES HERE"/> <!-- format: "OneValue: TwoValue" -->
 
     <!--
     ############################################################
@@ -165,36 +166,36 @@
     ############################################################-->
 
     <!-- IntegerField Sample Values-->
-    <Parameter Name="IntegerValueLow" Value="9" />
-    <Parameter Name="IntegerValueHigh" Value="15" />
-    <Parameter Name="IntegerNotFound" Value="-1" />
+    <Parameter Name="IntegerValueLow" Value="9"/>
+    <Parameter Name="IntegerValueHigh" Value="15"/>
+    <Parameter Name="IntegerNotFound" Value="-1"/>
 
     <!-- Integer Field for "not" testing -->
-    <Parameter Name="FilterNotField" Value="*Parameter_IntegerField*" />
-    <Parameter Name="FilterNotValue" Value="-1" />
+    <Parameter Name="FilterNotField" Value="*Parameter_IntegerField*"/>
+    <Parameter Name="FilterNotValue" Value="-1"/>
 
     <!-- Platinum - String Fields for testing -->
-    <Parameter Name="ContainsValue" Value="M" />
-    <Parameter Name="EndsWithValue" Value="Rd" />
-    <Parameter Name="StartsWithValue" Value="M" />
-    <Parameter Name="ToLowerValue" Value="main" />
-    <Parameter Name="ToUpperValue" Value="MAIN" />
+    <Parameter Name="ContainsValue" Value="M"/>
+    <Parameter Name="EndsWithValue" Value="Rd"/>
+    <Parameter Name="StartsWithValue" Value="M"/>
+    <Parameter Name="ToLowerValue" Value="main"/>
+    <Parameter Name="ToUpperValue" Value="MAIN"/>
 
     <!-- Gold and Platinum: Date Fields for testing -->
-    <Parameter Name="DateTimeValue" Value="2018-12-31T23:55:55-09:00" />
-    <Parameter Name="DateValue" Value="2018-12-31" />
-    <Parameter Name="YearValue" Value="2018" />
-    <Parameter Name="MonthValue" Value="12" />
-    <Parameter Name="DayValue" Value="31" />
-    <Parameter Name="TimeValue" Value="23:55:55" />
-    <Parameter Name="HourValue" Value="23" />
-    <Parameter Name="MinuteValue" Value="55" />
-    <Parameter Name="SecondValue" Value="55" />
-    <Parameter Name="FractionalValue" Value="30" />
+    <Parameter Name="DateTimeValue" Value="2018-12-31T23:55:55-09:00"/>
+    <Parameter Name="DateValue" Value="2018-12-31"/>
+    <Parameter Name="YearValue" Value="2018"/>
+    <Parameter Name="MonthValue" Value="12"/>
+    <Parameter Name="DayValue" Value="31"/>
+    <Parameter Name="TimeValue" Value="23:55:55"/>
+    <Parameter Name="HourValue" Value="23"/>
+    <Parameter Name="MinuteValue" Value="55"/>
+    <Parameter Name="SecondValue" Value="55"/>
+    <Parameter Name="FractionalValue" Value="30"/>
 
     <!-- Platinum - GeoSpatial query values -->
-    <Parameter Name="GeoSpatialDistanceValue" Value="1000" />
-    <Parameter Name="SRID" Value="4326" />
+    <Parameter Name="GeoSpatialDistanceValue" Value="1000"/>
+    <Parameter Name="SRID" Value="4326"/>
 
 
     <!--
@@ -203,13 +204,13 @@
     ############################################################-->
 
     <!-- 200 Response OK: This should always work! No need to change it -->
-    <Parameter Name="200_OK" Value="*Parameter_EndpointResource*" />
+    <Parameter Name="200_OK" Value="*Parameter_EndpointResource*"/>
 
     <!-- REQUIRED: 400 Bad Request - Adjust to something that produces a 400 response if this doesn't work -->
-    <Parameter Name="400BadRequest" Value="*Parameter_EndpointResource*?$filter=BadField eq 'SoBad'" />
+    <Parameter Name="400BadRequest" Value="*Parameter_EndpointResource*?$filter=BadField eq 'SoBad'"/>
 
     <!-- REQUIRED: 404 Not Found - You shouldn't need to change this -->
-    <Parameter Name="404NotFound" Value="ResourceNotFound" />
+    <Parameter Name="404NotFound" Value="ResourceNotFound"/>
 
     <!--
     ############################################################
@@ -217,32 +218,37 @@
     ############################################################-->
 
     <!-- For Top, Skip, and Sort Testing -->
-    <Parameter Name="TopCount" Value="5" />
-    <Parameter Name="SortCount" Value="20" />
+    <Parameter Name="TopCount" Value="5"/>
+    <Parameter Name="SortCount" Value="20"/>
 
     <!-- New Values for WS103 Testing -->
-    <Parameter Name="CastFieldType" Value="Edm.String" />
+    <Parameter Name="CastFieldType" Value="Edm.String"/>
 
     <!-- Required resource lists for Standard Resource Names requirement -->
-    <Parameter Name="WebAPI102_RequiredResourceList" Value="Property,Member,Office,Media" />
+    <Parameter Name="WebAPI102_RequiredResourceList" Value="Property,Member,Office,Media"/>
 
     <!-- Allowed Resources - Update to 1.8 once it's approved -->
-    <Parameter Name="DD17_WellKnownResourceList" Value="Property,Member,Office,Contacts,ContactListings,HistoryTransactional,InternetTracking,Media,OpenHouse,OUID,Prospecting,Queue,Rules,SavedSearch,Showing,Teams" />
+    <Parameter Name="DD17_WellKnownResourceList"
+               Value="Property,Member,Office,Contacts,ContactListings,HistoryTransactional,InternetTracking,Media,OpenHouse,OUID,Prospecting,Queue,Rules,SavedSearch,Showing,Teams"/>
 
     <!-- Computed Has Value - uses SingleValueLookup field -->
-    <Parameter Name="FilterHasField" Value="*Parameter_SingleValueLookupField*" />
-    <Parameter Name="FilterHasValue" Value="*Parameter_SingleValueLookupValue*" />
-    <Parameter Name="FilterHasLookupNamespace" Value="*Parameter_SingleValueLookupNamespace*" />
-    <Parameter Name="FilterHasLookupValue" Value="*Parameter_SingleLookupValue*" />
+    <Parameter Name="FilterHasField" Value="*Parameter_SingleValueLookupField*"/>
+    <Parameter Name="FilterHasValue" Value="*Parameter_SingleValueLookupValue*"/>
+    <Parameter Name="FilterHasLookupNamespace" Value="*Parameter_SingleValueLookupNamespace*"/>
+    <Parameter Name="FilterHasLookupValue" Value="*Parameter_SingleLookupValue*"/>
 
     <!-- Computed Enumeration Values - do not change -->
-    <Parameter Name="SingleValueLookupValue" Value="*Parameter_SingleValueLookupNamespace*'*Parameter_SingleLookupValue*'" />
-    <Parameter Name="FilterHasValueLookupValue" Value="*Parameter_FilterHasLookupNamespace*'*Parameter_FilterHasLookupValue*'" />
-    <Parameter Name="MultipleValueLookupValue1" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue1*'"/>
-    <Parameter Name="MultipleValueLookupValue2" Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue2*'" />
+    <Parameter Name="SingleValueLookupValue"
+               Value="*Parameter_SingleValueLookupNamespace*'*Parameter_SingleLookupValue*'"/>
+    <Parameter Name="FilterHasValueLookupValue"
+               Value="*Parameter_FilterHasLookupNamespace*'*Parameter_FilterHasLookupValue*'"/>
+    <Parameter Name="MultipleValueLookupValue1"
+               Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue1*'"/>
+    <Parameter Name="MultipleValueLookupValue2"
+               Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue2*'"/>
 
     <!-- OPTIONAL: Useful for testing the OData Format Parameter - Value="?$format=application/xml" -->
-    <Parameter Name="OptionalMetadataFormatParameter" Value="" />
+    <Parameter Name="OptionalMetadataFormatParameter" Value=""/>
 
     <!--
     ############################################################
@@ -250,8 +256,8 @@
     ############################################################-->
 
     <!-- OPTIONAL: System Specific Additional Required Parameters for Queries. Leave Blank if none. -->
-    <Parameter Name="RequiredParameters" Value="" />
-    <Parameter Name="RequiredParametersFilter" Value="" />
+    <Parameter Name="RequiredParameters" Value=""/>
+    <Parameter Name="RequiredParametersFilter" Value=""/>
 
   </Parameters>
 

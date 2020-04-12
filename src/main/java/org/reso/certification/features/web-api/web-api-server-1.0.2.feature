@@ -32,7 +32,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-END2 @core @2.4.1 @core-endorsement @datasystem
   Scenario: REQ-WA103-END2 - Data System Endpoint test
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-END2"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -42,7 +42,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QR1 @core @2.4.1 @query-functions-endorsement
   Scenario: REQ-WA103-QR1 - Search Parameters: Select KeyOrKeyNumeric Field
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QR1"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -52,7 +52,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QR3 @core @2.4.2 @query-functions-endorsement
   Scenario: REQ-WA103-QR3 - Query Support: $select
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QR3"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -63,7 +63,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QR4 @core @2.4.2 @client-paging-endorsement
   Scenario: REQ-WA103-QR4 - Query Support: $top
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QR4"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -75,7 +75,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QR5 @core @2.4.2 @query-support-endorsement
   Scenario: REQ-WA103-QR5 - Query Support: $skip
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QR5"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -94,7 +94,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO1.1 @core @2.4.4 @core-endorsement @OData-4.0
   Scenario: REQ-WA103-QO1.1 - Query Support: $select case-sensitivity for OData 4.0
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO1.1"
     And the server has an OData-Version header value of "4.0" or "4.01"
     Then the server responds with a status code of 400 if the server reports OData-Version "4.0"
@@ -102,7 +102,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO1.2 @core @2.4.4 @core-endorsement @OData-4.0
   Scenario: REQ-WA103-QO1.2 - Query Support: $filter case-sensitivity for OData 4.0
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO1.2"
     And the server has an OData-Version header value of "4.0" or "4.01"
     Then the server responds with a status code of 400 if the server reports OData-Version "4.0"
@@ -110,7 +110,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO1.3 @core @2.4.4 @core-endorsement @OData-4.0
   Scenario: REQ-WA103-QO1.3 - Query Support: $orderby asc case-sensitivity for OData 4.0
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO1.3"
     And the server has an OData-Version header value of "4.0" or "4.01"
     Then the server responds with a status code of 400 if the server reports OData-Version "4.0"
@@ -118,7 +118,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO1.4 @core @2.4.4 @core-endorsement @OData-4.0
   Scenario: REQ-WA103-QO1.4 - Query Support: $orderby desc case-sensitivity for OData 4.0
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO1.4"
     And the server has an OData-Version header value of "4.0" or "4.01"
     Then the server responds with a status code of 400 if the server reports OData-Version "4.0"
@@ -126,7 +126,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO2 @core @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO2 - Query Support: $filter - Integer Comparison: eq
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO2"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -138,7 +138,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO3 @core @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO3 - Query Support: $filter - Integer Comparison: ne
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO3"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -150,7 +150,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO4 @core @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO4 - Query Support: $filter - Integer Comparison: gt
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO4"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -162,7 +162,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO5 @core @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO5 - Query Support: $filter - Integer Comparison: ge
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO5"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -174,7 +174,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO6 @core @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO6 - Query Support: $filter - Integer Comparison: lt
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO6"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -186,7 +186,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO7 @core @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO7 - Query Support: $filter - Integer Comparison: le
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO7"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -198,7 +198,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO9 @core @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO9 - Query Support: $filter - Integer Comparison: and
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO9"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -210,7 +210,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO10 @core @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO10 - Query Support: $filter - Integer Comparison: or
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO10"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -222,7 +222,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO11 @core @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO11 - Query Support: $filter - Integer Comparison: not() (operator)
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO11"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -234,7 +234,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO25 @core @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO25 - Query Support: $filter: Date portion of EdmDateTimeOffset field is greater than EdmDate value
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO25"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -246,7 +246,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO26 @core @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO26 - Query Support: $filter: Time portion of EdmDateTimeOffset field is less than EdmTime value
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO26"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -258,7 +258,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO26.2 @core @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO26.2 - Query Support: $filter: Date: EdmDateTimeOffset field is less than EdmDateTimeOffset value
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO26.2"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -270,7 +270,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO27 @core @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO27 - Query Support: $filter: DateTimeOffset le now()
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO27"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -287,28 +287,28 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-END1 @core @2.4.1 @core-endorsement
   Scenario: REQ-WA103-END1 - Service Endpoint
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-END1"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
 
   @REQ-WA103-RC3 @core @2.5.2 @core-endorsement
   Scenario: REQ-WA103-RC3 - 200 OK Request
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-RC3"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
 
   @REQ-WA103-RC5 @core @2.4.2 @core-endorsement
   Scenario: REQ-WA103-RC5 - 400 Bad Request
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-RC5"
     Then the server responds with a status code of 400
     And the server has an OData-Version header value of "4.0" or "4.01"
 
   @REQ-WA103-RC07 @core @2.5.2 @core-endorsement
   Scenario: REQ-WA103-RC07 - 404 Not Found Request
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-RC07"
     Then the server responds with a status code of 404
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -319,7 +319,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QM7 @bronze @2.4.9 @filterability-endorsement
   Scenario: REQ-WA103-QM7 - Support Single Value Lookups
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QM7"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -331,7 +331,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QM8 @bronze @2.4.10 @filterability-endorsement
   Scenario: REQ-WA103-QM8 - Support Multi Value Lookups
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QM8"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -343,7 +343,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QM8.2 @bronze @2.4.10 @filterability-endorsement
   Scenario: REQ-WA103-QM8.2 - Support Multi Value Lookups multiple values
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QM8.2"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -356,7 +356,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO8 @bronze @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO8 - Query Support: $filter - Comparison: has
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO8"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -368,7 +368,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO28.1 @bronze @2.4.4 @sortability-endorsement
   Scenario: REQ-WA103-QO28.1 - Query Support: $orderby asc filtered
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO28.1"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -380,7 +380,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO28.2 @bronze @2.4.4 @sortability-endorsement
   Scenario: REQ-WA103-QO28.2 - Query Support: $orderby asc no filter
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO28.2"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -392,7 +392,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO28.3 @bronze @2.4.4 @sortability-endorsement
   Scenario: REQ-WA103-QO28.3 - Query Support: $orderby desc filtered
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO28.3"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -404,7 +404,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO28.4 @bronze @2.4.4 @sortability-endorsement
   Scenario: REQ-WA103-QO28.4 - Query Support: $orderby desc no filter
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO28.4"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -421,7 +421,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO18.1 @gold @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO18.1 - Query Support: $filter: Date: year
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO18.1"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -433,7 +433,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO18.2 @gold @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO18.2 - Query Support: $filter: Date: year comparison with timestamp
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO18.2"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -445,7 +445,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO19.1 @gold @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO19.1 - Query Support: $filter: Date: month
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO19.1"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -457,7 +457,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO19.2 @gold @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO19.2 - Query Support: $filter: Date: month comparison with timestamp
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO19.2"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -469,7 +469,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO20.1 @gold @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO20.1 - Query Support: $filter: Date: day
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO20.1"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -481,7 +481,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO20.2 @gold @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO20.2 - Query Support: $filter: Date: day comparison with timestamp
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO20.2"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -493,7 +493,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO21 @gold @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO21 - Query Support: $filter: Date: hour comparison with timestamp
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO21"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -505,7 +505,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO22 @gold @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO22 - Query Support: $filter: Date: minute comparison with timestamp
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO22"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -517,7 +517,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO23 @gold @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO23 - Query Support: $filter: Date: second comparison with timestamp
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO23"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -529,7 +529,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO24 @gold @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO24 - Query Support: $filter: Date: fractional seconds comparison with timestamp
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO24"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -545,7 +545,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO13 @platinum @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO13 - Query Support: $filter - String: contains
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO13"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -557,7 +557,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO14 @platinum @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO14 - Query Support: $filter - String: ends with
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO14"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -569,7 +569,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO15 @platinum @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO15 - Query Support: $filter - String: starts with
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO15"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -581,7 +581,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO16 @platinum @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO16 - Query Support: $filter - String: tolower() support
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO16"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -593,7 +593,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO17 @platinum @2.4.4 @filterability-endorsement
   Scenario: REQ-WA103-QO17 - Query Support: $filter - String: toupper() support
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO17"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -605,7 +605,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO29.1 @platinum @2.4.4 @expandability-endorsement
   Scenario: REQ-WA103-QO29.1 - Query Support: $expand
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO29.1"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -619,7 +619,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO29.2 @platinum @2.4.4 @expandability-endorsement @todo
   Scenario: REQ-WA103-QO29.2 - Query Support: $expand media photo count (TODO)
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO29.2"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -630,7 +630,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO29.3 @platinum @2.4.4 @expandability-endorsement @todo
   Scenario: REQ-WA103-QO29.3 - Query Support: $expand required field (TODO)
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO29.3"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -641,7 +641,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QM3 @platinum @2.4.6 @queryability-endorsement @todo
   Scenario: REQ-WA103-QM3 - Support Literals: any() Lambda Expression (TODO)
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QM3"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -652,7 +652,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QM4 @platinum @2.4.6 @queryability-endorsement @todo
   Scenario: REQ-WA103-QM4 - Query Support Literals: all() Lambda Operator (TODO)
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QM4"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -663,7 +663,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QM5.1 @platinum @2.4.7 @queryability-endorsement @geospatial @todo
   Scenario: REQ-WA103-QM5.1 - Query Support: GeoSpatial Search Implementation (TODO)
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QM5.1"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -674,7 +674,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QM5.2 @platinum @2.4.7 @queryability-endorsement @geospatial @todo
   Scenario: REQ-WA103-QM5.2 - Query Support: GeoSpatial Search Implementation (TODO)
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QM5.2"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -685,7 +685,7 @@ Feature: Web API Server 1.0.2 Certification
 
   @REQ-WA103-QO12 @platinum @2.4.4 @filterability-endorsement @filterability-endorsement
   Scenario: REQ-WA103-QO12 - Query Support: $filter - Grouping: filter (ge, le) and (gt, lt) and expect (gt, lt)
-    Given valid metadata have been retrieved    
+    Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "REQ-WA103-QO12" using the OData Client
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
