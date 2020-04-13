@@ -30,4 +30,3 @@ jobs:
       run: chmod +x gradlew
     - name: Build and Run acceptance tests
       run: ./gradlew build
-    - name: Create Build Artifacts
