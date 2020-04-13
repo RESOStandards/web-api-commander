@@ -577,7 +577,7 @@ public final class WebAPITestContainer implements TestContainer {
   }
 
   public boolean getHaveMetadataBeenRequested() {
-    return false;
+    return haveMetadataBeenRequested.get();
   }
 
   public boolean getShowResponses() {

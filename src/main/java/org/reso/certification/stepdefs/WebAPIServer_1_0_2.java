@@ -94,8 +94,8 @@ public class WebAPIServer_1_0_2 implements En {
       if (!getTestContainer().getHaveMetadataBeenRequested()) {
         //will lazy-load metadata from the server if not yet requested
         getTestContainer().getXMLMetadata();
-        getTestContainer().validateMetadata();
       }
+      getTestContainer().validateMetadata();
       assertTrue("XML Metadata at the given service root is not valid! " + getTestContainer().getServiceRoot(),
           getTestContainer().getIsValidXMLMetadata());
     });
