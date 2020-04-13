@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
+import org.reso.certification.testgenerators.DataDictionaryBDDGenerator;
 import org.reso.models.ClientSettings;
 import org.reso.models.Request;
 import org.reso.models.Settings;
@@ -247,6 +248,9 @@ public class App {
         //converts metadata in input source file to output file
         commander.convertEDMXToSwagger(inputFilename);
 
+      } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)) {
+        DataDictionaryBDDGenerator generator = new DataDictionaryBDDGenerator();
+        generator.readDictionaryReference();
       } else {
         printHelp(APP_OPTIONS.getOptions());
       }
@@ -471,6 +475,8 @@ public class App {
       OptionGroup actions = new OptionGroup()
           .addOption(Option.builder().argName("r").longOpt(ACTIONS.RUN_RESOSCRIPT)
               .desc("Runs commands in RESOScript file given as <inputFile>.").build())
+          .addOption(Option.builder().argName("a").longOpt(ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)
+                  .desc("Generates acceptance tests in the current directory.").build())
           .addOption(Option.builder().argName("m").longOpt(ACTIONS.GET_METADATA)
               .desc("Fetches metadata from <serviceRoot> using <bearerToken> and saves results in <outputFile>.").build())
           .addOption(Option.builder().argName("g").longOpt(ACTIONS.GET_ENTITIES)
@@ -502,12 +508,13 @@ public class App {
 
     static class ACTIONS {
       //actions
-      static String RUN_RESOSCRIPT = "runRESOScript";
-      static String GET_METADATA = "getMetadata";
-      static String VALIDATE_METADATA = "validateMetadata";
-      static String GET_ENTITIES = "getEntities";
-      static String SAVE_RAW_GET_REQUEST = "saveRawGetRequest";
-      static String CONVERT_EDMX_TO_OPEN_API = "convertEDMXtoOpenAPI";
+      public static final String GENERATE_DD_ACCEPTANCE_TESTS = "generateDDAcceptanceTests";
+      public static final String RUN_RESOSCRIPT = "runRESOScript";
+      public static final String GET_METADATA = "getMetadata";
+      public static final String VALIDATE_METADATA = "validateMetadata";
+      public static final String GET_ENTITIES = "getEntities";
+      public static final String SAVE_RAW_GET_REQUEST = "saveRawGetRequest";
+      public static final String CONVERT_EDMX_TO_OPEN_API = "convertEDMXtoOpenAPI";
     }
   }
 }

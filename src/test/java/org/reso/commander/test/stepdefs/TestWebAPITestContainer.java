@@ -2,7 +2,7 @@ package org.reso.commander.test.stepdefs;
 
 import io.cucumber.java8.En;
 import org.apache.http.HttpStatus;
-import org.reso.commander.certfication.containers.WebAPITestContainer;
+import org.reso.certfication.containers.WebAPITestContainer;
 import org.reso.commander.common.TestUtils;
 import org.reso.models.Settings;
 
