@@ -68,12 +68,14 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicReference<String> xmlResponseData = new AtomicReference<>();
   private final AtomicBoolean showResponses = new AtomicBoolean(false);
 
-  // Metadata state variables
+  // Metadata and DataSystem state variables
   private final AtomicBoolean isValidXMLMetadata = new AtomicBoolean(false);
   private final AtomicBoolean isValidEdm = new AtomicBoolean(false);
-  private final AtomicBoolean isXMLMetadataValidXML = new AtomicBoolean(false);
-  private final AtomicBoolean hasXMLMetadataBeenRequested = new AtomicBoolean(false);
-  private final AtomicBoolean hasEdmBeenRequested = new AtomicBoolean(false);
+  private final AtomicBoolean isValidXMLMetadataXML = new AtomicBoolean(false);
+  private final AtomicBoolean haveMetadataBeenRequested = new AtomicBoolean(false);
+  private final AtomicBoolean haveEdmMetadataBeenRetrieved = new AtomicBoolean(false);
+  private final AtomicBoolean isDataSystemValid = new AtomicBoolean(false);
+  private final AtomicReference<Set<ValidationMessage>> schemaValidationErrors = new AtomicReference<>();
 
   // request instance variables - these get reset with every request
   private final AtomicReference<String> selectList = new AtomicReference<>();
@@ -271,17 +273,8 @@ public final class WebAPITestContainer implements TestContainer {
    */
   public Edm getEdm() throws Exception {
     if (edm.get() == null) {
-      try {
-        LOG.info("Requesting the entity data model (Edm) from service root at: " + getServiceRoot());
-        ODataRetrieveResponse<Edm> response = getCommander().prepareEdmMetadataRequest().execute();
-        responseCode.set(response.getStatusCode());
-        setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, response));
-        edm.set(response.getBody());
-      } catch (Exception ex) {
-        processODataRequestException(ex);
-      } finally {
-        hasEdmBeenRequested.set(true);
-      }
+      assertNotNull(getDefaultErrorMessage("no XML response data found, cannot return Edm!"), xmlResponseData.get());
+      edm.set(Commander.deserializeEdm(xmlResponseData.get(), getCommander().getClient()));
     }
     return edm.get();
   }
@@ -320,7 +313,7 @@ public final class WebAPITestContainer implements TestContainer {
       } catch (Exception ex) {
         processODataRequestException(ex);
       } finally {
-        hasXMLMetadataBeenRequested.set(true);
+        haveMetadataBeenRequested.set(true);
       }
     }
     return xmlMetadata.get();
@@ -557,21 +550,7 @@ public final class WebAPITestContainer implements TestContainer {
     setODataServerErrorException(exception);
   }
 
-  public final boolean hasValidMetadata() {
-    return xmlMetadata.get() != null && getIsValidXMLMetadata()
-        && xmlResponseData.get() != null && getIsXMLMetadataValidXML()
-        && edm.get() != null && getIsValidEdm();
-  }
 
-  public final void validateMetadata() {
-    validateXMLMetadataXML();
-
-    setXMLMetadata(Commander.deserializeXMLMetadata(getXMLResponseData(), getCommander().getClient()));
-    validateXMLMetadata();
-
-    setEdm(Commander.deserializeEdm(getXMLResponseData(), getCommander().getClient()));
-    validateEdm();
-  }
 
   public boolean getIsValidXMLMetadata() {
     return isValidXMLMetadata.get();
@@ -589,16 +568,16 @@ public final class WebAPITestContainer implements TestContainer {
     isValidEdm.set(isValid);
   }
 
-  public boolean getIsXMLMetadataValidXML() {
-    return isXMLMetadataValidXML.get();
+  public boolean getIsValidXMLMetadataXML() {
+    return isValidXMLMetadataXML.get();
   }
 
-  private void setAreXMLMetadataValidXML(boolean isValid) {
-    isXMLMetadataValidXML.set(isValid);
+  private void setIsValidXMLMetadataXML(boolean isValid) {
+    isValidXMLMetadataXML.set(isValid);
   }
 
-  public boolean haveMetadataBeenRequested() {
-    return hasXMLMetadataBeenRequested.get() && hasEdmBeenRequested.get();
+  public boolean getHaveMetadataBeenRequested() {
+    return false;
   }
 
   public boolean getShowResponses() {
@@ -609,8 +588,31 @@ public final class WebAPITestContainer implements TestContainer {
     showResponses.set(value);
   }
 
-  public void validateDataSystem() {
-    if (getResponseCode() == HttpStatus.SC_OK && this.getResponseData() != null) {
+  public boolean getIsValidDataSystem() {
+    return isDataSystemValid.get();
+  }
+
+  public final boolean hasValidMetadata() {
+    return xmlMetadata.get() != null && getIsValidXMLMetadata()
+        && xmlResponseData.get() != null && getIsValidXMLMetadataXML()
+        && edm.get() != null && getIsValidEdm();
+  }
+
+  public final WebAPITestContainer validateMetadata() {
+    assertNotNull(getDefaultErrorMessage("no XML response data found!"), getXMLResponseData());
+    validateXMLMetadataXML();
+
+    setXMLMetadata(Commander.deserializeXMLMetadata(getXMLResponseData(), getCommander().getClient()));
+    validateXMLMetadata();
+
+    setEdm(Commander.deserializeEdm(getXMLResponseData(), getCommander().getClient()));
+    validateEdm();
+
+    return this;
+  }
+
+  public WebAPITestContainer validateDataSystem() {
+    if (getResponseData() != null) {
       try {
         JsonSchemaFactory factory = JsonSchemaFactory.getInstance();
         InputStream is = Thread.currentThread().getContextClassLoader()
@@ -621,21 +623,24 @@ public final class WebAPITestContainer implements TestContainer {
         JsonNode node = mapper.readTree(getResponseData());
 
         if (node.findPath(JSON_VALUE_PATH).size() > 0) {
-          Set<ValidationMessage> errors = schema.validate(node);
+          schemaValidationErrors.set(schema.validate(node));
 
-          if (errors.size() > 0) LOG.error("ERROR: JSON Schema validation errors were found!");
-          errors.forEach(LOG::error);
-
-          assertEquals("ERROR: JSON Schema validation produced errors!", 0, errors.size());
-          LOG.info("DataSystem response matches reference schema!");
+          if (getSchemaValidationErrors().size() > 0) {
+            LOG.error("ERROR: JSON Schema validation errors were found!");
+            getSchemaValidationErrors().forEach(LOG::error);
+          } else {
+            LOG.info("DataSystem response matches reference schema!");
+            isDataSystemValid.set(true);
+          }
         }
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
     }
+    return this;
   }
 
-  public void validateEdm() {
+  public WebAPITestContainer validateEdm() {
     try {
       assertNotNull("ERROR: No Entity Data Model (Edm) Exists!", getEdm());
       boolean isValid = getCommander().validateMetadata(getEdm());
@@ -644,20 +649,23 @@ public final class WebAPITestContainer implements TestContainer {
     } catch (Exception ex) {
       fail("ERROR: could not validate Edm Metadata!\n" + ex.toString());
     }
+    return this;
   }
 
-  public void validateXMLMetadata() {
+  public WebAPITestContainer validateXMLMetadata() {
     try {
-      assertNotNull("ERROR: XML Metadata (EDMX) Exists!", getXMLMetadata());
+      //note that this will lazy-load XML metadata when it's not present
+      assertNotNull(getDefaultErrorMessage("XML metadata was not found!"), getXMLMetadata());
       boolean isValid = getCommander().validateMetadata(getXMLMetadata());
       setIsValidXMLMetadata(isValid);
       LOG.info("XML Metadata is " + (isValid ? "valid" : "invalid") + "!");
     } catch (Exception ex) {
       fail("ERROR: could not validate XML Metadata!\n" + ex.toString());
     }
+    return this;
   }
 
-  public void validateXMLMetadataXML() {
+  public WebAPITestContainer validateXMLMetadataXML() {
     LOG.info("Validating XML Metadata response to ensure it's valid XML and matches OASIS OData XSDs...");
     LOG.info("See: https://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/schemas/");
     assertNotNull("XML response data were not found in the test container! Please ensure the XML Metadata request succeeded.",
@@ -665,14 +673,15 @@ public final class WebAPITestContainer implements TestContainer {
 
     try {
       boolean isValid = Commander.validateXML(getXMLResponseData());
-      setAreXMLMetadataValidXML(isValid);
+      setIsValidXMLMetadataXML(isValid);
       LOG.info("XMLMetadata string is " + (isValid ? "valid" : "invalid") + " XML!");
     } catch (Exception ex) {
       fail(getDefaultErrorMessage(ex));
     }
+    return this;
   }
 
-  public void validateJSON() {
+  public WebAPITestContainer validateJSON() {
     assertNotNull(getDefaultErrorMessage("JSON response data were not found in the test container! Please ensure your request succeeded.",
         getResponseData()));
 
@@ -685,7 +694,11 @@ public final class WebAPITestContainer implements TestContainer {
     } catch (Exception ex) {
       fail(getDefaultErrorMessage(ex));
     }
+    return this;
+  }
 
+  public Set<ValidationMessage> getSchemaValidationErrors() {
+    return schemaValidationErrors.get();
   }
 
   public static final class ODATA_QUERY_PARAMS {

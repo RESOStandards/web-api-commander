@@ -66,20 +66,23 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * REQ-WA103-END2 - validate DataSystem endpoint, if present.
      */
-    And("^the results match the expected DataSystem JSON schema$", getTestContainer()::validateDataSystem);
+    And("^the results match the expected DataSystem JSON schema$", () -> {
+      getTestContainer().validateDataSystem();
+      assertEquals("ERROR: JSON Schema validation produced errors!", 0, getTestContainer().getSchemaValidationErrors().size());
+    });
 
 
     And("^the XML Metadata returned by the server contains Edm metadata$", () -> {
       getTestContainer().setEdm(
           Commander.deserializeEdm(getTestContainer().getXMLResponseData(), getTestContainer().getCommander().getClient())
       );
+      assertNotNull(getDefaultErrorMessage("Edm deserialized to an empty object!"), getTestContainer().getEdm());
     });
 
     /*
      * Edm Metadata Validator
      */
     And("^the Edm metadata returned by the server are valid$", () -> {
-      getTestContainer().validateEdm();
       assertTrue("Edm Metadata at the given service root is not valid! " + getTestContainer().getServiceRoot(),
           getTestContainer().getIsValidEdm());
     });
@@ -88,7 +91,11 @@ public class WebAPIServer_1_0_2 implements En {
      * XML Metadata Validator
      */
     And("^the XML Metadata returned by the server are valid$", () -> {
-      getTestContainer().validateXMLMetadata();
+      if (!getTestContainer().getHaveMetadataBeenRequested()) {
+        //will lazy-load metadata from the server if not yet requested
+        getTestContainer().getXMLMetadata();
+        getTestContainer().validateMetadata();
+      }
       assertTrue("XML Metadata at the given service root is not valid! " + getTestContainer().getServiceRoot(),
           getTestContainer().getIsValidXMLMetadata());
     });
@@ -270,8 +277,9 @@ public class WebAPIServer_1_0_2 implements En {
      * validate XML wrapper
      */
     And("^the XML Metadata response is valid XML$", () -> {
+      assertNotNull(getDefaultErrorMessage("no XML Response data were found!"), getTestContainer().getXMLResponseData());
       getTestContainer().validateXMLMetadataXML();
-      assertTrue("ERROR: invalid XML response!", getTestContainer().getIsXMLMetadataValidXML());
+      assertTrue("ERROR: invalid XML response!", getTestContainer().getIsValidXMLMetadataXML());
     });
 
     /*
@@ -942,7 +950,8 @@ public class WebAPIServer_1_0_2 implements En {
      * Ensures valid metadata have been retrieved from the server
      */
     Given("^valid metadata have been retrieved$", () -> {
-      if (!getTestContainer().haveMetadataBeenRequested()) {
+      //NOTE: this is here so that tests may be run individually
+      if (!getTestContainer().getHaveMetadataBeenRequested()) {
        getTestContainer().validateMetadata();
       }
       assertTrue(getDefaultErrorMessage("Valid metadata could not be retrieved from the server! Please check the log for more information."),

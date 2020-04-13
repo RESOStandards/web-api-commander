@@ -24,3 +24,7 @@ jobs:
       run: chmod +x gradlew
     - name: Build and Run acceptance tests
       run: ./gradlew build
+      uses: actions/upload-artifact@v1
+        with:
+          name: web-api-commander.jar
+          path: build/libs/

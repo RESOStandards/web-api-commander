@@ -1,6 +1,7 @@
 package org.reso.commander.test.stepdefs;
 
 import io.cucumber.java8.En;
+import org.apache.http.HttpStatus;
 import org.reso.commander.certfication.containers.WebAPITestContainer;
 import org.reso.commander.common.TestUtils;
 import org.reso.models.Settings;
@@ -39,9 +40,9 @@ public class TestWebAPITestContainer implements En {
       assertNotNull(getDefaultErrorMessage("resourceName cannot be null!"), resourceName);
 
       try {
-        String xmlMetadataString = TestUtils.convertInputStreamToString(getClass().getClassLoader().getResourceAsStream(resourceName));
+        String xmlMetadataString = loadResourceAsString(resourceName);
         assertNotNull(getDefaultErrorMessage("could not load resourceName:", resourceName), xmlMetadataString);
-        getTestContainer().setResponseCode(200);
+        getTestContainer().setResponseCode(HttpStatus.SC_OK);
 
         getTestContainer().setXMLResponseData(xmlMetadataString);
       } catch (Exception ex) {
@@ -92,7 +93,28 @@ public class TestWebAPITestContainer implements En {
           getTestContainer().hasValidMetadata());
     });
 
+    When("^sample JSON data from \"([^\"]*)\" are loaded into the test container$", (String resourceName) -> {
+      getTestContainer().setResponseCode(HttpStatus.SC_OK);
+      getTestContainer().setResponseData(loadResourceAsString(resourceName));
+    });
+    Then("^schema validation passes for the sample DataSystem data$", () -> {
+      assertTrue(getDefaultErrorMessage("expected DataSystem to pass validation, but it failed!"),
+          getTestContainer().validateDataSystem().getIsValidDataSystem());
+    });
+    Then("^schema validation fails for the sample DataSystem data$", () -> {
+      assertFalse(getDefaultErrorMessage("expected DataSystem to fail validation, but it passed!"),
+          getTestContainer().validateDataSystem().getIsValidDataSystem());
+    });
 
+  }
+
+  /**
+   * Returns a string containing the contents of the given resource name
+   * @param resourceName the resource name to load
+   * @return string data from the resource
+   */
+  public String loadResourceAsString(String resourceName) {
+    return TestUtils.convertInputStreamToString(getClass().getClassLoader().getResourceAsStream(resourceName));
   }
 
   private WebAPITestContainer getTestContainer() {
