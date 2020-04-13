@@ -952,7 +952,8 @@ public class WebAPIServer_1_0_2 implements En {
     Given("^valid metadata have been retrieved$", () -> {
       //NOTE: this is here so that tests may be run individually
       if (!getTestContainer().getHaveMetadataBeenRequested()) {
-       getTestContainer().validateMetadata();
+        getTestContainer().getXMLMetadata();
+        getTestContainer().validateMetadata();
       }
       assertTrue(getDefaultErrorMessage("Valid metadata could not be retrieved from the server! Please check the log for more information."),
           getTestContainer().hasValidMetadata());
