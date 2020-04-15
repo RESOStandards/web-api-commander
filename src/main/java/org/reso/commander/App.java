@@ -8,7 +8,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
-import org.reso.certification.testgenerators.DataDictionaryBDDGenerator;
+import org.reso.certification.generators.BDDProcessor;
+import org.reso.certification.generators.DataDictionaryGenerator;
 import org.reso.models.ClientSettings;
 import org.reso.models.Request;
 import org.reso.models.Settings;
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import static org.reso.commander.Commander.*;
+import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 /**
  * Entry point of the RESO Web API Commander, which is a command line OData client that uses the Java Olingo
@@ -249,8 +251,12 @@ public class App {
         commander.convertEDMXToSwagger(inputFilename);
 
       } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)) {
-        DataDictionaryBDDGenerator generator = new DataDictionaryBDDGenerator();
-        generator.readDictionaryReference();
+        try {
+          DataDictionaryGenerator generator = new DataDictionaryGenerator(new BDDProcessor());
+          generator.readDictionaryReference();
+        } catch (Exception ex) {
+          LOG.error(getDefaultErrorMessage(ex));
+        }
       } else {
         printHelp(APP_OPTIONS.getOptions());
       }
@@ -476,7 +482,7 @@ public class App {
           .addOption(Option.builder().argName("r").longOpt(ACTIONS.RUN_RESOSCRIPT)
               .desc("Runs commands in RESOScript file given as <inputFile>.").build())
           .addOption(Option.builder().argName("a").longOpt(ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)
-                  .desc("Generates acceptance tests in the current directory.").build())
+              .desc("Generates acceptance tests in the current directory.").build())
           .addOption(Option.builder().argName("m").longOpt(ACTIONS.GET_METADATA)
               .desc("Fetches metadata from <serviceRoot> using <bearerToken> and saves results in <outputFile>.").build())
           .addOption(Option.builder().argName("g").longOpt(ACTIONS.GET_ENTITIES)

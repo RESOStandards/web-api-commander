@@ -33,10 +33,10 @@ public class OAuth2HttpClientFactory extends AbstractHttpClientFactory {
   final static String ACCESS_TOKEN = "access_token";
   private static final Logger LOG = LogManager.getLogger(OAuth2HttpClientFactory.class);
   HttpClientConnectionManager connectionManager = null;
-  private String clientId;
-  private String clientSecret;
-  private String tokenUri;
-  private String scope;
+  private final String clientId;
+  private final String clientSecret;
+  private final String tokenUri;
+  private final String scope;
   private String accessToken;
   private Integer expiresIn;
 

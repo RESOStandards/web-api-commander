@@ -65,6 +65,8 @@ public class DataDictionary implements En {
     });
     And("^\"([^\"]*)\" should only contain enum values found in the metadata$", (String fieldName) -> {
     });
+    And("^\"([^\"]*)\" length should be less than or equal to the RESO Suggested Max Length of (\\d+)$", (String arg0, Integer arg1) -> {
+    });
 
     /*
      * Single-select Fields - handled by generic functions

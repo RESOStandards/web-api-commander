@@ -1,4 +1,4 @@
-package org.reso.certfication.containers;
+package org.reso.certification.containers;
 
 public interface TestContainer {
 

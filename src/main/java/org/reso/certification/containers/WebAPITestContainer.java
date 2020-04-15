@@ -1,4 +1,4 @@
-package org.reso.certfication.containers;
+package org.reso.certification.containers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,6 +48,7 @@ public final class WebAPITestContainer implements TestContainer {
   public static final String EMPTY_STRING = "";
   public static final String SINGLE_SPACE = " ";
   public static final String DOLLAR_SIGN = "$";
+  public static final String DATA_SYSTEM_JSON_4_SCHEMA = "datasystem.schema.4.json";
   public static final String PRETTY_FIELD_SEPARATOR = FIELD_SEPARATOR + SINGLE_SPACE;
   private static final Logger LOG = LogManager.getLogger(WebAPITestContainer.class);
 
@@ -551,7 +552,6 @@ public final class WebAPITestContainer implements TestContainer {
   }
 
 
-
   public boolean getIsValidXMLMetadata() {
     return isValidXMLMetadata.get();
   }
@@ -616,7 +616,7 @@ public final class WebAPITestContainer implements TestContainer {
       try {
         JsonSchemaFactory factory = JsonSchemaFactory.getInstance();
         InputStream is = Thread.currentThread().getContextClassLoader()
-            .getResourceAsStream("datasystem.schema.4.json");
+            .getResourceAsStream(DATA_SYSTEM_JSON_4_SCHEMA);
         JsonSchema schema = factory.getSchema(is);
 
         ObjectMapper mapper = new ObjectMapper();
@@ -702,7 +702,7 @@ public final class WebAPITestContainer implements TestContainer {
   }
 
   public static final class ODATA_QUERY_PARAMS {
-    private static String format = DOLLAR_SIGN + "%s";
+    private static final String format = DOLLAR_SIGN + "%s";
 
     //TODO: add additional items as needed, and see if there's a lib for this in Olingo
     public static final String

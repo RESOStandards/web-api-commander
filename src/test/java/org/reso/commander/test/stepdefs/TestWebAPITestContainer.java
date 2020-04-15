@@ -2,7 +2,7 @@ package org.reso.commander.test.stepdefs;
 
 import io.cucumber.java8.En;
 import org.apache.http.HttpStatus;
-import org.reso.certfication.containers.WebAPITestContainer;
+import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.TestUtils;
 import org.reso.models.Settings;
 
@@ -110,6 +110,7 @@ public class TestWebAPITestContainer implements En {
 
   /**
    * Returns a string containing the contents of the given resource name
+   *
    * @param resourceName the resource name to load
    * @return string data from the resource
    */

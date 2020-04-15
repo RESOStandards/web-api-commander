@@ -5,8 +5,7 @@ Feature: Commander Platinum Web API Test Container Tests
     And a Commander instance exists within the test container
 
   Scenario: Test Container is Initialized using Token-Based Authentication
-    When sample metadata from "good-edmx-and-edm.xml" are loaded into the test container
-    And Settings are present in the test container
+    Given Settings are present in the test container
     And an auth token is provided in "ClientSettings_BearerToken"
     Then the Commander is created using auth token client mode
     And the auth token has a value of "testTokenValue"
