@@ -17,7 +17,7 @@ public class BDDTemplates {
         "\n  @" + fieldName +
         "\n  Scenario: " + fieldName + "\n" +
           "    Given \"" + fieldName + "\" exists in the metadata\n" +
-          "    Then \"" + fieldName + "\" should be \"Boolean\" data type\n";
+          "    Then \"" + fieldName + "\" MUST be \"Boolean\" data type\n";
   }
 
   public static String buildDateTest(String fieldName, Integer suggestedMaxLength) {
@@ -26,7 +26,7 @@ public class BDDTemplates {
         "\n  @" + fieldName +
         "\n  Scenario: " + fieldName + "\n" +
           "    Given \"" + fieldName + "\" exists in the metadata\n" +
-          "    Then \"" + fieldName + "\" should be \"Date\" data type\n";
+          "    Then \"" + fieldName + "\" MUST be \"Date\" data type\n";
 
     if (suggestedMaxLength != null)
       template +=
@@ -48,7 +48,7 @@ public class BDDTemplates {
         "\n  @" + fieldName +
         "\n  Scenario: " + fieldName + "\n" +
           "    Given \"" + fieldName + "\" exists in the metadata\n" +
-          "    Then \"" + fieldName + "\" should be \"Decimal\" data type\n";
+          "    Then \"" + fieldName + "\" MUST be \"Decimal\" data type\n";
 
     if (suggestedMaxLength != null)
       template +=
@@ -67,7 +67,7 @@ public class BDDTemplates {
         "\n  @" + fieldName +
         "\n  Scenario: " + fieldName + "\n" +
           "    Given \"" + fieldName + "\" exists in the metadata\n" +
-          "    Then \"" + fieldName + "\" should be \"Integer\" data type\n";
+          "    Then \"" + fieldName + "\" MUST be \"Integer\" data type\n";
   }
 
   public static String buildStringListMultiTest(String fieldName, Integer suggestedMaxLength) {
@@ -76,9 +76,9 @@ public class BDDTemplates {
         "\n  @" + fieldName +
         "\n  Scenario: " + fieldName + "\n" +
           "    Given \"" + fieldName + "\" exists in the metadata\n" +
-          "    And \"" + fieldName + "\" enum values can be compiled\n" +
-          "    Then \"" + fieldName + "\" should be \"String Array\" data type\n" +
-          "    And \"" + fieldName + "\" should only contain enum values found in the metadata\n";
+          "    And \"" + fieldName + "\" enum values exist in the metadata\n" +
+          "    And \"" + fieldName + "\" enum types MUST have at least one member\n" +
+          "    Then \"" + fieldName + "\" MUST be \"String Array\" data type\n";
     if (suggestedMaxLength != null)
       template +=
           "    And \"" + fieldName + "\" length should be less than or equal to the RESO Suggested Max Length of " + suggestedMaxLength + "\n";
@@ -92,8 +92,9 @@ public class BDDTemplates {
         "\n  @" + fieldName +
         "\n  Scenario: " + fieldName + "\n" +
           "    Given \"" + fieldName + "\" exists in the metadata\n" +
-          "    And \"" + fieldName + "\" enum values can be compiled\n" +
-          "    Then \"" + fieldName + "\" should be \"String\" data type\n" +
+          "    And \"" + fieldName + "\" enum values exist in the metadata\n" +
+          "    And \"" + fieldName + "\" enum types MUST have at least one member\n" +
+          "    Then \"" + fieldName + "\" MUST be \"String\" data type\n" +
           "    And \"" + fieldName + "\" should only contain enum values found in the metadata\n";
 
     if (suggestedMaxLength != null)
@@ -109,7 +110,7 @@ public class BDDTemplates {
         "\n  @" + fieldName +
         "\n  Scenario: " + fieldName + "\n" +
           "    Given \"" + fieldName + "\" exists in the metadata\n" +
-          "    Then \"" + fieldName + "\" should be \"String\" data type\n";
+          "    Then \"" + fieldName + "\" MUST be \"String\" data type\n";
 
     if (suggestedMaxLength != null)
       template +=
@@ -124,7 +125,7 @@ public class BDDTemplates {
         "\n  @" + fieldName +
         "\n  Scenario: " + fieldName + "\n" +
           "    Given \"" + fieldName + "\" exists in the metadata\n" +
-          "    Then \"" + fieldName + "\" should be \"Timestamp\" data type\n";
+          "    Then \"" + fieldName + "\" MUST be \"Timestamp\" data type\n";
 
     if (suggestedMaxLength != null)
       template +=

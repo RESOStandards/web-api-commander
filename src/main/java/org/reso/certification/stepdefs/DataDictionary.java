@@ -4,19 +4,19 @@ import io.cucumber.java8.En;
 
 public class DataDictionary implements En {
   public DataDictionary() {
-    Given("^\"([^\"]*)\" exists in the metadata$", (String arg0) -> {
+    Given("^\"([^\"]*)\" exists in the metadata$", (String fieldName) -> {
     });
-    Then("^\"([^\"]*)\" should be \"([^\"]*)\" data type$", (String arg0, String arg1) -> {
+    Then("^\"([^\"]*)\" should be \"([^\"]*)\" data type$", (String fieldName, String dataTypeName) -> {
     });
-    And("^\"([^\"]*)\" enum values can be compiled$", (String arg0) -> {
+    And("^\"([^\"]*)\" enum values can be compiled$", (String fieldName) -> {
     });
-    And("^\"([^\"]*)\" should only contain enum values found in the metadata$", (String arg0) -> {
+    And("^\"([^\"]*)\" should only contain enum values found in the metadata$", (String fieldName) -> {
     });
-    And("^\"([^\"]*)\" length should be less than or equal to the RESO Suggested Max Length of (\\d+)$", (String arg0, Integer arg1) -> {
+    And("^\"([^\"]*)\" length should be less than or equal to the RESO Suggested Max Length of (\\d+)$", (String fieldName, Integer suggestedMax) -> {
     });
-    And("^\"([^\"]*)\" precision should be less than or equal to the RESO Suggested Max Length of (\\d+)$", (String arg0, Integer arg1) -> {
+    And("^\"([^\"]*)\" precision should be less than or equal to the RESO Suggested Max Length of (\\d+)$", (String fieldName, Integer suggestedMax) -> {
     });
-    And("^\"([^\"]*)\" scale should be less than or equal to the RESO Suggested Max Scale of (\\d+)$", (String arg0, Integer arg1) -> {
+    And("^\"([^\"]*)\" scale should be less than or equal to the RESO Suggested Max Scale of (\\d+)$", (String fieldName, Integer suggestedMax) -> {
     });
   }
 }

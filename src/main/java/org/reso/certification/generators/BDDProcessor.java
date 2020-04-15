@@ -171,7 +171,6 @@ public class BDDProcessor implements DDWorksheetProcessor {
       COLLECTION = "Collection";
   }
 
-
   @Override
   public String getTemplateMarkup() {
     return markup.toString();
