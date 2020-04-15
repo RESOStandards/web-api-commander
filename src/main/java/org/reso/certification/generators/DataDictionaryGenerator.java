@@ -8,11 +8,16 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
+import static org.reso.commander.common.Utils.getTimestamp;
+
 public class DataDictionaryGenerator {
   private static final Logger LOG = LogManager.getLogger(DataDictionaryGenerator.class);
+  public static final String REFERENCE_RESOURCE = "RESO.Dictionary.Final.v.1.7.0.20190124T0000.xlsx";
 
   static Map<String, String> resourceTemplates = new LinkedHashMap<>();
 
@@ -22,7 +27,7 @@ public class DataDictionaryGenerator {
   public DataDictionaryGenerator(DDWorksheetProcessor processor) throws Exception {
     if (processor == null) throw new Exception("Data Dictionary processor cannot be null!");
     this.processor = processor;
-    dataDictionaryReference = DDReferenceMetadata.v1_7_0;
+    dataDictionaryReference = REFERENCE_RESOURCE;
   }
 
   public void readDictionaryReference() {
@@ -32,28 +37,29 @@ public class DataDictionaryGenerator {
               .getResourceAsStream(dataDictionaryReference))));
 
       Sheet worksheet;
-      Set<String> headerNames = new LinkedHashSet<>();
       int sheetIndex, rowIndex;
+      String dateString = getTimestamp(new Date()), sourceFilename = REFERENCE_RESOURCE;
+      String parentDirectoryName = dateString + "-" + REFERENCE_RESOURCE.toLowerCase().substring(0, REFERENCE_RESOURCE.lastIndexOf("."));
 
       //workbook consists of many sheets, process only the ones that have the name of a well-known resource
       for (sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++) {
         worksheet = workbook.getSheetAt(sheetIndex);
-        if (DDReferenceMetadata.WellKnownResources.WELL_KNOWN_RESOURCES.contains(worksheet.getSheetName())
-            && worksheet.getPhysicalNumberOfRows() > 1) {
-
-          worksheet.getRow(0).cellIterator().forEachRemaining(cell -> headerNames.add(cell.getStringCellValue()));
-
-          //skip header row
+        if (DDReferenceMetadata.WellKnownResources.WELL_KNOWN_RESOURCES.contains(worksheet.getSheetName()) && worksheet.getPhysicalNumberOfRows() > 1) {
+          processor.addHeader(worksheet.getSheetName(), dateString);
+          //starts at row 1 to skip header row
           for (rowIndex = 1; rowIndex < worksheet.getPhysicalNumberOfRows(); rowIndex++) {
             processor.processRow(worksheet.getRow(rowIndex));
           }
-
           resourceTemplates.put(worksheet.getSheetName(), processor.getTemplateMarkup());
-          processor.reset();
         }
+        processor.reset();
       }
 
-      resourceTemplates.forEach((key, value) -> LOG.info("\nFeature: " + key + "\n" + value));
+      LOG.info("Generating BDD .feature files for the following resources: " + resourceTemplates.keySet().toString());
+      resourceTemplates.forEach((resourceName, content) -> {
+        //put in local directory rather than relative to where the input file is
+        createFile( parentDirectoryName, resourceName.toLowerCase() + ".feature", content);
+      });
     } catch (IOException | NullPointerException | InvalidFormatException e) {
       e.printStackTrace();
     }
@@ -61,7 +67,6 @@ public class DataDictionaryGenerator {
 
   private static final class DDReferenceMetadata {
     public static final String version = "1.7.0";
-    public static final String v1_7_0 = "RESO.Dictionary.Final.v.1.7.0.20190124T0000.xlsx";
 
     public static final class WellKnownResources {
       public static final String
@@ -100,6 +105,23 @@ public class DataDictionaryGenerator {
           SHOWING,
           TEAMS
       ));
+    }
+  }
+
+  public static void createFile(String directoryName, String fileName, String content) {
+    if (directoryName == null || fileName == null) return;
+    String outputPath = System.getProperty("user.dir") + File.separator + directoryName;
+    File baseDirectory = new File(outputPath);
+    FileWriter writer = null;
+    try {
+      if (!baseDirectory.exists()) {
+        if (!baseDirectory.mkdirs()) throw new Exception("ERROR: could not create directory: " + baseDirectory);
+      }
+      writer = new FileWriter(new File(outputPath + File.separator + fileName));
+      writer.write(content);
+      writer.flush();
+    } catch (Exception ex) {
+      LOG.error("Filename: " + fileName + ". Could not create file: " + ex);
     }
   }
 }

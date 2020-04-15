@@ -15,8 +15,6 @@ import org.reso.models.Request;
 import org.reso.models.Settings;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,6 +22,7 @@ import java.util.function.Function;
 
 import static org.reso.commander.Commander.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
+import static org.reso.commander.common.Utils.getTimestamp;
 
 /**
  * Entry point of the RESO Web API Commander, which is a command line OData client that uses the Java Olingo
@@ -333,17 +332,6 @@ public class App {
     reportBuilder.append("\n\tSkipped:          ").append(String.format("%1$4s", numSkipped)).append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numSkipped) / totalRequestCount) + "%)" : "");
     reportBuilder.append("\n\tIncomplete:       ").append(String.format("%1$4s", numIncomplete)).append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numIncomplete) / totalRequestCount) + "%)" : "");
     return reportBuilder.toString();
-  }
-
-  /**
-   * Gets a formatted date string for the given date.
-   *
-   * @param date the date to format
-   * @return date string in yyyyMMddHHMMssS format
-   */
-  private static String getTimestamp(Date date) {
-    DateFormat df = new SimpleDateFormat("yyyyMMddHHMMssS");
-    return df.format(date);
   }
 
   /**

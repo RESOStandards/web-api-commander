@@ -8,6 +8,8 @@ import org.reso.models.DataDictionaryRow;
 
 import java.util.*;
 
+import static org.reso.certification.generators.BDDTemplates.buildHeaderInfo;
+
 public class BDDProcessor implements DDWorksheetProcessor {
   private static final Logger LOG = LogManager.getLogger(BDDProcessor.class);
 
@@ -20,6 +22,11 @@ public class BDDProcessor implements DDWorksheetProcessor {
   }
 
   public void reset() { markup = new StringBuffer(); }
+
+  @Override
+  public void addHeader(String headerInfo, String timestamp) {
+    markup.append(buildHeaderInfo(headerInfo, timestamp));
+  }
 
   @Override
   public void processRow(Row row) {

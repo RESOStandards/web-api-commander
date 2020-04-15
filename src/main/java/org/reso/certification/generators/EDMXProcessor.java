@@ -15,6 +15,9 @@ public class EDMXProcessor implements DDWorksheetProcessor {
   }
 
   @Override
+  public void addHeader(String content, String timestamp) { }
+
+  @Override
   public void reset() {
 
   }

@@ -8,6 +8,7 @@ import java.util.List;
 public interface DDWorksheetProcessor {
   String getTemplateMarkup();
   void processRow(Row row);
+  void addHeader(String content, String timestamp);
   void reset();
 
   String
@@ -89,6 +90,5 @@ public interface DDWorksheetProcessor {
       WIKI_PAGE_URL,
       WIKI_PAGE_ID
   );
-
 
 }
