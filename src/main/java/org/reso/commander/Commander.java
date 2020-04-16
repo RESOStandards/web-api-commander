@@ -22,6 +22,7 @@ import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.auth.OAuth2HttpClientFactory;
 import org.reso.auth.TokenHttpClientFactory;
+import org.reso.commander.common.TestUtils;
 import org.xml.sax.*;
 
 import javax.xml.XMLConstants;
@@ -45,20 +46,19 @@ import java.util.function.Function;
  * the ones the Client programmer is expected to use.
  */
 public class Commander {
-  private static final Logger LOG = LogManager.getLogger(Commander.class);
-
   public static final int OK = 0;
   public static final int NOT_OK = 1;
-  public static final String AMPERSAND = "&"; //TODO: find the corresponding query params constant for this
-  public static final String EQUALS = "="; //TODO: find the corresponding query params constant for this
-
+  //TODO: find the corresponding query params constant for this
+  public static final String AMPERSAND = "&";
+  //TODO: find the corresponding query params constant for this
+  public static final String EQUALS = "=";
   public static final Integer DEFAULT_PAGE_SIZE = 10;
   public static final Integer DEFAULT_PAGE_LIMIT = 1;
   public static final String REPORT_DIVIDER = "==============================================================";
   public static final String REPORT_DIVIDER_SMALL = "===========================";
   public static final String RESOSCRIPT_EXTENSION = ".resoscript";
   public static final String EDMX_EXTENSION = ".xml";
-
+  private static final Logger LOG = LogManager.getLogger(Commander.class);
   private static final String EDM_4_0_3_XSD = "edm.4.0.errata03.xsd", EDMX_4_0_3_XSD = "edmx.4.0.errata03.xsd";
 
   private static String bearerToken;
@@ -80,17 +80,6 @@ public class Commander {
   }
 
   /**
-   * Validates XML for the given xmlMetadata item
-   *
-   * @param xmlMetadata the XML metadata to validate
-   * @return true if valid, false otherwise
-   * @throws ODataSerializerException if the given XML metadata could not be serialized
-   */
-  public static boolean validateXML(XMLMetadata xmlMetadata) throws ODataSerializerException {
-    return validateXML(serializeXMLMetadataToXMLString(xmlMetadata));
-  }
-
-  /**
    * Uses an XML validator to validate that the given string contains valid XML.
    *
    * @param xmlString the string containing the XML to validate.
@@ -99,12 +88,14 @@ public class Commander {
   public static boolean validateXML(final String xmlString) {
     try {
       SAXParserFactory factory = SAXParserFactory.newInstance();
-      factory.setValidating(false); //turn off expectation of having DTD in DOCTYPE tag
+
+      //turn off expectation of having DTD in DOCTYPE tag
+      factory.setValidating(false);
       factory.setNamespaceAware(true);
 
       factory.setSchema(SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(new StreamSource[]{
-        new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream(EDM_4_0_3_XSD)),
-        new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream(EDMX_4_0_3_XSD))
+          new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream(EDM_4_0_3_XSD)),
+          new StreamSource(Thread.currentThread().getContextClassLoader().getResourceAsStream(EDMX_4_0_3_XSD))
       }));
 
       SAXParser parser = factory.newSAXParser();
@@ -213,19 +204,6 @@ public class Commander {
   }
 
   /**
-   * Serializes XML Metadata to an XML string
-   *
-   * @param xmlMetadata the metadata to serialize
-   * @return a String containing the metadata
-   * @throws ODataSerializerException
-   */
-  private static String serializeXMLMetadataToXMLString(XMLMetadata xmlMetadata) throws ODataSerializerException {
-    StringWriter writer = new StringWriter();
-    client.getSerializer(ContentType.APPLICATION_XML).write(writer, xmlMetadata);
-    return writer.getBuffer().toString();
-  }
-
-  /**
    * Metadata Pretty Printer
    *
    * @param metadata any metadata in Edm format
@@ -276,7 +254,35 @@ public class Commander {
   }
 
   /**
+   * Deserializes XML Metadata from a string
+   *
+   * @param xmlMetadataString a string containing XML Metadata
+   * @param client            an instance of an OData Client
+   * @return the XML Metadata contained within the string
+   */
+  public static XMLMetadata deserializeXMLMetadata(String xmlMetadataString, ODataClient client) {
+    //deserialize response into XML Metadata - will throw an exception if metadata are invalid
+    return client.getDeserializer(ContentType.APPLICATION_XML)
+        .toMetadata(new ByteArrayInputStream(xmlMetadataString.getBytes(StandardCharsets.UTF_8)));
+  }
+
+  /**
+   * Deserializes Edm from XML Metadata
+   *
+   * @param xmlMetadataString a string containing XML metadata
+   * @param client            an instance of an OData Client
+   * @return the Edm contained within the xmlMetadataString
+   * <p>
+   * TODO: rewrite the separate Edm request in the Web API server test code to only make one request and convert
+   * to Edm from the XML Metadata that was received.
+   */
+  public static Edm deserializeEdm(String xmlMetadataString, ODataClient client) {
+    return client.getReader().readMetadata(new ByteArrayInputStream(xmlMetadataString.getBytes(StandardCharsets.UTF_8)));
+  }
+
+  /**
    * OData client getter
+   *
    * @return the OData client for the current Commander instance
    */
   public ODataClient getClient() {
@@ -285,6 +291,7 @@ public class Commander {
 
   /**
    * OData client setter
+   *
    * @param client sets the current Commander instance to use the given client
    */
   public void setClient(ODataClient client) {
@@ -293,6 +300,7 @@ public class Commander {
 
   /**
    * Token URI getter
+   *
    * @return the tokenUri used by the current Commander instance, or null
    */
   public String getTokenUri() {
@@ -301,6 +309,7 @@ public class Commander {
 
   /**
    * Service Root getter
+   *
    * @return the serviceRoot used by the current Commander instance, or null
    */
   public String getServiceRoot() {
@@ -313,11 +322,11 @@ public class Commander {
    * @return true if the auth config is valid, false otherwise.
    */
   public boolean hasValidAuthConfig() {
-    if (isTokenClient()) {
+    if (isAuthTokenClient()) {
       return bearerToken != null && bearerToken.length() > 0;
     }
 
-    if (isOAuthClient()) {
+    if (isOAuth2Client()) {
       return getTokenUri() != null && getTokenUri().length() > 0
           && clientId != null && clientId.length() > 0
           && clientSecret != null && clientSecret.length() > 0;
@@ -327,6 +336,7 @@ public class Commander {
 
   /**
    * Prepares an Edm Metadata request
+   *
    * @return a prepared Edm metadata request
    */
   public EdmMetadataRequest prepareEdmMetadataRequest() {
@@ -338,6 +348,7 @@ public class Commander {
 
   /**
    * Prepares an XML Metadata request
+   *
    * @return a prepared XML Metadata request
    */
   public XMLMetadataRequest prepareXMLMetadataRequest() {
@@ -374,12 +385,13 @@ public class Commander {
   }
 
   /**
-   * Validates given XMLMetadata
+   * Static version of the metadata validator that can work with a given client
    *
-   * @param metadata the XMLMetadata to be validated
-   * @return true if the metadata is valid, meaning that it's also a valid OData 4 Service Document
+   * @param metadata the XML Metadata to validate
+   * @param client   the OData client to use for validation
+   * @return true if the given XML metadata is valid, false otherwise
    */
-  public boolean validateMetadata(XMLMetadata metadata) {
+  public static boolean validateMetadata(XMLMetadata metadata, ODataClient client) {
     try {
       // call the probably-useless metadata validator. can't hurt though
       // SEE: https://github.com/apache/olingo-odata4/blob/master/lib/client-core/src/main/java/org/apache/olingo/client/core/serialization/ODataMetadataValidationImpl.java#L77-L116
@@ -400,16 +412,17 @@ public class Commander {
   }
 
   /**
-   * Validates given XMLMetadata
+   * Static version of the metadata validator that can work with a given client
    *
-   * @param metadata the XMLMetadata to be validated
-   * @return true if the metadata is valid, meaning that it's also a valid OData 4 Service Document
+   * @param edm    the Edm to validate
+   * @param client the OData client to use for validation
+   * @return true if the given XML metadata is valid, false otherwise
    */
-  public boolean validateMetadata(Edm metadata) {
+  public static boolean validateMetadata(Edm edm, ODataClient client) {
     try {
       // call the probably-useless metadata validator. can't hurt though
       // SEE: https://github.com/apache/olingo-odata4/blob/master/lib/client-core/src/main/java/org/apache/olingo/client/core/serialization/ODataMetadataValidationImpl.java#L77-L116
-      client.metadataValidation().validateMetadata(metadata);
+      client.metadataValidation().validateMetadata(edm);
       //if Edm metadata are invalid, the previous line will throw an exception and this line won't be reached.
       return true;
     } catch (NullPointerException nex) {
@@ -421,6 +434,26 @@ public class Commander {
       }
     }
     return false;
+  }
+
+  /**
+   * Validates given XMLMetadata
+   *
+   * @param metadata the XMLMetadata to be validated
+   * @return true if the metadata is valid, meaning that it's also a valid OData 4 Service Document
+   */
+  public boolean validateMetadata(XMLMetadata metadata) {
+    return validateMetadata(metadata, client);
+  }
+
+  /**
+   * Validates given XMLMetadata
+   *
+   * @param metadata the XMLMetadata to be validated
+   * @return true if the metadata is valid, meaning that it's also a valid OData 4 Service Document
+   */
+  public boolean validateMetadata(Edm metadata) {
+    return validateMetadata(metadata, client);
   }
 
   /**
@@ -473,7 +506,7 @@ public class Commander {
    *
    * @return true if the commander instance is a token client, false otherwise.
    */
-  public boolean isTokenClient() {
+  public boolean isAuthTokenClient() {
     return isTokenClient;
   }
 
@@ -482,7 +515,7 @@ public class Commander {
    *
    * @return true if the commander instance is an OAuth2 client credentials client, false otherwise.
    */
-  public boolean isOAuthClient() {
+  public boolean isOAuth2Client() {
     return isOAuthClient;
   }
 
@@ -531,6 +564,7 @@ public class Commander {
 
   /**
    * Executes a raw OData request in the current commander instance without trying to intepret the results
+   *
    * @param requestUri the URI to make the request to
    * @return a string containing the serialized response, or null
    */
@@ -701,6 +735,7 @@ public class Commander {
 
     /**
      * Service root setter
+     *
      * @param serviceRoot the Web API service root
      * @return a Builder containing the given Web API service root
      */
@@ -711,6 +746,7 @@ public class Commander {
 
     /**
      * Bearer token setter
+     *
      * @param bearerToken the token to use to connect to the server
      * @return a Builder set with the given bearerToken
      */
@@ -721,6 +757,7 @@ public class Commander {
 
     /**
      * Client Identification setter
+     *
      * @param clientId the OAuth2 client_id to use to authenticate against the server
      * @return a Builder set with the given clientId
      */
@@ -731,6 +768,7 @@ public class Commander {
 
     /**
      * Client Secret setter
+     *
      * @param clientSecret the OAuth2 client_secret to use to authenticate against the server
      * @return a Builder set with the given clientSecret
      */
@@ -741,6 +779,7 @@ public class Commander {
 
     /**
      * Token URI setter
+     *
      * @param tokenUri the OAuth2 token_uri to use to authenticate against the server
      * @return a Builder set with the given tokenUri
      */
@@ -751,6 +790,7 @@ public class Commander {
 
     /**
      * Scope setter
+     *
      * @param scope the OAuth2 scope to use to authenticate against the server
      * @return a Builder set with the given scope
      */
@@ -773,6 +813,7 @@ public class Commander {
 
     /**
      * Commander builder is used to create instances of the RESO Commander, which should not be instantiated directly.
+     *
      * @return a Commander instantiated with the given properties set
      */
     public Commander build() {
@@ -789,8 +830,8 @@ public class Commander {
 
       //items required for OAuth client
       isOAuthClient = clientId != null && clientId.length() > 0
-              && clientSecret != null && clientSecret.length() > 0
-              && tokenUri != null && tokenUri.length() > 0;
+          && clientSecret != null && clientSecret.length() > 0
+          && tokenUri != null && tokenUri.length() > 0;
 
       //items required for token client
       isTokenClient = bearerToken != null && bearerToken.length() > 0;

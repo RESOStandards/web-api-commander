@@ -42,6 +42,8 @@ dependencies {
 
   compile 'com.networknt:json-schema-validator:1.0.35'
 
+  implementation 'org.mockito:mockito-core:3.3.3'
+
 }
 
 configurations {
@@ -91,7 +93,8 @@ task testWebApiServer_1_0_2_Gold() {
           'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
           'src/main/java/org/reso/certification/features/web-api',
           '--tags',
-          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0 ? 'not @platinum and ' + systemProperties.get('cucumber.filter.tags') : 'not @platinum')
+          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0
+              ? 'not @platinum and ' + systemProperties.get('cucumber.filter.tags') : 'not @platinum')
       ]
     }
   }
@@ -141,7 +144,8 @@ task testDataDictionary_1_5() {
           'org.reso.certification.stepdefs#DataDictionary',
           'src/main/java/org/reso/certification/features/data-dictionary',
           '--tags',
-          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0 ? '@DD1.5 and ' + systemProperties.get('cucumber.filter.tags') : '@DD1.5')
+          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0
+              ? '@DD1.5 and ' + systemProperties.get('cucumber.filter.tags') : '@DD1.5')
       ]
     }
   }
@@ -167,7 +171,27 @@ task testDataDictionary_1_6() {
           'org.reso.certification.stepdefs#DataDictionary',
           'src/main/java/org/reso/certification/features/data-dictionary',
           '--tags',
-          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0 ? '@DD1.6 and ' + systemProperties.get('cucumber.filter.tags') : '@DD1.6')
+          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0
+              ? '@DD1.6 and ' + systemProperties.get('cucumber.filter.tags') : '@DD1.6')
+      ]
+    }
+  }
+}
+
+//used for internal Commander testing
+test {
+  dependsOn assemble, compileTestJava
+  doLast {
+    javaexec {
+      main = "io.cucumber.core.cli.Main"
+      systemProperties = System.getProperties()
+      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      args = ['--strict',
+              '--plugin',
+              'pretty',
+              '--glue',
+              'org.reso.commander.test.stepdefs',
+              'src/test/java/org/reso/commander/test/features'
       ]
     }
   }

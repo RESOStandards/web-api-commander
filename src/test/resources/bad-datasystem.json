@@ -1,0 +1,14 @@
+{
+  "odata.metadata": "http://localhost:2099/DataSystem/$metadata",
+  "value": [
+    {
+      "Name": "RESO_MLS",
+      "ServiceURI": "http://odata.reso.org/DataSystem",
+      "DateTimeStamp": "2014-04-11T12:02:48.509401-04:00",
+      "TransportVersion": "0.9",
+      "DataDictionaryVersion": "1.3",
+      "Description": "MISSING RESOURCES!",
+      "ID": "RESO_MLS"
+    }
+  ]
+}

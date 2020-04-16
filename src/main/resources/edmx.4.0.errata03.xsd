@@ -71,7 +71,9 @@ Overview:
   prose specification document take precedence.
 
 -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" xmlns:edm="http://docs.oasis-open.org/odata/ns/edm" elementFormDefault="qualified" attributeFormDefault="unqualified" targetNamespace="http://docs.oasis-open.org/odata/ns/edmx">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx"
+           xmlns:edm="http://docs.oasis-open.org/odata/ns/edm" elementFormDefault="qualified"
+           attributeFormDefault="unqualified" targetNamespace="http://docs.oasis-open.org/odata/ns/edmx">
   <xs:annotation>
     <xs:documentation xml:lang="en">
       Entity Data Model Wrapper part of the Common Schema Definition Language

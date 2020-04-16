@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
+  <edmx:DataServices>
+    <Schema Namespace="org.reso.metadata" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityType Name="Property">
+        <Key>
+          <PropertyRef Name="ListingKey"/>
+        </Key>
+        <Property Name="ListingKey" Nullable="false" Type="Edm.String"/>
+        <NavigationProperty Name="ListingPhotos" Type="Collection(org.reso.metadata.resources.Media)"/>
+      </EntityType>
+      <EntityContainer Name="EntityContainer">
+        <EntitySet EntityType="org.reso.metadata.resources.Property" Name="Property">
+          <NavigationPropertyBinding Path="ListingPhotos" Target="Media"/>
+        </EntitySet>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

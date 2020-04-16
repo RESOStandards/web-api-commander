@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
-    <Properties>
-        <Property name="PATTERN">[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%level] [%c{1}] - %msg%n</Property>
-        <Property name="SIMPLE_PATTERN">%msg%n</Property>
-        <Property name="LOGFILE_NAME">./commander.log</Property>
-    </Properties>
-    <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="\r${SIMPLE_PATTERN}" />
-        </Console>
-        <File name="Log" fileName="${LOGFILE_NAME}" immediateFlush="false" append="false">
-            <PatternLayout pattern="${PATTERN}"/>
-        </File>
-    </Appenders>
-    <Loggers>
-        <Logger name="org.apache.olingo.client.core" level="all" additivity="false">
-            <AppenderRef ref="Log"/>
-        </Logger>
-        <Root level="all">
-            <AppenderRef ref="Console" level="info" />
-            <AppenderRef ref="Log" />
-        </Root>
-    </Loggers>
+  <Properties>
+    <Property name="PATTERN">[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%level] [%c{1}] - %msg%n</Property>
+    <Property name="SIMPLE_PATTERN">%msg%n</Property>
+    <Property name="LOGFILE_NAME">./commander.log</Property>
+  </Properties>
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="\r${SIMPLE_PATTERN}"/>
+    </Console>
+    <File name="Log" fileName="${LOGFILE_NAME}" immediateFlush="false" append="false">
+      <PatternLayout pattern="${PATTERN}"/>
+    </File>
+  </Appenders>
+  <Loggers>
+    <Logger name="org.apache.olingo.client.core" level="all" additivity="false">
+      <AppenderRef ref="Log"/>
+    </Logger>
+    <Root level="all">
+      <AppenderRef ref="Console" level="info"/>
+      <AppenderRef ref="Log"/>
+    </Root>
+  </Loggers>
 </Configuration>

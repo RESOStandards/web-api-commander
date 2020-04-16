@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
+  <edmx:DataServices>
+    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="org.reso.metadata.Resources">
+      <EntityType Name="Property">
+        <Key>
+          <PropertyRef Name="ListingKey"/>
+        </Key>
+        <Property Name="ListingKey" Type="Edm.String" MaxLength="255" Nullable="false"/>
+        <Property Name="ListingId" Type="Edm.String" MaxLength="255"/>
+      </EntityType>
+    </Schema>
+    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Default">
+      <EntityContainer Name="Container">
+        <EntitySet Name="Property" EntityType="org.reso.metadata.Resources.Property"/>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+  <!--  NOTE: intentionally stray character-->'
+</edmx:Edmx>
