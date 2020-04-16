@@ -484,13 +484,13 @@
     <Request
       RequestId="REQ-WA103-RC3"
       OutputFile="REQ-WA103-RC05_200OKRequest.json"
-      Url="ClientSettings_WebAPIURI*/*Parameter_200_OK*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_200_OK*"
     />
 
     <Request
       RequestId="REQ-WA103-RC5"
       OutputFile="REQ-WA103-RC05_400BadRequest.json"
-      Url="ClientSettings_WebAPIURI*/*Parameter_400BadRequest*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_400BadRequest*"
     />
 
     <Request
