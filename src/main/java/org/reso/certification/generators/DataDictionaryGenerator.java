@@ -85,7 +85,15 @@ public class DataDictionaryGenerator {
           RULES = "Rules",
           SAVED_SEARCH = "SavedSearch",
           SHOWING = "Showing",
-          TEAMS = "Teams";
+          TEAMS = "Teams",
+          TEAM_MEMBERS = "TeamMembers",
+          CONTACT_LISTING_NOTES = "ContactListingNotes",
+          OTHER_PHONE = "OtherPhone",
+          PROPERTY_GREEN_VERIFICATION = "PropertyGreenVerification",
+          PROPERTY_POWER_PRODUCTION = "PropertyPowerProduction",
+          PROPERTY_ROOMS = "PropertyRooms",
+          PROPERTY_UNIT_TYPES = "PropertyUnitTypes",
+          SOCIAL_MEDIA = "SocialMedia";
 
       public static final Set<String> WELL_KNOWN_RESOURCES = new LinkedHashSet<>(Arrays.asList(
           PROPERTY,
@@ -103,7 +111,15 @@ public class DataDictionaryGenerator {
           RULES,
           SAVED_SEARCH,
           SHOWING,
-          TEAMS
+          TEAMS,
+          TEAM_MEMBERS,
+          CONTACT_LISTING_NOTES,
+          OTHER_PHONE,
+          PROPERTY_GREEN_VERIFICATION,
+          PROPERTY_POWER_PRODUCTION,
+          PROPERTY_ROOMS,
+          PROPERTY_UNIT_TYPES,
+          SOCIAL_MEDIA
       ));
     }
   }

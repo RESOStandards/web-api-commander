@@ -227,7 +227,8 @@
     <Parameter Name="WebAPI102_RequiredResourceList" Value="Property,Member,Office,Media" />
 
     <!-- Allowed Resources - Update to 1.8 once it's approved -->
-    <Parameter Name="DD17_WellKnownResourceList" Value="Property,Member,Office,Contacts,ContactListings,HistoryTransactional,InternetTracking,Media,OpenHouse,OUID,Prospecting,Queue,Rules,SavedSearch,Showing,Teams" />
+    <Parameter Name="DD17_WellKnownResourceList"
+               Value="Property,Member,Office,Contacts,ContactListings,HistoryTransactional,InternetTracking,Media,OpenHouse,OUID,Prospecting,Queue,Rules,SavedSearch,Showing,Teams,TeamMembers,ContactListingNotes,OtherPhone,PropertyGreenVerification,PropertyPowerProduction,PropertyRooms,PropertyUnitTypes,SocialMediaTeams" />
 
     <!-- Computed Has Value - uses SingleValueLookup field -->
     <Parameter Name="FilterHasField" Value="*Parameter_SingleValueLookupField*" />
