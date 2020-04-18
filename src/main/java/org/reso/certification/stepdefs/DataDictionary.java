@@ -22,6 +22,11 @@ public class DataDictionary implements En {
     });
     And("^\"([^\"]*)\" enumerations must match  MUST have annotations if they contain special characters$", (String arg0) -> {
     });
-
+    And("^metadata were retrieved from the server$", () -> {
+    });
+    And("^\"([^\"]*)\" is not a synonym for another field$", (String arg0) -> {
+    });
+    And("^RESO enumerations for \"([^\"]*)\" MUST have annotations if they contain special characters$", (String arg0) -> {
+    });
   }
 }

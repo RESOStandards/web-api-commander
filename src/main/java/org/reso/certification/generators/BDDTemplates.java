@@ -13,10 +13,8 @@ public class BDDTemplates {
         "    Given a RESOScript file was provided\n" +
         "    And Client Settings and Parameters were read from the file\n" +
         "    And a test container was successfully created from the given RESOScript\n" +
-        "    And the test container uses an authorization_code or client_credentials for authentication" +
+        "    And the test container uses an authorization_code or client_credentials for authentication\n" +
         "    And metadata were retrieved from the server\n";
-
-
   }
 
   public static String buildBooleanTest(String fieldName) {
