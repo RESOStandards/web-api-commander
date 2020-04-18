@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -426,7 +427,7 @@ public final class TestUtils {
    * @param datePart the timestamp part, "Year", "Month", "Day", etc. to try and parse
    * @param value the value to try and parse
    * @return the Integer portion of the date if successful, otherwise throws an Exception
-   * @exception throws an exception if value cannot be parsed into a date.
+   * @exception EdmPrimitiveTypeException an exception if value cannot be parsed into a date.
    */
   public static Integer getDatePart(String datePart, Object value) throws EdmPrimitiveTypeException {
     LocalDate date = LocalDate.parse(parseDateFromEdmDateString(value.toString()).toString());
@@ -450,25 +451,26 @@ public final class TestUtils {
    */
   public static Integer getTimestampPart(String timestampPart, Object value) throws EdmPrimitiveTypeException {
     //Turns nanoseconds into two most significant 2 digits for fractional comparisons
-    Integer ADJUSTMENT_FACTOR = 10000000;
+    int ADJUSTMENT_FACTOR = 10000000;
     OffsetDateTime offsetDateTime = OffsetDateTime.parse(value.toString());
 
-    if (timestampPart.equals(DateParts.YEAR)) {
-      return offsetDateTime.getYear();
-    } else if (timestampPart.equals(DateParts.MONTH)) {
-      return offsetDateTime.getMonthValue();
-    } else if (timestampPart.equals(DateParts.DAY)) {
-      return offsetDateTime.getDayOfMonth();
-    } else if (timestampPart.equals(DateParts.HOUR)) {
-      return offsetDateTime.getHour();
-    } else if (timestampPart.equals(DateParts.MINUTE)) {
-      return offsetDateTime.getMinute();
-    } else if (timestampPart.equals(DateParts.SECOND)) {
-      return offsetDateTime.getSecond();
-    } else if (timestampPart.equals(DateParts.FRACTIONAL)) {
-      return offsetDateTime.getNano() / ADJUSTMENT_FACTOR;
-    } else {
-      return null;
+    switch (timestampPart) {
+      case DateParts.YEAR:
+        return offsetDateTime.getYear();
+      case DateParts.MONTH:
+        return offsetDateTime.getMonthValue();
+      case DateParts.DAY:
+        return offsetDateTime.getDayOfMonth();
+      case DateParts.HOUR:
+        return offsetDateTime.getHour();
+      case DateParts.MINUTE:
+        return offsetDateTime.getMinute();
+      case DateParts.SECOND:
+        return offsetDateTime.getSecond();
+      case DateParts.FRACTIONAL:
+        return offsetDateTime.getNano() / ADJUSTMENT_FACTOR;
+      default:
+        return null;
     }
   }
 
@@ -479,11 +481,11 @@ public final class TestUtils {
    * @return the string value contained in the stream.
    */
   public static String convertInputStreamToString(InputStream inputStream) {
-    InputStreamReader isReader = new InputStreamReader(inputStream);
-    BufferedReader reader = new BufferedReader(isReader);
-    StringBuilder sb = new StringBuilder();
-    String str;
     try {
+      InputStreamReader isReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8.name());
+      BufferedReader reader = new BufferedReader(isReader);
+      StringBuilder sb = new StringBuilder();
+      String str;
       while ((str = reader.readLine()) != null) {
         sb.append(str);
       }
