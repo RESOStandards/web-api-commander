@@ -86,7 +86,6 @@ public class EDMXProcessor extends WorksheetProcessor {
     StringBuilder content = new StringBuilder();
     content.append(openingTag);
     resourceTemplates.forEach((name, templateContent) -> content.append(templateContent));
-    //TODO: add lookups as well
     content.append(entityContainerTag.toString());
     content.append(closingTag);
 

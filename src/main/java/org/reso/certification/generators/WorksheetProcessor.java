@@ -14,6 +14,7 @@ import org.reso.models.DataDictionaryRow;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.reso.certification.generators.DataDictionaryGenerator.REFERENCE_RESOURCE;
 import static org.reso.certification.generators.WorksheetProcessor.WELL_KNOWN_COLUMN_INDICES.*;
@@ -54,10 +55,16 @@ public abstract class WorksheetProcessor {
   DataDictionaryRow dictionaryRow;
   String startTimestamp;
   Map<String, String> resourceTemplates = new LinkedHashMap<>();
+  Map<String, Set<String>> lookups = new LinkedHashMap<>();
 
   public WorksheetProcessor() {
     startTimestamp = Utils.getTimestamp();
     markup = new StringBuffer();
+    try {
+      lookups = buildLookups();
+    } catch (Exception ex) {
+     LOG.error(ex);
+    }
   }
 
   public static Integer getIntegerValue(Integer index, Row row, Integer defaultValue) {
@@ -234,6 +241,27 @@ public abstract class WorksheetProcessor {
   void finishProcessing(Sheet sheet) {
     resourceTemplates.put(sheet.getSheetName(), markup.toString());
     reset();
+  }
+
+  Map<String, Set<String>> buildLookups() throws Exception {
+    final String TAB_NAME = "Lookup Fields and Values";
+    final Integer LOOKUP_INDEX = 0, LOOKUP_VALUE_INDEX = 1;
+    DataFormatter formatter = new DataFormatter();
+    AtomicReference<String> lookup = new AtomicReference<>();
+    AtomicReference<String> lookupValue = new AtomicReference<>();
+
+    Sheet sheet = getReferenceWorkbook().getSheet(TAB_NAME);
+    sheet.rowIterator().forEachRemaining(row -> {
+      lookup.set(formatter.getDefaultFormat(row.getCell(LOOKUP_INDEX)).toString());
+      lookupValue.set(formatter.getDefaultFormat(row.getCell(LOOKUP_VALUE_INDEX)).toString());
+
+      if (!lookups.containsKey(lookup.get())) {
+        lookups.put(lookup.get(), new LinkedHashSet<>());
+      }
+      lookups.get(lookup.get()).add(lookupValue.get());
+    });
+    lookups.forEach((key, items) -> LOG.info("key: " + key + " , items: " + items.toString() + "\n"));
+    return null;
   }
 
   public void reset() {

@@ -187,12 +187,18 @@ public class DataDictionaryRow {
       WIKI_PAGE_URL = "Wiki Page URL",
       WIKI_PAGE_ID = "Wiki Page ID";
 
+  private static String sanitizeSimpleName (String name) {
+    return name
+      .replace("[Type]", "_TYPE_PLACEHOLDER_")
+      .replace("[#]", "_NUM_PLACEHOLDER_");
+  }
+
   public String getStandardName() {
     return standardName;
   }
 
   public void setStandardName(String standardName) {
-    this.standardName = standardName;
+    this.standardName = sanitizeSimpleName(standardName);
   }
 
   public String getDefinition() {
