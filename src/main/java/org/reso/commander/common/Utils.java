@@ -15,4 +15,8 @@ public class Utils {
     DateFormat df = new SimpleDateFormat("yyyyMMddHHMMssS");
     return df.format(date);
   }
+
+  public static String getTimestamp() {
+    return getTimestamp(new Date());
+  }
 }

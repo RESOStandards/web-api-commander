@@ -35,7 +35,7 @@ public class TestXMLAndMetadataValidation implements En {
      * Background
      */
     Given("^an OData test client has been created$", () -> {
-      commander.set(Commander.Builder.class.newInstance().build());
+      commander.set(new Commander.Builder().build());
     });
 
 

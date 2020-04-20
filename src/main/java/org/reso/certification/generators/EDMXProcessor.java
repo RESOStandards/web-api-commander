@@ -1,24 +1,54 @@
 package org.reso.certification.generators;
 
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 
-public class EDMXProcessor implements DDWorksheetProcessor {
-
-  @Override
-  public String getTemplateMarkup() {
-    return null;
-  }
+public class EDMXProcessor extends WorksheetProcessor {
 
   @Override
-  public void processRow(Row row) {
-
-  }
-
-  @Override
-  public void addHeader(String content, String timestamp) { }
+  public void processSheet(Sheet sheet) { }
 
   @Override
   public void reset() {
+
+  }
+
+  @Override
+  void processNumber() {
+
+  }
+
+  @Override
+  void processStringListSingle() {
+
+  }
+
+  @Override
+  void processString() {
+
+  }
+
+  @Override
+  void processBoolean() {
+
+  }
+
+  @Override
+  void processStringListMulti() {
+
+  }
+
+  @Override
+  void processDate() {
+
+  }
+
+  @Override
+  void processTimestamp() {
+
+  }
+
+  @Override
+  void processCollection() {
 
   }
 }

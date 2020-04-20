@@ -19,49 +19,39 @@ public class DataDictionaryGenerator {
   private static final Logger LOG = LogManager.getLogger(DataDictionaryGenerator.class);
   public static final String REFERENCE_RESOURCE = "RESO.Dictionary.Final.v.1.7.0.20190124T0000.xlsx";
 
-  static Map<String, String> resourceTemplates = new LinkedHashMap<>();
-
   String dataDictionaryReference = null;
-  DDWorksheetProcessor processor = null;
+  WorksheetProcessor processor = null;
+  Workbook workbook = null;
 
-  public DataDictionaryGenerator(DDWorksheetProcessor processor) throws Exception {
+  public DataDictionaryGenerator(WorksheetProcessor processor) throws Exception {
     if (processor == null) throw new Exception("Data Dictionary processor cannot be null!");
     this.processor = processor;
     dataDictionaryReference = REFERENCE_RESOURCE;
+    workbook = new XSSFWorkbook(
+      OPCPackage.open(Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
+          .getResourceAsStream(dataDictionaryReference))));
   }
 
   public void readDictionaryReference() {
     try {
-      Workbook workbook = new XSSFWorkbook(
-          OPCPackage.open(Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
-              .getResourceAsStream(dataDictionaryReference))));
-
       Sheet worksheet;
       int sheetIndex, rowIndex;
-      String dateString = getTimestamp(new Date()), sourceFilename = REFERENCE_RESOURCE;
-      String parentDirectoryName = dateString + "-" + REFERENCE_RESOURCE.toLowerCase().substring(0, REFERENCE_RESOURCE.lastIndexOf("."));
 
       //workbook consists of many sheets, process only the ones that have the name of a well-known resource
       for (sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++) {
         worksheet = workbook.getSheetAt(sheetIndex);
         if (DDReferenceMetadata.WellKnownResources.WELL_KNOWN_RESOURCES.contains(worksheet.getSheetName()) && worksheet.getPhysicalNumberOfRows() > 1) {
-          processor.addHeader(worksheet.getSheetName(), dateString);
+          processor.processSheet(worksheet);
           //starts at row 1 to skip header row
           for (rowIndex = 1; rowIndex < worksheet.getPhysicalNumberOfRows(); rowIndex++) {
             processor.processRow(worksheet.getRow(rowIndex));
           }
-          resourceTemplates.put(worksheet.getSheetName(), processor.getTemplateMarkup());
         }
-        processor.reset();
+        processor.finishProcessing(worksheet);
       }
-
-      LOG.info("Generating BDD .feature files for the following resources: " + resourceTemplates.keySet().toString());
-      resourceTemplates.forEach((resourceName, content) -> {
-        //put in local directory rather than relative to where the input file is
-        createFile( parentDirectoryName, resourceName.toLowerCase() + ".feature", content);
-      });
-    } catch (IOException | NullPointerException | InvalidFormatException e) {
-      e.printStackTrace();
+      processor.generateOutput();
+    } catch (Exception ex) {
+      LOG.error(ex);
     }
   }
 
