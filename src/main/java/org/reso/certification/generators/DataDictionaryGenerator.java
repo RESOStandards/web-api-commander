@@ -2,37 +2,33 @@ package org.reso.certification.generators;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.util.*;
-
-import static org.reso.commander.common.Utils.getTimestamp;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class DataDictionaryGenerator {
   private static final Logger LOG = LogManager.getLogger(DataDictionaryGenerator.class);
+
+  //TODO: make this a dynamic property based on DD version
   public static final String REFERENCE_RESOURCE = "RESO.Dictionary.Final.v.1.7.0.20190124T0000.xlsx";
 
-  String dataDictionaryReference = null;
   WorksheetProcessor processor = null;
   Workbook workbook = null;
 
   public DataDictionaryGenerator(WorksheetProcessor processor) throws Exception {
     if (processor == null) throw new Exception("Data Dictionary processor cannot be null!");
     this.processor = processor;
-    dataDictionaryReference = REFERENCE_RESOURCE;
-    workbook = new XSSFWorkbook(
-      OPCPackage.open(Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
-          .getResourceAsStream(dataDictionaryReference))));
+    processor.setReferenceResource(REFERENCE_RESOURCE);
+    workbook = processor.getReferenceWorkbook();
   }
 
-  public void readDictionaryReference() {
+  public void createReference() {
     try {
       Sheet worksheet;
       int sheetIndex, rowIndex;
@@ -46,8 +42,8 @@ public class DataDictionaryGenerator {
           for (rowIndex = 1; rowIndex < worksheet.getPhysicalNumberOfRows(); rowIndex++) {
             processor.processRow(worksheet.getRow(rowIndex));
           }
+          processor.finishProcessing(worksheet);
         }
-        processor.finishProcessing(worksheet);
       }
       processor.generateOutput();
     } catch (Exception ex) {
@@ -124,7 +120,7 @@ public class DataDictionaryGenerator {
         if (!baseDirectory.mkdirs()) throw new Exception("ERROR: could not create directory: " + baseDirectory);
       }
       writer = new FileWriter(new File(outputPath + File.separator + fileName));
-      writer.write(content);
+      writer.write(new String(content.getBytes(StandardCharsets.UTF_8)));
       writer.flush();
     } catch (Exception ex) {
       LOG.error("Filename: " + fileName + ". Could not create file: " + ex);

@@ -166,6 +166,7 @@ public class DataDictionaryRow {
       GROUPS = "Groups",
       SIMPLE_DATA_TYPE = "SimpleDataType",
       SUGGESTED_MAX_LENGTH = "SugMaxLength",
+      SUGGESTED_MAX_SCALE = "SugMaxScale",
       SYNONYM = "Synonym",
       ELEMENT_STATUS = "ElementStatus",
       BEDES = "BEDES",

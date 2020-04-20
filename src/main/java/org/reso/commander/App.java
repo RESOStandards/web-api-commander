@@ -10,6 +10,7 @@ import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.generators.BDDProcessor;
 import org.reso.certification.generators.DataDictionaryGenerator;
+import org.reso.certification.generators.EDMXProcessor;
 import org.reso.models.ClientSettings;
 import org.reso.models.Request;
 import org.reso.models.Settings;
@@ -252,7 +253,14 @@ public class App {
       } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)) {
         try {
           DataDictionaryGenerator generator = new DataDictionaryGenerator(new BDDProcessor());
-          generator.readDictionaryReference();
+          generator.createReference();
+        } catch (Exception ex) {
+          LOG.error(getDefaultErrorMessage(ex));
+        }
+      } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_EDMX)) {
+        try {
+          DataDictionaryGenerator generator = new DataDictionaryGenerator(new EDMXProcessor());
+          generator.createReference();
         } catch (Exception ex) {
           LOG.error(getDefaultErrorMessage(ex));
         }
@@ -468,13 +476,15 @@ public class App {
 
       OptionGroup actions = new OptionGroup()
           .addOption(Option.builder().argName("r").longOpt(ACTIONS.RUN_RESOSCRIPT)
-              .desc("Runs commands in RESOScript file given as <inputFile>.").build())
+            .desc("Runs commands in RESOScript file given as <inputFile>.").build())
           .addOption(Option.builder().argName("a").longOpt(ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)
-              .desc("Generates acceptance tests in the current directory.").build())
+            .desc("Generates acceptance tests in the current directory.").build())
+          .addOption(Option.builder().argName("x").longOpt(ACTIONS.GENERATE_REFERENCE_EDMX)
+            .desc("Generates reference metadata in EDMX format.").build())
           .addOption(Option.builder().argName("m").longOpt(ACTIONS.GET_METADATA)
-              .desc("Fetches metadata from <serviceRoot> using <bearerToken> and saves results in <outputFile>.").build())
+            .desc("Fetches metadata from <serviceRoot> using <bearerToken> and saves results in <outputFile>.").build())
           .addOption(Option.builder().argName("g").longOpt(ACTIONS.GET_ENTITIES)
-              .desc("Executes GET on <uri> using the given <bearerToken> and optional <serviceRoot> when " +
+            .desc("Executes GET on <uri> using the given <bearerToken> and optional <serviceRoot> when " +
                   "--useEdmEnabledClient is specified. Optionally takes a --pageLimit parameter, default " + PAGE_LIMIT + " , which will fetch that number " +
                   "of pages. Pass --pageLimit -1 to fetch all pages. " +
                   "Also takes a --pageSize parameter, default " + PAGE_SIZE + ", which lets you specify the page size.").build())
@@ -503,6 +513,7 @@ public class App {
     static class ACTIONS {
       //actions
       public static final String GENERATE_DD_ACCEPTANCE_TESTS = "generateDDAcceptanceTests";
+      public static final String GENERATE_REFERENCE_EDMX = "generateReferenceEdmx";
       public static final String RUN_RESOSCRIPT = "runRESOScript";
       public static final String GET_METADATA = "getMetadata";
       public static final String VALIDATE_METADATA = "validateMetadata";
