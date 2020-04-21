@@ -133,17 +133,17 @@ public final class TestUtils {
     boolean result = false;
 
     if (operator.contentEquals(Operators.GREATER_THAN)) {
-      result = lhs > rhs;
+      result = lhs != null && rhs != null && lhs > rhs;
     } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
-      result = lhs >= rhs;
+      result = Objects.equals(lhs, rhs) || lhs > rhs;
     } else if (operator.contentEquals(Operators.EQ)) {
-      result = lhs.equals(rhs);
+      result = Objects.equals(lhs, rhs);
     } else if (operator.contentEquals(Operators.NE)) {
-      result = !lhs.equals(rhs);
+      result = !Objects.equals(lhs, rhs);
     } else if (operator.contentEquals(Operators.LESS_THAN)) {
-      result = lhs < rhs;
+      result = lhs != null && rhs != null && lhs < rhs;
     } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
-      result = lhs <= rhs;
+      result = Objects.equals(lhs, rhs) || lhs < rhs;
     }
     LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
     return result;
@@ -162,15 +162,15 @@ public final class TestUtils {
     boolean result = false;
 
     if (operator.contentEquals(Operators.CONTAINS)) {
-      result = lhs.contains(rhs);
+      result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs.contains(rhs));
     } else if (operator.contentEquals(Operators.STARTS_WITH)) {
-      result = lhs.startsWith(rhs);
+      result = lhs != null && rhs != null && lhs.startsWith(rhs);
     } else if (operator.contentEquals(Operators.ENDS_WITH)) {
-      result = lhs.endsWith(rhs);
+      result = lhs != null && rhs != null && lhs.endsWith(rhs);
     } else if (operator.contentEquals(Operators.TO_LOWER)) {
-      result = lhs.toLowerCase().equals(rhs);
+      result = lhs != null && lhs.toLowerCase().contentEquals(rhs);
     } else if (operator.contentEquals(Operators.TO_UPPER)) {
-      result = lhs.toUpperCase().equals(rhs);
+      result = lhs != null && lhs.toUpperCase().contentEquals(rhs);
     }
     LOG.info("Compare: \"" + lhs + "\" " + operator + " \"" + rhs + "\" ==> " + result);
     return result;
@@ -189,17 +189,17 @@ public final class TestUtils {
     boolean result = false;
 
     if (operator.contentEquals(Operators.GREATER_THAN)) {
-      result = lhs.after(rhs);
+      result = lhs != null && rhs != null && lhs.after(rhs);
     } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
-      result = lhs.after(rhs) || lhs.equals(rhs);
+      result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs.after(rhs));
     } else if (operator.contentEquals(Operators.EQ)) {
-      result = lhs.equals(rhs);
+      result = Objects.equals(lhs, rhs);
     } else if (operator.contentEquals(Operators.NE)) {
-      result = !lhs.equals(rhs);
+      result = !Objects.equals(lhs, rhs);
     } else if (operator.contentEquals(Operators.LESS_THAN)) {
-      result = lhs.before(rhs);
+      result = lhs != null && lhs.before(rhs);
     } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
-      result = lhs.before(rhs) || lhs.equals(rhs);
+      result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs.before(rhs));
     }
     LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
     return result;
@@ -218,17 +218,17 @@ public final class TestUtils {
     boolean result = false;
 
     if (operator.contentEquals(Operators.GREATER_THAN)) {
-      result = lhs.isAfter(rhs);
+      result = lhs != null && lhs.isAfter(rhs);
     } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
-      result = lhs.isAfter(rhs) || lhs.equals(rhs);
+      result = Objects.equals(lhs, rhs) || lhs.isAfter(rhs);
     } else if (operator.contentEquals(Operators.EQ)) {
-      result = lhs.equals(rhs);
+      result = Objects.equals(lhs, rhs);
     } else if (operator.contentEquals(Operators.NE)) {
-      result = !lhs.equals(rhs);
+      result = !Objects.equals(lhs, rhs);
     } else if (operator.contentEquals(Operators.LESS_THAN)) {
-      result = lhs.isBefore(rhs);
+      result = lhs != null && lhs.isBefore(rhs);
     } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
-      result = lhs.isBefore(rhs) || lhs.equals(rhs);
+      result = Objects.equals(lhs, rhs) || lhs.isBefore(rhs);
     }
     LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
     return result;
@@ -247,17 +247,17 @@ public final class TestUtils {
     boolean result = false;
 
     if (operator.contentEquals(Operators.GREATER_THAN)) {
-      result = lhs.toLocalTime().isAfter(rhs.toLocalTime());
+      result = lhs != null && rhs != null && lhs.toLocalTime().isAfter(rhs.toLocalTime());
     } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
-      result = lhs.toLocalTime().isAfter(rhs.toLocalTime()) || lhs.toLocalTime().equals(rhs.toLocalTime());
+      result = Objects.equals(lhs, rhs) || lhs.toLocalTime().isAfter(rhs.toLocalTime()) || lhs.toLocalTime().equals(rhs.toLocalTime());
     } else if (operator.contentEquals(Operators.EQ)) {
-      result = lhs.toLocalTime().equals(rhs.toLocalTime());
+      result = Objects.equals(lhs, rhs) || lhs.toLocalTime().equals(rhs.toLocalTime());
     } else if (operator.contentEquals(Operators.NE)) {
-      result = !lhs.toLocalTime().equals(rhs.toLocalTime());
+      result = !Objects.equals(lhs, rhs) || !lhs.toLocalTime().equals(rhs.toLocalTime());
     } else if (operator.contentEquals(Operators.LESS_THAN)) {
-      result = lhs.toLocalTime().isBefore(rhs.toLocalTime());
+      result = lhs != null && rhs != null && lhs.toLocalTime().isBefore(rhs.toLocalTime());
     } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
-      result = lhs.toLocalTime().isBefore(rhs.toLocalTime()) || lhs.toLocalTime().equals(rhs.toLocalTime());
+      result = Objects.equals(lhs, rhs) || lhs.toLocalTime().isBefore(rhs.toLocalTime()) || lhs.toLocalTime().equals(rhs.toLocalTime());
     }
     LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
     return result;
@@ -276,17 +276,17 @@ public final class TestUtils {
     boolean result = false;
 
     if (operator.contentEquals(Operators.GREATER_THAN)) {
-      result = lhs.after(rhs);
+      result = lhs != null && lhs.after(rhs);
     } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
-      result = lhs.after(rhs) || lhs.equals(rhs);
+      result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null &&  lhs.after(rhs));
     } else if (operator.contentEquals(Operators.EQ)) {
-      result = lhs.equals(rhs);
+      result = Objects.equals(lhs, rhs);
     } else if (operator.contentEquals(Operators.NE)) {
-      result = !lhs.equals(rhs);
+      result = !Objects.equals(lhs, rhs);
     } else if (operator.contentEquals(Operators.LESS_THAN)) {
-      result = lhs.before(rhs);
+      result = lhs != null && lhs.before(rhs);
     } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
-      result = lhs.before(rhs) || lhs.equals(rhs);
+      result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs.before(rhs));
     }
     LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
     return result;
