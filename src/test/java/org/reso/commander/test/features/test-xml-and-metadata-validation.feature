@@ -17,7 +17,6 @@ Feature: Commander XML and Metadata Validation
     When XML validation is performed on the resource data
     Then XML validation fails
 
-
   #######################################
   #  XML Metadata Validation Tests
   #######################################
@@ -30,7 +29,6 @@ Feature: Commander XML and Metadata Validation
     Given metadata were loaded from the sample resource "bad-edmx-no-keyfield.xml"
     When XML Metadata validation is performed on the resource data
     Then XML Metadata validation fails
-
 
   #######################################
   #  Edm Validation Tests

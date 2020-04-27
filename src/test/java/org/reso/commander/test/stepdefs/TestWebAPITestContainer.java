@@ -2,19 +2,25 @@ package org.reso.commander.test.stepdefs;
 
 import io.cucumber.java8.En;
 import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.reso.commander.certfication.containers.WebAPITestContainer;
 import org.reso.commander.common.TestUtils;
 import org.reso.models.Settings;
 
 import java.io.File;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
-
+import static org.reso.commander.common.TestUtils.JSON_VALUE_PATH;
 
 public class TestWebAPITestContainer implements En {
+  private static final Logger LOG = LogManager.getLogger(TestWebAPITestContainer.class);
   AtomicReference<WebAPITestContainer> testContainer = new AtomicReference<>();
 
   public TestWebAPITestContainer() {
@@ -106,6 +112,36 @@ public class TestWebAPITestContainer implements En {
           getTestContainer().validateDataSystem().getIsValidDataSystem());
     });
 
+    /*
+     * Response testing
+     */
+    Then("^Integer comparisons of \"([^\"]*)\" \"([^\"]*)\" (\\d+) return \"([^\"]*)\"$", (String fieldName, String op, Integer assertedValue, String expected) -> {
+      Boolean expectedValue = Boolean.parseBoolean(expected),
+          result = compareIntegerResults(fieldName, op, assertedValue);
+      if (expectedValue) {
+        assertTrue(result);
+      } else {
+        assertFalse(result);
+      }
+    });
+    Then("^Integer comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String fieldName, String op, String expected) -> {
+      Boolean expectedValue = Boolean.parseBoolean(expected),
+          result = compareIntegerResults(fieldName, op, null);
+      if (expectedValue) {
+        assertTrue(result);
+      } else {
+        assertFalse(result);
+      }
+    });
+  }
+
+  boolean compareIntegerResults(String fieldName, String op, Integer assertedValue) {
+    AtomicBoolean result = new AtomicBoolean(false);
+    //iterate over the items and count the number of fields with data to determine whether there are data present
+    from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+      result.compareAndSet(result.get(), TestUtils.compare((Integer) item.get(fieldName), op, assertedValue));
+    });
+    return result.get();
   }
 
   /**

@@ -35,7 +35,7 @@ public class TestXMLAndMetadataValidation implements En {
      * Background
      */
     Given("^an OData test client has been created$", () -> {
-      commander.set(Commander.Builder.class.newInstance().build());
+      commander.set(new Commander.Builder().build());
     });
 
 
@@ -66,7 +66,7 @@ public class TestXMLAndMetadataValidation implements En {
       assertTrue(getDefaultErrorMessage("expected XML validation to succeed but it failed!"), isXMLValid.get());
     });
     Then("^XML validation fails$", () -> {
-      assertFalse(getDefaultErrorMessage("expected XML validation to succeed but it failed!"), isXMLValid.get());
+      assertFalse(getDefaultErrorMessage("expected XML validation to fail but it succeeded!"), isXMLValid.get());
     });
 
 

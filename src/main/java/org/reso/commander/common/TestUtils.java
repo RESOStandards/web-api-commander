@@ -135,7 +135,7 @@ public final class TestUtils {
     if (operator.contentEquals(Operators.GREATER_THAN)) {
       result = lhs != null && rhs != null && lhs > rhs;
     } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
-      result = Objects.equals(lhs, rhs) || lhs > rhs;
+      result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs > rhs);
     } else if (operator.contentEquals(Operators.EQ)) {
       result = Objects.equals(lhs, rhs);
     } else if (operator.contentEquals(Operators.NE)) {
@@ -143,7 +143,7 @@ public final class TestUtils {
     } else if (operator.contentEquals(Operators.LESS_THAN)) {
       result = lhs != null && rhs != null && lhs < rhs;
     } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
-      result = Objects.equals(lhs, rhs) || lhs < rhs;
+      result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs < rhs);
     }
     LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
     return result;

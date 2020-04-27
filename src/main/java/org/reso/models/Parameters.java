@@ -75,6 +75,8 @@ public class Parameters {
     public static final String
         RESOURCE_NAME = "EndpointResource",
         DATASYSTEM_ENDPOINT = "EndpointDataSystem",
-        EXPAND_FIELD = "ExpandField";
+        EXPAND_FIELD = "ExpandField",
+        INTEGER_FIELD = "IntegerField";
+
   }
 }

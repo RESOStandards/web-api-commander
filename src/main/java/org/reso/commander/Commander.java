@@ -37,10 +37,11 @@ import javax.xml.validation.SchemaFactory;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+
+import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 /**
  * Most of the work done by the WebAPI commander is done by this class. Its public methods are, therefore,
@@ -104,15 +105,15 @@ public class Commander {
       reader.setErrorHandler(new SimpleErrorHandler());
       InputSource inputSource = new InputSource(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
       inputSource.setEncoding(StandardCharsets.UTF_8.toString());
-
       reader.parse(inputSource);
       return true;
     } catch (SAXException saxEx) {
       if (saxEx.getMessage() != null) {
-        LOG.error(saxEx);
+        LOG.error(getDefaultErrorMessage(saxEx));
       }
     } catch (Exception ex) {
-      LOG.error(ex);
+      LOG.error(getDefaultErrorMessage("general error validating XML!"));
+      LOG.debug("Exception in validateXML: " + ex);
     }
     return false;
   }
