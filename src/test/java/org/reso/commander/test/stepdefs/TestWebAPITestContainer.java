@@ -18,6 +18,7 @@ import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.JSON_VALUE_PATH;
+import static org.reso.commander.common.TestUtils.parseTimestampFromEdmDateTimeOffsetString;
 
 public class TestWebAPITestContainer implements En {
   private static final Logger LOG = LogManager.getLogger(TestWebAPITestContainer.class);
@@ -129,20 +130,20 @@ public class TestWebAPITestContainer implements En {
     /*
      * Integer Response Testing
      */
-    Then("^Integer comparisons of \"([^\"]*)\" \"([^\"]*)\" (\\d+) return \"([^\"]*)\"$", (String fieldName, String op, Integer assertedValue, String expected) -> {
-      final boolean expectedValue = Boolean.parseBoolean(expected),
+    Then("^Integer comparisons of \"([^\"]*)\" \"([^\"]*)\" (\\d+) return \"([^\"]*)\"$", (String fieldName, String op, Integer assertedValue, String expectedValue) -> {
+      final boolean expected = Boolean.parseBoolean(expectedValue),
           result = testIntegerComparisons(fieldName, op, assertedValue);
-      if (expectedValue) {
+      if (expected) {
         assertTrue(result);
       } else {
         assertFalse(result);
       }
     });
 
-    Then("^Integer comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String fieldName, String op, String expected) -> {
-      final boolean expectedValue = Boolean.parseBoolean(expected),
+    Then("^Integer comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String fieldName, String op, String expectedValue) -> {
+      final boolean expected = Boolean.parseBoolean(expectedValue),
           result = testIntegerComparisons(fieldName, op, null);
-      if (expectedValue) {
+      if (expected) {
         assertTrue(result);
       } else {
         assertFalse(result);
@@ -152,20 +153,20 @@ public class TestWebAPITestContainer implements En {
     /*
      * String Response Testing
      */
-    Then("^String data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" returns \"([^\"]*)\"$", (String fieldName, String op, String assertedValue, String expected) -> {
-      final boolean expectedValue = Boolean.parseBoolean(expected),
+    Then("^String data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" returns \"([^\"]*)\"$", (String fieldName, String op, String assertedValue, String expectedValue) -> {
+      final boolean expected = Boolean.parseBoolean(expectedValue),
           result = testStringComparisons(fieldName, op, assertedValue);
-      if (expectedValue) {
+      if (expected) {
         assertTrue(result);
       } else {
         assertFalse(result);
       }
     });
 
-    Then("^String data in \"([^\"]*)\" \"([^\"]*)\" null returns \"([^\"]*)\"$", (String fieldName, String op, String expected) -> {
-      final boolean expectedValue = Boolean.parseBoolean(expected),
+    Then("^String data in \"([^\"]*)\" \"([^\"]*)\" null returns \"([^\"]*)\"$", (String fieldName, String op, String expectedValue) -> {
+      final boolean expected = Boolean.parseBoolean(expectedValue),
           result = testStringComparisons(fieldName, op, null);
-      if (expectedValue) {
+      if (expected) {
         assertTrue(result);
       } else {
         assertFalse(result);
@@ -183,6 +184,29 @@ public class TestWebAPITestContainer implements En {
     Then("^String data in \"([^\"]*)\" \"([^\"]*)\" is null$", (String fieldName, String op) -> {
       assertFalse(testStringComparisons(fieldName, op, null));
     });
+
+    /*
+     * Timestamp Response Testing
+     */
+    Then("^Timestamp comparisons of \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" return \"([^\"]*)\"$", (String fieldName, String op, String assertedValue, String expectedValue) -> {
+      final boolean expected = Boolean.parseBoolean(expectedValue),
+          result = testTimestampComparisons(fieldName, op, assertedValue);
+      if (expected) {
+        assertTrue(result);
+      } else {
+        assertFalse(result);
+      }
+    });
+
+    Then("^Timestamp comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String fieldName, String op, String expectedValue) -> {
+      final boolean expected = Boolean.parseBoolean(expectedValue),
+          result = testTimestampComparisons(fieldName, op, null);
+      if (expected) {
+        assertTrue(result);
+      } else {
+        assertFalse(result);
+      }
+    });
   }
 
   boolean testStringComparisons(String fieldName, String op, String assertedValue) {
@@ -199,6 +223,21 @@ public class TestWebAPITestContainer implements En {
     //iterate over the items and count the number of fields with data to determine whether there are data present
     from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
       result.compareAndSet(result.get(), TestUtils.compare((Integer) item.get(fieldName), op, assertedValue));
+    });
+    return result.get();
+  }
+
+  boolean testTimestampComparisons(String fieldName, String op, String offsetDateTime) {
+    AtomicBoolean result = new AtomicBoolean(false);
+    //iterate over the items and count the number of fields with data to determine whether there are data present
+    from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+      try {
+        result.compareAndSet(result.get(), TestUtils.compare(
+            parseTimestampFromEdmDateTimeOffsetString((String)item.get(fieldName)), op,
+            parseTimestampFromEdmDateTimeOffsetString(offsetDateTime)));
+      } catch (Exception ex) {
+        fail(getDefaultErrorMessage(ex));
+      }
     });
     return result.get();
   }

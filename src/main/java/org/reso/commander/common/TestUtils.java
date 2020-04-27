@@ -197,7 +197,7 @@ public final class TestUtils {
     } else if (operator.contentEquals(Operators.NE)) {
       result = !Objects.equals(lhs, rhs);
     } else if (operator.contentEquals(Operators.LESS_THAN)) {
-      result = lhs != null && lhs.before(rhs);
+      result = lhs != null && rhs != null && lhs.before(rhs);
     } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
       result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs.before(rhs));
     }

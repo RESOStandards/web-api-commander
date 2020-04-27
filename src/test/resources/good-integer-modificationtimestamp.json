@@ -1,0 +1,9 @@
+{
+  "@odata.context": "https://test.reso.org",
+  "value": [
+    {
+      "ListingKeyNumeric": 1,
+      "ModificationTimestamp": "2020-04-01T00:00:01Z"
+    }
+  ]
+}

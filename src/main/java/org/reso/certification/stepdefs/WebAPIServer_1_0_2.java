@@ -259,6 +259,7 @@ public class WebAPIServer_1_0_2 implements En {
         //TODO: clean up logic
         if (getTestContainer().getResponseCode() != null && assertedResponseCode.intValue() != getTestContainer().getResponseCode().intValue()) {
           if (getTestContainer().getODataClientErrorException() != null) {
+
             if (getTestContainer().getODataClientErrorException().getODataError().getMessage() != null) {
               LOG.error(getDefaultErrorMessage("Request failed with the following message:",
                   getTestContainer().getODataClientErrorException().getODataError().getMessage()));
@@ -266,6 +267,7 @@ public class WebAPIServer_1_0_2 implements En {
               LOG.error(getDefaultErrorMessage("Request failed with the following message:",
                   getTestContainer().getODataClientErrorException().getMessage()));
             }
+
           } else if (getTestContainer().getODataServerErrorException() != null) {
             LOG.error(getDefaultErrorMessage("Request failed with the following message:",
                 getTestContainer().getODataServerErrorException().toString()));
@@ -274,8 +276,12 @@ public class WebAPIServer_1_0_2 implements En {
               getTestContainer().setResponseCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             }
           }
+
+          //fail for all inner conditions
           fail(getAssertResponseCodeErrorMessage(assertedResponseCode, getTestContainer().getResponseCode()));
         }
+
+        //if we make it through without failing, things are good
         assertTrue(getTestContainer().getResponseCode() > 0 && assertedResponseCode > 0);
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
