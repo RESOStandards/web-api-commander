@@ -264,123 +264,123 @@ Feature: Commander Platinum Web API Test Container Tests
 
   # Timestamp test 'gt'
   Scenario: Timestamp test 'gt' is true when data are greater than given value
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "gt" "2020-04-01T00:00:00Z" return "true"
 
   Scenario: Timestamp test 'gt' is false when data are less than given value
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "gt" "2020-04-01T00:00:02Z" return "false"
 
   Scenario: Timestamp test 'gt' is false when data are null and known value is null
-    When sample JSON data from "good-integer-modificationtimestamp-null.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "gt" null return "false"
 
   Scenario: Timestamp test 'gt' is false when data are present and known value is null
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "gt" null return "false"
 
   Scenario: Timestamp test 'gt' is false when data are null and known value is present
-    When sample JSON data from "good-integer-modificationtimestamp-null.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "gt" "2020-04-01T00:00:00Z" return "false"
 
 
   # Timestamp test 'ge'
   Scenario: Timestamp test 'ge' is true when data are compared to known lesser value
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "ge" "2020-04-01T00:00:00Z" return "true"
 
   Scenario: Timestamp test 'ge' is true when data are compared to known equal value
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "ge" "2020-04-01T00:00:01Z" return "true"
 
   Scenario: Timestamp test 'ge' is false when data are compared to known greater value
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "ge" "2020-04-03T00:00:00Z" return "false"
 
   Scenario: Timestamp test 'ge' is false when null data are compared to valid value
-    When sample JSON data from "good-integer-modificationtimestamp-null.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "ge" "2020-04-01T00:00:01Z" return "false"
 
   Scenario: Timestamp test 'ge' is true when null data are compared to null value
-    When sample JSON data from "good-integer-modificationtimestamp-null.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "ge" null return "true"
 
 
   # Timestamp test 'eq'
   Scenario: Timestamp test 'eq' is true when values are valid and match
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "eq" "2020-04-01T00:00:01Z" return "true"
 
   Scenario: Timestamp test 'eq' is false when values are valid don't mach
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "eq" "2020-04-01T00:00:01Z" return "true"
 
   Scenario: Timestamp test 'eq' is false when null data are compared to a valid value
-    When sample JSON data from "good-integer-modificationtimestamp-null.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "eq" "2020-04-01T00:00:01Z" return "false"
 
   Scenario: Timestamp test 'eq' is false when valid data are compared to a null value
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "eq" null return "false"
 
   Scenario: Timestamp test 'eq' is true when null data are compared to a null value
-    When sample JSON data from "good-integer-modificationtimestamp-null.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "eq" null return "true"
 
 
   # Timestamp test 'ne'
   Scenario: Timestamp test 'ne' is true when values are valid and match
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "ne" "2020-04-01T00:00:00Z" return "true"
 
   Scenario: Timestamp test 'ne' is true when values are null and asserted value is a valid
-    When sample JSON data from "good-integer-modificationtimestamp-null.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "ne" "2020-04-01T00:00:00Z" return "true"
 
   Scenario: Timestamp test 'ne' is false when values are null and asserted value is null
-    When sample JSON data from "good-integer-modificationtimestamp-null.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "ne" null return "false"
 
 
   # Timestamp test 'lt'
   Scenario: Timestamp test 'lt' is true when data are less than given value
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "lt" "2020-04-01T00:00:02Z" return "true"
 
   Scenario: Timestamp test 'lt' is false when data are greater than given value
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "lt" "2020-04-01T00:00:00Z" return "false"
 
   Scenario: Timestamp test 'lt' is false when data are null and known value is null
-    When sample JSON data from "good-integer-modificationtimestamp-null.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "lt" null return "false"
 
   Scenario: Timestamp test 'lt' is false when data are present and known value is null
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "lt" null return "false"
 
   Scenario: Timestamp test 'lt' is false when data are null and known value is present
-    When sample JSON data from "good-integer-modificationtimestamp-null.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "lt" "2020-04-01T00:00:00Z" return "false"
 
 
   # Timestamp test 'le'
   Scenario: Timestamp test 'le' is true when data are compared to known greater value
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "le" "2020-04-01T00:00:02Z" return "true"
 
   Scenario: Timestamp test 'le' is true when data are compared to known equal value
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "le" "2020-04-01T00:00:01Z" return "true"
 
   Scenario: Timestamp test 'le' is false when data are compared to known lesser value
-    When sample JSON data from "good-integer-modificationtimestamp.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "le" "2020-04-01T00:00:00Z" return "false"
 
   Scenario: Timestamp test 'le' is false when null data are compared to valid value
-    When sample JSON data from "good-integer-modificationtimestamp-null.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "le" "2020-04-01T00:00:01Z" return "false"
 
   Scenario: Timestamp test 'le' is true when null data are compared to null value
-    When sample JSON data from "good-integer-modificationtimestamp-null.json" are loaded into the test container
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "le" null return "true"
