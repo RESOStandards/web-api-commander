@@ -56,6 +56,7 @@ public class TestWebAPITestContainer implements En {
       }
     });
 
+
     /*
      * auth settings validation
      */
@@ -88,54 +89,112 @@ public class TestWebAPITestContainer implements En {
       assertNotNull(getDefaultErrorMessage("settings were not found in the Web API test container!"),
           getTestContainer().getSettings());
     });
+
+
+    /*
+     * metadata validation
+     */
     Then("^metadata are valid$", () -> {
       getTestContainer().validateMetadata();
       assertTrue(getDefaultErrorMessage("getIsMetadataValid() returned false when true was expected!"),
           getTestContainer().hasValidMetadata());
     });
+
     Then("^metadata are invalid$", () -> {
       getTestContainer().validateMetadata();
       assertFalse(getDefaultErrorMessage("getIsMetadataValid() returned true when false was expected!"),
           getTestContainer().hasValidMetadata());
     });
 
+
+    /*
+     * DataSystem validation
+     */
     When("^sample JSON data from \"([^\"]*)\" are loaded into the test container$", (String resourceName) -> {
       getTestContainer().setResponseCode(HttpStatus.SC_OK);
       getTestContainer().setResponseData(loadResourceAsString(resourceName));
     });
+
     Then("^schema validation passes for the sample DataSystem data$", () -> {
       assertTrue(getDefaultErrorMessage("expected DataSystem to pass validation, but it failed!"),
           getTestContainer().validateDataSystem().getIsValidDataSystem());
     });
+
     Then("^schema validation fails for the sample DataSystem data$", () -> {
       assertFalse(getDefaultErrorMessage("expected DataSystem to fail validation, but it passed!"),
           getTestContainer().validateDataSystem().getIsValidDataSystem());
     });
 
+
     /*
-     * Response testing
+     * Integer Response Testing
      */
     Then("^Integer comparisons of \"([^\"]*)\" \"([^\"]*)\" (\\d+) return \"([^\"]*)\"$", (String fieldName, String op, Integer assertedValue, String expected) -> {
-      Boolean expectedValue = Boolean.parseBoolean(expected),
-          result = compareIntegerResults(fieldName, op, assertedValue);
+      final boolean expectedValue = Boolean.parseBoolean(expected),
+          result = testIntegerComparisons(fieldName, op, assertedValue);
       if (expectedValue) {
         assertTrue(result);
       } else {
         assertFalse(result);
       }
     });
+
     Then("^Integer comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String fieldName, String op, String expected) -> {
-      Boolean expectedValue = Boolean.parseBoolean(expected),
-          result = compareIntegerResults(fieldName, op, null);
+      final boolean expectedValue = Boolean.parseBoolean(expected),
+          result = testIntegerComparisons(fieldName, op, null);
       if (expectedValue) {
         assertTrue(result);
       } else {
         assertFalse(result);
       }
+    });
+
+    /*
+     * String Response Testing
+     */
+    Then("^String data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" returns \"([^\"]*)\"$", (String fieldName, String op, String assertedValue, String expected) -> {
+      final boolean expectedValue = Boolean.parseBoolean(expected),
+          result = testStringComparisons(fieldName, op, assertedValue);
+      if (expectedValue) {
+        assertTrue(result);
+      } else {
+        assertFalse(result);
+      }
+    });
+
+    Then("^String data in \"([^\"]*)\" \"([^\"]*)\" null returns \"([^\"]*)\"$", (String fieldName, String op, String expected) -> {
+      final boolean expectedValue = Boolean.parseBoolean(expected),
+          result = testStringComparisons(fieldName, op, null);
+      if (expectedValue) {
+        assertTrue(result);
+      } else {
+        assertFalse(result);
+      }
+    });
+
+    Then("^String data in \"([^\"]*)\" \"([^\"]*)\" equals \"([^\"]*)\"$", (String fieldName, String op, String assertedValue) -> {
+      assertTrue(testStringComparisons(fieldName, op, assertedValue));
+    });
+
+    Then("^String data in \"([^\"]*)\" \"([^\"]*)\" does not equal \"([^\"]*)\"$", (String fieldName, String op, String assertedValue) -> {
+      assertFalse(testStringComparisons(fieldName, op, assertedValue));
+    });
+
+    Then("^String data in \"([^\"]*)\" \"([^\"]*)\" is null$", (String fieldName, String op) -> {
+      assertFalse(testStringComparisons(fieldName, op, null));
     });
   }
 
-  boolean compareIntegerResults(String fieldName, String op, Integer assertedValue) {
+  boolean testStringComparisons(String fieldName, String op, String assertedValue) {
+    AtomicBoolean result = new AtomicBoolean(false);
+    //iterate over the items and count the number of fields with data to determine whether there are data present
+    from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+      result.compareAndSet(result.get(), TestUtils.compare((String)item.get(fieldName), op, assertedValue));
+    });
+    return result.get();
+  }
+
+  boolean testIntegerComparisons(String fieldName, String op, Integer assertedValue) {
     AtomicBoolean result = new AtomicBoolean(false);
     //iterate over the items and count the number of fields with data to determine whether there are data present
     from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {

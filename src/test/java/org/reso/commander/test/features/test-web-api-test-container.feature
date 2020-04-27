@@ -35,116 +35,218 @@ Feature: Commander Platinum Web API Test Container Tests
   # Response Validation
   #######################################
 
-  # test 'eq'
+  # Integer test 'eq'
   Scenario: Integer 'eq' tests succeed when valid response data are compared to a valid Integer
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "eq" 5 return "true"
 
   Scenario: Integer 'eq' tests fail when valid response data are compared to null
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "eq" null return "false"
 
   Scenario: Integer 'eq' tests succeed when null response data are compared to null
-    When sample JSON data from "good-integer-bedrooms-total-null.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal-null.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "eq" null return "true"
 
   Scenario: Integer 'eq' tests fail when null response data are compared to a valid Integer
-    When sample JSON data from "good-integer-bedrooms-total-null.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal-null.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "eq" 5 return "false"
 
-  # test 'ne'
+    
+  # Integer test 'ne'
   Scenario: Integer 'ne' tests succeed when valid response data are compared to a valid Integer
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "ne" 10 return "true"
 
   Scenario: Integer 'ne' tests succeed when valid response data are compared to null
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "ne" null return "true"
 
   Scenario: Integer 'ne' tests succeed when null response data are compared to null
-    When sample JSON data from "good-integer-bedrooms-total-null.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal-null.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "ne" null return "false"
 
   Scenario: Integer 'ne' tests fail when null response data are compared to a valid Integer
-    When sample JSON data from "good-integer-bedrooms-total-null.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal-null.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "ne" 10 return "true"
 
 
-  # test 'gt'
+  # Integer test 'gt'
   Scenario: Integer 'gt' tests fail when valid response data are compared to a valid Integer of greater value
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "gt" 6 return "false"
 
   Scenario: Integer 'gt' tests succeed when valid response data are compared to a valid Integer of lesser value
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "gt" 4 return "true"
 
   Scenario: Integer 'gt' tests fail when valid response data are compared to null
-    When sample JSON data from "good-integer-bedrooms-total-null.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal-null.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "gt" null return "false"
 
 
-  # test 'ge'
+  # Integer test 'ge'
   Scenario: Integer 'ge' tests fail when valid response data are compared to a valid Integer of a lesser value
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "ge" 4 return "true"
 
   Scenario: Integer 'ge' tests succeed when valid response data are compared to a valid Integer of an equal value
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "ge" 5 return "true"
 
   Scenario: Integer 'ge' tests succeed when valid response data are compared to a valid Integer of a greater value
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "ge" 10 return "false"
 
   Scenario: Integer 'ge' tests succeed when valid response data are compared to null
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "ge" null return "false"
 
   Scenario: Integer 'ge' tests succeed when null response data are compared to null
-    When sample JSON data from "good-integer-bedrooms-total-null.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal-null.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "ge" null return "true"
 
   Scenario: Integer 'ge' tests fail when null response data are compared to a valid Integer
-    When sample JSON data from "good-integer-bedrooms-total-null.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal-null.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "ge" 5 return "false"
 
 
-  # test 'lt'
+  # Integer test 'lt'
   Scenario: Integer 'lt' tests succeed when valid response data are compared to a valid Integer of greater value
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "lt" 6 return "true"
 
   Scenario: Integer 'lt' tests fail when valid response data are compared to a valid Integer of lesser value
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "lt" 4 return "false"
 
   Scenario: Integer 'lt' tests fail when valid response data are compared to null
-    When sample JSON data from "good-integer-bedrooms-total-null.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal-null.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "lt" null return "false"
 
 
-  # test 'le'
+  # Integer test 'le'
   Scenario: Integer 'le' tests fail when valid response data are compared to a valid Integer of a greater value
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "le" 6 return "true"
 
   Scenario: Integer 'le' tests succeed when valid response data are compared to a valid Integer of an equal value
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "le" 5 return "true"
 
   Scenario: Integer 'le' tests fail when valid response data are compared to a valid Integer of a lesser value
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "le" 4 return "false"
 
   Scenario: Integer 'le' tests succeed when valid response data are compared to null
-    When sample JSON data from "good-integer-bedrooms-total.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "le" null return "false"
 
   Scenario: Integer 'le' tests succeed when null response data are compared to null
-    When sample JSON data from "good-integer-bedrooms-total-null.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal-null.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "le" null return "true"
 
   Scenario: Integer 'le' tests fail when null response data are compared to a valid Integer
-    When sample JSON data from "good-integer-bedrooms-total-null.json" are loaded into the test container
+    When sample JSON data from "good-integer-bedroomstotal-null.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "le" 5 return "false"
+
+
+  # String test 'contains'
+  Scenario: String 'contains' case-sensitive comparison succeeds
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "contains" "Main" returns "true"
+
+  Scenario: String 'contains' case-sensitive comparison fails
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "contains" "main" returns "false"
+
+  Scenario: String 'contains' results do not contain value
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "contains" "1st" returns "false"
+
+  Scenario: String 'contains' data are present and cannot contain null
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "contains" null returns "false"
+
+  Scenario: String 'contains' data are null and cannot contain value
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "contains" "1st" returns "false"
+
+
+  # String test 'startswith'
+  Scenario: String data 'startswith' given value matching case returns true
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "startswith" "M" returns "true"
+
+  Scenario: String data 'startswith' given value not matching case returns false
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "startswith" "m" returns "false"
+
+  Scenario: String data 'startswith' given value equal to a different character
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "startswith" "z" returns "false"
+
+  Scenario: String data 'startswith' returns false when data are present but asserted value is null
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "startswith" null returns "false"
+
+  Scenario: String data 'startswith' returns false when null data are compared to asserted value
+    When sample JSON data from "good-string-streetname-null.json" are loaded into the test container
+    Then String data in "StreetName" "startswith" "M" returns "false"
+
+
+  # String test 'endswith'
+  Scenario: String data 'endswith' given value matching case returns true
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "endswith" "n" returns "true"
+
+  Scenario: String data 'endswith' given value not matching case returns false
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "endswith" "N" returns "false"
+
+  Scenario: String data 'endswith' given value equal to a different character
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "endswith" "z" returns "false"
+
+  Scenario: String data 'startswith' returns false when data are present but asserted value is null
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "endswith" null returns "false"
+
+  Scenario: String data 'startswith' returns false when null data are compared to asserted value
+    When sample JSON data from "good-string-streetname-null.json" are loaded into the test container
+    Then String data in "StreetName" "endswith" "M" returns "false"
+
+
+  # String test 'tolower'
+  Scenario: String 'tolower' matches lowercase string
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "tolower" equals "main"
+
+  Scenario: String 'tolower' does not match uppercase string
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "tolower" does not equal "MAIN"
+
+  Scenario: String 'tolower' does not match mixed-case string
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "tolower" does not equal "Main"
+
+  Scenario: String 'tolower' returns null when data are null
+    When sample JSON data from "good-string-streetname-null.json" are loaded into the test container
+    Then String data in "StreetName" "tolower" is null
+
+  # String test 'toupper'
+  Scenario: String 'toupper' matches uppercase string
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "toupper" equals "MAIN"
+
+  Scenario: String 'toupper' does not match lowercase string
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "toupper" does not equal "main"
+
+  Scenario: String 'toupper' does not match mixed-case string
+    When sample JSON data from "good-string-streetname.json" are loaded into the test container
+    Then String data in "StreetName" "toupper" does not equal "Main"
+
+  Scenario: String 'toupper' returns null when data are null
+    When sample JSON data from "good-string-streetname-null.json" are loaded into the test container
+    Then String data in "StreetName" "toupper" is null
