@@ -3,6 +3,7 @@ package org.reso.certification.stepdefs;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.POJONode;
 import io.cucumber.java8.En;
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
@@ -254,20 +255,34 @@ public class WebAPIServer_1_0_2 implements En {
     Then("^the server responds with a status code of (\\d+)$", (Integer assertedResponseCode) -> {
       try {
         LOG.info("Asserted Response Code: " + assertedResponseCode + ", Server Response Code: " + getTestContainer().getResponseCode());
-        assertTrue(getTestContainer().getResponseCode() > 0 && assertedResponseCode > 0);
 
-        if (assertedResponseCode.intValue() != getTestContainer().getResponseCode().intValue()) {
+        //TODO: clean up logic
+        if (getTestContainer().getResponseCode() != null && assertedResponseCode.intValue() != getTestContainer().getResponseCode().intValue()) {
           if (getTestContainer().getODataClientErrorException() != null) {
+
             if (getTestContainer().getODataClientErrorException().getODataError().getMessage() != null) {
-              LOG.error("Request failed with the following message: "
-                  + getTestContainer().getODataClientErrorException().getODataError().getMessage());
+              LOG.error(getDefaultErrorMessage("Request failed with the following message:",
+                  getTestContainer().getODataClientErrorException().getODataError().getMessage()));
             } else if (getTestContainer().getODataClientErrorException().getMessage() != null) {
-              LOG.error("Request failed with the following message: "
-                  + getTestContainer().getODataClientErrorException().getMessage());
+              LOG.error(getDefaultErrorMessage("Request failed with the following message:",
+                  getTestContainer().getODataClientErrorException().getMessage()));
+            }
+
+          } else if (getTestContainer().getODataServerErrorException() != null) {
+            LOG.error(getDefaultErrorMessage("Request failed with the following message:",
+                getTestContainer().getODataServerErrorException().toString()));
+
+            if (getTestContainer().getODataServerErrorException().toString().contains(String.valueOf(HttpStatus.SC_INTERNAL_SERVER_ERROR))) {
+              getTestContainer().setResponseCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             }
           }
+
+          //fail for all inner conditions
           fail(getAssertResponseCodeErrorMessage(assertedResponseCode, getTestContainer().getResponseCode()));
         }
+
+        //if we make it through without failing, things are good
+        assertTrue(getTestContainer().getResponseCode() > 0 && assertedResponseCode > 0);
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -329,11 +344,9 @@ public class WebAPIServer_1_0_2 implements En {
 
         //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
         from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-          assertNotNull("ERROR: '" + fieldName + "' cannot be null!", item.get(fieldName));
-          fieldValue.set(Integer.parseInt(item.get(fieldName).toString()));
+          fieldValue.set(item.get(fieldName) != null ? new Integer(item.get(fieldName).toString()) : null);
           result.set(result.get() && TestUtils.compare(fieldValue.get(), op, assertedValue));
         });
-
         assertTrue(result.get());
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
