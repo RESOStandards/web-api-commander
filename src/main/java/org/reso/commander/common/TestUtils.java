@@ -28,7 +28,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.Year;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -200,35 +199,6 @@ public final class TestUtils {
       result = lhs != null && rhs != null && lhs.before(rhs);
     } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
       result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs.before(rhs));
-    }
-    LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
-    return result;
-  }
-
-  /**
-   * Year Comparator
-   *
-   * @param lhs Year to compare
-   * @param op  an OData binary operator to use for comparisons
-   * @param rhs Timestamp to compare
-   * @return true if lhs op rhs, false otherwise
-   */
-  public static boolean compare(Year lhs, String op, Year rhs) {
-    String operator = op.toLowerCase();
-    boolean result = false;
-
-    if (operator.contentEquals(Operators.GREATER_THAN)) {
-      result = lhs != null && lhs.isAfter(rhs);
-    } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
-      result = Objects.equals(lhs, rhs) || lhs.isAfter(rhs);
-    } else if (operator.contentEquals(Operators.EQ)) {
-      result = Objects.equals(lhs, rhs);
-    } else if (operator.contentEquals(Operators.NE)) {
-      result = !Objects.equals(lhs, rhs);
-    } else if (operator.contentEquals(Operators.LESS_THAN)) {
-      result = lhs != null && lhs.isBefore(rhs);
-    } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
-      result = Objects.equals(lhs, rhs) || lhs.isBefore(rhs);
     }
     LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
     return result;
@@ -450,6 +420,8 @@ public final class TestUtils {
    * @return the Integer portion of the date if successful, otherwise throws an Exception
    */
   public static Integer getTimestampPart(String timestampPart, Object value) throws EdmPrimitiveTypeException {
+    if (timestampPart == null || value == null) return null;
+
     //Turns nanoseconds into two most significant 2 digits for fractional comparisons
     int ADJUSTMENT_FACTOR = 10000000;
     OffsetDateTime offsetDateTime = OffsetDateTime.parse(value.toString());

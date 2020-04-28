@@ -73,17 +73,25 @@ Feature: Commander Platinum Web API Test Container Tests
 
 
   # Integer test 'gt'
-  Scenario: Integer 'gt' tests fail when valid response data are compared to a valid Integer of greater value
+  Scenario: Integer test 'gt' is false when data are compared to an Integer of greater value
     When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "gt" 6 return "false"
 
-  Scenario: Integer 'gt' tests succeed when valid response data are compared to a valid Integer of lesser value
+  Scenario: Integer test 'gt' is true when data are compared to an Integer of lesser value
     When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "gt" 4 return "true"
 
-  Scenario: Integer 'gt' tests fail when valid response data are compared to null
+  Scenario: Integer test 'gt' is false when data are null and known value is null
     When sample JSON data from "good-integer-bedroomstotal-null.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "gt" null return "false"
+
+  Scenario: Integer test 'gt' is false when data are present and known value is null
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
+    Then Integer comparisons of "BedroomsTotal" "gt" null return "false"
+
+  Scenario: Integer test 'gt' is false when data are null and known value is present
+    When sample JSON data from "good-integer-bedroomstotal-null.json" are loaded into the test container
+    Then Integer comparisons of "BedroomsTotal" "gt" 3 return "false"
 
 
   # Integer test 'ge'
@@ -113,17 +121,25 @@ Feature: Commander Platinum Web API Test Container Tests
 
 
   # Integer test 'lt'
-  Scenario: Integer 'lt' tests succeed when valid response data are compared to a valid Integer of greater value
+  Scenario: Integer test 'lt' is true when data are compared to an Integer of greater value
     When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "lt" 6 return "true"
 
-  Scenario: Integer 'lt' tests fail when valid response data are compared to a valid Integer of lesser value
+  Scenario: Integer test 'lt' is false when data are compared to an Integer of lesser value
     When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "lt" 4 return "false"
 
-  Scenario: Integer 'lt' tests fail when valid response data are compared to null
+  Scenario: Integer test 'lt' is false when data are null and known value is null
     When sample JSON data from "good-integer-bedroomstotal-null.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "lt" null return "false"
+
+  Scenario: Integer test 'lt' is false when data are present and known value is null
+    When sample JSON data from "good-integer-bedroomstotal.json" are loaded into the test container
+    Then Integer comparisons of "BedroomsTotal" "lt" null return "false"
+
+  Scenario: Integer test 'lt' is false when data are null and known value is present
+    When sample JSON data from "good-integer-bedroomstotal-null.json" are loaded into the test container
+    Then Integer comparisons of "BedroomsTotal" "lt" 3 return "false"
 
 
   # Integer test 'le'
@@ -337,6 +353,10 @@ Feature: Commander Platinum Web API Test Container Tests
     When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "ne" "2020-04-01T00:00:00Z" return "true"
 
+  Scenario: Timestamp test 'ne' is false when values are present and asserted value is null
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then Timestamp comparisons of "ModificationTimestamp" "ne" null return "true"
+
   Scenario: Timestamp test 'ne' is false when values are null and asserted value is null
     When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "ne" null return "false"
@@ -384,3 +404,139 @@ Feature: Commander Platinum Web API Test Container Tests
   Scenario: Timestamp test 'le' is true when null data are compared to null value
     When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
     Then Timestamp comparisons of "ModificationTimestamp" "le" null return "true"
+
+
+  #######################################
+  # Year Comparisons
+  #######################################
+
+  # Year test 'gt'
+  Scenario: Year test 'gt' is true when data are greater than given value
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "gt" 2019 return "true"
+
+  Scenario: Year test 'gt' is false when data are less than given value
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "gt" 2021 return "false"
+
+  Scenario: Year test 'gt' is false when data are null and known value is null
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "gt" null return "false"
+
+  Scenario: Year test 'gt' is false when data are present and known value is null
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "gt" null return "false"
+
+  Scenario: Year test 'gt' is false when data are null and known value is present
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "gt" 2019 return "false"
+
+
+  # Year test 'ge'
+  Scenario: Year test 'ge' is true when data are compared to known lesser value
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "ge" 2020 return "true"
+
+  Scenario: Year test 'ge' is true when data are compared to known equal value
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "ge" 2019 return "true"
+
+  Scenario: Year test 'ge' is false when data are compared to known greater value
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "ge" 2021 return "false"
+
+  Scenario: Year test 'ge' is false when null data are compared to valid value
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "ge" 2020 return "false"
+
+  Scenario: Year test 'ge' is true when null data are compared to null value
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "ge" null return "true"
+
+  Scenario: Year test 'ge' is false when data are compared to null value
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "ge" null return "false"
+
+
+  # Year test 'eq'
+  Scenario: Year test 'eq' is true when values are valid and match
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "eq" 2020 return "true"
+
+  Scenario: Year test 'eq' is false when values are valid don't mach
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "eq" 2019 return "false"
+
+  Scenario: Year test 'eq' is false when null data are compared to a valid value
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "eq" 2020 return "false"
+
+  Scenario: Year test 'eq' is false when valid data are compared to a null value
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "eq" null return "false"
+
+  Scenario: Year test 'eq' is true when null data are compared to a null value
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "eq" null return "true"
+
+
+  # Year test 'ne'
+  Scenario: Year test 'ne' is true when values are valid and match
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "ne" 2021 return "true"
+
+  Scenario: Year test 'ne' is true when values are null and asserted value is a valid
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "ne" 2021 return "true"
+
+  Scenario: Year test 'ne' is true when values are valid and asserted value is null
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "ne" null return "true"
+
+  Scenario: Year test 'ne' is false when values are null and asserted value is null
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "ne" null return "false"
+
+
+  # Year test 'lt'
+  Scenario: Year test 'lt' is true when data are less than given value
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "lt" 2021 return "true"
+
+  Scenario: Year test 'lt' is false when data are greater than given value
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "lt" 2019 return "false"
+
+  Scenario: Year test 'lt' is false when data are null and known value is null
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "lt" null return "false"
+
+  Scenario: Year test 'lt' is false when data are present and known value is null
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "lt" null return "false"
+
+  Scenario: Year test 'lt' is false when data are null and known value is present
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "lt" 2020 return "false"
+
+
+  # Year test 'le'
+  Scenario: Year test 'le' is true when data are compared to known greater value
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "le" 2022 return "true"
+
+  Scenario: Year test 'le' is true when data are compared to known equal value
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "le" 2020 return "true"
+
+  Scenario: Year test 'le' is false when data are compared to known lesser value
+    When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "le" 2019 return "false"
+
+  Scenario: Year test 'le' is false when null data are compared to valid value
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "le" 2020 return "false"
+
+  Scenario: Year test 'le' is true when null data are compared to null value
+    When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
+    Then "year" comparisons of "ModificationTimestamp" "le" null return "true"

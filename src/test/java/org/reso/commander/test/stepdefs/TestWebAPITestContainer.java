@@ -26,7 +26,9 @@ public class TestWebAPITestContainer implements En {
 
   public TestWebAPITestContainer() {
 
-    //background
+    /*
+     * Background
+     */
     Given("^a Web API test container was created using the RESOScript \"([^\"]*)\"$", (String fileName) -> {
       try {
         //get settings from mock RESOScript file
@@ -59,7 +61,7 @@ public class TestWebAPITestContainer implements En {
 
 
     /*
-     * auth settings validation
+     * Auth settings validation
      */
     When("^an auth token is provided in \"([^\"]*)\"$", (String clientSettingsAuthToken) -> {
       String token = Settings.resolveParametersString(clientSettingsAuthToken, getTestContainer().getSettings());
@@ -93,7 +95,7 @@ public class TestWebAPITestContainer implements En {
 
 
     /*
-     * metadata validation
+     * Metadata validation
      */
     Then("^metadata are valid$", () -> {
       getTestContainer().validateMetadata();
@@ -150,6 +152,7 @@ public class TestWebAPITestContainer implements En {
       }
     });
 
+
     /*
      * String Response Testing
      */
@@ -185,6 +188,7 @@ public class TestWebAPITestContainer implements En {
       assertFalse(testStringComparisons(fieldName, op, null));
     });
 
+
     /*
      * Timestamp Response Testing
      */
@@ -201,6 +205,30 @@ public class TestWebAPITestContainer implements En {
     Then("^Timestamp comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String fieldName, String op, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
           result = testTimestampComparisons(fieldName, op, null);
+      if (expected) {
+        assertTrue(result);
+      } else {
+        assertFalse(result);
+      }
+    });
+
+
+    /*
+     * Date Part Response Testing
+     */
+    Then("^\"([^\"]*)\" comparisons of \"([^\"]*)\" \"([^\"]*)\" (\\d+) return \"([^\"]*)\"$", (String datePart, String fieldName, String op, Integer assertedValue, String expectedValue) -> {
+      final boolean expected = Boolean.parseBoolean(expectedValue),
+          result = testDatePartComparisons(datePart, fieldName, op, assertedValue);
+      if (expected) {
+        assertTrue(result);
+      } else {
+        assertFalse(result);
+      }
+    });
+
+    Then("^\"([^\"]*)\" comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String datePart, String fieldName, String op, String expectedValue) -> {
+      final boolean expected = Boolean.parseBoolean(expectedValue),
+          result = testDatePartComparisons(datePart, fieldName, op, null);
       if (expected) {
         assertTrue(result);
       } else {
@@ -239,6 +267,18 @@ public class TestWebAPITestContainer implements En {
         fail(getDefaultErrorMessage(ex));
       }
     });
+    return result.get();
+  }
+
+  boolean testDatePartComparisons(String datePart, String fieldName, String op, Integer assertedValue) {
+    AtomicBoolean result = new AtomicBoolean(false);
+
+    from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+          try {
+            result.compareAndSet(result.get(), TestUtils.compare(TestUtils.getTimestampPart(datePart, item.get(fieldName)), op, assertedValue));
+          } catch (Exception ex) {
+            fail(getDefaultErrorMessage(ex));
+    }});
     return result.get();
   }
 
