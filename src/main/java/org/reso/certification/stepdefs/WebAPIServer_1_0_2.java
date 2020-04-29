@@ -432,7 +432,6 @@ public class WebAPIServer_1_0_2 implements En {
 
     /*
      * Date Comparison glue
-     * TODO: add payload tester for this
      */
     And("^Date data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
       try {
@@ -624,7 +623,9 @@ public class WebAPIServer_1_0_2 implements En {
 
         try {
           assertedValue = Double.parseDouble(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
-          LOG.info("Asserted value is: " + (assertedValue % 1 == 0 ? assertedValue.intValue() : assertedValue));
+
+          if (assertedValue % 1 == 0) LOG.info("Asserted value is: " + assertedValue.intValue());
+          else LOG.info("Asserted value is: " + assertedValue);
 
           //TODO: re-consolidate fractional with other date part ops
           if (datePart.contentEquals(FRACTIONAL)) {

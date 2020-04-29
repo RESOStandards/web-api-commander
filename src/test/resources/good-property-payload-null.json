@@ -5,7 +5,8 @@
       "ListingKeyNumeric": null,
       "BedroomsTotal": null,
       "StreetName": null,
-      "ModificationTimestamp": null
+      "ModificationTimestamp": null,
+      "ListingContractDate": null
     }
   ]
 }

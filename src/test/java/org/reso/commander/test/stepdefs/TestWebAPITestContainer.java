@@ -174,7 +174,7 @@ public class TestWebAPITestContainer implements En {
     /*
      * Timestamp Response Testing
      */
-    Then("^Timestamp comparisons of \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" return \"([^\"]*)\"$", (String fieldName, String op, String assertedValue, String expectedValue) -> {
+    Then("^comparisons of Timestamp field \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" return \"([^\"]*)\"$", (String fieldName, String op, String assertedValue, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
           result = compareTimestampPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue);
       if (expected) {
@@ -184,7 +184,7 @@ public class TestWebAPITestContainer implements En {
       }
     });
 
-    Then("^Timestamp comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String fieldName, String op, String expectedValue) -> {
+    Then("^comparisons of Timestamp field \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String fieldName, String op, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
           result = compareTimestampPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, null);
       if (expected) {
@@ -193,11 +193,8 @@ public class TestWebAPITestContainer implements En {
         assertFalse(result);
       }
     });
-
-    /*
-     * Date Part Response Testing
-     */
-    Then("^\"([^\"]*)\" comparisons of \"([^\"]*)\" \"([^\"]*)\" (\\d+) return \"([^\"]*)\"$", (String datePart, String fieldName, String op, Integer assertedValue, String expectedValue) -> {
+    
+    Then("^\"([^\"]*)\" comparisons of Timestamp field \"([^\"]*)\" \"([^\"]*)\" (\\d+) return \"([^\"]*)\"$", (String datePart, String fieldName, String op, Integer assertedValue, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
           result = compareTimestampPayloadToAssertedDatePartValue(getTestContainer().getResponseData(), datePart, fieldName, op, assertedValue);
       if (expected) {
@@ -207,7 +204,7 @@ public class TestWebAPITestContainer implements En {
       }
     });
 
-    Then("^\"([^\"]*)\" comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String datePart, String fieldName, String op, String expectedValue) -> {
+    Then("^\"([^\"]*)\" comparisons of Timestamp field \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String datePart, String fieldName, String op, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
           result = compareTimestampPayloadToAssertedDatePartValue(getTestContainer().getResponseData(), datePart, fieldName, op,null);
       if (expected) {
@@ -220,7 +217,7 @@ public class TestWebAPITestContainer implements En {
     /*
      * Fractional Second Response Testing
      */
-    Then("^fractionalsecond comparisons of \"([^\"]*)\" \"([^\"]*)\" (\\d+\\.\\d+) return \"([^\"]*)\"$", (String fieldName, String op, Double assertedValue, String expectedValue) -> {
+    Then("^fractionalsecond comparisons of Timestamp field \"([^\"]*)\" \"([^\"]*)\" (\\d+\\.\\d+) return \"([^\"]*)\"$", (String fieldName, String op, Double assertedValue, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
         result = compareFractionalSecondsPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue);
       if (expected) {
@@ -230,9 +227,33 @@ public class TestWebAPITestContainer implements En {
       }
     });
 
-    Then("^fractionalsecond comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String fieldName, String op, String expectedValue) -> {
+    Then("^fractionalsecond comparisons of Timestamp field \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String fieldName, String op, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
         result = compareFractionalSecondsPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, null);
+      if (expected) {
+        assertTrue(result);
+      } else {
+        assertFalse(result);
+      }
+    });
+
+
+    /*
+     * Date Comparisons
+     */
+    Then("^\"([^\"]*)\" comparisons of Date field \"([^\"]*)\" \"([^\"]*)\" (\\d+) return \"([^\"]*)\"$", (String datePart, String fieldName, String op, Integer assertedValue, String expectedValue) -> {
+      final boolean expected = Boolean.parseBoolean(expectedValue),
+        result = compareDatePayloadToAssertedDatePartValue(getTestContainer().getResponseData(), datePart, fieldName, op, assertedValue);
+      if (expected) {
+        assertTrue(result);
+      } else {
+        assertFalse(result);
+      }
+    });
+
+    Then("^\"([^\"]*)\" comparisons of Date field \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String datePart, String fieldName, String op, String expectedValue) -> {
+      final boolean expected = Boolean.parseBoolean(expectedValue),
+        result = compareDatePayloadToAssertedDatePartValue(getTestContainer().getResponseData(), datePart, fieldName, op, null);
       if (expected) {
         assertTrue(result);
       } else {

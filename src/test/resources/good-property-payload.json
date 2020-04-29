@@ -5,7 +5,8 @@
       "ListingKeyNumeric": 1,
       "BedroomsTotal": 5,
       "StreetName": "Main",
-      "ModificationTimestamp": "2020-04-02T02:02:02.02Z"
+      "ModificationTimestamp": "2020-04-02T02:02:02.02Z",
+      "ListingContractDate": "2020-04-02"
     }
   ]
 }

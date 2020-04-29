@@ -134,7 +134,7 @@ public final class TestUtils {
     AtomicBoolean result = new AtomicBoolean(false);
     //iterate over the items and count the number of fields with data to determine whether there are data present
     from(payload).getList(JSON_VALUE_PATH, HashMap.class).forEach(item ->
-      result.compareAndSet(result.get(), TestUtils.compare((String)item.get(fieldName), op, assertedValue)));
+      result.compareAndSet(result.get(), compare((String)item.get(fieldName), op, assertedValue)));
     return result.get();
   }
 
@@ -150,7 +150,7 @@ public final class TestUtils {
     AtomicBoolean result = new AtomicBoolean(false);
     //iterate over the items and count the number of fields with data to determine whether there are data present
     from(payload).getList(JSON_VALUE_PATH, HashMap.class).forEach(item ->
-      result.compareAndSet(result.get(), TestUtils.compare((Integer)item.get(fieldName), op, assertedValue)));
+      result.compareAndSet(result.get(), compare((Integer)item.get(fieldName), op, assertedValue)));
     return result.get();
   }
 
@@ -167,7 +167,7 @@ public final class TestUtils {
     //iterate over the items and count the number of fields with data to determine whether there are data present
     from(payload).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
       try {
-        result.compareAndSet(result.get(), TestUtils.compare(
+        result.compareAndSet(result.get(), compare(
           parseTimestampFromEdmDateTimeOffsetString((String)item.get(fieldName)), op,
           parseTimestampFromEdmDateTimeOffsetString(assertedValue)));
       } catch (Exception ex) {
@@ -190,7 +190,7 @@ public final class TestUtils {
 
     from(payload).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
       try {
-        result.compareAndSet(result.get(), TestUtils.compare(TestUtils.getTimestampPart(datePart, item.get(fieldName)), op, assertedValue));
+        result.compareAndSet(result.get(), compare(getTimestampPart(datePart, item.get(fieldName)), op, assertedValue));
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }});
@@ -211,7 +211,7 @@ public final class TestUtils {
 
     from(payload).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
       try {
-        result.compareAndSet(result.get(), TestUtils.compare(TestUtils.getDatePart(datePart, item.get(fieldName)), op, assertedValue));
+        result.compareAndSet(result.get(), compare(getDatePart(datePart, item.get(fieldName)), op, assertedValue));
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }});
@@ -235,7 +235,7 @@ public final class TestUtils {
 
     from(payload).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
       try {
-        timestampPart.set(TestUtils.getTimestampPart(FRACTIONAL, item.get(fieldName)));
+        timestampPart.set(getTimestampPart(FRACTIONAL, item.get(fieldName)));
         if (timestampPart.get() != null) fractionalSeconds.set(timestampPart.get() / CONVERSION_FACTOR);
 
         result.set(compare(fractionalSeconds.get(), op, assertedValue));
@@ -535,6 +535,8 @@ public final class TestUtils {
    * @exception EdmPrimitiveTypeException an exception if value cannot be parsed into a date.
    */
   public static Integer getDatePart(String datePart, Object value) throws EdmPrimitiveTypeException {
+    if (value == null) return null;
+
     LocalDate date = LocalDate.parse(parseDateFromEdmDateString(value.toString()).toString());
     switch (datePart) {
       case DateParts.YEAR:
@@ -572,7 +574,7 @@ public final class TestUtils {
         return dateTime.getMinute();
       case DateParts.SECOND:
         return dateTime.getSecond();
-      case DateParts.FRACTIONAL:
+      case FRACTIONAL:
         return dateTime.toInstant().get(ChronoField.MICRO_OF_SECOND);
       default:
         return null;

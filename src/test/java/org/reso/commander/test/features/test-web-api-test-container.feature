@@ -281,1078 +281,1451 @@ Feature: Commander Platinum Web API Test Container Tests
   # Timestamp test 'gt'
   Scenario: Timestamp test 'gt' is true when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "gt" "2020-04-02T02:02:01.02Z" return "true"
+    Then comparisons of Timestamp field "ModificationTimestamp" "gt" "2020-04-02T02:02:01.02Z" return "true"
 
   Scenario: Timestamp test 'gt' is false when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "gt" "2020-04-02T02:02:02.02Z" return "false"
+    Then comparisons of Timestamp field "ModificationTimestamp" "gt" "2020-04-02T02:02:02.02Z" return "false"
 
   Scenario: Timestamp test 'gt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
   Scenario: Timestamp test 'gt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
   Scenario: Timestamp test 'gt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "gt" "2020-04-02T02:02:01.02Z" return "false"
+    Then comparisons of Timestamp field "ModificationTimestamp" "gt" "2020-04-02T02:02:01.02Z" return "false"
 
 
   # Timestamp test 'ge'
   Scenario: Timestamp test 'ge' is true when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "ge" "2020-04-02T02:02:01.02Z" return "true"
+    Then comparisons of Timestamp field "ModificationTimestamp" "ge" "2020-04-02T02:02:01.02Z" return "true"
 
   Scenario: Timestamp test 'ge' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "ge" "2020-04-02T02:02:02.02Z" return "true"
+    Then comparisons of Timestamp field "ModificationTimestamp" "ge" "2020-04-02T02:02:02.02Z" return "true"
 
   Scenario: Timestamp test 'ge' is false when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "ge" "2020-04-02T02:02:03.02Z" return "false"
+    Then comparisons of Timestamp field "ModificationTimestamp" "ge" "2020-04-02T02:02:03.02Z" return "false"
 
   Scenario: Timestamp test 'ge' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "ge" "2020-04-02T02:02:02.02Z" return "false"
+    Then comparisons of Timestamp field "ModificationTimestamp" "ge" "2020-04-02T02:02:02.02Z" return "false"
 
   Scenario: Timestamp test 'ge' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "ge" null return "true"
+    Then comparisons of Timestamp field "ModificationTimestamp" "ge" null return "true"
 
 
   # Timestamp test 'eq'
   Scenario: Timestamp test 'eq' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "eq" "2020-04-02T02:02:02.02Z" return "true"
+    Then comparisons of Timestamp field "ModificationTimestamp" "eq" "2020-04-02T02:02:02.02Z" return "true"
 
   Scenario: Timestamp test 'eq' is false when values are valid don't mach
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "eq" "2020-04-02T02:02:02.02Z" return "true"
+    Then comparisons of Timestamp field "ModificationTimestamp" "eq" "2020-04-02T02:02:02.02Z" return "true"
 
   Scenario: Timestamp test 'eq' is false when null data are compared to a valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "eq" "2020-04-02T02:02:02.02Z" return "false"
+    Then comparisons of Timestamp field "ModificationTimestamp" "eq" "2020-04-02T02:02:02.02Z" return "false"
 
   Scenario: Timestamp test 'eq' is false when valid data are compared to a null value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "eq" null return "false"
+    Then comparisons of Timestamp field "ModificationTimestamp" "eq" null return "false"
 
   Scenario: Timestamp test 'eq' is true when null data are compared to a null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "eq" null return "true"
+    Then comparisons of Timestamp field "ModificationTimestamp" "eq" null return "true"
 
 
   # Timestamp test 'ne'
   Scenario: Timestamp test 'ne' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "ne" "2020-04-02T02:02:01.02Z" return "true"
+    Then comparisons of Timestamp field "ModificationTimestamp" "ne" "2020-04-02T02:02:01.02Z" return "true"
 
   Scenario: Timestamp test 'ne' is true when values are null and asserted value is a valid
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "ne" "2020-04-02T02:02:01.02Z" return "true"
+    Then comparisons of Timestamp field "ModificationTimestamp" "ne" "2020-04-02T02:02:01.02Z" return "true"
 
   Scenario: Timestamp test 'ne' is false when values are present and asserted value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "ne" null return "true"
+    Then comparisons of Timestamp field "ModificationTimestamp" "ne" null return "true"
 
   Scenario: Timestamp test 'ne' is false when values are null and asserted value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "ne" null return "false"
+    Then comparisons of Timestamp field "ModificationTimestamp" "ne" null return "false"
 
 
   # Timestamp test 'lt'
   Scenario: Timestamp test 'lt' is true when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "lt" "2020-04-02T02:02:03.02Z" return "true"
+    Then comparisons of Timestamp field "ModificationTimestamp" "lt" "2020-04-02T02:02:03.02Z" return "true"
 
   Scenario: Timestamp test 'lt' is false when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "lt" "2020-04-02T02:02:01.02Z" return "false"
+    Then comparisons of Timestamp field "ModificationTimestamp" "lt" "2020-04-02T02:02:01.02Z" return "false"
 
   Scenario: Timestamp test 'lt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
   Scenario: Timestamp test 'lt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
   Scenario: Timestamp test 'lt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "lt" "2020-04-02T02:02:01.02Z" return "false"
+    Then comparisons of Timestamp field "ModificationTimestamp" "lt" "2020-04-02T02:02:01.02Z" return "false"
 
 
   # Timestamp test 'le'
   Scenario: Timestamp test 'le' is true when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "le" "2020-04-02T02:02:02.02Z" return "true"
+    Then comparisons of Timestamp field "ModificationTimestamp" "le" "2020-04-02T02:02:02.02Z" return "true"
 
   Scenario: Timestamp test 'le' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "le" "2020-04-02T02:02:02.02Z" return "true"
+    Then comparisons of Timestamp field "ModificationTimestamp" "le" "2020-04-02T02:02:02.02Z" return "true"
 
   Scenario: Timestamp test 'le' is false when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "le" "2020-04-02T02:02:01.02Z" return "false"
+    Then comparisons of Timestamp field "ModificationTimestamp" "le" "2020-04-02T02:02:01.02Z" return "false"
 
   Scenario: Timestamp test 'le' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "le" "2020-04-02T02:02:02.02Z" return "false"
+    Then comparisons of Timestamp field "ModificationTimestamp" "le" "2020-04-02T02:02:02.02Z" return "false"
 
   Scenario: Timestamp test 'le' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then Timestamp comparisons of "ModificationTimestamp" "le" null return "true"
+    Then comparisons of Timestamp field "ModificationTimestamp" "le" null return "true"
 
-
-  #######################################
-  # Year Comparisons
-  #######################################
 
   # Year test 'gt'
-  Scenario: Year test 'gt' is true when data are greater than given value
+  Scenario: Timestamp year test 'gt' is true when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "gt" 2019 return "true"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "gt" 2019 return "true"
 
-  Scenario: Year test 'gt' is false when data are less than given value
+  Scenario: Timestamp year test 'gt' is false when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "gt" 2021 return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "gt" 2021 return "false"
 
-  Scenario: Year test 'gt' is false when data are null and known value is null
+  Scenario: Timestamp year test 'gt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
-  Scenario: Year test 'gt' is false when data are present and known value is null
+  Scenario: Timestamp year test 'gt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
-  Scenario: Year test 'gt' is false when data are null and known value is present
+  Scenario: Timestamp year test 'gt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "gt" 2019 return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "gt" 2019 return "false"
 
 
   # Year test 'ge'
-  Scenario: Year test 'ge' is true when data are compared to known lesser value
+  Scenario: Timestamp year test 'ge' is true when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "ge" 2020 return "true"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "ge" 2020 return "true"
 
-  Scenario: Year test 'ge' is true when data are compared to known equal value
+  Scenario: Timestamp year test 'ge' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "ge" 2019 return "true"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "ge" 2019 return "true"
 
-  Scenario: Year test 'ge' is false when data are compared to known greater value
+  Scenario: Timestamp year test 'ge' is false when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "ge" 2021 return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "ge" 2021 return "false"
 
-  Scenario: Year test 'ge' is false when null data are compared to valid value
+  Scenario: Timestamp year test 'ge' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "ge" 2020 return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "ge" 2020 return "false"
 
-  Scenario: Year test 'ge' is true when null data are compared to null value
+  Scenario: Timestamp year test 'ge' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "ge" null return "true"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "ge" null return "true"
 
-  Scenario: Year test 'ge' is false when data are compared to null value
+  Scenario: Timestamp year test 'ge' is false when data are compared to null value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "ge" null return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "ge" null return "false"
 
 
   # Year test 'eq'
-  Scenario: Year test 'eq' is true when values are valid and match
+  Scenario: Timestamp year test 'eq' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "eq" 2020 return "true"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "eq" 2020 return "true"
 
-  Scenario: Year test 'eq' is false when values are valid don't mach
+  Scenario: Timestamp year test 'eq' is false when values are valid don't mach
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "eq" 2019 return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "eq" 2019 return "false"
 
-  Scenario: Year test 'eq' is false when null data are compared to a valid value
+  Scenario: Timestamp year test 'eq' is false when null data are compared to a valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "eq" 2020 return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "eq" 2020 return "false"
 
-  Scenario: Year test 'eq' is false when valid data are compared to a null value
+  Scenario: Timestamp year test 'eq' is false when valid data are compared to a null value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "eq" null return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "eq" null return "false"
 
-  Scenario: Year test 'eq' is true when null data are compared to a null value
+  Scenario: Timestamp year test 'eq' is true when null data are compared to a null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "eq" null return "true"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "eq" null return "true"
 
 
   # Year test 'ne'
-  Scenario: Year test 'ne' is true when values are valid and match
+  Scenario: Timestamp year test 'ne' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "ne" 2021 return "true"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "ne" 2021 return "true"
 
-  Scenario: Year test 'ne' is true when values are null and asserted value is a valid
+  Scenario: Timestamp year test 'ne' is true when values are null and asserted value is a valid
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "ne" 2021 return "true"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "ne" 2021 return "true"
 
-  Scenario: Year test 'ne' is true when values are valid and asserted value is null
+  Scenario: Timestamp year test 'ne' is true when values are valid and asserted value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "ne" null return "true"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "ne" null return "true"
 
-  Scenario: Year test 'ne' is false when values are null and asserted value is null
+  Scenario: Timestamp year test 'ne' is false when values are null and asserted value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "ne" null return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "ne" null return "false"
 
 
   # Year test 'lt'
-  Scenario: Year test 'lt' is true when data are less than given value
+  Scenario: Timestamp year test 'lt' is true when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "lt" 2021 return "true"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "lt" 2021 return "true"
 
-  Scenario: Year test 'lt' is false when data are greater than given value
+  Scenario: Timestamp year test 'lt' is false when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "lt" 2019 return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "lt" 2019 return "false"
 
-  Scenario: Year test 'lt' is false when data are null and known value is null
+  Scenario: Timestamp year test 'lt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
-  Scenario: Year test 'lt' is false when data are present and known value is null
+  Scenario: Timestamp year test 'lt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
-  Scenario: Year test 'lt' is false when data are null and known value is present
+  Scenario: Timestamp year test 'lt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "lt" 2020 return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "lt" 2020 return "false"
 
 
   # Year test 'le'
-  Scenario: Year test 'le' is true when data are compared to known greater value
+  Scenario: Timestamp year test 'le' is true when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "le" 2022 return "true"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "le" 2022 return "true"
 
-  Scenario: Year test 'le' is true when data are compared to known equal value
+  Scenario: Timestamp year test 'le' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "le" 2020 return "true"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "le" 2020 return "true"
 
-  Scenario: Year test 'le' is false when data are compared to known lesser value
+  Scenario: Timestamp year test 'le' is false when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "le" 2019 return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "le" 2019 return "false"
 
-  Scenario: Year test 'le' is false when null data are compared to valid value
+  Scenario: Timestamp year test 'le' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "le" 2020 return "false"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "le" 2020 return "false"
 
-  Scenario: Year test 'le' is true when null data are compared to null value
+  Scenario: Timestamp year test 'le' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "year" comparisons of "ModificationTimestamp" "le" null return "true"
+    Then "year" comparisons of Timestamp field "ModificationTimestamp" "le" null return "true"
 
-
-  #######################################
-  # Month Comparisons
-  #######################################
 
   # Month test 'gt'
-  Scenario: Month test 'gt' is true when data are greater than given value
+  Scenario: Timestamp month test 'gt' is true when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "gt" 3 return "true"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "gt" 3 return "true"
 
-  Scenario: Month test 'gt' is false when data are less than given value
+  Scenario: Timestamp month test 'gt' is false when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "gt" 5 return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "gt" 5 return "false"
 
-  Scenario: Month test 'gt' is false when data are null and known value is null
+  Scenario: Timestamp month test 'gt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
-  Scenario: Month test 'gt' is false when data are present and known value is null
+  Scenario: Timestamp month test 'gt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
-  Scenario: Month test 'gt' is false when data are null and known value is present
+  Scenario: Timestamp month test 'gt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "gt" 3 return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "gt" 3 return "false"
 
 
   # Month test 'ge'
-  Scenario: Month test 'ge' is true when data are compared to known lesser value
+  Scenario: Timestamp month test 'ge' is true when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "ge" 4 return "true"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "ge" 4 return "true"
 
-  Scenario: Month test 'ge' is true when data are compared to known equal value
+  Scenario: Timestamp month test 'ge' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "ge" 3 return "true"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "ge" 3 return "true"
 
-  Scenario: Month test 'ge' is false when data are compared to known greater value
+  Scenario: Timestamp month test 'ge' is false when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "ge" 5 return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "ge" 5 return "false"
 
-  Scenario: Month test 'ge' is false when null data are compared to valid value
+  Scenario: Timestamp month test 'ge' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "ge" 4 return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "ge" 4 return "false"
 
-  Scenario: Month test 'ge' is true when null data are compared to null value
+  Scenario: Timestamp month test 'ge' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "ge" null return "true"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "ge" null return "true"
 
-  Scenario: Month test 'ge' is false when data are compared to null value
+  Scenario: Timestamp month test 'ge' is false when data are compared to null value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "ge" null return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "ge" null return "false"
 
 
   # Month test 'eq'
-  Scenario: Month test 'eq' is true when values are valid and match
+  Scenario: Timestamp month test 'eq' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "eq" 4 return "true"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "eq" 4 return "true"
 
-  Scenario: Month test 'eq' is false when values are valid don't mach
+  Scenario: Timestamp month test 'eq' is false when values are valid don't mach
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "eq" 3 return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "eq" 3 return "false"
 
-  Scenario: Month test 'eq' is false when null data are compared to a valid value
+  Scenario: Timestamp month test 'eq' is false when null data are compared to a valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "eq" 4 return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "eq" 4 return "false"
 
-  Scenario: Month test 'eq' is false when valid data are compared to a null value
+  Scenario: Timestamp month test 'eq' is false when valid data are compared to a null value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "eq" null return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "eq" null return "false"
 
-  Scenario: Month test 'eq' is true when null data are compared to a null value
+  Scenario: Timestamp month test 'eq' is true when null data are compared to a null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "eq" null return "true"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "eq" null return "true"
 
 
   # Month test 'ne'
-  Scenario: Month test 'ne' is true when values are valid and match
+  Scenario: Timestamp month test 'ne' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "ne" 5 return "true"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "ne" 5 return "true"
 
-  Scenario: Month test 'ne' is true when values are null and asserted value is a valid
+  Scenario: Timestamp month test 'ne' is true when values are null and asserted value is a valid
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "ne" 5 return "true"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "ne" 5 return "true"
 
-  Scenario: Month test 'ne' is true when values are valid and asserted value is null
+  Scenario: Timestamp month test 'ne' is true when values are valid and asserted value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "ne" null return "true"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "ne" null return "true"
 
-  Scenario: Month test 'ne' is false when values are null and asserted value is null
+  Scenario: Timestamp month test 'ne' is false when values are null and asserted value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "ne" null return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "ne" null return "false"
 
 
   # Month test 'lt'
-  Scenario: Month test 'lt' is true when data are less than given value
+  Scenario: Timestamp month test 'lt' is true when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "lt" 5 return "true"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "lt" 5 return "true"
 
-  Scenario: Month test 'lt' is false when data are greater than given value
+  Scenario: Timestamp month test 'lt' is false when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "lt" 3 return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "lt" 3 return "false"
 
-  Scenario: Month test 'lt' is false when data are null and known value is null
+  Scenario: Timestamp month test 'lt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
-  Scenario: Month test 'lt' is false when data are present and known value is null
+  Scenario: Timestamp month test 'lt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
-  Scenario: Month test 'lt' is false when data are null and known value is present
+  Scenario: Timestamp month test 'lt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "lt" 4 return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "lt" 4 return "false"
 
 
   # Month test 'le'
-  Scenario: Month test 'le' is true when data are compared to known greater value
+  Scenario: Timestamp month test 'le' is true when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "le" 6 return "true"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "le" 6 return "true"
 
-  Scenario: Month test 'le' is true when data are compared to known equal value
+  Scenario: Timestamp month test 'le' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "le" 4 return "true"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "le" 4 return "true"
 
-  Scenario: Month test 'le' is false when data are compared to known lesser value
+  Scenario: Timestamp month test 'le' is false when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "le" 3 return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "le" 3 return "false"
 
-  Scenario: Month test 'le' is false when null data are compared to valid value
+  Scenario: Timestamp month test 'le' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "le" 4 return "false"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "le" 4 return "false"
 
-  Scenario: Month test 'le' is true when null data are compared to null value
+  Scenario: Timestamp month test 'le' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "month" comparisons of "ModificationTimestamp" "le" null return "true"
+    Then "month" comparisons of Timestamp field "ModificationTimestamp" "le" null return "true"
 
-
-  #######################################
-  # Day Comparisons
-  #######################################
 
   # Day test 'gt'
-  Scenario: Day test 'gt' is true when data are greater than given value
+  Scenario: Timestamp day test 'gt' is true when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "gt" 1 return "true"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "gt" 1 return "true"
 
-  Scenario: Day test 'gt' is false when data are less than given value
+  Scenario: Timestamp day test 'gt' is false when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "gt" 3 return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "gt" 3 return "false"
 
-  Scenario: Day test 'gt' is false when data are null and known value is null
+  Scenario: Timestamp day test 'gt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
-  Scenario: Day test 'gt' is false when data are present and known value is null
+  Scenario: Timestamp day test 'gt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
-  Scenario: Day test 'gt' is false when data are null and known value is present
+  Scenario: Timestamp day test 'gt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "gt" 1 return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "gt" 1 return "false"
 
 
   # Day test 'ge'
-  Scenario: Day test 'ge' is true when data are compared to known lesser value
+  Scenario: Timestamp day test 'ge' is true when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "ge" 2 return "true"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "ge" 2 return "true"
 
-  Scenario: Day test 'ge' is true when data are compared to known equal value
+  Scenario: Timestamp day test 'ge' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "ge" 1 return "true"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "ge" 1 return "true"
 
-  Scenario: Day test 'ge' is false when data are compared to known greater value
+  Scenario: Timestamp day test 'ge' is false when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "ge" 3 return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "ge" 3 return "false"
 
-  Scenario: Day test 'ge' is false when null data are compared to valid value
+  Scenario: Timestamp day test 'ge' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "ge" 2 return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "ge" 2 return "false"
 
-  Scenario: Day test 'ge' is true when null data are compared to null value
+  Scenario: Timestamp day test 'ge' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "ge" null return "true"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "ge" null return "true"
 
-  Scenario: Day test 'ge' is false when data are compared to null value
+  Scenario: Timestamp day test 'ge' is false when data are compared to null value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "ge" null return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "ge" null return "false"
 
 
   # Day test 'eq'
-  Scenario: Day test 'eq' is true when values are valid and match
+  Scenario: Timestamp day test 'eq' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "eq" 2 return "true"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "eq" 2 return "true"
 
-  Scenario: Day test 'eq' is false when values are valid don't mach
+  Scenario: Timestamp day test 'eq' is false when values are valid don't mach
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "eq" 1 return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "eq" 1 return "false"
 
-  Scenario: Day test 'eq' is false when null data are compared to a valid value
+  Scenario: Timestamp day test 'eq' is false when null data are compared to a valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "eq" 2 return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "eq" 2 return "false"
 
-  Scenario: Day test 'eq' is false when valid data are compared to a null value
+  Scenario: Timestamp day test 'eq' is false when valid data are compared to a null value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "eq" null return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "eq" null return "false"
 
-  Scenario: Day test 'eq' is true when null data are compared to a null value
+  Scenario: Timestamp day test 'eq' is true when null data are compared to a null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "eq" null return "true"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "eq" null return "true"
 
 
   # Day test 'ne'
-  Scenario: Day test 'ne' is true when values are valid and match
+  Scenario: Timestamp day test 'ne' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "ne" 3 return "true"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "ne" 3 return "true"
 
-  Scenario: Day test 'ne' is true when values are null and asserted value is a valid
+  Scenario: Timestamp day test 'ne' is true when values are null and asserted value is a valid
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "ne" 3 return "true"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "ne" 3 return "true"
 
-  Scenario: Day test 'ne' is true when values are valid and asserted value is null
+  Scenario: Timestamp day test 'ne' is true when values are valid and asserted value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "ne" null return "true"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "ne" null return "true"
 
-  Scenario: Day test 'ne' is false when values are null and asserted value is null
+  Scenario: Timestamp day test 'ne' is false when values are null and asserted value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "ne" null return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "ne" null return "false"
 
 
   # Day test 'lt'
-  Scenario: Day test 'lt' is true when data are less than given value
+  Scenario: Timestamp day test 'lt' is true when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "lt" 3 return "true"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "lt" 3 return "true"
 
-  Scenario: Day test 'lt' is false when data are greater than given value
+  Scenario: Timestamp day test 'lt' is false when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "lt" 1 return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "lt" 1 return "false"
 
-  Scenario: Day test 'lt' is false when data are null and known value is null
+  Scenario: Timestamp day test 'lt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
-  Scenario: Day test 'lt' is false when data are present and known value is null
+  Scenario: Timestamp day test 'lt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
-  Scenario: Day test 'lt' is false when data are null and known value is present
+  Scenario: Timestamp day test 'lt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "lt" 2 return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "lt" 2 return "false"
 
 
   # Day test 'le'
-  Scenario: Day test 'le' is true when data are compared to known greater value
+  Scenario: Timestamp day test 'le' is true when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "le" 3 return "true"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "le" 3 return "true"
 
-  Scenario: Day test 'le' is true when data are compared to known equal value
+  Scenario: Timestamp day test 'le' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "le" 2 return "true"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "le" 2 return "true"
 
-  Scenario: Day test 'le' is false when data are compared to known lesser value
+  Scenario: Timestamp day test 'le' is false when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "le" 1 return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "le" 1 return "false"
 
-  Scenario: Day test 'le' is false when null data are compared to valid value
+  Scenario: Timestamp day test 'le' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "le" 2 return "false"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "le" 2 return "false"
 
-  Scenario: Day test 'le' is true when null data are compared to null value
+  Scenario: Timestamp day test 'le' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "day" comparisons of "ModificationTimestamp" "le" null return "true"
+    Then "day" comparisons of Timestamp field "ModificationTimestamp" "le" null return "true"
 
-
-  #######################################
-  # Hour Comparisons
-  #######################################
 
   # Hour test 'gt'
-  Scenario: Hour test 'gt' is true when data are greater than given value
+  Scenario: Timestamp hour test 'gt' is true when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "gt" 1 return "true"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "gt" 1 return "true"
 
-  Scenario: Hour test 'gt' is false when data are less than given value
+  Scenario: Timestamp hour test 'gt' is false when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "gt" 3 return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "gt" 3 return "false"
 
-  Scenario: Hour test 'gt' is false when data are null and known value is null
+  Scenario: Timestamp hour test 'gt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
-  Scenario: Hour test 'gt' is false when data are present and known value is null
+  Scenario: Timestamp hour test 'gt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
-  Scenario: Hour test 'gt' is false when data are null and known value is present
+  Scenario: Timestamp hour test 'gt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "gt" 1 return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "gt" 1 return "false"
 
 
   # Hour test 'ge'
-  Scenario: Hour test 'ge' is true when data are compared to known lesser value
+  Scenario: Timestamp hour test 'ge' is true when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "ge" 2 return "true"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "ge" 2 return "true"
 
-  Scenario: Hour test 'ge' is true when data are compared to known equal value
+  Scenario: Timestamp hour test 'ge' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "ge" 1 return "true"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "ge" 1 return "true"
 
-  Scenario: Hour test 'ge' is false when data are compared to known greater value
+  Scenario: Timestamp hour test 'ge' is false when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "ge" 3 return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "ge" 3 return "false"
 
-  Scenario: Hour test 'ge' is false when null data are compared to valid value
+  Scenario: Timestamp hour test 'ge' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "ge" 2 return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "ge" 2 return "false"
 
-  Scenario: Hour test 'ge' is true when null data are compared to null value
+  Scenario: Timestamp hour test 'ge' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "ge" null return "true"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "ge" null return "true"
 
-  Scenario: Hour test 'ge' is false when data are compared to null value
+  Scenario: Timestamp hour test 'ge' is false when data are compared to null value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "ge" null return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "ge" null return "false"
 
 
   # Hour test 'eq'
-  Scenario: Hour test 'eq' is true when values are valid and match
+  Scenario: Timestamp hour test 'eq' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "eq" 2 return "true"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "eq" 2 return "true"
 
-  Scenario: Hour test 'eq' is false when values are valid don't mach
+  Scenario: Timestamp hour test 'eq' is false when values are valid don't mach
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "eq" 1 return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "eq" 1 return "false"
 
-  Scenario: Hour test 'eq' is false when null data are compared to a valid value
+  Scenario: Timestamp hour test 'eq' is false when null data are compared to a valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "eq" 2 return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "eq" 2 return "false"
 
-  Scenario: Hour test 'eq' is false when valid data are compared to a null value
+  Scenario: Timestamp hour test 'eq' is false when valid data are compared to a null value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "eq" null return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "eq" null return "false"
 
-  Scenario: Hour test 'eq' is true when null data are compared to a null value
+  Scenario: Timestamp hour test 'eq' is true when null data are compared to a null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "eq" null return "true"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "eq" null return "true"
 
 
   # Hour test 'ne'
-  Scenario: Hour test 'ne' is true when values are valid and match
+  Scenario: Timestamp hour test 'ne' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "ne" 3 return "true"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "ne" 3 return "true"
 
-  Scenario: Hour test 'ne' is true when values are null and asserted value is a valid
+  Scenario: Timestamp hour test 'ne' is true when values are null and asserted value is a valid
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "ne" 3 return "true"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "ne" 3 return "true"
 
-  Scenario: Hour test 'ne' is true when values are valid and asserted value is null
+  Scenario: Timestamp hour test 'ne' is true when values are valid and asserted value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "ne" null return "true"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "ne" null return "true"
 
-  Scenario: Hour test 'ne' is false when values are null and asserted value is null
+  Scenario: Timestamp hour test 'ne' is false when values are null and asserted value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "ne" null return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "ne" null return "false"
 
 
   # Hour test 'lt'
-  Scenario: Hour test 'lt' is true when data are less than given value
+  Scenario: Timestamp hour test 'lt' is true when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "lt" 3 return "true"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "lt" 3 return "true"
 
-  Scenario: Hour test 'lt' is false when data are greater than given value
+  Scenario: Timestamp hour test 'lt' is false when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "lt" 1 return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "lt" 1 return "false"
 
-  Scenario: Hour test 'lt' is false when data are null and known value is null
+  Scenario: Timestamp hour test 'lt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
-  Scenario: Hour test 'lt' is false when data are present and known value is null
+  Scenario: Timestamp hour test 'lt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
-  Scenario: Hour test 'lt' is false when data are null and known value is present
+  Scenario: Timestamp hour test 'lt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "lt" 2 return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "lt" 2 return "false"
 
 
   # Hour test 'le'
-  Scenario: Hour test 'le' is true when data are compared to known greater value
+  Scenario: Timestamp hour test 'le' is true when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "le" 3 return "true"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "le" 3 return "true"
 
-  Scenario: Hour test 'le' is true when data are compared to known equal value
+  Scenario: Timestamp hour test 'le' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "le" 2 return "true"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "le" 2 return "true"
 
-  Scenario: Hour test 'le' is false when data are compared to known lesser value
+  Scenario: Timestamp hour test 'le' is false when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "le" 1 return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "le" 1 return "false"
 
-  Scenario: Hour test 'le' is false when null data are compared to valid value
+  Scenario: Timestamp hour test 'le' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "le" 2 return "false"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "le" 2 return "false"
 
-  Scenario: Hour test 'le' is true when null data are compared to null value
+  Scenario: Timestamp hour test 'le' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "hour" comparisons of "ModificationTimestamp" "le" null return "true"
+    Then "hour" comparisons of Timestamp field "ModificationTimestamp" "le" null return "true"
 
-
-  #######################################
-  # Minute Comparisons
-  #######################################
 
   # Minute test 'gt'
-  Scenario: Minute test 'gt' is true when data are greater than given value
+  Scenario: Timestamp minute test 'gt' is true when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "gt" 1 return "true"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "gt" 1 return "true"
 
-  Scenario: Minute test 'gt' is false when data are less than given value
+  Scenario: Timestamp minute test 'gt' is false when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "gt" 3 return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "gt" 3 return "false"
 
-  Scenario: Minute test 'gt' is false when data are null and known value is null
+  Scenario: Timestamp minute test 'gt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
-  Scenario: Minute test 'gt' is false when data are present and known value is null
+  Scenario: Timestamp minute test 'gt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
-  Scenario: Minute test 'gt' is false when data are null and known value is present
+  Scenario: Timestamp minute test 'gt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "gt" 1 return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "gt" 1 return "false"
 
 
   # Minute test 'ge'
-  Scenario: Minute test 'ge' is true when data are compared to known lesser value
+  Scenario: Timestamp minute test 'ge' is true when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "ge" 2 return "true"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "ge" 2 return "true"
 
-  Scenario: Minute test 'ge' is true when data are compared to known equal value
+  Scenario: Timestamp minute test 'ge' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "ge" 1 return "true"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "ge" 1 return "true"
 
-  Scenario: Minute test 'ge' is false when data are compared to known greater value
+  Scenario: Timestamp minute test 'ge' is false when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "ge" 3 return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "ge" 3 return "false"
 
-  Scenario: Minute test 'ge' is false when null data are compared to valid value
+  Scenario: Timestamp minute test 'ge' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "ge" 2 return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "ge" 2 return "false"
 
-  Scenario: Minute test 'ge' is true when null data are compared to null value
+  Scenario: Timestamp minute test 'ge' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "ge" null return "true"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "ge" null return "true"
 
-  Scenario: Minute test 'ge' is false when data are compared to null value
+  Scenario: Timestamp minute test 'ge' is false when data are compared to null value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "ge" null return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "ge" null return "false"
 
 
   # Minute test 'eq'
-  Scenario: Minute test 'eq' is true when values are valid and match
+  Scenario: Timestamp minute test 'eq' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "eq" 2 return "true"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "eq" 2 return "true"
 
-  Scenario: Minute test 'eq' is false when values are valid don't mach
+  Scenario: Timestamp minute test 'eq' is false when values are valid don't mach
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "eq" 1 return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "eq" 1 return "false"
 
-  Scenario: Minute test 'eq' is false when null data are compared to a valid value
+  Scenario: Timestamp minute test 'eq' is false when null data are compared to a valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "eq" 2 return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "eq" 2 return "false"
 
-  Scenario: Minute test 'eq' is false when valid data are compared to a null value
+  Scenario: Timestamp minute test 'eq' is false when valid data are compared to a null value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "eq" null return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "eq" null return "false"
 
-  Scenario: Minute test 'eq' is true when null data are compared to a null value
+  Scenario: Timestamp minute test 'eq' is true when null data are compared to a null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "eq" null return "true"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "eq" null return "true"
 
 
   # Minute test 'ne'
-  Scenario: Minute test 'ne' is true when values are valid and match
+  Scenario: Timestamp minute test 'ne' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "ne" 3 return "true"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "ne" 3 return "true"
 
-  Scenario: Minute test 'ne' is true when values are null and asserted value is a valid
+  Scenario: Timestamp minute test 'ne' is true when values are null and asserted value is a valid
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "ne" 3 return "true"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "ne" 3 return "true"
 
-  Scenario: Minute test 'ne' is true when values are valid and asserted value is null
+  Scenario: Timestamp minute test 'ne' is true when values are valid and asserted value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "ne" null return "true"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "ne" null return "true"
 
-  Scenario: Minute test 'ne' is false when values are null and asserted value is null
+  Scenario: Timestamp minute test 'ne' is false when values are null and asserted value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "ne" null return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "ne" null return "false"
 
 
   # Minute test 'lt'
-  Scenario: Minute test 'lt' is true when data are less than given value
+  Scenario: Timestamp minute test 'lt' is true when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "lt" 3 return "true"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "lt" 3 return "true"
 
-  Scenario: Minute test 'lt' is false when data are greater than given value
+  Scenario: Timestamp minute test 'lt' is false when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "lt" 1 return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "lt" 1 return "false"
 
-  Scenario: Minute test 'lt' is false when data are null and known value is null
+  Scenario: Timestamp minute test 'lt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
-  Scenario: Minute test 'lt' is false when data are present and known value is null
+  Scenario: Timestamp minute test 'lt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
-  Scenario: Minute test 'lt' is false when data are null and known value is present
+  Scenario: Timestamp minute test 'lt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "lt" 2 return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "lt" 2 return "false"
 
 
   # Minute test 'le'
-  Scenario: Minute test 'le' is true when data are compared to known greater value
+  Scenario: Timestamp minute test 'le' is true when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "le" 3 return "true"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "le" 3 return "true"
 
-  Scenario: Minute test 'le' is true when data are compared to known equal value
+  Scenario: Timestamp minute test 'le' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "le" 2 return "true"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "le" 2 return "true"
 
-  Scenario: Minute test 'le' is false when data are compared to known lesser value
+  Scenario: Timestamp minute test 'le' is false when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "le" 1 return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "le" 1 return "false"
 
-  Scenario: Minute test 'le' is false when null data are compared to valid value
+  Scenario: Timestamp minute test 'le' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "le" 2 return "false"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "le" 2 return "false"
 
-  Scenario: Minute test 'le' is true when null data are compared to null value
+  Scenario: Timestamp minute test 'le' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "minute" comparisons of "ModificationTimestamp" "le" null return "true"
+    Then "minute" comparisons of Timestamp field "ModificationTimestamp" "le" null return "true"
 
-
-  #######################################
-  # Second Comparisons
-  #######################################
 
   # Second test 'gt'
-  Scenario: Second test 'gt' is true when data are greater than given value
+  Scenario: Timestamp second test 'gt' is true when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "gt" 1 return "true"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "gt" 1 return "true"
 
-  Scenario: Second test 'gt' is false when data are less than given value
+  Scenario: Timestamp second test 'gt' is false when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "gt" 3 return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "gt" 3 return "false"
 
-  Scenario: Second test 'gt' is false when data are null and known value is null
+  Scenario: Timestamp second test 'gt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
-  Scenario: Second test 'gt' is false when data are present and known value is null
+  Scenario: Timestamp second test 'gt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
-  Scenario: Second test 'gt' is false when data are null and known value is present
+  Scenario: Timestamp second test 'gt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "gt" 1 return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "gt" 1 return "false"
 
 
   # Second test 'ge'
-  Scenario: Second test 'ge' is true when data are compared to known lesser value
+  Scenario: Timestamp second test 'ge' is true when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "ge" 2 return "true"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "ge" 2 return "true"
 
-  Scenario: Second test 'ge' is true when data are compared to known equal value
+  Scenario: Timestamp second test 'ge' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "ge" 1 return "true"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "ge" 1 return "true"
 
-  Scenario: Second test 'ge' is false when data are compared to known greater value
+  Scenario: Timestamp second test 'ge' is false when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "ge" 3 return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "ge" 3 return "false"
 
-  Scenario: Second test 'ge' is false when null data are compared to valid value
+  Scenario: Timestamp second test 'ge' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "ge" 2 return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "ge" 2 return "false"
 
-  Scenario: Second test 'ge' is true when null data are compared to null value
+  Scenario: Timestamp second test 'ge' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "ge" null return "true"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "ge" null return "true"
 
-  Scenario: Second test 'ge' is false when data are compared to null value
+  Scenario: Timestamp second test 'ge' is false when data are compared to null value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "ge" null return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "ge" null return "false"
 
 
   # Second test 'eq'
-  Scenario: Second test 'eq' is true when values are valid and match
+  Scenario: Timestamp second test 'eq' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "eq" 2 return "true"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "eq" 2 return "true"
 
-  Scenario: Second test 'eq' is false when values are valid don't mach
+  Scenario: Timestamp second test 'eq' is false when values are valid don't mach
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "eq" 1 return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "eq" 1 return "false"
 
-  Scenario: Second test 'eq' is false when null data are compared to a valid value
+  Scenario: Timestamp second test 'eq' is false when null data are compared to a valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "eq" 2 return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "eq" 2 return "false"
 
-  Scenario: Second test 'eq' is false when valid data are compared to a null value
+  Scenario: Timestamp second test 'eq' is false when valid data are compared to a null value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "eq" null return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "eq" null return "false"
 
-  Scenario: Second test 'eq' is true when null data are compared to a null value
+  Scenario: Timestamp second test 'eq' is true when null data are compared to a null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "eq" null return "true"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "eq" null return "true"
 
 
   # Second test 'ne'
-  Scenario: Second test 'ne' is true when values are valid and match
+  Scenario: Timestamp second test 'ne' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "ne" 3 return "true"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "ne" 3 return "true"
 
-  Scenario: Second test 'ne' is true when values are null and asserted value is a valid
+  Scenario: Timestamp second test 'ne' is true when values are null and asserted value is a valid
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "ne" 3 return "true"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "ne" 3 return "true"
 
-  Scenario: Second test 'ne' is true when values are valid and asserted value is null
+  Scenario: Timestamp second test 'ne' is true when values are valid and asserted value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "ne" null return "true"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "ne" null return "true"
 
-  Scenario: Second test 'ne' is false when values are null and asserted value is null
+  Scenario: Timestamp second test 'ne' is false when values are null and asserted value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "ne" null return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "ne" null return "false"
 
 
   # Second test 'lt'
-  Scenario: Second test 'lt' is true when data are less than given value
+  Scenario: Timestamp second test 'lt' is true when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "lt" 3 return "true"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "lt" 3 return "true"
 
-  Scenario: Second test 'lt' is false when data are greater than given value
+  Scenario: Timestamp second test 'lt' is false when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "lt" 1 return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "lt" 1 return "false"
 
-  Scenario: Second test 'lt' is false when data are null and known value is null
+  Scenario: Timestamp second test 'lt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
-  Scenario: Second test 'lt' is false when data are present and known value is null
+  Scenario: Timestamp second test 'lt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
-  Scenario: Second test 'lt' is false when data are null and known value is present
+  Scenario: Timestamp second test 'lt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "lt" 2 return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "lt" 2 return "false"
 
 
   # Second test 'le'
-  Scenario: Second test 'le' is true when data are compared to known greater value
+  Scenario: Timestamp second test 'le' is true when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "le" 3 return "true"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "le" 3 return "true"
 
-  Scenario: Second test 'le' is true when data are compared to known equal value
+  Scenario: Timestamp second test 'le' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "le" 2 return "true"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "le" 2 return "true"
 
-  Scenario: Second test 'le' is false when data are compared to known lesser value
+  Scenario: Timestamp second test 'le' is false when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "le" 1 return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "le" 1 return "false"
 
-  Scenario: Second test 'le' is false when null data are compared to valid value
+  Scenario: Timestamp second test 'le' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "le" 2 return "false"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "le" 2 return "false"
 
-  Scenario: Second test 'le' is true when null data are compared to null value
+  Scenario: Timestamp second test 'le' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then "second" comparisons of "ModificationTimestamp" "le" null return "true"
+    Then "second" comparisons of Timestamp field "ModificationTimestamp" "le" null return "true"
 
-
-  #######################################
-  # Fractional Second Comparisons
-  #######################################
 
   # Fractional Second test 'gt'
-  Scenario: Fractional Second test 'gt' is true when data are greater than given value
+  Scenario: Timestamp fractional second test 'gt' is true when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "gt" 0.01 return "true"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "gt" 0.01 return "true"
 
-  Scenario: Fractional Second test 'gt' is false when data are less than given value
+  Scenario: Timestamp fractional second test 'gt' is false when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "gt" 0.03 return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "gt" 0.03 return "false"
 
-  Scenario: Fractional Second test 'gt' is false when data are null and known value is null
+  Scenario: Timestamp fractional second test 'gt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
-  Scenario: Fractional Second test 'gt' is false when data are present and known value is null
+  Scenario: Timestamp fractional second test 'gt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "gt" null return "false"
 
-  Scenario: Fractional Second test 'gt' is false when data are null and known value is present
+  Scenario: Timestamp fractional second test 'gt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "gt" 0.01 return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "gt" 0.01 return "false"
 
 
   # Fractional Second test 'ge'
-  Scenario: Fractional Second test 'ge' is true when data are compared to known lesser value
+  Scenario: Timestamp fractional second test 'ge' is true when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "ge" 0.02 return "true"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "ge" 0.02 return "true"
 
-  Scenario: Fractional Second test 'ge' is true when data are compared to known equal value
+  Scenario: Timestamp fractional second test 'ge' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "ge" 0.01 return "true"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "ge" 0.01 return "true"
 
-  Scenario: Fractional Second test 'ge' is false when data are compared to known greater value
+  Scenario: Timestamp fractional second test 'ge' is false when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "ge" 0.03 return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "ge" 0.03 return "false"
 
-  Scenario: Fractional Second test 'ge' is false when null data are compared to valid value
+  Scenario: Timestamp fractional second test 'ge' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "ge" 0.02 return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "ge" 0.02 return "false"
 
-  Scenario: Fractional Second test 'ge' is true when null data are compared to null value
+  Scenario: Timestamp fractional second test 'ge' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "ge" null return "true"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "ge" null return "true"
 
-  Scenario: Fractional Second test 'ge' is false when data are compared to null value
+  Scenario: Timestamp fractional second test 'ge' is false when data are compared to null value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "ge" null return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "ge" null return "false"
 
 
   # Fractional Second test 'eq'
-  Scenario: Fractional Second test 'eq' is true when values are valid and match
+  Scenario: Timestamp fractional second test 'eq' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "eq" 0.02 return "true"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "eq" 0.02 return "true"
 
-  Scenario: Fractional Second test 'eq' is false when values are valid don't mach
+  Scenario: Timestamp fractional second test 'eq' is false when values are valid don't mach
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "eq" 0.01 return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "eq" 0.01 return "false"
 
-  Scenario: Fractional Second test 'eq' is false when null data are compared to a valid value
+  Scenario: Timestamp fractional second test 'eq' is false when null data are compared to a valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "eq" 0.02 return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "eq" 0.02 return "false"
 
-  Scenario: Fractional Second test 'eq' is false when valid data are compared to a null value
+  Scenario: Timestamp fractional second test 'eq' is false when valid data are compared to a null value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "eq" null return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "eq" null return "false"
 
-  Scenario: Fractional Second test 'eq' is true when null data are compared to a null value
+  Scenario: Timestamp fractional second test 'eq' is true when null data are compared to a null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "eq" null return "true"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "eq" null return "true"
 
 
   # Fractional Second test 'ne'
-  Scenario: Fractional Second test 'ne' is true when values are valid and match
+  Scenario: Timestamp fractional second test 'ne' is true when values are valid and match
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "ne" 0.03 return "true"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "ne" 0.03 return "true"
 
-  Scenario: Fractional Second test 'ne' is true when values are null and asserted value is a valid
+  Scenario: Timestamp fractional second test 'ne' is true when values are null and asserted value is a valid
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "ne" 0.03 return "true"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "ne" 0.03 return "true"
 
-  Scenario: Fractional Second test 'ne' is true when values are valid and asserted value is null
+  Scenario: Timestamp fractional second test 'ne' is true when values are valid and asserted value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "ne" null return "true"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "ne" null return "true"
 
-  Scenario: Fractional Second test 'ne' is false when values are null and asserted value is null
+  Scenario: Timestamp fractional second test 'ne' is false when values are null and asserted value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "ne" null return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "ne" null return "false"
 
 
   # Fractional Second test 'lt'
-  Scenario: Fractional Second test 'lt' is true when data are less than given value
+  Scenario: Timestamp fractional second test 'lt' is true when data are less than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "lt" 0.03 return "true"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "lt" 0.03 return "true"
 
-  Scenario: Fractional Second test 'lt' is false when data are greater than given value
+  Scenario: Timestamp fractional second test 'lt' is false when data are greater than given value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "lt" 0.01 return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "lt" 0.01 return "false"
 
-  Scenario: Fractional Second test 'lt' is false when data are null and known value is null
+  Scenario: Timestamp fractional second test 'lt' is false when data are null and known value is null
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
-  Scenario: Fractional Second test 'lt' is false when data are present and known value is null
+  Scenario: Timestamp fractional second test 'lt' is false when data are present and known value is null
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "lt" null return "false"
 
-  Scenario: Fractional Second test 'lt' is false when data are null and known value is present
+  Scenario: Timestamp fractional second test 'lt' is false when data are null and known value is present
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "lt" 0.02 return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "lt" 0.02 return "false"
 
 
   # Fractional Second test 'le'
-  Scenario: Fractional Second test 'le' is true when data are compared to known greater value
+  Scenario: Timestamp fractional second test 'le' is true when data are compared to known greater value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "le" 0.03 return "true"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "le" 0.03 return "true"
 
-  Scenario: Fractional Second test 'le' is true when data are compared to known equal value
+  Scenario: Timestamp fractional second test 'le' is true when data are compared to known equal value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "le" 0.02 return "true"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "le" 0.02 return "true"
 
-  Scenario: Fractional Second test 'le' is false when data are compared to known lesser value
+  Scenario: Timestamp fractional second test 'le' is false when data are compared to known lesser value
     When sample JSON data from "good-property-payload.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "le" 0.01 return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "le" 0.01 return "false"
 
-  Scenario: Fractional Second test 'le' is false when null data are compared to valid value
+  Scenario: Timestamp fractional second test 'le' is false when null data are compared to valid value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "le" 0.02 return "false"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "le" 0.02 return "false"
 
-  Scenario: Fractional Second test 'le' is true when null data are compared to null value
+  Scenario: Timestamp fractional second test 'le' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
-    Then fractionalsecond comparisons of "ModificationTimestamp" "le" null return "true"
+    Then fractionalsecond comparisons of Timestamp field "ModificationTimestamp" "le" null return "true"
+
+
+
+  #######################################
+  # Date Comparisons
+  #######################################
+
+  # Year test 'gt'
+  Scenario: Date year test 'gt' is true when data are greater than given value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "gt" 2019 return "true"
+
+  Scenario: Date year test 'gt' is false when data are less than given value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "gt" 2021 return "false"
+
+  Scenario: Date year test 'gt' is false when data are null and known value is null
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "gt" null return "false"
+
+  Scenario: Date year test 'gt' is false when data are present and known value is null
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "gt" null return "false"
+
+  Scenario: Date year test 'gt' is false when data are null and known value is present
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "gt" 2019 return "false"
+
+
+  # Year test 'ge'
+  Scenario: Date year test 'ge' is true when data are compared to known lesser value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "ge" 2020 return "true"
+
+  Scenario: Date year test 'ge' is true when data are compared to known equal value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "ge" 2019 return "true"
+
+  Scenario: Date year test 'ge' is false when data are compared to known greater value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "ge" 2021 return "false"
+
+  Scenario: Date year test 'ge' is false when null data are compared to valid value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "ge" 2020 return "false"
+
+  Scenario: Date year test 'ge' is true when null data are compared to null value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "ge" null return "true"
+
+  Scenario: Date year test 'ge' is false when data are compared to null value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "ge" null return "false"
+
+
+  # Year test 'eq'
+  Scenario: Date year test 'eq' is true when values are valid and match
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "eq" 2020 return "true"
+
+  Scenario: Date year test 'eq' is false when values are valid don't mach
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "eq" 2019 return "false"
+
+  Scenario: Date year test 'eq' is false when null data are compared to a valid value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "eq" 2020 return "false"
+
+  Scenario: Date year test 'eq' is false when valid data are compared to a null value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "eq" null return "false"
+
+  Scenario: Date year test 'eq' is true when null data are compared to a null value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "eq" null return "true"
+
+
+  # Year test 'ne'
+  Scenario: Date year test 'ne' is true when values are valid and match
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "ne" 2021 return "true"
+
+  Scenario: Date year test 'ne' is true when values are null and asserted value is a valid
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "ne" 2021 return "true"
+
+  Scenario: Date year test 'ne' is true when values are valid and asserted value is null
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "ne" null return "true"
+
+  Scenario: Date year test 'ne' is false when values are null and asserted value is null
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "ne" null return "false"
+
+
+  # Year test 'lt'
+  Scenario: Date year test 'lt' is true when data are less than given value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "lt" 2021 return "true"
+
+  Scenario: Date year test 'lt' is false when data are greater than given value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "lt" 2019 return "false"
+
+  Scenario: Date year test 'lt' is false when data are null and known value is null
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "lt" null return "false"
+
+  Scenario: Date year test 'lt' is false when data are present and known value is null
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "lt" null return "false"
+
+  Scenario: Date year test 'lt' is false when data are null and known value is present
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "lt" 2020 return "false"
+
+
+  # Year test 'le'
+  Scenario: Date year test 'le' is true when data are compared to known greater value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "le" 2022 return "true"
+
+  Scenario: Date year test 'le' is true when data are compared to known equal value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "le" 2020 return "true"
+
+  Scenario: Date year test 'le' is false when data are compared to known lesser value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "le" 2019 return "false"
+
+  Scenario: Date year test 'le' is false when null data are compared to valid value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "le" 2020 return "false"
+
+  Scenario: Date year test 'le' is true when null data are compared to null value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "year" comparisons of Date field "ListingContractDate" "le" null return "true"
+
+
+  # Month test 'gt'
+  Scenario: Date month test 'gt' is true when data are greater than given value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "gt" 3 return "true"
+
+  Scenario: Date month test 'gt' is false when data are less than given value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "gt" 5 return "false"
+
+  Scenario: Date month test 'gt' is false when data are null and known value is null
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "gt" null return "false"
+
+  Scenario: Date month test 'gt' is false when data are present and known value is null
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "gt" null return "false"
+
+  Scenario: Date month test 'gt' is false when data are null and known value is present
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "gt" 3 return "false"
+
+
+  # Month test 'ge'
+  Scenario: Date month test 'ge' is true when data are compared to known lesser value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "ge" 4 return "true"
+
+  Scenario: Date month test 'ge' is true when data are compared to known equal value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "ge" 3 return "true"
+
+  Scenario: Date month test 'ge' is false when data are compared to known greater value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "ge" 5 return "false"
+
+  Scenario: Date month test 'ge' is false when null data are compared to valid value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "ge" 4 return "false"
+
+  Scenario: Date month test 'ge' is true when null data are compared to null value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "ge" null return "true"
+
+  Scenario: Date month test 'ge' is false when data are compared to null value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "ge" null return "false"
+
+
+  # Month test 'eq'
+  Scenario: Date month test 'eq' is true when values are valid and match
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "eq" 4 return "true"
+
+  Scenario: Date month test 'eq' is false when values are valid don't mach
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "eq" 3 return "false"
+
+  Scenario: Date month test 'eq' is false when null data are compared to a valid value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "eq" 4 return "false"
+
+  Scenario: Date month test 'eq' is false when valid data are compared to a null value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "eq" null return "false"
+
+  Scenario: Date month test 'eq' is true when null data are compared to a null value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "eq" null return "true"
+
+
+  # Month test 'ne'
+  Scenario: Date month test 'ne' is true when values are valid and match
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "ne" 5 return "true"
+
+  Scenario: Date month test 'ne' is true when values are null and asserted value is a valid
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "ne" 5 return "true"
+
+  Scenario: Date month test 'ne' is true when values are valid and asserted value is null
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "ne" null return "true"
+
+  Scenario: Date month test 'ne' is false when values are null and asserted value is null
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "ne" null return "false"
+
+
+  # Month test 'lt'
+  Scenario: Date month test 'lt' is true when data are less than given value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "lt" 5 return "true"
+
+  Scenario: Date month test 'lt' is false when data are greater than given value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "lt" 3 return "false"
+
+  Scenario: Date month test 'lt' is false when data are null and known value is null
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "lt" null return "false"
+
+  Scenario: Date month test 'lt' is false when data are present and known value is null
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "lt" null return "false"
+
+  Scenario: Date month test 'lt' is false when data are null and known value is present
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "lt" 4 return "false"
+
+
+  # Month test 'le'
+  Scenario: Date month test 'le' is true when data are compared to known greater value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "le" 6 return "true"
+
+  Scenario: Date month test 'le' is true when data are compared to known equal value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "le" 4 return "true"
+
+  Scenario: Date month test 'le' is false when data are compared to known lesser value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "le" 3 return "false"
+
+  Scenario: Date month test 'le' is false when null data are compared to valid value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "le" 4 return "false"
+
+  Scenario: Date month test 'le' is true when null data are compared to null value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "month" comparisons of Date field "ListingContractDate" "le" null return "true"
+
+
+  # Day test 'gt'
+  Scenario: Date day test 'gt' is true when data are greater than given value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "gt" 1 return "true"
+
+  Scenario: Date day test 'gt' is false when data are less than given value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "gt" 3 return "false"
+
+  Scenario: Date day test 'gt' is false when data are null and known value is null
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "gt" null return "false"
+
+  Scenario: Date day test 'gt' is false when data are present and known value is null
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "gt" null return "false"
+
+  Scenario: Date day test 'gt' is false when data are null and known value is present
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "gt" 1 return "false"
+
+
+  # Day test 'ge'
+  Scenario: Date day test 'ge' is true when data are compared to known lesser value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "ge" 2 return "true"
+
+  Scenario: Date day test 'ge' is true when data are compared to known equal value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "ge" 1 return "true"
+
+  Scenario: Date day test 'ge' is false when data are compared to known greater value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "ge" 3 return "false"
+
+  Scenario: Date day test 'ge' is false when null data are compared to valid value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "ge" 2 return "false"
+
+  Scenario: Date day test 'ge' is true when null data are compared to null value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "ge" null return "true"
+
+  Scenario: Date day test 'ge' is false when data are compared to null value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "ge" null return "false"
+
+
+  # Day test 'eq'
+  Scenario: Date day test 'eq' is true when values are valid and match
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "eq" 2 return "true"
+
+  Scenario: Date day test 'eq' is false when values are valid don't mach
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "eq" 1 return "false"
+
+  Scenario: Date day test 'eq' is false when null data are compared to a valid value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "eq" 2 return "false"
+
+  Scenario: Date day test 'eq' is false when valid data are compared to a null value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "eq" null return "false"
+
+  Scenario: Date day test 'eq' is true when null data are compared to a null value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "eq" null return "true"
+
+
+  # Day test 'ne'
+  Scenario: Date day test 'ne' is true when values are valid and match
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "ne" 3 return "true"
+
+  Scenario: Date day test 'ne' is true when values are null and asserted value is a valid
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "ne" 3 return "true"
+
+  Scenario: Date day test 'ne' is true when values are valid and asserted value is null
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "ne" null return "true"
+
+  Scenario: Date day test 'ne' is false when values are null and asserted value is null
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "ne" null return "false"
+
+
+  # Day test 'lt'
+  Scenario: Date day test 'lt' is true when data are less than given value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "lt" 3 return "true"
+
+  Scenario: Date day test 'lt' is false when data are greater than given value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "lt" 1 return "false"
+
+  Scenario: Date day test 'lt' is false when data are null and known value is null
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "lt" null return "false"
+
+  Scenario: Date day test 'lt' is false when data are present and known value is null
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "lt" null return "false"
+
+  Scenario: Date day test 'lt' is false when data are null and known value is present
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "lt" 2 return "false"
+
+
+  # Day test 'le'
+  Scenario: Date day test 'le' is true when data are compared to known greater value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "le" 3 return "true"
+
+  Scenario: Date day test 'le' is true when data are compared to known equal value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "le" 2 return "true"
+
+  Scenario: Date day test 'le' is false when data are compared to known lesser value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "le" 1 return "false"
+
+  Scenario: Date day test 'le' is false when null data are compared to valid value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "le" 2 return "false"
+
+  Scenario: Date day test 'le' is true when null data are compared to null value
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then "day" comparisons of Date field "ListingContractDate" "le" null return "true"
