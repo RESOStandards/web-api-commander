@@ -2,26 +2,19 @@ package org.reso.commander.test.stepdefs;
 
 import io.cucumber.java8.En;
 import org.apache.http.HttpStatus;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.reso.commander.certfication.containers.WebAPITestContainer;
 import org.reso.commander.common.TestUtils;
 import org.reso.models.Settings;
 
 import java.io.File;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
-import static org.reso.commander.common.TestUtils.DateParts.FRACTIONAL;
 import static org.reso.commander.common.TestUtils.*;
 
 public class TestWebAPITestContainer implements En {
-  private static final Logger LOG = LogManager.getLogger(TestWebAPITestContainer.class);
   AtomicReference<WebAPITestContainer> testContainer = new AtomicReference<>();
 
   public TestWebAPITestContainer() {
@@ -68,29 +61,24 @@ public class TestWebAPITestContainer implements En {
       assertNotNull(getDefaultErrorMessage("BearerToken is null in the ClientSettings section!"), token);
     });
 
-    Then("^the Commander is created using auth token client mode$", () -> {
-      assertTrue(getDefaultErrorMessage("expected auth token Commander client!"), getTestContainer().getCommander().isAuthTokenClient());
-    });
+    Then("^the Commander is created using auth token client mode$", () ->
+      assertTrue(getDefaultErrorMessage("expected auth token Commander client!"), getTestContainer().getCommander().isAuthTokenClient()));
 
-    And("^the auth token has a value of \"([^\"]*)\"$", (String assertedTokenValue) -> {
+    And("^the auth token has a value of \"([^\"]*)\"$", (String assertedTokenValue) ->
       assertEquals(getDefaultErrorMessage("asserted token value is not equal to the one provided in the container!"),
-          assertedTokenValue, getTestContainer().getAuthToken());
-    });
+        assertedTokenValue, getTestContainer().getAuthToken()));
 
-    And("^a Commander instance exists within the test container$", () -> {
+    And("^a Commander instance exists within the test container$", () ->
       assertNotNull(getDefaultErrorMessage("Commander instance is null in the container!"),
-          getTestContainer().getCommander());
-    });
+          getTestContainer().getCommander()));
 
-    But("^the Commander is not created using client credentials mode$", () -> {
+    But("^the Commander is not created using client credentials mode$", () ->
       assertFalse(getDefaultErrorMessage("expected that the Commander was not using client credentials"),
-          getTestContainer().getCommander().isOAuth2Client());
-    });
+        getTestContainer().getCommander().isOAuth2Client()));
 
-    And("^Settings are present in the test container$", () -> {
+    And("^Settings are present in the test container$", () ->
       assertNotNull(getDefaultErrorMessage("settings were not found in the Web API test container!"),
-          getTestContainer().getSettings());
-    });
+        getTestContainer().getSettings()));
 
 
     /*
@@ -117,15 +105,13 @@ public class TestWebAPITestContainer implements En {
       getTestContainer().setResponseData(loadResourceAsString(resourceName));
     });
 
-    Then("^schema validation passes for the sample DataSystem data$", () -> {
+    Then("^schema validation passes for the sample DataSystem data$", () ->
       assertTrue(getDefaultErrorMessage("expected DataSystem to pass validation, but it failed!"),
-          getTestContainer().validateDataSystem().getIsValidDataSystem());
-    });
+        getTestContainer().validateDataSystem().getIsValidDataSystem()));
 
-    Then("^schema validation fails for the sample DataSystem data$", () -> {
+    Then("^schema validation fails for the sample DataSystem data$", () ->
       assertFalse(getDefaultErrorMessage("expected DataSystem to fail validation, but it passed!"),
-          getTestContainer().validateDataSystem().getIsValidDataSystem());
-    });
+        getTestContainer().validateDataSystem().getIsValidDataSystem()));
 
 
     /*
@@ -133,7 +119,7 @@ public class TestWebAPITestContainer implements En {
      */
     Then("^Integer comparisons of \"([^\"]*)\" \"([^\"]*)\" (\\d+) return \"([^\"]*)\"$", (String fieldName, String op, Integer assertedValue, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
-          result = testIntegerComparisons(fieldName, op, assertedValue);
+          result = compareIntegerPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue);
       if (expected) {
         assertTrue(result);
       } else {
@@ -143,7 +129,7 @@ public class TestWebAPITestContainer implements En {
 
     Then("^Integer comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String fieldName, String op, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
-          result = testIntegerComparisons(fieldName, op, null);
+          result = compareIntegerPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, null);
       if (expected) {
         assertTrue(result);
       } else {
@@ -157,7 +143,7 @@ public class TestWebAPITestContainer implements En {
      */
     Then("^String data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" returns \"([^\"]*)\"$", (String fieldName, String op, String assertedValue, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
-          result = testStringComparisons(fieldName, op, assertedValue);
+          result = compareStringPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue);
       if (expected) {
         assertTrue(result);
       } else {
@@ -167,7 +153,7 @@ public class TestWebAPITestContainer implements En {
 
     Then("^String data in \"([^\"]*)\" \"([^\"]*)\" null returns \"([^\"]*)\"$", (String fieldName, String op, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
-          result = testStringComparisons(fieldName, op, null);
+          result = compareStringPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, null);
       if (expected) {
         assertTrue(result);
       } else {
@@ -175,17 +161,14 @@ public class TestWebAPITestContainer implements En {
       }
     });
 
-    Then("^String data in \"([^\"]*)\" \"([^\"]*)\" equals \"([^\"]*)\"$", (String fieldName, String op, String assertedValue) -> {
-      assertTrue(testStringComparisons(fieldName, op, assertedValue));
-    });
+    Then("^String data in \"([^\"]*)\" \"([^\"]*)\" equals \"([^\"]*)\"$", (String fieldName, String op, String assertedValue)
+      -> assertTrue(compareStringPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue)));
 
-    Then("^String data in \"([^\"]*)\" \"([^\"]*)\" does not equal \"([^\"]*)\"$", (String fieldName, String op, String assertedValue) -> {
-      assertFalse(testStringComparisons(fieldName, op, assertedValue));
-    });
+    Then("^String data in \"([^\"]*)\" \"([^\"]*)\" does not equal \"([^\"]*)\"$", (String fieldName, String op, String assertedValue)
+      -> assertFalse(compareStringPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue)));
 
-    Then("^String data in \"([^\"]*)\" \"([^\"]*)\" is null$", (String fieldName, String op) -> {
-      assertFalse(testStringComparisons(fieldName, op, null));
-    });
+    Then("^String data in \"([^\"]*)\" \"([^\"]*)\" is null$", (String fieldName, String op)
+      -> assertFalse(compareStringPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, null)));
 
 
     /*
@@ -193,7 +176,7 @@ public class TestWebAPITestContainer implements En {
      */
     Then("^Timestamp comparisons of \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" return \"([^\"]*)\"$", (String fieldName, String op, String assertedValue, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
-          result = testTimestampComparisons(fieldName, op, assertedValue);
+          result = compareTimestampPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue);
       if (expected) {
         assertTrue(result);
       } else {
@@ -203,7 +186,7 @@ public class TestWebAPITestContainer implements En {
 
     Then("^Timestamp comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String fieldName, String op, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
-          result = testTimestampComparisons(fieldName, op, null);
+          result = compareTimestampPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, null);
       if (expected) {
         assertTrue(result);
       } else {
@@ -216,7 +199,7 @@ public class TestWebAPITestContainer implements En {
      */
     Then("^\"([^\"]*)\" comparisons of \"([^\"]*)\" \"([^\"]*)\" (\\d+) return \"([^\"]*)\"$", (String datePart, String fieldName, String op, Integer assertedValue, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
-          result = testDatePartComparisons(datePart, fieldName, op, assertedValue);
+          result = compareTimestampPayloadToAssertedDatePartValue(getTestContainer().getResponseData(), datePart, fieldName, op, assertedValue);
       if (expected) {
         assertTrue(result);
       } else {
@@ -226,7 +209,7 @@ public class TestWebAPITestContainer implements En {
 
     Then("^\"([^\"]*)\" comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String datePart, String fieldName, String op, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
-          result = testDatePartComparisons(datePart, fieldName, op,null);
+          result = compareTimestampPayloadToAssertedDatePartValue(getTestContainer().getResponseData(), datePart, fieldName, op,null);
       if (expected) {
         assertTrue(result);
       } else {
@@ -239,7 +222,7 @@ public class TestWebAPITestContainer implements En {
      */
     Then("^fractionalsecond comparisons of \"([^\"]*)\" \"([^\"]*)\" (\\d+\\.\\d+) return \"([^\"]*)\"$", (String fieldName, String op, Double assertedValue, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
-        result = testFractionalSecondComparisons(fieldName, op, assertedValue);
+        result = compareFractionalSecondsPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue);
       if (expected) {
         assertTrue(result);
       } else {
@@ -249,7 +232,7 @@ public class TestWebAPITestContainer implements En {
 
     Then("^fractionalsecond comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String fieldName, String op, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
-        result = testFractionalSecondComparisons(fieldName, op, null);
+        result = compareFractionalSecondsPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, null);
       if (expected) {
         assertTrue(result);
       } else {
@@ -257,72 +240,6 @@ public class TestWebAPITestContainer implements En {
       }
     });
 
-  }
-
-  boolean testStringComparisons(String fieldName, String op, String assertedValue) {
-    AtomicBoolean result = new AtomicBoolean(false);
-    //iterate over the items and count the number of fields with data to determine whether there are data present
-    from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-      result.compareAndSet(result.get(), TestUtils.compare((String)item.get(fieldName), op, assertedValue));
-    });
-    return result.get();
-  }
-
-  boolean testIntegerComparisons(String fieldName, String op, Integer assertedValue) {
-    AtomicBoolean result = new AtomicBoolean(false);
-    //iterate over the items and count the number of fields with data to determine whether there are data present
-    from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-      result.compareAndSet(result.get(), TestUtils.compare((Integer) item.get(fieldName), op, assertedValue));
-    });
-    return result.get();
-  }
-
-  boolean testTimestampComparisons(String fieldName, String op, String offsetDateTime) {
-    AtomicBoolean result = new AtomicBoolean(false);
-    //iterate over the items and count the number of fields with data to determine whether there are data present
-    from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-      try {
-        result.compareAndSet(result.get(), TestUtils.compare(
-            parseTimestampFromEdmDateTimeOffsetString((String)item.get(fieldName)), op,
-            parseTimestampFromEdmDateTimeOffsetString(offsetDateTime)));
-      } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex));
-      }
-    });
-    return result.get();
-  }
-
-  boolean testDatePartComparisons(String datePart, String fieldName, String op, Integer assertedValue) {
-    AtomicBoolean result = new AtomicBoolean(false);
-
-    from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-          try {
-            result.compareAndSet(result.get(), TestUtils.compare(TestUtils.getTimestampPart(datePart, item.get(fieldName)), op, assertedValue));
-          } catch (Exception ex) {
-            fail(getDefaultErrorMessage(ex));
-    }});
-    return result.get();
-  }
-
-
-  boolean testFractionalSecondComparisons(String fieldName, String op, Double assertedValue) {
-    final Double CONVERSION_FACTOR = 1000000.0;
-
-    AtomicBoolean result = new AtomicBoolean(false);
-    AtomicReference<Integer> timestampPart = new AtomicReference<>(null);
-    AtomicReference<Double> fractionalSeconds = new AtomicReference<>(null);
-
-    from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-      try {
-        timestampPart.set(TestUtils.getTimestampPart(FRACTIONAL, item.get(fieldName)));
-        if (timestampPart.get() != null) fractionalSeconds.set(timestampPart.get() / CONVERSION_FACTOR);
-
-        result.set(compare(fractionalSeconds.get(), op, assertedValue));
-
-      } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex));
-      }});
-    return result.get();
   }
 
   /**

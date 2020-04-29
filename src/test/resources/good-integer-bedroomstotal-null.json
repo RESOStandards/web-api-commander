@@ -1,9 +1,0 @@
-{
-  "@odata.context": "https://test.reso.org",
-  "value": [
-    {
-      "ListingKeyNumeric": 1,
-      "BedroomsTotal": null
-    }
-  ]
-}

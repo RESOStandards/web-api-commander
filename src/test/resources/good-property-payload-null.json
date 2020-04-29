@@ -2,7 +2,9 @@
   "@odata.context": "https://test.reso.org",
   "value": [
     {
-      "ListingKeyNumeric": 1,
+      "ListingKeyNumeric": null,
+      "BedroomsTotal": null,
+      "StreetName": null,
       "ModificationTimestamp": null
     }
   ]

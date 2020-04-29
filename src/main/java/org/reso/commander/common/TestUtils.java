@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.Header;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.communication.response.ODataResponse;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.commons.api.edm.Edm;
@@ -32,12 +31,15 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.restassured.path.json.JsonPath.from;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.reso.commander.common.TestUtils.Operators.*;
+import static org.junit.Assert.*;
+import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
+import static org.reso.commander.common.TestUtils.DateParts.FRACTIONAL;
+import static org.reso.commander.common.TestUtils.Operators.LESS_THAN;
+import static org.reso.commander.common.TestUtils.Operators.LESS_THAN_OR_EQUAL;
 
 public final class TestUtils {
   public static final String JSON_VALUE_PATH = "value";
@@ -64,7 +66,6 @@ public final class TestUtils {
    *
    * @param xmlMetadata XML Metadata to search through
    * @return the default CSDL Container for the given XMLMetadata
-   * @throws Exception if required metadata cannot be parsed, an exception will be thrown with an appropriate message.
    */
   public static CsdlEntityContainer findDefaultEntityContainer(Edm edm, XMLMetadata xmlMetadata) {
     assertNotNull("Edm Cannot be Null!", edm);
@@ -83,7 +84,6 @@ public final class TestUtils {
    * @param xmlMetadata    the metadata to search.
    * @param entityTypeName the name of the entityType to search for. MUST be in the default EntityContainer.
    * @return a list of CsdlProperty items for the given entityTypeName
-   * @throws Exception is thrown if the given metadata doesn't contain the given type name.
    */
   public static List<CsdlProperty> findEntityTypesForEntityTypeName(Edm edm, XMLMetadata xmlMetadata, String entityTypeName) {
     assertNotNull("ERROR: Edm Cannot be Null!", edm);
@@ -106,7 +106,6 @@ public final class TestUtils {
    * @param xmlMetadata    the metadata to search.
    * @param entityTypeName the name of the entityType to search for. MUST be in the default EntityContainer.
    * @return a list of CsdlProperty items for the given entityTypeName
-   * @throws Exception is thrown if the given metadata doesn't contain the given type name.
    */
   public static List<CsdlNavigationProperty> findNavigationPropertiesForEntityTypeName(Edm edm, XMLMetadata xmlMetadata, String entityTypeName) {
     assertNotNull("ERROR: Edm Cannot be Null!", edm);
@@ -121,6 +120,130 @@ public final class TestUtils {
     assertNotNull("ERROR: could not find type corresponding to given type name: " + entityTypeName, schemaForType);
 
     return schemaForType.getEntityType(entityTypeName).getNavigationProperties();
+  }
+
+  /**
+   * Compares each item in the string (JSON) payload with the given field name to the asserted value using op.
+   * @param payload JSON payload to compare
+   * @param fieldName fieldName to compare against
+   * @param op binary comparison operator
+   * @param assertedValue asserted value
+   * @return true if values in the payload match the assertion, false otherwise.
+   */
+  public static boolean compareStringPayloadToAssertedValue(String payload, String fieldName, String op, String assertedValue) {
+    AtomicBoolean result = new AtomicBoolean(false);
+    //iterate over the items and count the number of fields with data to determine whether there are data present
+    from(payload).getList(JSON_VALUE_PATH, HashMap.class).forEach(item ->
+      result.compareAndSet(result.get(), TestUtils.compare((String)item.get(fieldName), op, assertedValue)));
+    return result.get();
+  }
+
+  /**
+   * Compares each item in the string (JSON) payload with the given field name to the asserted value using op.
+   * @param payload JSON payload to compare
+   * @param fieldName fieldName to compare against
+   * @param op binary comparison operator
+   * @param assertedValue asserted value
+   * @return true if values in the payload match the assertion, false otherwise.
+   */
+  public static boolean compareIntegerPayloadToAssertedValue(String payload, String fieldName, String op, Integer assertedValue) {
+    AtomicBoolean result = new AtomicBoolean(false);
+    //iterate over the items and count the number of fields with data to determine whether there are data present
+    from(payload).getList(JSON_VALUE_PATH, HashMap.class).forEach(item ->
+      result.compareAndSet(result.get(), TestUtils.compare((Integer)item.get(fieldName), op, assertedValue)));
+    return result.get();
+  }
+
+  /**
+   * Compares each item in the string (JSON) payload with the given field name to the asserted value using op.
+   * @param payload JSON payload to compare
+   * @param fieldName fieldName to compare against
+   * @param op binary comparison operator
+   * @param assertedValue asserted value
+   * @return true if values in the payload match the assertion, false otherwise.
+   */
+  public static boolean compareTimestampPayloadToAssertedValue(String payload, String fieldName, String op, String assertedValue) {
+    AtomicBoolean result = new AtomicBoolean(false);
+    //iterate over the items and count the number of fields with data to determine whether there are data present
+    from(payload).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+      try {
+        result.compareAndSet(result.get(), TestUtils.compare(
+          parseTimestampFromEdmDateTimeOffsetString((String)item.get(fieldName)), op,
+          parseTimestampFromEdmDateTimeOffsetString(assertedValue)));
+      } catch (Exception ex) {
+        fail(getDefaultErrorMessage(ex));
+      }
+    });
+    return result.get();
+  }
+
+  /**
+   * Compares each item in the string (JSON) payload with the given field name to the asserted value using op.
+   * @param payload JSON payload to compare
+   * @param fieldName fieldName to compare against
+   * @param op binary comparison operator
+   * @param assertedValue asserted value
+   * @return true if values in the payload match the assertion, false otherwise.
+   */
+  public static boolean compareTimestampPayloadToAssertedDatePartValue(String payload, String datePart, String fieldName, String op, Integer assertedValue) {
+    AtomicBoolean result = new AtomicBoolean(false);
+
+    from(payload).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+      try {
+        result.compareAndSet(result.get(), TestUtils.compare(TestUtils.getTimestampPart(datePart, item.get(fieldName)), op, assertedValue));
+      } catch (Exception ex) {
+        fail(getDefaultErrorMessage(ex));
+      }});
+    return result.get();
+  }
+
+  //And "month" data in Date Field "Parameter_DateField" "eq" "Parameter_MonthValue"
+  /**
+   * Compares each item in the string (JSON) payload with the given field name to the asserted value using op.
+   * @param payload JSON payload to compare
+   * @param fieldName fieldName to compare against
+   * @param op binary comparison operator
+   * @param assertedValue asserted value
+   * @return true if values in the payload match the assertion, false otherwise.
+   */
+  public static boolean compareDatePayloadToAssertedDatePartValue(String payload, String datePart, String fieldName, String op, Integer assertedValue) {
+    AtomicBoolean result = new AtomicBoolean(false);
+
+    from(payload).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+      try {
+        result.compareAndSet(result.get(), TestUtils.compare(TestUtils.getDatePart(datePart, item.get(fieldName)), op, assertedValue));
+      } catch (Exception ex) {
+        fail(getDefaultErrorMessage(ex));
+      }});
+    return result.get();
+  }
+
+  /**
+   * Compares each item in the string (JSON) payload with the given field name to the asserted value using op.
+   * @param payload JSON payload to compare
+   * @param fieldName fieldName to compare against
+   * @param op binary comparison operator
+   * @param assertedValue asserted value
+   * @return true if values in the payload match the assertion, false otherwise.
+   */
+  public static boolean compareFractionalSecondsPayloadToAssertedValue(String payload, String fieldName, String op, Double assertedValue) {
+    final Double CONVERSION_FACTOR = 1000000.0;
+
+    AtomicBoolean result = new AtomicBoolean(false);
+    AtomicReference<Integer> timestampPart = new AtomicReference<>(null);
+    AtomicReference<Double> fractionalSeconds = new AtomicReference<>(null);
+
+    from(payload).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+      try {
+        timestampPart.set(TestUtils.getTimestampPart(FRACTIONAL, item.get(fieldName)));
+        if (timestampPart.get() != null) fractionalSeconds.set(timestampPart.get() / CONVERSION_FACTOR);
+
+        result.set(compare(fractionalSeconds.get(), op, assertedValue));
+
+      } catch (Exception ex) {
+        fail(getDefaultErrorMessage(ex));
+      }});
+    return result.get();
   }
 
   /**
@@ -160,7 +283,7 @@ public final class TestUtils {
    * @param rhs Integer value
    * @return true if lhs op rhs produces true, false otherwise
    */
-  public static boolean compare(String lhs, String op, String rhs) {
+  private static boolean compare(String lhs, String op, String rhs) {
     String operator = op.toLowerCase();
     boolean result = false;
 
@@ -187,7 +310,7 @@ public final class TestUtils {
    * @param rhs Timestamp to compare
    * @return true if lhs op rhs, false otherwise
    */
-  public static boolean compare(Timestamp lhs, String op, Timestamp rhs) {
+  private static boolean compare(Timestamp lhs, String op, Timestamp rhs) {
     String operator = op.toLowerCase();
     boolean result = false;
 
@@ -273,7 +396,7 @@ public final class TestUtils {
    * @param rhs the right value
    * @return true if lhs 'op' rhs is true, false otherwise
    */
-  public static boolean compare(Double lhs, String op, Double rhs) {
+  private static boolean compare(Double lhs, String op, Double rhs) {
     String operator = op.toLowerCase();
     boolean result = false;
 
@@ -310,16 +433,6 @@ public final class TestUtils {
     } catch (IOException e) {
       return false;
     }
-  }
-
-  /**
-   * Returns the String data contained within a given ODataRawResponse.
-   *
-   * @param oDataRawResponse the response to convert.
-   * @return the response stream as a string.
-   */
-  public static String getResponseData(ODataRawResponse oDataRawResponse) {
-    return convertInputStreamToString(oDataRawResponse.getRawResponse());
   }
 
   /**
@@ -368,17 +481,6 @@ public final class TestUtils {
    */
   public static Timestamp parseTimestampFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) throws EdmPrimitiveTypeException {
     return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Timestamp.class);
-  }
-
-  /**
-   * Parses the given edmDateString into a Java Timestamp.
-   *
-   * @param edmDateString the date string to convert.
-   * @return the corresponding Timestamp value.
-   * @throws EdmPrimitiveTypeException thrown if given value cannot be parsed.
-   */
-  public static Timestamp parseTimestampFromEdmDateString(String edmDateString) throws EdmPrimitiveTypeException {
-    return EdmDate.getInstance().valueOfString(edmDateString, true, null, null, null, null, Timestamp.class);
   }
 
   /**
