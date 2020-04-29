@@ -44,7 +44,6 @@ dependencies {
   compile 'com.networknt:json-schema-validator:1.0.35'
 
   implementation 'org.mockito:mockito-core:3.3.3'
-
 }
 
 configurations {

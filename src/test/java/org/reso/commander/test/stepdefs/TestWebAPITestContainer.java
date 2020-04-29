@@ -17,8 +17,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
-import static org.reso.commander.common.TestUtils.JSON_VALUE_PATH;
-import static org.reso.commander.common.TestUtils.parseTimestampFromEdmDateTimeOffsetString;
+import static org.reso.commander.common.TestUtils.DateParts.FRACTIONAL;
+import static org.reso.commander.common.TestUtils.*;
 
 public class TestWebAPITestContainer implements En {
   private static final Logger LOG = LogManager.getLogger(TestWebAPITestContainer.class);
@@ -69,8 +69,7 @@ public class TestWebAPITestContainer implements En {
     });
 
     Then("^the Commander is created using auth token client mode$", () -> {
-      assertTrue(getDefaultErrorMessage("expected auth token Commander client!"),
-          getTestContainer().getCommander().isAuthTokenClient());
+      assertTrue(getDefaultErrorMessage("expected auth token Commander client!"), getTestContainer().getCommander().isAuthTokenClient());
     });
 
     And("^the auth token has a value of \"([^\"]*)\"$", (String assertedTokenValue) -> {
@@ -212,7 +211,6 @@ public class TestWebAPITestContainer implements En {
       }
     });
 
-
     /*
      * Date Part Response Testing
      */
@@ -228,13 +226,37 @@ public class TestWebAPITestContainer implements En {
 
     Then("^\"([^\"]*)\" comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String datePart, String fieldName, String op, String expectedValue) -> {
       final boolean expected = Boolean.parseBoolean(expectedValue),
-          result = testDatePartComparisons(datePart, fieldName, op, null);
+          result = testDatePartComparisons(datePart, fieldName, op,null);
       if (expected) {
         assertTrue(result);
       } else {
         assertFalse(result);
       }
     });
+
+    /*
+     * Fractional Second Response Testing
+     */
+    Then("^fractionalsecond comparisons of \"([^\"]*)\" \"([^\"]*)\" (\\d+\\.\\d+) return \"([^\"]*)\"$", (String fieldName, String op, Double assertedValue, String expectedValue) -> {
+      final boolean expected = Boolean.parseBoolean(expectedValue),
+        result = testFractionalSecondComparisons(fieldName, op, assertedValue);
+      if (expected) {
+        assertTrue(result);
+      } else {
+        assertFalse(result);
+      }
+    });
+
+    Then("^fractionalsecond comparisons of \"([^\"]*)\" \"([^\"]*)\" null return \"([^\"]*)\"$", (String fieldName, String op, String expectedValue) -> {
+      final boolean expected = Boolean.parseBoolean(expectedValue),
+        result = testFractionalSecondComparisons(fieldName, op, null);
+      if (expected) {
+        assertTrue(result);
+      } else {
+        assertFalse(result);
+      }
+    });
+
   }
 
   boolean testStringComparisons(String fieldName, String op, String assertedValue) {
@@ -279,6 +301,27 @@ public class TestWebAPITestContainer implements En {
           } catch (Exception ex) {
             fail(getDefaultErrorMessage(ex));
     }});
+    return result.get();
+  }
+
+
+  boolean testFractionalSecondComparisons(String fieldName, String op, Double assertedValue) {
+    final Double CONVERSION_FACTOR = 1000000.0;
+
+    AtomicBoolean result = new AtomicBoolean(false);
+    AtomicReference<Integer> timestampPart = new AtomicReference<>(null);
+    AtomicReference<Double> fractionalSeconds = new AtomicReference<>(null);
+
+    from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+      try {
+        timestampPart.set(TestUtils.getTimestampPart(FRACTIONAL, item.get(fieldName)));
+        if (timestampPart.get() != null) fractionalSeconds.set(timestampPart.get() / CONVERSION_FACTOR);
+
+        result.set(compare(fractionalSeconds.get(), op, assertedValue));
+
+      } catch (Exception ex) {
+        fail(getDefaultErrorMessage(ex));
+      }});
     return result.get();
   }
 

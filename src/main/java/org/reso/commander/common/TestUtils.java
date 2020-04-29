@@ -27,13 +27,17 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.reso.commander.common.TestUtils.Operators.*;
 
 public final class TestUtils {
   public static final String JSON_VALUE_PATH = "value";
@@ -139,9 +143,9 @@ public final class TestUtils {
       result = Objects.equals(lhs, rhs);
     } else if (operator.contentEquals(Operators.NE)) {
       result = !Objects.equals(lhs, rhs);
-    } else if (operator.contentEquals(Operators.LESS_THAN)) {
+    } else if (operator.contentEquals(LESS_THAN)) {
       result = lhs != null && rhs != null && lhs < rhs;
-    } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
+    } else if (operator.contentEquals(LESS_THAN_OR_EQUAL)) {
       result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs < rhs);
     }
     LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
@@ -195,9 +199,9 @@ public final class TestUtils {
       result = Objects.equals(lhs, rhs);
     } else if (operator.contentEquals(Operators.NE)) {
       result = !Objects.equals(lhs, rhs);
-    } else if (operator.contentEquals(Operators.LESS_THAN)) {
+    } else if (operator.contentEquals(LESS_THAN)) {
       result = lhs != null && rhs != null && lhs.before(rhs);
-    } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
+    } else if (operator.contentEquals(LESS_THAN_OR_EQUAL)) {
       result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs.before(rhs));
     }
     LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
@@ -224,9 +228,9 @@ public final class TestUtils {
       result = Objects.equals(lhs, rhs) || lhs.toLocalTime().equals(rhs.toLocalTime());
     } else if (operator.contentEquals(Operators.NE)) {
       result = !Objects.equals(lhs, rhs) || !lhs.toLocalTime().equals(rhs.toLocalTime());
-    } else if (operator.contentEquals(Operators.LESS_THAN)) {
+    } else if (operator.contentEquals(LESS_THAN)) {
       result = lhs != null && rhs != null && lhs.toLocalTime().isBefore(rhs.toLocalTime());
-    } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
+    } else if (operator.contentEquals(LESS_THAN_OR_EQUAL)) {
       result = Objects.equals(lhs, rhs) || lhs.toLocalTime().isBefore(rhs.toLocalTime()) || lhs.toLocalTime().equals(rhs.toLocalTime());
     }
     LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
@@ -253,12 +257,41 @@ public final class TestUtils {
       result = Objects.equals(lhs, rhs);
     } else if (operator.contentEquals(Operators.NE)) {
       result = !Objects.equals(lhs, rhs);
-    } else if (operator.contentEquals(Operators.LESS_THAN)) {
+    } else if (operator.contentEquals(LESS_THAN)) {
       result = lhs != null && lhs.before(rhs);
-    } else if (operator.contentEquals(Operators.LESS_THAN_OR_EQUAL)) {
+    } else if (operator.contentEquals(LESS_THAN_OR_EQUAL)) {
       result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs.before(rhs));
     }
     LOG.info("Compare: " + lhs + " " + operator + " " + rhs + " ==> " + result);
+    return result;
+  }
+
+  /**
+   * Compares Double values, taking nulls into account
+   * @param lhs the left value
+   * @param op a binary comparison operator
+   * @param rhs the right value
+   * @return true if lhs 'op' rhs is true, false otherwise
+   */
+  public static boolean compare(Double lhs, String op, Double rhs) {
+    String operator = op.toLowerCase();
+    boolean result = false;
+
+    if (operator.contentEquals(Operators.GREATER_THAN)) {
+      //TODO: consider switching to compare()
+      result = lhs != null && rhs != null && lhs > rhs;
+    } else if (operator.contentEquals(Operators.GREATER_THAN_OR_EQUAL)) {
+      result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs > rhs);
+    } else if (operator.contentEquals(Operators.EQ)) {
+      result = Objects.equals(lhs, rhs);
+    } else if (operator.contentEquals(Operators.NE)) {
+      result = !Objects.equals(lhs, rhs);
+    } else if (operator.contentEquals(LESS_THAN)) {
+      result = lhs != null && rhs != null && lhs < rhs;
+    } else if (operator.contentEquals(LESS_THAN_OR_EQUAL)) {
+      result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs < rhs);
+    }
+    LOG.info("Compare: " + lhs + " " + op + " " + rhs + " ==> " + result);
     return result;
   }
 
@@ -419,28 +452,26 @@ public final class TestUtils {
    * @param value the value to try and parse
    * @return the Integer portion of the date if successful, otherwise throws an Exception
    */
-  public static Integer getTimestampPart(String timestampPart, Object value) throws EdmPrimitiveTypeException {
+  public static Integer getTimestampPart(String timestampPart, Object value) throws DateTimeParseException {
     if (timestampPart == null || value == null) return null;
 
-    //Turns nanoseconds into two most significant 2 digits for fractional comparisons
-    int ADJUSTMENT_FACTOR = 10000000;
-    OffsetDateTime offsetDateTime = OffsetDateTime.parse(value.toString());
+    ZonedDateTime dateTime = ZonedDateTime.parse((String)value, DateTimeFormatter.ISO_DATE_TIME);
 
     switch (timestampPart) {
       case DateParts.YEAR:
-        return offsetDateTime.getYear();
+        return dateTime.getYear();
       case DateParts.MONTH:
-        return offsetDateTime.getMonthValue();
+        return dateTime.getMonthValue();
       case DateParts.DAY:
-        return offsetDateTime.getDayOfMonth();
+        return dateTime.getDayOfMonth();
       case DateParts.HOUR:
-        return offsetDateTime.getHour();
+        return dateTime.getHour();
       case DateParts.MINUTE:
-        return offsetDateTime.getMinute();
+        return dateTime.getMinute();
       case DateParts.SECOND:
-        return offsetDateTime.getSecond();
+        return dateTime.getSecond();
       case DateParts.FRACTIONAL:
-        return offsetDateTime.getNano() / ADJUSTMENT_FACTOR;
+        return dateTime.toInstant().get(ChronoField.MICRO_OF_SECOND);
       default:
         return null;
     }

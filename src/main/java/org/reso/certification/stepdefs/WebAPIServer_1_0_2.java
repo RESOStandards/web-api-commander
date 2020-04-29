@@ -344,7 +344,7 @@ public class WebAPIServer_1_0_2 implements En {
 
         //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
         from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-          fieldValue.set(item.get(fieldName) != null ? new Integer(item.get(fieldName).toString()) : null);
+          fieldValue.set((Integer)item.get(fieldName));
           result.set(result.get() && TestUtils.compare(fieldValue.get(), op, assertedValue));
         });
         assertTrue(result.get());

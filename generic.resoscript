@@ -181,7 +181,7 @@
     <Parameter Name="ToUpperValue" Value="MAIN" />
 
     <!-- Gold and Platinum: Date Fields for testing -->
-    <Parameter Name="DateTimeValue" Value="2018-12-31T23:55:55-09:00" />
+    <Parameter Name="DateTimeValue" Value="2018-12-31T23:55:55.3-09:00" />
     <Parameter Name="DateValue" Value="2018-12-31" />
     <Parameter Name="YearValue" Value="2018" />
     <Parameter Name="MonthValue" Value="12" />
@@ -190,7 +190,7 @@
     <Parameter Name="HourValue" Value="23" />
     <Parameter Name="MinuteValue" Value="55" />
     <Parameter Name="SecondValue" Value="55" />
-    <Parameter Name="FractionalValue" Value="30" />
+    <Parameter Name="FractionalValue" Value="0.3" />
 
     <!-- Platinum - GeoSpatial query values -->
     <Parameter Name="GeoSpatialDistanceValue" Value="1000" />

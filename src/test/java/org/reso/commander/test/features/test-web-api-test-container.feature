@@ -1229,130 +1229,130 @@ Feature: Commander Platinum Web API Test Container Tests
   # Fractional Second test 'gt'
   Scenario: Fractional Second test 'gt' is true when data are greater than given value
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "gt" 1 return "true"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "gt" 0.01 return "true"
 
   Scenario: Fractional Second test 'gt' is false when data are less than given value
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "gt" 3 return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "gt" 0.03 return "false"
 
   Scenario: Fractional Second test 'gt' is false when data are null and known value is null
     When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "gt" null return "false"
 
   Scenario: Fractional Second test 'gt' is false when data are present and known value is null
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "gt" null return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "gt" null return "false"
 
   Scenario: Fractional Second test 'gt' is false when data are null and known value is present
     When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "gt" 1 return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "gt" 0.01 return "false"
 
 
   # Fractional Second test 'ge'
   Scenario: Fractional Second test 'ge' is true when data are compared to known lesser value
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "ge" 2 return "true"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "ge" 0.02 return "true"
 
   Scenario: Fractional Second test 'ge' is true when data are compared to known equal value
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "ge" 1 return "true"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "ge" 0.01 return "true"
 
   Scenario: Fractional Second test 'ge' is false when data are compared to known greater value
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "ge" 3 return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "ge" 0.03 return "false"
 
   Scenario: Fractional Second test 'ge' is false when null data are compared to valid value
     When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "ge" 2 return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "ge" 0.02 return "false"
 
   Scenario: Fractional Second test 'ge' is true when null data are compared to null value
     When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "ge" null return "true"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "ge" null return "true"
 
   Scenario: Fractional Second test 'ge' is false when data are compared to null value
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "ge" null return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "ge" null return "false"
 
 
   # Fractional Second test 'eq'
   Scenario: Fractional Second test 'eq' is true when values are valid and match
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "eq" 2 return "true"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "eq" 0.02 return "true"
 
   Scenario: Fractional Second test 'eq' is false when values are valid don't mach
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "eq" 1 return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "eq" 0.01 return "false"
 
   Scenario: Fractional Second test 'eq' is false when null data are compared to a valid value
     When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "eq" 2 return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "eq" 0.02 return "false"
 
   Scenario: Fractional Second test 'eq' is false when valid data are compared to a null value
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "eq" null return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "eq" null return "false"
 
   Scenario: Fractional Second test 'eq' is true when null data are compared to a null value
     When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "eq" null return "true"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "eq" null return "true"
 
 
   # Fractional Second test 'ne'
   Scenario: Fractional Second test 'ne' is true when values are valid and match
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "ne" 3 return "true"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "ne" 0.03 return "true"
 
   Scenario: Fractional Second test 'ne' is true when values are null and asserted value is a valid
     When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "ne" 3 return "true"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "ne" 0.03 return "true"
 
   Scenario: Fractional Second test 'ne' is true when values are valid and asserted value is null
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "ne" null return "true"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "ne" null return "true"
 
   Scenario: Fractional Second test 'ne' is false when values are null and asserted value is null
     When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "ne" null return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "ne" null return "false"
 
 
   # Fractional Second test 'lt'
   Scenario: Fractional Second test 'lt' is true when data are less than given value
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "lt" 3 return "true"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "lt" 0.03 return "true"
 
   Scenario: Fractional Second test 'lt' is false when data are greater than given value
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "lt" 1 return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "lt" 0.01 return "false"
 
   Scenario: Fractional Second test 'lt' is false when data are null and known value is null
     When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "lt" null return "false"
 
   Scenario: Fractional Second test 'lt' is false when data are present and known value is null
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "lt" null return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "lt" null return "false"
 
   Scenario: Fractional Second test 'lt' is false when data are null and known value is present
     When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "lt" 2 return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "lt" 0.02 return "false"
 
 
   # Fractional Second test 'le'
   Scenario: Fractional Second test 'le' is true when data are compared to known greater value
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "le" 3 return "true"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "le" 0.03 return "true"
 
   Scenario: Fractional Second test 'le' is true when data are compared to known equal value
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "le" 2 return "true"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "le" 0.02 return "true"
 
   Scenario: Fractional Second test 'le' is false when data are compared to known lesser value
     When sample JSON data from "good-timestamp-modificationtimestamp.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "le" 1 return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "le" 0.01 return "false"
 
   Scenario: Fractional Second test 'le' is false when null data are compared to valid value
     When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "le" 2 return "false"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "le" 0.02 return "false"
 
   Scenario: Fractional Second test 'le' is true when null data are compared to null value
     When sample JSON data from "good-timestamp-modificationtimestamp-null.json" are loaded into the test container
-    Then "fractional" comparisons of "ModificationTimestamp" "le" null return "true"
+    Then fractionalsecond comparisons of "ModificationTimestamp" "le" null return "true"
