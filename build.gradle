@@ -10,6 +10,7 @@ plugins {
 mainClassName = 'org.reso.commander.Main'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+compileJava.options.encoding = 'UTF-8'
 
 repositories {
   // Use jcenter for resolving your dependencies.
