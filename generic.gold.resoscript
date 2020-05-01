@@ -44,7 +44,7 @@
   ############################################################-->
 
   <!-- The current version of this RESOScript -->
-  <RESOScriptVersion>2.0.2</RESOScriptVersion>
+  <RESOScriptVersion>2.0.3</RESOScriptVersion>
 
 
   <!--
@@ -79,7 +79,7 @@
     <TokenURI><!-- REQUIRED: Your token endpoint URI--></TokenURI>
     <ClientScope>
 
-    <!--OPTIONAL - your client scope. See: https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/ -->
+      <!--OPTIONAL - your client scope. See: https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/ -->
     </ClientScope>
 
   </ClientSettings>
@@ -101,7 +101,7 @@
     <Parameter Name="EndpointResource" Value="REQUIRED: YOUR RESOURCE GOES HERE, FOR EXAMPLE, Property" />
 
     <!-- REQUIRED: Core - The DataSystems endpoint being tested
-        NOTE: the FULL DataSystems URL is required as it might not be relative to the Service Root. -->
+        NOTE: the FULL DataSystems URL is required as it might not be relative to the Service Root.-->
     <Parameter Name="EndpointDataSystem" Value="REQUIRED: YOUR DATA SYSTEMS ENDPOINT GOES HERE" />
 
     <!--
@@ -115,7 +115,8 @@
     <Parameter Name="KeyOrKeyNumericField" Value="ListingKey" />
 
     <!-- REQUIRED: Core - Provide a value for the KeyOrKeyNumeric from your server
-                   NOTE: if you are using Key instead of KeyNumeric values, wrap your Key in quotes: 'myUniqueKey123' -->
+                   NOTE: if you are using Key instead of KeyNumeric values, wrap your Key in quotes: 'myUniqueKey123'
+    -->
     <Parameter Name="KeyOrKeyNumericValue" Value="REQUIRED: YOUR KeyOrKeyNumericValue GOES HERE" />
 
     <!-- REQUIRED: Core - Integer Field. Should be one of: Type="Edm.Int16", Type="Edm.Int32", or Type="Edm.Int64" -->
@@ -123,8 +124,8 @@
 
     <!-- REQUIRED: Core - Enumerated Field for Single-Value Testing -->
     <Parameter Name="SingleValueLookupField" Value="PropertyType" />
-    <Parameter Name="SingleValueLookupNamespace" Value="PropertyEnums.PropertyType" />
     <Parameter Name="SingleLookupValue" Value="Residential" />
+    <Parameter Name="SingleValueLookupNamespace" Value="PropertyEnums.PropertyType" />
 
     <!-- REQUIRED: Core - Enumerated Field for Multi-value testing -->
     <Parameter Name="MultipleValueLookupField" Value="Appliances" />
@@ -192,7 +193,7 @@
     <Parameter Name="WebAPI102_RequiredResourceList" Value="Property,Member,Office,Media" />
 
     <!-- Allowed Resources - Update to 1.8 once it's approved -->
-    <Parameter Name="DD17_WellKnownResourceList" Value="Property,Member,Office,Contacts,ContactListings,HistoryTransactional,InternetTracking,Media,OpenHouse,OUID,Prospecting,Queue,Rules,SavedSearch,Showing,Teams" />
+    <Parameter Name="DD17_WellKnownResourceList" Value="Property,Member,Office,Contacts,ContactListings,HistoryTransactional,InternetTracking,Media,OpenHouse,OUID,Prospecting,Queue,Rules,SavedSearch,Showing,Teams,TeamMembers,ContactListingNotes,OtherPhone,PropertyGreenVerification,PropertyPowerProduction,PropertyRooms,PropertyUnitTypes,SocialMedia" />
     
     <!-- Computed Has Value - uses SingleValueLookup field -->
     <Parameter Name="FilterHasField" Value="*Parameter_SingleValueLookupField*" />

@@ -44,7 +44,7 @@
   ############################################################-->
 
   <!-- The current version of this RESOScript -->
-  <RESOScriptVersion>2.0.2</RESOScriptVersion>
+  <RESOScriptVersion>2.0.3</RESOScriptVersion>
 
 
   <!--
@@ -149,16 +149,6 @@
     <Parameter Name="GeoSpatialField" Value="Coordinates" />
     <Parameter Name="GeoSpatialValue" Value="REQUIRED: YOUR COORDINATES GO HERE in Longitude Latitude format" /> <!-- "Longitude Latitude" -->
 
-    <!-- REQUIRED: New Fields for WS103 Testing -->
-    <Parameter Name="ValueField" Value="AboveGradeFinishedArea" />
-    <Parameter Name="CastField" Value="AboveGradeFinishedArea" />
-    <Parameter Name="CastFieldValue" Value="YOUR CastFieldValue GOES HERE. FOR EXAMPLE, 1200" />
-    <Parameter Name="ConcatFieldOne" Value="StreetName" />
-    <Parameter Name="ConcatFieldOneValue" Value="REQUIRED: Your OneValue GOES HERE>" />
-    <Parameter Name="ConcatFieldTwo" Value="City" />
-    <Parameter Name="ConcatFieldTwoValue" Value="YOUR TwoValue GOES HERE" />
-    <Parameter Name="ConcatFieldBothValue" Value="Your OneValue: TwoValue GOES HERE" /> <!-- format: "OneValue: TwoValue" -->
-
     <!--
     ############################################################
       Sample Field Values
@@ -227,7 +217,7 @@
     <Parameter Name="WebAPI102_RequiredResourceList" Value="Property,Member,Office,Media" />
 
     <!-- Allowed Resources - Update to 1.8 once it's approved -->
-    <Parameter Name="DD17_WellKnownResourceList" Value="Property,Member,Office,Contacts,ContactListings,HistoryTransactional,InternetTracking,Media,OpenHouse,OUID,Prospecting,Queue,Rules,SavedSearch,Showing,Teams" />
+    <Parameter Name="DD17_WellKnownResourceList" Value="Property,Member,Office,Contacts,ContactListings,HistoryTransactional,InternetTracking,Media,OpenHouse,OUID,Prospecting,Queue,Rules,SavedSearch,Showing,Teams,TeamMembers,ContactListingNotes,OtherPhone,PropertyGreenVerification,PropertyPowerProduction,PropertyRooms,PropertyUnitTypes,SocialMedia" />
 
     <!-- Computed Has Value - uses SingleValueLookup field -->
     <Parameter Name="FilterHasField" Value="*Parameter_SingleValueLookupField*" />
