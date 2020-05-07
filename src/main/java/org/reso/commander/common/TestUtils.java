@@ -283,7 +283,7 @@ public final class TestUtils {
    * @param rhs Integer value
    * @return true if lhs op rhs produces true, false otherwise
    */
-  private static boolean compare(String lhs, String op, String rhs) {
+  public static boolean compare(String lhs, String op, String rhs) {
     String operator = op.toLowerCase();
     boolean result = false;
 
@@ -310,7 +310,7 @@ public final class TestUtils {
    * @param rhs Timestamp to compare
    * @return true if lhs op rhs, false otherwise
    */
-  private static boolean compare(Timestamp lhs, String op, Timestamp rhs) {
+  public static boolean compare(Timestamp lhs, String op, Timestamp rhs) {
     String operator = op.toLowerCase();
     boolean result = false;
 
@@ -396,7 +396,7 @@ public final class TestUtils {
    * @param rhs the right value
    * @return true if lhs 'op' rhs is true, false otherwise
    */
-  private static boolean compare(Double lhs, String op, Double rhs) {
+  public static boolean compare(Double lhs, String op, Double rhs) {
     String operator = op.toLowerCase();
     boolean result = false;
 
