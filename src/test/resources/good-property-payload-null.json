@@ -1,0 +1,12 @@
+{
+  "@odata.context": "https://test.reso.org",
+  "value": [
+    {
+      "ListingKeyNumeric": null,
+      "BedroomsTotal": null,
+      "StreetName": null,
+      "ModificationTimestamp": null,
+      "ListingContractDate": null
+    }
+  ]
+}

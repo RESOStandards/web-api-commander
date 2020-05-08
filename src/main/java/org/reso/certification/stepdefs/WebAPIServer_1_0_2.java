@@ -38,6 +38,7 @@ import static org.reso.commander.certfication.containers.WebAPITestContainer.*;
 import static org.reso.commander.common.ErrorMsg.getAssertResponseCodeErrorMessage;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.*;
+import static org.reso.commander.common.TestUtils.DateParts.FRACTIONAL;
 import static org.reso.commander.common.TestUtils.Operators.*;
 
 /**
@@ -83,10 +84,9 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * Edm Metadata Validator
      */
-    And("^the Edm metadata returned by the server are valid$", () -> {
+    And("^the Edm metadata returned by the server are valid$", () ->
       assertTrue("Edm Metadata at the given service root is not valid! " + getTestContainer().getServiceRoot(),
-          getTestContainer().getIsValidEdm());
-    });
+        getTestContainer().getIsValidEdm()));
 
     /*
      * XML Metadata Validator
@@ -140,7 +140,7 @@ public class WebAPIServer_1_0_2 implements En {
 
         DecimalFormat df = new DecimalFormat();
         df.setMaximumFractionDigits(1);
-        double fill = 0;
+        double fill;
 
         assertNotNull("ERROR: no fields found within the given $select list. Check request Id: " + getTestContainer().getRequest().getRequestId() + " in your .resoscript file!",
             getTestContainer().getSelectList());
@@ -328,32 +328,6 @@ public class WebAPIServer_1_0_2 implements En {
     });
 
     /*
-     * Compares field data (LHS) to a given parameter value (RHS). The operator is passed as a string,
-     * and is used to select among the supported comparisons.
-     */
-    And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
-      try {
-        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
-        int assertedValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
-
-        LOG.info("fieldName: " + fieldName + ", op: " + op + ", assertedValue: " + assertedValue);
-
-        //subsequent value comparisons are and-ed together while iterating over the list of items, so init to true
-        AtomicBoolean result = new AtomicBoolean(true);
-        AtomicReference<Integer> fieldValue = new AtomicReference<>();
-
-        //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
-        from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-          fieldValue.set(item.get(fieldName) != null ? new Integer(item.get(fieldName).toString()) : null);
-          result.set(result.get() && TestUtils.compare(fieldValue.get(), op, assertedValue));
-        });
-        assertTrue(result.get());
-      } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex));
-      }
-    });
-
-    /*
      * True if response has results, meaning value.length > 0
      */
     And("^the response has results$", () -> {
@@ -374,8 +348,7 @@ public class WebAPIServer_1_0_2 implements En {
         String value = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
         boolean isPresent = from(getTestContainer().getResponseData()).get() != null;
         assertTrue("ERROR: singleton results not found for '" + value + "'!", isPresent);
-        LOG.info("Response value is: " + value);
-        LOG.info("Is Present: " + isPresent);
+        LOG.info("Data are present and response value is: " + value);
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -396,7 +369,24 @@ public class WebAPIServer_1_0_2 implements En {
     });
 
     /*
+     * Compares field data (LHS) to a given parameter value (RHS). The operator is passed as a string,
+     * and is used to select among the supported comparisons.
+     */
+    And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
+      try {
+        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
+        int assertedValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
+
+        LOG.info("fieldName: " + fieldName + ", op: " + op + ", assertedValue: " + assertedValue);
+        assertTrue(TestUtils.compareIntegerPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue));
+      } catch (Exception ex) {
+        fail(getDefaultErrorMessage(ex));
+      }
+    });
+
+    /*
      * True if data in the lhs expression and rhs expressions pass the AND or OR condition given in andOrOp
+     * TODO: integrate with TestUtils compareIntegerPayloadToAssertedValue
      */
     And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String opLhs, String parameterAssertedLhsValue, String andOrOp, String opRhs, String parameterAssertedRhsValue) -> {
       try {
@@ -412,8 +402,9 @@ public class WebAPIServer_1_0_2 implements En {
         AtomicBoolean rhsResult = new AtomicBoolean(isAndOp);
         AtomicBoolean itemResult = new AtomicBoolean(isAndOp);
 
-        AtomicReference<Integer> lhsValue = new AtomicReference<>(),
-            rhsValue = new AtomicReference<>();
+        AtomicReference<Integer>
+          lhsValue = new AtomicReference<>(),
+          rhsValue = new AtomicReference<>();
 
         //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
         from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
@@ -614,44 +605,34 @@ public class WebAPIServer_1_0_2 implements En {
       try {
         assertedValue.set(Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings())));
         LOG.info("Asserted value is: " + assertedValue.get());
-
-        from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-          try {
-            fieldValue.set(TestUtils.getDatePart(datePart.get(), item.get(fieldName)));
-            assertTrue(TestUtils.compare(fieldValue.get(), operator.get(), assertedValue.get()));
-          } catch (Exception ex) {
-            fail(getDefaultErrorMessage(ex));
-          }
-        });
+        assertTrue(TestUtils.compareDatePayloadToAssertedDatePartValue(getTestContainer().getResponseData(), datePart.get(), fieldName, operator.get(), assertedValue.intValue()));
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
     });
 
     /*
-     * Year comparison from Timestamp Field
-     * TODO: consolidate with Year comparison with Date Field
+     * Date part comparison with Timestamp Field
      */
     And("^\"([^\"]*)\" data in Timestamp Field \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String stringDatePart, String parameterFieldName, String op, String parameterAssertedValue) -> {
       try {
         String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
-        AtomicReference<Integer> fieldValue = new AtomicReference<>();
-        AtomicReference<Integer> assertedValue = new AtomicReference<>();
-        AtomicReference<String> datePart = new AtomicReference<>(stringDatePart.toLowerCase());
-        AtomicReference<String> operator = new AtomicReference<>(op.toLowerCase());
+        Double assertedValue;
+        String datePart = stringDatePart.toLowerCase();
+        String operator = op.toLowerCase();
 
         try {
-          assertedValue.set(Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings())));
-          LOG.info("Asserted value is: " + assertedValue.get().toString());
+          assertedValue = Double.parseDouble(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
 
-          from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-            try {
-              fieldValue.set(TestUtils.getTimestampPart(datePart.get(), item.get(fieldName).toString()));
-              assertTrue(TestUtils.compare(fieldValue.get(), operator.get(), assertedValue.get()));
-            } catch (Exception ex) {
-              fail(getDefaultErrorMessage(ex));
-            }
-          });
+          if (assertedValue % 1 == 0) LOG.info("Asserted value is: " + assertedValue.intValue());
+          else LOG.info("Asserted value is: " + assertedValue);
+
+          //TODO: re-consolidate fractional with other date part ops
+          if (datePart.contentEquals(FRACTIONAL)) {
+            assertTrue(TestUtils.compareFractionalSecondsPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, operator, assertedValue));
+          } else {
+            assertTrue(TestUtils.compareTimestampPayloadToAssertedDatePartValue(getTestContainer().getResponseData(), datePart, fieldName, operator, assertedValue.intValue()));
+          }
         } catch (Exception ex) {
           fail(getDefaultErrorMessage(ex));
         }
@@ -666,12 +647,8 @@ public class WebAPIServer_1_0_2 implements En {
     And("^String data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
       try {
         String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
-        AtomicReference<String> assertedValue = new AtomicReference<>(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
-        AtomicReference<String> operator = new AtomicReference<>(op.toLowerCase());
-
-        from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
-          assertTrue(TestUtils.compare(item.get(fieldName).toString(), operator.get(), assertedValue.get()));
-        });
+        String assertedValue = Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings());
+        assertTrue(TestUtils.compareStringPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue));
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -708,8 +685,6 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^resource metadata for \"([^\"]*)\" contains the fields in the given select list$", (String parameterResourceName) -> {
       try {
-        final String resourceName = Settings.resolveParametersString(parameterResourceName, getTestContainer().getSettings());
-
         LOG.info("Searching metadata for fields in given select list: " + getTestContainer().getSelectList().toString());
         getTestContainer().getSelectList().forEach(fieldName -> {
           //need to skip the expand field when looking through the metadata
@@ -838,9 +813,8 @@ public class WebAPIServer_1_0_2 implements En {
      * Checks to see whether expanding the EndpointResource on ExpandField produces equivalent records from the corresponding
      * resource of the expanded type
      */
-    And("^the expanded data were found in the related resource$", () -> {
-      LOG.info("TODO: this depends on either finding the appropriate navigation property for a given relationship, or having the Expanded resource type name.");
-    });
+    And("^the expanded data were found in the related resource$", () ->
+      LOG.info("TODO: this depends on either finding the appropriate navigation property for a given relationship, or having the Expanded resource type name."));
 
 
     /*
@@ -922,9 +896,8 @@ public class WebAPIServer_1_0_2 implements En {
       Integer fieldValue = Integer.parseInt(Settings.resolveParametersString(parameterFieldValue, getTestContainer().getSettings()));
       assertNotNull(fieldValue);
 
-      getTestContainer().getClientEntitySet().getEntities().forEach(entity -> {
-        assertTrue(compare((Integer) entity.getProperty(fieldName).getValue().asPrimitive().toValue(), op, fieldValue));
-      });
+      getTestContainer().getClientEntitySet().getEntities().forEach(entity ->
+        assertTrue(compare((Integer) entity.getProperty(fieldName).getValue().asPrimitive().toValue(), op, fieldValue)));
 
     });
 
@@ -1017,6 +990,7 @@ public class WebAPIServer_1_0_2 implements En {
       assertNotNull("ERROR: pathToRESOScript must be present in command arguments, see README", getTestContainer().getPathToRESOScript());
       LOG.info("Using RESOScript: " + getTestContainer().getPathToRESOScript());
     });
+
     And("^Client Settings and Parameters were read from the file$", () -> {
       if (getTestContainer().getSettings() == null) {
         getTestContainer().setSettings(Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript"))));
@@ -1025,9 +999,8 @@ public class WebAPIServer_1_0_2 implements En {
       LOG.info("RESOScript loaded successfully!");
     });
 
-    Given("^a test container was successfully created from the given RESOScript$", () -> {
-      getTestContainer().initialize();
-    });
+    Given("^a test container was successfully created from the given RESOScript$", ()
+      -> getTestContainer().initialize());
 
     /*
      * Ensures that the client either uses Authorization Codes or Client Credentials
