@@ -284,6 +284,9 @@ public final class TestUtils {
             case Operators.LESS_THAN_OR_EQUAL:
                 result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs < rhs);
                 break;
+            default:
+                LOG.debug("Unknown Operator: " + op);
+                break;
         }
         LOG.info("Compare: " + lhs + " " + op + " " + rhs + " ==> " + result);
         return result;
@@ -315,6 +318,9 @@ public final class TestUtils {
                 break;
             case Operators.TO_UPPER:
                 result = lhs != null && lhs.toUpperCase().contentEquals(rhs);
+                break;
+            default:
+                LOG.debug("Unknown Operator: " + op);
                 break;
         }
         LOG.info("Compare: \"" + lhs + "\" " + op + " \"" + rhs + "\" ==> " + result);
@@ -351,6 +357,9 @@ public final class TestUtils {
             case Operators.LESS_THAN_OR_EQUAL:
                 result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs.before(rhs));
                 break;
+            default:
+                LOG.debug("Unknown Operator: " + op);
+                break;
         }
         LOG.info("Compare: " + lhs + " " + op + " " + rhs + " ==> " + result);
         return result;
@@ -385,6 +394,9 @@ public final class TestUtils {
                 break;
             case Operators.LESS_THAN_OR_EQUAL:
                 result = Objects.equals(lhs, rhs) || lhs.toLocalTime().isBefore(rhs.toLocalTime()) || lhs.toLocalTime().equals(rhs.toLocalTime());
+                break;
+            default:
+                LOG.debug("Unknown Operator: " + op);
                 break;
         }
         LOG.info("Compare: " + lhs + " " + op + " " + rhs + " ==> " + result);
@@ -421,6 +433,9 @@ public final class TestUtils {
             case Operators.LESS_THAN_OR_EQUAL:
                 result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs.before(rhs));
                 break;
+            default:
+                LOG.debug("Unknown Operator: " + op);
+                break;
         }
         LOG.info("Compare: " + lhs + " " + op + " " + rhs + " ==> " + result);
         return result;
@@ -456,6 +471,9 @@ public final class TestUtils {
                 break;
             case Operators.LESS_THAN_OR_EQUAL:
                 result = Objects.equals(lhs, rhs) || (lhs != null && rhs != null && lhs < rhs);
+                break;
+            default:
+                LOG.debug("Unknown Operator: " + op);
                 break;
         }
         LOG.info("Compare: " + lhs + " " + op + " " + rhs + " ==> " + result);
