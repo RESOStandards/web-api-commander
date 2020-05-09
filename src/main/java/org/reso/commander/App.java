@@ -205,6 +205,7 @@ public class App {
       if (cmd.hasOption(APP_OPTIONS.ACTIONS.GET_METADATA)) {
         APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GET_METADATA);
 
+        //TODO: this isn't the metadata but the entity data model (edm), change to XML Metadata
         metadata = commander.prepareEdmMetadataRequest().execute().getBody();
         getMetadataReport(metadata);
 

@@ -41,6 +41,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
+import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
+
 /**
  * Most of the work done by the WebAPI commander is done by this class. Its public methods are, therefore,
  * the ones the Client programmer is expected to use.
@@ -102,15 +104,16 @@ public class Commander {
       XMLReader reader = parser.getXMLReader();
       reader.setErrorHandler(new SimpleErrorHandler());
       InputSource inputSource = new InputSource(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
-
+      inputSource.setEncoding(StandardCharsets.UTF_8.toString());
       reader.parse(inputSource);
       return true;
     } catch (SAXException saxEx) {
       if (saxEx.getMessage() != null) {
-        LOG.error(saxEx);
+        LOG.error(getDefaultErrorMessage(saxEx));
       }
     } catch (Exception ex) {
-      LOG.error(ex);
+      LOG.error(getDefaultErrorMessage("general error validating XML!"));
+      LOG.debug("Exception in validateXML: " + ex);
     }
     return false;
   }
@@ -153,8 +156,7 @@ public class Commander {
         JSON_FULL_METADATA = "JSON_FULL_METADATA",
         XML = "XML";
 
-    final ContentType DEFAULT_CONTENT_TYPE = ContentType.JSON;
-    ContentType type = DEFAULT_CONTENT_TYPE;
+    ContentType type = ContentType.JSON;
 
     if (contentType == null) {
       return type;
@@ -471,7 +473,8 @@ public class Commander {
       //require the XML Document to be valid XML before trying to validate it with the OData validator
       if (validateXML(xmlString)) {
         // deserialize metadata from given file
-        XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).toMetadata(new ByteArrayInputStream(xmlString.getBytes()));
+        XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML)
+                .toMetadata(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
         if (metadata != null) {
           return validateMetadata(metadata);
         } else {

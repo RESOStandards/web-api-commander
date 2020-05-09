@@ -10,6 +10,7 @@ plugins {
 mainClassName = 'org.reso.commander.Main'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+compileJava.options.encoding = 'UTF-8'
 
 repositories {
   // Use jcenter for resolving your dependencies.
@@ -47,7 +48,6 @@ dependencies {
   compile 'com.networknt:json-schema-validator:1.0.35'
 
   implementation 'org.mockito:mockito-core:3.3.3'
-
 }
 
 configurations {
