@@ -39,56 +39,56 @@ public class DataDictionary {
     } catch (Exception ex) {
       LOG.debug(fieldName + " is not contained in the given metadata.");
     }
-    assumeTrue(isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata.get());
   }
   
   @Then("{string} MUST be {string} data type")
   public void mustBeDataType(String fieldName, String dataTypeName) {
-    assumeTrue(isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata.get());
   }
 
   @And("{string} precision SHOULD be less than or equal to the RESO Suggested Max Length of {int}")
   public void precisionSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxLengthOf(String fieldName, Integer suggestedPrecision) {
-    assumeTrue(isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata.get());
   }
 
   @And("{string} scale SHOULD be less than or equal to the RESO Suggested Max Scale of {int}")
   public void scaleSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxScaleOf(String fieldName, Integer suggestedMaxScale) {
-    assumeTrue(isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata.get());
   }
 
   @And("{string} enum values exist in the metadata")
   public void enumValuesExistInTheMetadata(String lookupName) {
-    assumeTrue(isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata.get());
   }
 
   @And("{string} enum types MUST have exactly one member")
   public void enumTypesMUSTHaveExactlyOneMember(String lookupName) {
-    assumeTrue(isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata.get());
   }
 
   @And("{string} MUST only contain enum values found in the metadata")
   public void mustOnlyContainEnumValuesFoundInTheMetadata(String lookupName) {
-    assumeTrue(isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata.get());
   }
 
   @And("{string} length SHOULD be less than or equal to the RESO Suggested Max Length of {int}")
   public void lengthSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxLengthOf(String fieldName, Integer suggestedMaxLength) {
-    assumeTrue(isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata.get());
   }
 
   @And("{string} enum types MUST have at least one member")
   public void enumTypesMUSTHaveAtLeastOneMember(String lookupName) {
-    assumeTrue(isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata.get());
   }
 
   @And("{string} SHOULD have no more than the RESO Suggested Max Length of {int} item\\(s)")
   public void shouldHaveNoMoreThanTheRESOSuggestedMaxLengthOfItemS(String lookupName, Integer suggestedMaxItems) {
-    assumeTrue(isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata.get());
   }
 
   @And("{string} is not a synonym for another field")
   public void isNotASynonymForAnotherField(String fieldName) {
-    assumeTrue(isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata.get());
   }
 }
