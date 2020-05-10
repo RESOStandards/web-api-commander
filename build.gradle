@@ -132,8 +132,8 @@ task testWebApiServer_1_0_2_Platinum() {
   }
 }
 
-// task for Data Dictionary 1.5
-task testDataDictionary_1_5() {
+// task for Data Dictionary 1.7
+task testDataDictionary_1_7() {
   dependsOn jar
   doLast {
     javaexec {
@@ -145,42 +145,15 @@ task testDataDictionary_1_5() {
           '--plugin',
           'pretty',
           '--plugin',
-          'json:build/data-dictionary-1.5.json',
+          'json:build/data-dictionary-1.7.json',
           '--plugin',
-          'html:build/data-dictionary-1.5.html',
+          'html:build/data-dictionary-1.7.html',
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary',
+          'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0',
           '--tags',
           (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0
-              ? '@DD1.5 and ' + systemProperties.get('cucumber.filter.tags') : '@DD1.5')
-      ]
-    }
-  }
-}
-
-// task for Data Dictionary 1.6
-task testDataDictionary_1_6() {
-  dependsOn jar
-  doLast {
-    javaexec {
-      main = "io.cucumber.core.cli.Main"
-      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-      systemProperties = System.getProperties()
-      args = [
-          '--strict',
-          '--plugin',
-          'pretty',
-          '--plugin',
-          'json:build/data-dictionary-1.6.json',
-          '--plugin',
-          'html:build/data-dictionary-1.6.html',
-          '--glue',
-          'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary',
-          '--tags',
-          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0
-              ? '@DD1.6 and ' + systemProperties.get('cucumber.filter.tags') : '@DD1.6')
+              ? systemProperties.get('cucumber.filter.tags') : '')
       ]
     }
   }
@@ -192,7 +165,6 @@ test {
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
-      systemProperties = System.getProperties()
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       args = ['--strict',
               '--plugin',

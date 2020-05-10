@@ -96,25 +96,37 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
   private final AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
 
-  public Map<String, CsdlProperty> getFieldMap() throws Exception {
-    if (fieldMap.get() == null) {
-      fieldMap.set(new HashMap<>());
+  public Map<String, CsdlProperty> getFieldMap() {
+    try {
+      if (xmlMetadata.get() != null && edm.get() != null && fieldMap.get() == null) {
+        fieldMap.set(new HashMap<>());
 
-      LOG.info("Building Field Map...this may take a moment depending on size of metadata and connection speed.");
-      //build a map of all of the discovered fields on the server for the given resource by field name
-      //this can also be used to look up type information
-      TestUtils.findEntityTypesForEntityTypeName(getEdm(), getXMLMetadata(), getSettings().getParameters().getValue(Parameters.WELL_KNOWN.RESOURCE_NAME))
-          .forEach(csdlProperty -> fieldMap.get().put(csdlProperty.getName(), csdlProperty));
-      assertTrue("ERROR: No field were found in the server's metadata!", fieldMap.get().size() > 0);
-      LOG.info("Metadata Field Map created!");
+        LOG.info("Building Field Map...this may take a moment depending on size of metadata and connection speed.");
+        //build a map of all of the discovered fields on the server for the given resource by field name
+        //this can also be used to look up type information
+        TestUtils.findEntityTypesForEntityTypeName(getEdm(), getXMLMetadata(), getSettings().getParameters().getValue(Parameters.WELL_KNOWN.RESOURCE_NAME))
+            .forEach(csdlProperty -> fieldMap.get().put(csdlProperty.getName(), csdlProperty));
+        assertTrue("ERROR: No field were found in the server's metadata!", fieldMap.get().size() > 0);
+        LOG.info("Metadata Field Map created!");
+      }
+    } catch (Exception ex) {
+      LOG.error(getDefaultErrorMessage(ex));
     }
     return fieldMap.get();
   }
 
+  /**
+   * Gets XML Response data from the container
+   * @return the XML response data in the container
+   */
   public String getXMLResponseData() {
     return xmlResponseData.get();
   }
 
+  /**
+   * Sets XML Response data in the container
+   * @param xmlResponseData the response data to set
+   */
   public void setXMLResponseData(String xmlResponseData) {
     this.xmlResponseData.set(xmlResponseData);
   }
@@ -140,6 +152,10 @@ public final class WebAPITestContainer implements TestContainer {
     testAppliesToServerODataHeaderVersion.set(false);
   }
 
+
+  /**
+   * Initializes the container
+   */
   public void initialize() {
     setServiceRoot(getSettings().getClientSettings().get(ClientSettings.SERVICE_ROOT));
 
@@ -213,8 +229,8 @@ public final class WebAPITestContainer implements TestContainer {
    * @param fieldName the name of the field to retrieve metadata about
    * @return the metadata for the given field
    */
-  public CsdlProperty getCsdlForFieldName(String fieldName) throws Exception {
-    return getFieldMap().get(fieldName);
+  public CsdlProperty getCsdlForFieldName(String fieldName) {
+    return getFieldMap() != null ? getFieldMap().get(fieldName) : null;
   }
 
   /**
@@ -222,8 +238,8 @@ public final class WebAPITestContainer implements TestContainer {
    *
    * @return gets the local collection of Csdl Properties
    */
-  public Collection<CsdlProperty> getCsdlProperties() throws Exception {
-    return getFieldMap().values();
+  public Collection<CsdlProperty> getCsdlProperties() {
+    return getFieldMap() != null ? getFieldMap().values() : null;
   }
 
   /**
@@ -270,10 +286,10 @@ public final class WebAPITestContainer implements TestContainer {
   /**
    * Gets server metadata in Edm format.
    *
-   * @return
+   * @return the Entity Data Model contained in the container
    * @implNote the data in this item are cached in the test container once fetched
    */
-  public Edm getEdm() throws Exception {
+  public Edm getEdm() {
     if (edm.get() == null) {
       assertNotNull(getDefaultErrorMessage("no XML response data found, cannot return Edm!"), xmlResponseData.get());
       edm.set(Commander.deserializeEdm(xmlResponseData.get(), getCommander().getClient()));
@@ -321,66 +337,130 @@ public final class WebAPITestContainer implements TestContainer {
     return xmlMetadata.get();
   }
 
+  /**
+   * XML Metadata setter
+   * @param xmlMetadata the XML metadata to set
+   */
   public void setXMLMetadata(XMLMetadata xmlMetadata) {
     this.xmlMetadata.set(xmlMetadata);
   }
 
+  /**
+   * Commander getter
+   * @return the local Commander instance
+   */
   public Commander getCommander() {
     return commander.get();
   }
 
+  /**
+   * Commander setter
+   * @param commander the Commander to set
+   */
   public void setCommander(Commander commander) {
     this.commander.set(commander);
   }
 
+  /**
+   * OData response getter
+   * @return the local OData response
+   */
   public ODataRawResponse getODataRawResponse() {
     return oDataRawResponse.get();
   }
 
+  /**
+   * OData response setter
+   * @param oDataRawResponse the OData response to set
+   */
   public void setODataRawResponse(ODataRawResponse oDataRawResponse) {
     this.oDataRawResponse.set(oDataRawResponse);
   }
 
+  /**
+   * Request getter
+   * @return the local Request instance
+   */
   public Request getRequest() {
     return request.get();
   }
 
+  /**
+   * Request setter
+   * @param request the Request to set
+   */
   public void setRequest(Request request) {
     this.request.set(request);
   }
 
+  /**
+   * Request setter
+   * @param requestId the Request Id of the Request
+   */
   public void setRequest(String requestId) {
     setRequest(getSettings().getRequest(requestId));
   }
 
+  /**
+   * Request URI getter
+   * @return the URI of the current request
+   */
   public URI getRequestUri() {
     return requestUri.get();
   }
 
+  /**
+   * Request URI setter
+   * @param requestUri the URI of the current request
+   */
   public void setRequestUri(URI requestUri) {
     this.requestUri.set(requestUri);
   }
 
+  /**
+   * Response code getter
+   * @return the Response code of the last request
+   */
   public Integer getResponseCode() {
     return responseCode.get();
   }
 
+  /**
+   * Response code setter
+   * @param responseCode the response code to set
+   */
   public void setResponseCode(Integer responseCode) {
     this.responseCode.set(responseCode);
   }
 
+  /**
+   * Response Data getter
+   * @return the local response data
+   */
   public String getResponseData() {
     return responseData.get();
   }
 
+  /**
+   * Response code setter
+   * @param responseData the response data to set
+   */
   public void setResponseData(String responseData) {
     this.responseData.set(responseData);
   }
 
+  /**
+   * Initial response data getter
+   * @return the local response data
+   */
   public String getInitialResponseData() {
     return initialResponseData.get();
   }
 
+  /**
+   * Initial response data setter
+   * @param initialResponseData the response data to set
+   */
   public void setInitialResponseData(String initialResponseData) {
     this.initialResponseData.set(initialResponseData);
   }
@@ -415,14 +495,6 @@ public final class WebAPITestContainer implements TestContainer {
 
   public void setServerODataHeaderVersion(String serverODataHeaderVersion) {
     this.serverODataHeaderVersion.set(serverODataHeaderVersion);
-  }
-
-  public Boolean getTestAppliesToServerODataHeaderVersion() {
-    return testAppliesToServerODataHeaderVersion.get();
-  }
-
-  public void setTestAppliesToServerODataHeaderVersion(Boolean testAppliesToServerODataHeaderVersion) {
-    this.testAppliesToServerODataHeaderVersion.set(testAppliesToServerODataHeaderVersion);
   }
 
   public ODataEntitySetRequest<ClientEntitySet> getClientEntitySetRequest() {
@@ -481,10 +553,6 @@ public final class WebAPITestContainer implements TestContainer {
     this.clientSecret.set(clientSecret);
   }
 
-  public String getAuthorizationUri() {
-    return authorizationUri.get();
-  }
-
   public void setAuthorizationUri(String authorizationUri) {
     this.authorizationUri.set(authorizationUri);
   }
@@ -495,10 +563,6 @@ public final class WebAPITestContainer implements TestContainer {
 
   public void setTokenUri(String tokenUri) {
     this.tokenUri.set(tokenUri);
-  }
-
-  public String getRedirectUri() {
-    return redirectUri.get();
   }
 
   public void setRedirectUri(String redirectUri) {

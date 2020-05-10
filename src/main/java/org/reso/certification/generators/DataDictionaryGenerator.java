@@ -12,12 +12,10 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_RESOURCE;
+
 public class DataDictionaryGenerator {
   private static final Logger LOG = LogManager.getLogger(DataDictionaryGenerator.class);
-
-  //TODO: make this a dynamic property based on DD version
-  public static final String REFERENCE_RESOURCE = "RESO.Dictionary.Final.v.1.7.0.20190124T0000.xlsx";
-
   WorksheetProcessor processor = null;
   Workbook workbook = null;
 
@@ -52,8 +50,6 @@ public class DataDictionaryGenerator {
   }
 
   private static final class DDReferenceMetadata {
-    public static final String version = "1.7.0";
-
     public static final class WellKnownResources {
       public static final String
           PROPERTY = "Property",
