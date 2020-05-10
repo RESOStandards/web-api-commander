@@ -97,7 +97,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return
         "\n  @" + row.getStandardName() + SINGLE_SPACE +
             Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
-          "Scenario: " + row.getStandardName() + "\n" +
+          "  Scenario: " + row.getStandardName() + "\n" +
           "    Given \"" + row.getStandardName() + "\" exists in the metadata\n" +
           "    And \"" + row.getStandardName() + "\" is not a synonym for another field\n" +
           "    Then \"" + row.getStandardName() + "\" MUST be \"Boolean\" data type\n";
