@@ -15,7 +15,7 @@ Feature: Web API Server 1.0.2 Certification
   #######################################
   @REQ-WA103-END3 @core @2.4.1 @core-endorsement @metadata
   Scenario: REQ-WA103-END3 - Request and Validate Server Metadata
-    When XML Metadata are requested from the service root in "ClientSettings_WebAPIURI"
+    When XML Metadata are requested from the given service root
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the XML Metadata response is valid XML

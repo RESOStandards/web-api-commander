@@ -67,7 +67,6 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicReference<String> redirectUri = new AtomicReference<>();
   private final AtomicReference<String> scope = new AtomicReference<>();
   private final AtomicReference<String> pathToRESOScript = new AtomicReference<>();
-  private final AtomicReference<Map<String, CsdlProperty>> fieldMap = new AtomicReference<>();
   private final AtomicReference<String> xmlResponseData = new AtomicReference<>();
   private final AtomicBoolean showResponses = new AtomicBoolean(false);
 
@@ -95,6 +94,9 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicReference<ODataEntitySetRequest<ClientEntitySet>> clientEntitySetRequest = new AtomicReference<>();
   private final AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
   private final AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
+
+  //singleton variables
+  private static final AtomicReference<Map<String, CsdlProperty>> fieldMap = new AtomicReference<>();
 
   public Map<String, CsdlProperty> getFieldMap() {
     try {

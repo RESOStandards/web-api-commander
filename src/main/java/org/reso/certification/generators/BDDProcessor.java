@@ -88,8 +88,7 @@ public class BDDProcessor extends WorksheetProcessor {
         "    And Client Settings and Parameters were read from the file\n" +
         "    And a test container was successfully created from the given RESOScript\n" +
         "    And the test container uses an Authorization Code or Client Credentials for authentication\n" +
-        "    And metadata were retrieved from the server\n" +
-        "    And metadata are valid\n";
+        "    And valid metadata were retrieved from the server\n";
     }
 
     public static String buildBooleanTest(DataDictionaryRow row, String... tags) {

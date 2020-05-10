@@ -39,13 +39,11 @@ import static org.junit.Assert.*;
 import static org.reso.certification.containers.WebAPITestContainer.*;
 import static org.reso.certification.containers.WebAPITestContainer.ODATA_QUERY_PARAMS.SKIP;
 import static org.reso.commander.Commander.*;
-import static org.reso.commander.Commander.REPORT_DIVIDER;
 import static org.reso.commander.common.ErrorMsg.getAssertResponseCodeErrorMessage;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
-import static org.reso.commander.common.TestUtils.*;
 import static org.reso.commander.common.TestUtils.DateParts.FRACTIONAL;
+import static org.reso.commander.common.TestUtils.*;
 import static org.reso.commander.common.TestUtils.Operators.*;
-import static org.reso.commander.common.TestUtils.Operators.GREATER_THAN_OR_EQUAL;
 
 public class WebAPIServer_1_0_2 {
   private static final Logger LOG = LogManager.getLogger(WebAPIServer_1_0_2.class);
@@ -55,28 +53,58 @@ public class WebAPIServer_1_0_2 {
 
   /**
    * XML Metadata Getter
-   * @param clientSettingsServiceRoot the service root to get metadata from
    */
-  @When("XML Metadata are requested from the service root in {string}")
-  public void xmlMetadataAreRequestedFromTheServiceRootIn(String clientSettingsServiceRoot) {
-    assertNotNull(container);
-    assertNotNull("Commander is null!", container.getCommander());
+  @When("XML Metadata are requested from the given service root")
+  public void xmlMetadataAreRequestedFromTheGivenServiceRoot() {
+    TestUtils.assertXMLMetadataAreRequestedFromTheServer(container);
+  }
 
-    final String serviceRoot = Settings.resolveParametersString(clientSettingsServiceRoot, container.getSettings());
-    assertEquals(getDefaultErrorMessage("given service root doesn't match the one configured in the Commander"),
-        serviceRoot,
-        container.getCommander().getServiceRoot());
+  /**
+   * XML Validation Wrapper
+   */
+  @And("the XML Metadata response is valid XML")
+  public void theXMLMetadataResponseIsValidXML() {
+    TestUtils.assertXMLResponseIsValidXML(container);
+  }
 
-    try {
-      assertNotNull(getDefaultErrorMessage("could not find valid XML Metadata for given service root:", serviceRoot),
-          container.getXMLMetadata());
+  /**
+   * Gets XML Metadata from the server and validates them
+   */
+  @And("the XML Metadata returned by the server are valid")
+  public void theXMLMetadataReturnedByTheServerAreValid() {
+    TestUtils.assertValidXMLMetadata(container);
+  }
 
-    } catch (ODataClientErrorException cex) {
-      container.setResponseCode(cex.getStatusLine().getStatusCode());
-      fail(getDefaultErrorMessage(cex));
-    } catch (Exception ex) {
-      fail(getDefaultErrorMessage(ex));
-    }
+  /**
+   * Checks that the given XML Metadata (EDMX) contain an Entity Data Model (Edm)
+   */
+  @And("the XML Metadata returned by the server contains Edm metadata")
+  public void theXMLMetadataReturnedByTheServerContainsEdmMetadata() {
+    TestUtils.assertXmlMetadataContainsEdm(container);
+  }
+
+  /**
+   * Entity Data Model (Edm) validator
+   */
+  @And("the Edm metadata returned by the server are valid")
+  public void theEdmMetadataReturnedByTheServerAreValid() {
+    TestUtils.assertValidEdm(container);
+  }
+
+  /**
+   * Finds default Edm entity container at the given Service Root
+   */
+  @And("the metadata contains a valid service document")
+  public void theMetadataContainsAValidServiceDocument() {
+    TestUtils.assertXMLMetadataHasValidServiceDocument(container);
+  }
+
+  /**
+   * Allows metadata-dependent tests to be run individually
+   */
+  @Given("valid metadata have been retrieved")
+  public void validMetadataHaveBeenRetrieved() {
+    TestUtils.assertValidMetadataHaveBeenRetrieved(container);
   }
 
   /**
@@ -139,67 +167,6 @@ public class WebAPIServer_1_0_2 {
     assertTrue("ERROR: the 'OData-Version' response header must either be '" + val1 + "' or '" + val2 + "' (without quotes).",
         container.getServerODataHeaderVersion().contentEquals(val1)
             || container.getServerODataHeaderVersion().contentEquals(val2));
-  }
-
-  /**
-   * XML Validation Wrapper
-   */
-  @And("the XML Metadata response is valid XML")
-  public void theXMLMetadataResponseIsValidXML() {
-    assertNotNull(getDefaultErrorMessage("no XML Response data were found!"), container.getXMLResponseData());
-    container.validateXMLMetadataXML();
-    assertTrue("ERROR: invalid XML response!", container.getIsValidXMLMetadataXML());
-  }
-
-  /**
-   * Gets XML Metadata from the server and validates them
-   * @throws Exception if the metadata cannot be fetched and validated
-   */
-  @And("the XML Metadata returned by the server are valid")
-  public void theXMLMetadataReturnedByTheServerAreValid() throws Exception {
-    if (!container.getHaveMetadataBeenRequested()) {
-      //will lazy-load metadata from the server if not yet requested
-      container.getXMLMetadata();
-    }
-    container.validateMetadata();
-    assertTrue("XML Metadata at the given service root is not valid! " + container.getServiceRoot(),
-        container.getIsValidXMLMetadata());
-  }
-
-  /**
-   * Checks that the given XML Metadata (EDMX) contain an Entity Data Model (Edm)
-   * @throws Exception if the given XML Metadata could not be processed
-   */
-  @And("the XML Metadata returned by the server contains Edm metadata")
-  public void theXMLMetadataReturnedByTheServerContainsEdmMetadata() throws Exception {
-    container.setEdm(Commander.deserializeEdm(container.getXMLResponseData(), container.getCommander().getClient()));
-    assertNotNull(getDefaultErrorMessage("Edm de-serialized to an empty object!"), container.getEdm());
-  }
-
-  /**
-   * Entity Data Model (Edm) validator
-   */
-  @And("the Edm metadata returned by the server are valid")
-  public void theEdmMetadataReturnedByTheServerAreValid() {
-    assertTrue("Edm Metadata at the given service root is not valid! " + container.getServiceRoot(),
-        container.getIsValidEdm());
-  }
-
-  /**
-   * Finds default Edm entity container at the given Service Root
-   */
-  @And("the metadata contains a valid service document")
-  public void theMetadataContainsAValidServiceDocument() {
-    try {
-      assertNotNull("ERROR: could not find default entity container for given service root: " +
-          container.getServiceRoot(), container.getEdm().getEntityContainer());
-      LOG.info("Found Default Entity Container: '" + container.getEdm().getEntityContainer().getNamespace() + "'");
-    } catch (ODataClientErrorException cex) {
-      container.setResponseCode(cex.getStatusLine().getStatusCode());
-      fail(cex.toString());
-    } catch (Exception ex) {
-      fail(getDefaultErrorMessage(ex));
-    }
   }
 
   /**
@@ -271,21 +238,6 @@ public class WebAPIServer_1_0_2 {
         found.get());
 
     LOG.info("Standard Resource Names requirement met!");
-  }
-
-  /**
-   * Allows metadata-dependent tests to be run individually
-   * @throws Exception if the metadata cannot be retrieved and validated
-   */
-  @Given("valid metadata have been retrieved")
-  public void validMetadataHaveBeenRetrieved() throws Exception {
-    //NOTE: this is here so that tests may be run individually
-    if (!container.getHaveMetadataBeenRequested()) {
-      container.getXMLMetadata();
-      container.validateMetadata();
-    }
-    assertTrue(getDefaultErrorMessage("Valid metadata could not be retrieved from the server! Please check the log for more information."),
-        container.hasValidMetadata());
   }
 
   /**

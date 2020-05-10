@@ -4,12 +4,16 @@ import com.google.inject.Inject;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reso.certification.containers.WebAPITestContainer;
+import org.reso.commander.common.TestUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeTrue;
 
 public class DataDictionary {
@@ -19,26 +23,39 @@ public class DataDictionary {
   //TODO: make this a dynamic property based on DD version
   public static final String REFERENCE_RESOURCE = "RESO.Dictionary.Final.v.1.7.0.20190124T0000.xlsx";
 
-  AtomicBoolean isFieldContainedInMetadata = new AtomicBoolean(false);
+  static final AtomicBoolean isFieldContainedInMetadata = new AtomicBoolean(false);
+  static final AtomicBoolean shouldValidateMetadata = new AtomicBoolean(true);
 
   @Inject
   WebAPITestContainer container;
 
-  @And("metadata were retrieved from the server")
-  public void metadataWereRetrievedFromTheServer() {
-  }
+  @And("valid metadata were retrieved from the server")
+  public void validMetadataWereRetrievedFromTheServer() {
 
-  @And("metadata are valid")
-  public void metadataAreValid() {
+    if (shouldValidateMetadata.get()) {
+      //request metadata from server using service root in RESOScript file
+      TestUtils.assertXMLMetadataAreRequestedFromTheServer(container);
+
+      //ensure request succeeded
+      assertEquals(container.getResponseCode().intValue(), HttpStatus.SC_OK);
+
+      //metadata validation tests
+      TestUtils.assertValidXMLMetadata(container);
+      TestUtils.assertXmlMetadataContainsEdm(container);
+      TestUtils.assertXMLMetadataHasValidServiceDocument(container);
+
+      //build field map and ensure it's not null
+      assertNotNull(container.getFieldMap());
+
+      //everything succeeded, mark validation successful
+      shouldValidateMetadata.set(false);
+    }
   }
 
   @Given("{string} exists in the metadata")
   public void existsInTheMetadata(String fieldName) {
-    try {
-      isFieldContainedInMetadata.set(container.getFieldMap().containsKey(fieldName));
-    } catch (Exception ex) {
-      LOG.debug(fieldName + " is not contained in the given metadata.");
-    }
+    isFieldContainedInMetadata.set(container.getFieldMap().containsKey(fieldName));
+    if (isFieldContainedInMetadata.get()) LOG.info("Found: " + fieldName);
     assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata.get());
   }
   
