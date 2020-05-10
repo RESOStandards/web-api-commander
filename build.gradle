@@ -20,6 +20,7 @@ repositories {
 
 dependencies {
   compile 'com.google.guava:guava:28.2-jre'
+  compile 'com.google.inject:guice:4.0'
 
   compile 'commons-cli:commons-cli:1.4'
 
@@ -41,7 +42,10 @@ dependencies {
   compile 'io.rest-assured:json-schema-validator:4.2.0'
 
   compile 'io.cucumber:cucumber-java8:5.4.0'
+  compile 'io.cucumber:cucumber-java:5.4.0'
   compile 'io.cucumber:cucumber-junit:5.4.0'
+  compile 'io.cucumber:cucumber-guice:5.4.0'
+  compile 'io.cucumber:cucumber-core:5.4.0'
 
   compile 'net.masterthought:cucumber-reporting:5.1.1'
 

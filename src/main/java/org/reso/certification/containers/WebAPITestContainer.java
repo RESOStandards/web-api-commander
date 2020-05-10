@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.ValidationMessage;
+import io.cucumber.guice.ScenarioScoped;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,6 +44,7 @@ import static org.reso.commander.common.TestUtils.JSON_VALUE_PATH;
 /**
  * Encapsulates Commander Requests and Responses during runtime
  */
+@ScenarioScoped
 public final class WebAPITestContainer implements TestContainer {
   public static final String FIELD_SEPARATOR = ",";
   public static final String EMPTY_STRING = "";
@@ -74,7 +76,6 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicBoolean isValidEdm = new AtomicBoolean(false);
   private final AtomicBoolean isValidXMLMetadataXML = new AtomicBoolean(false);
   private final AtomicBoolean haveMetadataBeenRequested = new AtomicBoolean(false);
-  private final AtomicBoolean haveEdmMetadataBeenRetrieved = new AtomicBoolean(false);
   private final AtomicBoolean isDataSystemValid = new AtomicBoolean(false);
   private final AtomicReference<Set<ValidationMessage>> schemaValidationErrors = new AtomicReference<>();
 
