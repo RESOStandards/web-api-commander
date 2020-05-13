@@ -44,7 +44,7 @@
   ############################################################-->
 
   <!-- The current version of this RESOScript -->
-  <RESOScriptVersion>2.0.2</RESOScriptVersion>
+  <RESOScriptVersion>2.0.3</RESOScriptVersion>
 
 
   <!--
@@ -279,7 +279,7 @@
     <Request
       RequestId="REQ-WA103-QR1"
       OutputFile="REQ-WA103-QR1.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*(*Parameter_KeyOrKeyNumericValue*)?$select=*Parameter_KeyOrKeyNumericField*,*Parameter_KeyOrKeyNumericField*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*(*Parameter_KeyOrKeyNumericValue*)?$select=*Parameter_KeyOrKeyNumericField*"
     />
 
     <Request
@@ -405,19 +405,19 @@
     <Request
       RequestId="REQ-WA103-QM7"
       OutputFile="REQ-WA103-QM7.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_KeyOrKeyNumericField*,*Parameter_SingleValueLookupField*&amp;$filter=*Parameter_SingleValueLookupField* has *Parameter_SingleValueLookupValue**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_SingleValueLookupField*&amp;$filter=*Parameter_SingleValueLookupField* has *Parameter_SingleValueLookupValue**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QM8"
       OutputFile="REQ-WA103-QM8.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_KeyOrKeyNumericField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1**Parameter_RequiredParameters*"
     />
 
     <Request
       RequestId="REQ-WA103-QM8.2"
       OutputFile="REQ-WA103-QM8.2.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_KeyOrKeyNumericField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1* and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue2**Parameter_RequiredParameters*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1* and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue2**Parameter_RequiredParameters*"
     />
 
     <Request
@@ -513,19 +513,19 @@
     <Request
       RequestId="REQ-WA103-QO29.1"
       OutputFile="REQ-WA103-QO29.1.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_KeyOrKeyNumericField*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*"
     />
 
     <Request
       RequestId="REQ-WA103-QO29.2"
       OutputFile="REQ-WA103-QO29.2.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_KeyOrKeyNumericField*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*&amp;$filter=PhotosCount gt 0"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField*&amp;$filter=PhotosCount gt 0"
     />
 
     <Request
       RequestId="REQ-WA103-QO29.3"
       OutputFile="REQ-WA103-QO29.3.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_KeyOrKeyNumericField*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField**Parameter_RequiredParametersFilter*"
+      Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyOrKeyNumericField*,*Parameter_ExpandField*&amp;$expand=*Parameter_ExpandField**Parameter_RequiredParametersFilter*"
     />
 
     <Request

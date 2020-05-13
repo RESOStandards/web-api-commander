@@ -22,6 +22,7 @@ import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.commander.Commander;
+import org.reso.commander.common.DataDictionaryMetadata;
 import org.reso.commander.common.TestUtils;
 import org.reso.models.ClientSettings;
 import org.reso.models.Parameters;
@@ -96,64 +97,7 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
 
   //singleton variables
-  private static final AtomicReference<Map<String, CsdlProperty>> fieldMap = new AtomicReference<>();
-
-  public Map<String, CsdlProperty> getFieldMap() {
-    try {
-      if (xmlMetadata.get() != null && edm.get() != null && fieldMap.get() == null) {
-        fieldMap.set(new HashMap<>());
-
-        LOG.info("Building Field Map...this may take a moment depending on size of metadata and connection speed.");
-        //build a map of all of the discovered fields on the server for the given resource by field name
-        //this can also be used to look up type information
-        TestUtils.findEntityTypesForEntityTypeName(getEdm(), getXMLMetadata(), getSettings().getParameters().getValue(Parameters.WELL_KNOWN.RESOURCE_NAME))
-            .forEach(csdlProperty -> fieldMap.get().put(csdlProperty.getName(), csdlProperty));
-        assertTrue("ERROR: No field were found in the server's metadata!", fieldMap.get().size() > 0);
-        LOG.info("Metadata Field Map created!");
-      }
-    } catch (Exception ex) {
-      LOG.error(getDefaultErrorMessage(ex));
-    }
-    return fieldMap.get();
-  }
-
-  /**
-   * Gets XML Response data from the container
-   * @return the XML response data in the container
-   */
-  public String getXMLResponseData() {
-    return xmlResponseData.get();
-  }
-
-  /**
-   * Sets XML Response data in the container
-   * @param xmlResponseData the response data to set
-   */
-  public void setXMLResponseData(String xmlResponseData) {
-    this.xmlResponseData.set(xmlResponseData);
-  }
-
-  /**
-   * Resets the state of the test container
-   */
-  public void resetState() {
-    clientEntitySetRequest.set(null);
-    clientEntitySetResponse.set(null);
-    clientEntitySet.set(null);
-    oDataRawResponse.set(null);
-    request.set(null);
-    requestUri.set(null);
-    responseCode.set(null);
-    responseData.set(null);
-    initialResponseData.set(null);
-    rawRequest.set(null);
-    oDataClientErrorException.set(null);
-    oDataServerErrorException.set(null);
-    serverODataHeaderVersion.set(null);
-    selectList.set(null);
-    testAppliesToServerODataHeaderVersion.set(false);
-  }
-
+  private static final AtomicReference<Map<String, Map<String, CsdlProperty>>> fieldMap = new AtomicReference<>();
 
   /**
    * Initializes the container
@@ -191,6 +135,97 @@ public final class WebAPITestContainer implements TestContainer {
   }
 
   /**
+   * Resets the state of the test container
+   */
+  public void resetState() {
+    clientEntitySetRequest.set(null);
+    clientEntitySetResponse.set(null);
+    clientEntitySet.set(null);
+    oDataRawResponse.set(null);
+    request.set(null);
+    requestUri.set(null);
+    responseCode.set(null);
+    responseData.set(null);
+    initialResponseData.set(null);
+    rawRequest.set(null);
+    oDataClientErrorException.set(null);
+    oDataServerErrorException.set(null);
+    serverODataHeaderVersion.set(null);
+    selectList.set(null);
+    testAppliesToServerODataHeaderVersion.set(false);
+  }
+
+  /**
+   * Gets the field map from the well-known resource name passed in the given RESOScript
+   * @return a map of all Csdl properties keyed by field name.
+   */
+  public Map<String, Map<String, CsdlProperty>> getFieldMap() {
+    if (fieldMap.get() == null) buildFieldMap();
+    return fieldMap.get();
+  }
+
+  /**
+   * Returns a field map for the given Entity Type (Resource) name
+   * @param entityTypeName the name of the entity type to search for
+   * @return a field map, possibly empty, containing any fields that were found for the given resource
+   */
+  public Map<String, CsdlProperty> getFieldMap(String entityTypeName) {
+    return getFieldMap().get(entityTypeName);
+  }
+
+  /**
+   * Creates a metadata field map for the given resource name and each set of fields found for that resource, if present
+   */
+  private void buildFieldMap() {
+    try {
+      fieldMap.set(new HashMap<>());
+
+      LOG.info("Building Field Map...");
+
+      assertNotNull(getDefaultErrorMessage("no XML Metadata found in the container!"), getXMLMetadata());
+      assertNotNull(getDefaultErrorMessage("no Entity Data Model (edm) found in the container!"), getEdm());
+
+      XMLMetadata xmlMetadata = getXMLMetadata();
+      Edm edm = getEdm();
+
+      //build a map of all of the discovered fields on the server for the given resource by field name
+      //TODO: add multiple Data Dictionary version support
+      DataDictionaryMetadata.v1_7.WELL_KNOWN_RESOURCES.forEach(resourceName -> {
+        List<CsdlProperty> csdlProperties = TestUtils.findEntityTypesForEntityTypeName(edm, xmlMetadata, resourceName);
+
+        if (csdlProperties != null) {
+          LOG.info("Found '" + resourceName + "' resource");
+          csdlProperties.forEach(csdlProperty -> {
+            if (!fieldMap.get().containsKey(resourceName)) fieldMap.get().put(resourceName, new HashMap<>());
+            fieldMap.get().get(resourceName).put(csdlProperty.getName(), csdlProperty);
+          });
+        }
+      });
+      assertTrue("ERROR: No field were found in the server's metadata!", fieldMap.get().size() > 0);
+      LOG.info("Metadata Field Map created!");
+
+    } catch (Exception ex) {
+      LOG.error(getDefaultErrorMessage(ex));
+    }
+  }
+
+  /**
+   * Gets XML Response data from the container
+   * @return the XML response data in the container
+   */
+  public String getXMLResponseData() {
+    return xmlResponseData.get();
+  }
+
+  /**
+   * Sets XML Response data in the container
+   * @param xmlResponseData the response data to set
+   */
+  public void setXMLResponseData(String xmlResponseData) {
+    this.xmlResponseData.set(xmlResponseData);
+  }
+
+  /**
    * If the server is using a DataSystem endpoint that's not rooted at the Service Root, the EDM client
    * will fail the request. Cannot use the Edm client for those that do.
    *
@@ -201,8 +236,8 @@ public final class WebAPITestContainer implements TestContainer {
     String dataSystemEndpoint = getSettings().getParameters().getValue(Parameters.WELL_KNOWN.DATASYSTEM_ENDPOINT),
         serviceRoot = getSettings().getClientSettings().get(ClientSettings.SERVICE_ROOT);
 
-    assertNotNull("ERROR: " + Parameters.WELL_KNOWN.DATASYSTEM_ENDPOINT + " cannot be null!", dataSystemEndpoint);
-    assertNotNull("ERROR: " + ClientSettings.SERVICE_ROOT + " cannot be null!", serviceRoot);
+    assertNotNull(getDefaultErrorMessage(Parameters.WELL_KNOWN.DATASYSTEM_ENDPOINT, "cannot be null!"), dataSystemEndpoint);
+    assertNotNull(getDefaultErrorMessage(ClientSettings.SERVICE_ROOT, "cannot be null!"), serviceRoot);
 
     return dataSystemEndpoint.startsWith(serviceRoot);
   }
@@ -231,17 +266,9 @@ public final class WebAPITestContainer implements TestContainer {
    * @param fieldName the name of the field to retrieve metadata about
    * @return the metadata for the given field
    */
-  public CsdlProperty getCsdlForFieldName(String fieldName) {
-    return getFieldMap() != null ? getFieldMap().get(fieldName) : null;
-  }
-
-  /**
-   * Csdl property getter
-   *
-   * @return gets the local collection of Csdl Properties
-   */
-  public Collection<CsdlProperty> getCsdlProperties() {
-    return getFieldMap() != null ? getFieldMap().values() : null;
+  public CsdlProperty getCsdlProperty(String resourceName, String fieldName) {
+    return getFieldMap() != null && getFieldMap().containsKey(resourceName)
+        ? getFieldMap().get(resourceName).get(fieldName) : null;
   }
 
   /**

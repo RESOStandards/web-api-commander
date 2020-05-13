@@ -4,6 +4,7 @@ import java.util.List;
 
 public class DataDictionaryRow {
   private String standardName;
+  private String parentResourceName;
   private String definition;
   private List<String> groups;
   private String simpleDataType;
@@ -31,12 +32,16 @@ public class DataDictionaryRow {
   private DataDictionaryRow() {
     //use Builder instead
   }
-
   public static class Builder {
     DataDictionaryRow dataDictionaryRow = new DataDictionaryRow();
 
     public Builder setStandardName(String standardName) {
       dataDictionaryRow.setStandardName(standardName);
+      return this;
+    }
+
+    public Builder setParentResourceName(String parentResourceName) {
+      dataDictionaryRow.setParentResourceName(parentResourceName);
       return this;
     }
 
@@ -200,6 +205,15 @@ public class DataDictionaryRow {
   public void setStandardName(String standardName) {
     this.standardName = sanitizeSimpleName(standardName);
   }
+
+  public String getParentResourceName() {
+    return parentResourceName;
+  }
+
+  public void setParentResourceName(String parentResourceName) {
+    this.parentResourceName = parentResourceName;
+  }
+
 
   public String getDefinition() {
     return definition;

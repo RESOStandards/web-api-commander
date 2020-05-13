@@ -3,9 +3,8 @@ package org.reso.certification.generators;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.reso.commander.common.Utils;
 import org.reso.models.DataDictionaryRow;
-
-import static org.reso.certification.generators.DataDictionaryGenerator.createFile;
 
 public class EDMXProcessor extends WorksheetProcessor {
   private static final Logger LOG = LogManager.getLogger(EDMXProcessor.class);
@@ -80,7 +79,7 @@ public class EDMXProcessor extends WorksheetProcessor {
     StringBuilder entityContainerTag = new StringBuilder();
     entityContainerTag.append("      <EntityContainer>\n");
     resourceTemplates.forEach((name, templateContent) ->
-      entityContainerTag.append("        <EntitySet Name=\"" + name + "\" EntityType=\"" + name + "\" />\n"));
+        entityContainerTag.append("        <EntitySet Name=\"").append(name).append("\" EntityType=\"").append(name).append("\" />\n"));
     entityContainerTag.append("      </EntityContainer>\n");
 
     StringBuilder content = new StringBuilder();
@@ -89,7 +88,7 @@ public class EDMXProcessor extends WorksheetProcessor {
     content.append(entityContainerTag.toString());
     content.append(closingTag);
 
-    createFile(getDirectoryName(), getReferenceResource().replace(".xlsx", ".edmx"), content.toString());
+    Utils.createFile(getDirectoryName(), getReferenceResource().replace(".xlsx", ".edmx"), content.toString());
   }
 
   public static final class EDMXTemplates {

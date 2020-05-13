@@ -16,12 +16,13 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.junit.Assert.assertTrue;
 import static org.reso.certification.generators.WorksheetProcessor.WELL_KNOWN_COLUMN_INDICES.*;
 import static org.reso.certification.generators.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.*;
-import static org.reso.certification.generators.WorksheetProcessor.WELL_KNOWN_HEADER_NAMES.*;
 import static org.reso.certification.generators.WorksheetProcessor.WELL_KNOWN_HEADER_NAMES.COLLECTION;
-import static org.reso.certification.generators.WorksheetProcessor.WELL_KNOWN_HEADER_NAMES.WIKI_PAGE_ID;
+import static org.reso.certification.generators.WorksheetProcessor.WELL_KNOWN_HEADER_NAMES.*;
 import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_RESOURCE;
+import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public abstract class WorksheetProcessor {
   private static final Logger LOG = LogManager.getLogger(WorksheetProcessor.class);
@@ -29,6 +30,7 @@ public abstract class WorksheetProcessor {
   String referenceResource = null;
   StringBuffer markup;
   DataDictionaryRow dictionaryRow;
+  Sheet sheet;
   String startTimestamp;
   Map<String, String> resourceTemplates = new LinkedHashMap<>();
   Map<String, Set<String>> lookups = new LinkedHashMap<>();
@@ -163,7 +165,11 @@ public abstract class WorksheetProcessor {
   abstract void generateOutput();
 
   void processRow(Row row) {
+    assertTrue(getDefaultErrorMessage("sheet name was null but was expected to contain a resource name!"),
+        sheet != null && sheet.getSheetName() != null);
+
     dictionaryRow = extractDataDictionaryRow(row);
+    dictionaryRow.setParentResourceName(sheet.getSheetName());
 
     //now that row has been processed, extract field type and assemble the template
     switch (dictionaryRow.getSimpleDataType()) {

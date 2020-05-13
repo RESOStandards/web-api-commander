@@ -1,10 +1,18 @@
 package org.reso.commander.common;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Utils {
+  private static final Logger LOG = LogManager.getLogger(Utils.class);
+
   /**
    * Gets a formatted date string for the given date.
    *
@@ -16,7 +24,34 @@ public class Utils {
     return df.format(date);
   }
 
+  /**
+   * Gets the current timestamp
+   * @return the current timestamp returned as a string
+   */
   public static String getTimestamp() {
     return getTimestamp(new Date());
+  }
+
+  /**
+   * Creates a file in the given directory with the given content
+   * @param directoryName the directory name to create the file in
+   * @param fileName the name of the file to create
+   * @param content the content to write to the file
+   */
+  public static void createFile(String directoryName, String fileName, String content) {
+    if (directoryName == null || fileName == null) return;
+    String outputPath = System.getProperty("user.dir") + File.separator + directoryName;
+    File baseDirectory = new File(outputPath);
+    FileWriter writer = null;
+    try {
+      if (!baseDirectory.exists()) {
+        if (!baseDirectory.mkdirs()) throw new Exception("ERROR: could not create directory: " + baseDirectory);
+      }
+      writer = new FileWriter(new File(outputPath + File.separator + fileName));
+      writer.write(new String(content.getBytes(StandardCharsets.UTF_8)));
+      writer.flush();
+    } catch (Exception ex) {
+      LOG.error("Filename: " + fileName + ". Could not create file: " + ex);
+    }
   }
 }

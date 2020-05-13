@@ -22,6 +22,7 @@ import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.Commander;
 import org.reso.commander.common.TestUtils;
+import org.reso.models.Parameters;
 import org.reso.models.Request;
 import org.reso.models.Settings;
 
@@ -341,7 +342,8 @@ public class WebAPIServer_1_0_2 {
         //need to skip the expand field when looking through the metadata
         if (container.getExpandField() == null || !fieldName.contentEquals(container.getExpandField())) {
           try {
-            assertNotNull("ERROR: Field name '" + fieldName + "' is not present in server metadata!", container.getCsdlForFieldName(fieldName));
+            assertNotNull("ERROR: Field name '" + fieldName + "' is not present in server metadata!",
+                container.getCsdlProperty(container.getSettings().getParameters().getValue(Parameters.WELL_KNOWN.RESOURCE_NAME), fieldName));
             LOG.info("Found: '" + fieldName.trim() + "'");
           } catch (Exception ex) {
             LOG.error(getDefaultErrorMessage(ex));
@@ -645,7 +647,7 @@ public class WebAPIServer_1_0_2 {
    */
   @And("DateTimeOffset data in {string} {string} now")
   public void dateTimeOffsetDataInNow(String parameterFieldName, String op) {
-    dateTimeOffsetDataIn(parameterFieldName, op, Timestamp.from(Instant.now()).toString());
+    dateTimeOffsetDataIn(parameterFieldName, op, Instant.now().toString());
   }
 
   /**

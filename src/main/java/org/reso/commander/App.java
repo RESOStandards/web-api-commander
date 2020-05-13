@@ -254,14 +254,14 @@ public class App {
       } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)) {
         try {
           DataDictionaryGenerator generator = new DataDictionaryGenerator(new BDDProcessor());
-          generator.createReference();
+          generator.generateReferences();
         } catch (Exception ex) {
           LOG.error(getDefaultErrorMessage(ex));
         }
       } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_EDMX)) {
         try {
           DataDictionaryGenerator generator = new DataDictionaryGenerator(new EDMXProcessor());
-          generator.createReference();
+          generator.generateReferences();
         } catch (Exception ex) {
           LOG.error(getDefaultErrorMessage(ex));
         }

@@ -48,6 +48,7 @@ public class RESOScriptBackground {
   @And("a test container was successfully created from the given RESOScript")
   public void aTestContainerWasSuccessfullyCreatedFromTheGivenRESOScript() {
     container.initialize();
+    container.setShowResponses(showResponses);
   }
 
   @And("the test container uses an Authorization Code or Client Credentials for authentication")

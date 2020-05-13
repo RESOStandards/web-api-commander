@@ -45,7 +45,7 @@ import static org.reso.commander.common.TestUtils.DateParts.FRACTIONAL;
 public final class TestUtils {
   public static final String JSON_VALUE_PATH = "value";
   public static final String HEADER_ODATA_VERSION = "OData-Version";
-  private static final Logger LOG = LogManager.getLogger(TestUtils.class);
+  private static final Logger LOG = LogManager.getLogger(LogManager.getContext());
 
   /**
    * Used to prepare URIs given that the input queryStrings can sometimes contain special characters
@@ -83,7 +83,7 @@ public final class TestUtils {
    * Gets a list of CsdlProperty items for the given entityTypeName.
    *
    * @param xmlMetadata    the metadata to search.
-   * @param entityTypeName the name of the entityType to search for. MUST be in the default EntityContainer.
+   * @param entityTypeName the name of the entityType (resource) to search for. MUST be in the default EntityContainer.
    * @return a list of CsdlProperty items for the given entityTypeName
    */
   public static List<CsdlProperty> findEntityTypesForEntityTypeName(Edm edm, XMLMetadata xmlMetadata, String entityTypeName) {
@@ -94,11 +94,11 @@ public final class TestUtils {
     CsdlEntityContainer entityContainer = findDefaultEntityContainer(edm, xmlMetadata);
     assertNotNull("ERROR: could not find a default entity container for the given server!", entityContainer);
 
+    if (entityContainer.getEntitySet(entityTypeName) == null) return null;
+
     CsdlSchema schemaForType = xmlMetadata.getSchema(entityContainer.getEntitySet(entityTypeName).getTypeFQN().getNamespace());
 
-    assertNotNull("ERROR: could not find type corresponding to given type name: " + entityTypeName, schemaForType);
-
-    return schemaForType.getEntityType(entityTypeName).getProperties();
+    return schemaForType != null ? schemaForType.getEntityType(entityTypeName).getProperties() : null;
   }
 
   /**
@@ -681,7 +681,7 @@ public final class TestUtils {
       assertedValue.set(parseTimestampFromEdmDateTimeOffsetString(Settings.resolveParametersString(parameterAssertedValue, settings)));
       assertDateTimeOffset(parameterFieldName, op, assertedValue.get(), responseData, settings);
     } catch (EdmPrimitiveTypeException tex) {
-      LOG.error("ERROR: Cannot Convert the value in "
+      fail("ERROR: Cannot Convert the value in "
           + Settings.resolveParametersString(parameterAssertedValue, settings) + " to a Timestamp value!!" + tex);
     }
   }
@@ -704,7 +704,7 @@ public final class TestUtils {
         fieldValue.set(parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
         assertTrue(compare(fieldValue.get(), op, timestamp));
       } catch (EdmPrimitiveTypeException tex) {
-        LOG.error("ERROR: Cannot Convert the value in " + fieldValue.get() + " to a Timestamp value!!" + tex);
+        fail("ERROR: Cannot Convert the value in " + fieldValue.get() + " to a Timestamp value!!" + tex);
       }
     });
   }
@@ -723,7 +723,7 @@ public final class TestUtils {
       assertTrue("XML Metadata at the given service root is not valid! " + container.getServiceRoot(),
           container.getIsValidXMLMetadata());
     } catch (Exception ex) {
-      LOG.error(getDefaultErrorMessage(ex));
+      fail(getDefaultErrorMessage(ex));
     }
   }
 

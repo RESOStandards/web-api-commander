@@ -7,24 +7,31 @@ import io.cucumber.java.en.Then;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.TestUtils;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeTrue;
+import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public class DataDictionary {
-
   private static final Logger LOG = LogManager.getLogger(DataDictionary.class);
 
   //TODO: make this a dynamic property based on DD version
   public static final String REFERENCE_RESOURCE = "RESO.Dictionary.Final.v.1.7.0.20190124T0000.xlsx";
 
-  static final AtomicBoolean isFieldContainedInMetadata = new AtomicBoolean(false);
   static final AtomicBoolean shouldValidateMetadata = new AtomicBoolean(true);
+  static final AtomicReference<String> currentResourceName = new AtomicReference<>();
+
+  //used to keep track of the found standard fields being certified on a per-resource basis
+  static final AtomicReference<Map<String, Map<String, CsdlProperty>>> standardFieldMap = new AtomicReference<>(new LinkedHashMap<>());
 
   @Inject
   WebAPITestContainer container;
@@ -52,60 +59,80 @@ public class DataDictionary {
     }
   }
 
-  @Given("{string} exists in the metadata")
-  public void existsInTheMetadata(String fieldName) {
-    isFieldContainedInMetadata.set(container.getFieldMap().containsKey(fieldName));
-    if (isFieldContainedInMetadata.get()) LOG.info("Found: " + fieldName);
-    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata.get());
+  private boolean isFieldContainedInMetadata(String fieldName) {
+    return standardFieldMap.get().containsKey(currentResourceName.get())
+        && standardFieldMap.get().get(currentResourceName.get()).containsKey(fieldName);
   }
-  
+
+  @Given("{string} exists in the {string} metadata")
+  public void existsInTheMetadata(String fieldName, String resourceName) {
+    assertNotNull(getDefaultErrorMessage("field name cannot be null!"), fieldName);
+    assertNotNull(getDefaultErrorMessage("resource name cannot be null!"), resourceName);
+
+    currentResourceName.set(resourceName);
+
+    if (container.getFieldMap().containsKey(currentResourceName.get())) {
+      //add keyed hash for the given resource name if it doesn't exist
+      if (!standardFieldMap.get().containsKey(currentResourceName.get()))
+        standardFieldMap.get().put(currentResourceName.get(), new LinkedHashMap<>());
+
+      //if the field for the given resource contains the given field, then add it to the standard field map
+      if (container.getFieldMap(currentResourceName.get()).containsKey(fieldName))
+        standardFieldMap.get().get(resourceName).put(fieldName, container.getFieldMap(resourceName).get(fieldName));
+
+    }
+
+    if (isFieldContainedInMetadata(fieldName)) LOG.info("Found: " + fieldName);
+    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
+  }
+
   @Then("{string} MUST be {string} data type")
   public void mustBeDataType(String fieldName, String dataTypeName) {
-    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
   }
 
   @And("{string} precision SHOULD be less than or equal to the RESO Suggested Max Length of {int}")
   public void precisionSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxLengthOf(String fieldName, Integer suggestedPrecision) {
-    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
   }
 
   @And("{string} scale SHOULD be less than or equal to the RESO Suggested Max Scale of {int}")
   public void scaleSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxScaleOf(String fieldName, Integer suggestedMaxScale) {
-    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
   }
 
   @And("{string} enum values exist in the metadata")
   public void enumValuesExistInTheMetadata(String lookupName) {
-    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
   }
 
   @And("{string} enum types MUST have exactly one member")
   public void enumTypesMUSTHaveExactlyOneMember(String lookupName) {
-    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
   }
 
   @And("{string} MUST only contain enum values found in the metadata")
   public void mustOnlyContainEnumValuesFoundInTheMetadata(String lookupName) {
-    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
   }
 
   @And("{string} length SHOULD be less than or equal to the RESO Suggested Max Length of {int}")
   public void lengthSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxLengthOf(String fieldName, Integer suggestedMaxLength) {
-    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
   }
 
   @And("{string} enum types MUST have at least one member")
   public void enumTypesMUSTHaveAtLeastOneMember(String lookupName) {
-    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
   }
 
   @And("{string} SHOULD have no more than the RESO Suggested Max Length of {int} item\\(s)")
   public void shouldHaveNoMoreThanTheRESOSuggestedMaxLengthOfItemS(String lookupName, Integer suggestedMaxItems) {
-    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
   }
 
   @And("{string} is not a synonym for another field")
   public void isNotASynonymForAnotherField(String fieldName) {
-    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata.get());
+    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
   }
 }
