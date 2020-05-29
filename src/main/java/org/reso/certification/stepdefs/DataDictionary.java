@@ -16,8 +16,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
@@ -88,7 +87,37 @@ public class DataDictionary {
 
   @Then("{string} MUST be {string} data type")
   public void mustBeDataType(String fieldName, String dataTypeName) {
-    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
+    //container.getEdm().getEnumType(container.getFieldMap().get(currentResourceName.get()).get(fieldName).getTypeAsFQNObject()).getUnderlyingType()
+    String foundTypeName = container.getFieldMap().get(currentResourceName.get()).get(fieldName).getType();
+    assertDataTypeMapping(dataTypeName, foundTypeName);
+  }
+
+  private void assertDataTypeMapping(String ddTypeName, String edmTypeName) {
+    assertNotNull(getDefaultErrorMessage("you must specify a Data Dictionary type name to check!"), ddTypeName);
+    assertNotNull(getDefaultErrorMessage("you must specify an Edm type name to check!"), edmTypeName);
+
+
+    if ("string".equals(ddTypeName.toLowerCase())) {
+      assertTrue(getDefaultErrorMessage(ddTypeName, "data type must map to", edmTypeName),
+              edmTypeName.contentEquals("Edm.String"));
+    } else if ("date".equals(ddTypeName.toLowerCase())) {
+      assertTrue(getDefaultErrorMessage(ddTypeName, "data type must map to", edmTypeName),
+              edmTypeName.contentEquals("Edm.Date"));
+    } else if ("decimal".equals(ddTypeName.toLowerCase())) {
+      assertTrue(getDefaultErrorMessage(ddTypeName, "data type must map to", edmTypeName),
+              edmTypeName.contentEquals("Edm.Double"));
+    } else if ("integer".equals(ddTypeName.toLowerCase())) {
+      assertTrue(getDefaultErrorMessage(ddTypeName, "data type must map to", edmTypeName),
+              edmTypeName.contentEquals("Edm.Int16")
+                      || edmTypeName.contentEquals("Edm.Int32")
+                      || edmTypeName.contentEquals("Edm.Int64"));
+    } else if ("boolean".equals(ddTypeName.toLowerCase())) {
+      assertTrue(getDefaultErrorMessage(ddTypeName, "data type must map to", edmTypeName),
+              edmTypeName.contentEquals("Edm.Boolean"));
+    } else {
+      fail(getDefaultErrorMessage("could not find data type mapping for", ddTypeName));
+    }
+
   }
 
   @And("{string} precision SHOULD be less than or equal to the RESO Suggested Max Length of {int}")
@@ -134,5 +163,9 @@ public class DataDictionary {
   @And("{string} is not a synonym for another field")
   public void isNotASynonymForAnotherField(String fieldName) {
     assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
+  }
+
+  @And("{string} enum types MUST allow only one member")
+  public void enumTypesMUSTAllowOnlyOneMember(String arg0) {
   }
 }

@@ -161,8 +161,7 @@ public class BDDProcessor extends WorksheetProcessor {
           "  Scenario: " + row.getStandardName() + "\n" +
           "    Given \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
           "    And \"" + row.getStandardName() + "\" enum values exist in the metadata\n" +
-          "    And \"" + row.getStandardName() + "\" enum types MUST have at least one member\n" +
-          "    Then \"" + row.getStandardName() + "\" MUST be \"String Array\" data type\n";
+          "    And \"" + row.getStandardName() + "\" enum types MUST have at least one member\n";
       if (row.getSuggestedMaxLength() != null)
         template +=
           "    And \"" + row.getStandardName() + "\" SHOULD have no more than the RESO Suggested Max Length of " + row.getSuggestedMaxLength() + " item(s)\n";
@@ -178,9 +177,7 @@ public class BDDProcessor extends WorksheetProcessor {
           "  Scenario: " + row.getStandardName() + "\n" +
           "    Given \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
           "    And \"" + row.getStandardName() + "\" enum values exist in the metadata\n" +
-          "    And \"" + row.getStandardName() + "\" enum types MUST have exactly one member\n" +
-          "    Then \"" + row.getStandardName() + "\" MUST be \"String\" data type\n" +
-          "    And \"" + row.getStandardName() + "\" MUST only contain enum values found in the metadata\n";
+          "    And \"" + row.getStandardName() + "\" enum types MUST allow only one member\n";
 
       if (row.getSuggestedMaxLength() != null)
         template +=
