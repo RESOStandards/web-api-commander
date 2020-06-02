@@ -110,7 +110,7 @@ public abstract class WorksheetProcessor {
 
   public static DataDictionaryRow extractDataDictionaryRow(Row row) {
     return new DataDictionaryRow.Builder()
-        .setStandardName(getStringValue(STANDARD_NAME_INDEX, row))
+        .setStandardName(EDMXProcessor.getStringValue(STANDARD_NAME_INDEX, row))
         .setDefinition(getStringValue(DEFINITION_INDEX, row))
         .setGroups(getArrayValue(GROUPS_INDEX, row))
         .setSimpleDataType(getStringValue(SIMPLE_DATA_TYPE_INDEX, row))
@@ -242,7 +242,7 @@ public abstract class WorksheetProcessor {
         lookups.get(lookup.get()).add(lookupValue.get());
       }
     });
-    lookups.forEach((key, items) -> LOG.info("key: " + key + " , items: " + items.toString() + "\n"));
+    lookups.forEach((key, items) -> LOG.info("key: " + key + " , items: " + items.toString()));
   }
 
   public Map<String, Set<String>> getLookups() {
