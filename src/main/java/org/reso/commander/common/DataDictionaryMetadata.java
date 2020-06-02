@@ -58,5 +58,6 @@ public class DataDictionaryMetadata {
         PROPERTY_UNIT_TYPES,
         SOCIAL_MEDIA
     ));
+    public static final String LOOKUP_FIELDS_AND_VALUES = "Lookup Fields and Values";
   }
 }

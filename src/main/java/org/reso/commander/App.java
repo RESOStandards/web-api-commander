@@ -8,9 +8,9 @@ import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
-import org.reso.certification.generators.BDDProcessor;
-import org.reso.certification.generators.DataDictionaryGenerator;
-import org.reso.certification.generators.EDMXProcessor;
+import org.reso.certification.codegen.BDDProcessor;
+import org.reso.certification.codegen.DataDictionaryController;
+import org.reso.certification.codegen.EDMXProcessor;
 import org.reso.models.ClientSettings;
 import org.reso.models.Request;
 import org.reso.models.Settings;
@@ -129,6 +129,7 @@ public class App {
 
       //If the RESOScript option was passed, then the correct commander instance should exist at this point
       if (cmd.hasOption(APP_OPTIONS.ACTIONS.RUN_RESOSCRIPT)) {
+        assert settings != null;
         int numRequests = settings.getRequests().size();
 
         LOG.info(REPORT_DIVIDER);
@@ -253,15 +254,15 @@ public class App {
 
       } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)) {
         try {
-          DataDictionaryGenerator generator = new DataDictionaryGenerator(new BDDProcessor());
-          generator.generateReferences();
+          DataDictionaryController generator = new DataDictionaryController(new BDDProcessor());
+          generator.processWorksheets();
         } catch (Exception ex) {
           LOG.error(getDefaultErrorMessage(ex));
         }
       } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_EDMX)) {
         try {
-          DataDictionaryGenerator generator = new DataDictionaryGenerator(new EDMXProcessor());
-          generator.generateReferences();
+          DataDictionaryController generator = new DataDictionaryController(new EDMXProcessor());
+          generator.processWorksheets();
         } catch (Exception ex) {
           LOG.error(getDefaultErrorMessage(ex));
         }
@@ -514,13 +515,13 @@ public class App {
     static class ACTIONS {
       //actions
       public static final String GENERATE_DD_ACCEPTANCE_TESTS = "generateDDAcceptanceTests";
-      public static final String GENERATE_REFERENCE_EDMX = "generateReferenceEdmx";
+      public static final String GENERATE_REFERENCE_EDMX = "generateReferenceEDMX";
       public static final String RUN_RESOSCRIPT = "runRESOScript";
       public static final String GET_METADATA = "getMetadata";
       public static final String VALIDATE_METADATA = "validateMetadata";
       public static final String GET_ENTITIES = "getEntities";
       public static final String SAVE_RAW_GET_REQUEST = "saveRawGetRequest";
-      public static final String CONVERT_EDMX_TO_OPEN_API = "convertEDMXtoOpenAPI";
+      public static final String CONVERT_EDMX_TO_OPEN_API = "convertEDMXToOpenAPI";
     }
   }
 }
