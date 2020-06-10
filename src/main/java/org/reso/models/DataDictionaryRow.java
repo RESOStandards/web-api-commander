@@ -4,6 +4,7 @@ import java.util.List;
 
 public class DataDictionaryRow {
   private String standardName;
+  private String displayName;
   private String parentResourceName;
   private String definition;
   private List<String> groups;
@@ -29,14 +30,17 @@ public class DataDictionaryRow {
   private String wikiPageURL;
   private Integer wikiPageID;
 
-  private DataDictionaryRow() {
-    //use Builder instead
-  }
+
   public static class Builder {
     DataDictionaryRow dataDictionaryRow = new DataDictionaryRow();
 
     public Builder setStandardName(String standardName) {
       dataDictionaryRow.setStandardName(standardName);
+      return this;
+    }
+
+    public Builder setDisplayName(String displayName) {
+      dataDictionaryRow.setDisplayName(displayName);
       return this;
     }
 
@@ -165,45 +169,22 @@ public class DataDictionaryRow {
     }
   }
 
-  String
-      STANDARD_NAME = "StandardName",
-      DEFINITION = "Definition",
-      GROUPS = "Groups",
-      SIMPLE_DATA_TYPE = "SimpleDataType",
-      SUGGESTED_MAX_LENGTH = "SugMaxLength",
-      SUGGESTED_MAX_SCALE = "SugMaxScale",
-      SYNONYM = "Synonym",
-      ELEMENT_STATUS = "ElementStatus",
-      BEDES = "BEDES",
-      CERTIFICATION_LEVEL = "CertificationLevel",
-      RECORD_ID = "RecordID",
-      LOOKUP_STATUS = "LookupStatus",
-      LOOKUP = "Lookup",
-      COLLECTION = "Collection",
-      SUGGESTED_MAX_PRECISION = "SugMaxPrecision",
-      REPEATING_ELEMENT = "RepeatingElement",
-      PROPERTY_TYPES = "PropertyTypes",
-      PAYLOADS = "Payloads",
-      SPANISH_STANDARD_NAME = "SpanishStandardName",
-      STATUS_CHANGE_DATE = "StatusChangeDate",
-      REVISED_DATE = "RevisedDate",
-      ADDED_IN_VERSION = "AddedInVersion",
-      WIKI_PAGE_TITLE = "Wiki Page Title",
-      WIKI_PAGE_URL = "Wiki Page URL",
-      WIKI_PAGE_ID = "Wiki Page ID";
-
-  private static String sanitizeSimpleName (String name) {
-    return name
-      .replace("[Type]", "_TYPE_PLACEHOLDER_")
-      .replace("[#]", "_NUM_PLACEHOLDER_");
-  }
+  private DataDictionaryRow() { /* private constructor use Builder instead */ }
 
   public String getStandardName() {
     return standardName;
   }
 
   public void setStandardName(String standardName) {
-    this.standardName = sanitizeSimpleName(standardName);
+    this.standardName = standardName;
+  }
+
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   public String getParentResourceName() {

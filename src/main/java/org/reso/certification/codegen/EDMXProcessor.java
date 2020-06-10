@@ -5,6 +5,11 @@ import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.reso.commander.common.Utils;
 import org.reso.models.DataDictionaryRow;
+import org.xml.sax.InputSource;
+import org.xml.sax.helpers.DefaultHandler;
+
+import javax.xml.parsers.SAXParserFactory;
+import java.io.StringReader;
 
 public class EDMXProcessor extends WorksheetProcessor {
   private static final Logger LOG = LogManager.getLogger(EDMXProcessor.class);
@@ -20,8 +25,8 @@ public class EDMXProcessor extends WorksheetProcessor {
 
   final static String closingTag =
             "    </Schema>\n" +
-                    "  </edmx:DataServices>\n" +
-                    "</edmx:Edmx>\n";
+            "  </edmx:DataServices>\n" +
+            "</edmx:Edmx>\n";
 
   @Override
   public void processResourceSheet(Sheet sheet) {
@@ -83,7 +88,11 @@ public class EDMXProcessor extends WorksheetProcessor {
     //add entity type definitions for each of the Data Dictionary resources to EDM
     entityContainerTag.append("      <EntityContainer Name=\"RESO\">\n");
     resourceTemplates.forEach((name, templateContent) ->
-            entityContainerTag.append("        <EntitySet Name=\"").append(sanitizeTSimpleName(name)).append("\" EntityType=\"" + RESO_NAMESPACE).append(".").append(name).append("\" />\n"));
+            entityContainerTag
+                    .append("        <EntitySet Name=\"")
+                    .append(name).append("\" EntityType=\"" + RESO_NAMESPACE)
+                    .append(".")
+                    .append(name).append("\" />\n"));
     entityContainerTag.append("      </EntityContainer>\n");
 
 
@@ -96,51 +105,37 @@ public class EDMXProcessor extends WorksheetProcessor {
     //iterate through each of the lookup values and generate their edm:EnumType content
     //TODO: single vs. multi, single for now
     getLookups().forEach((lookupName, lookup) -> {
-      content.append("\n      <EnumType Name=\"").append(sanitizeTSimpleName(lookupName)).append("\">");
-      lookup.forEach(member -> content.append("\n        <Member Name=\"").append(sanitizeTSimpleName(member)).append("\" />"));
+      content.append("\n      <EnumType Name=\"").append(lookupName).append("\">");
+      lookup.forEach(member -> content.append("\n        <Member Name=\"").append(member).append("\" />"));
       content.append("\n      </EnumType>");
     });
 
     content.append("\n").append(entityContainerTag.toString());
     content.append(closingTag);
 
-    Utils.createFile(getDirectoryName(), getReferenceResource().replace(".xlsx", ".edmx"), content.toString());
-  }
+    final String output = content.toString();
 
-  public static String sanitizeTSimpleName(String name) {
-    if (name == null) return null;
-    String val = name
-            .replace(" ", "_")
-            .replace("'", "_")
-            .replace("&", "_")
-            .replace("\\", "_")
-            .replace("/", "_")
-            .replace("[", "_")
-            .replace("]", "_")
-            .replace("(s)", "s")
-            .replace("(", "_")
-            .replace(")", "_")
-            .replace("-", "_")
-            .replace(",", "_")
-            .replace("+", "_")
-            .replace("$", "_")
-            .replace(".", "_")
-            .replace("%", "_");
+    try {
+      //check the document that was created - will throw exceptions if that document doesn't contain valid XML
+      SAXParserFactory.newInstance().newSAXParser().parse(new InputSource(new StringReader(output)), new DefaultHandler());
 
-    if (Character.isDigit(val.charAt(0))) val = "_" + val;
-    return val.replaceAll(" {2,}", " ");
+      //write content of the string to
+      Utils.createFile(getDirectoryName(), getReferenceResource().replace(".xlsx", ".edmx"), output);
+    } catch (Exception ex) {
+      LOG.error(ex);
+    }
   }
 
   public static final class EDMXTemplates {
 
     public static String buildBooleanMember(DataDictionaryRow row) {
       if (row == null) return EMPTY_STRING;
-      return "        <Property Name=\""+ sanitizeTSimpleName(row.getStandardName()) + "\" Type=\"Edm.Boolean\" />\n";
+      return "        <Property Name=\""+ row.getStandardName() + "\" Type=\"Edm.Boolean\" />\n";
     }
 
     public static String buildDateMember(DataDictionaryRow row) {
       if (row == null) return EMPTY_STRING;
-      return "        <Property Name=\""+ sanitizeTSimpleName(row.getStandardName()) + "\" Type=\"Edm.Date\" />\n";
+      return "        <Property Name=\""+ row.getStandardName() + "\" Type=\"Edm.Date\" />\n";
     }
 
     public static String buildNumberMember(DataDictionaryRow row) {
@@ -152,7 +147,7 @@ public class EDMXProcessor extends WorksheetProcessor {
 
     public static String buildDecimalMember(DataDictionaryRow row) {
       if (row == null) return EMPTY_STRING;
-      String template = "        <Property Name=\"" + sanitizeTSimpleName(row.getStandardName()) + "\" Type=\"Edm.Decimal\"";
+      String template = "        <Property Name=\"" + row.getStandardName() + "\" Type=\"Edm.Decimal\"";
 
       //DD uses length as precision in this case
       if (row.getSuggestedMaxLength() != null) template += " Precision=\"" + row.getSuggestedMaxLength() + "\"";
@@ -167,26 +162,26 @@ public class EDMXProcessor extends WorksheetProcessor {
 
     public static String buildIntegerMember(DataDictionaryRow row) {
       if (row == null) return EMPTY_STRING;
-      return  "        <Property Name=\"" + sanitizeTSimpleName(row.getStandardName()) + "\" Type=\"Edm.Int64\" />\n";
+      return  "        <Property Name=\"" + row.getStandardName() + "\" Type=\"Edm.Int64\" />\n";
     }
 
     public static String buildEnumTypeMultiMember(DataDictionaryRow row) {
       if (row == null || row.getLookup() == null) return EMPTY_STRING;
       if (!row.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
       String lookupName = row.getLookup().replace("Lookups", "").trim();
-      return "        <Property Name=\"" + sanitizeTSimpleName(row.getStandardName()) + "\" Type=\"" + RESO_NAMESPACE + "." + sanitizeTSimpleName(lookupName) + "\" />\n";
+      return "        <Property Name=\"" + row.getStandardName() + "\" Type=\"" + RESO_NAMESPACE + ".enums." + lookupName + "\" />\n";
     }
 
     public static String buildEnumTypeSingleMember(DataDictionaryRow row) {
       if (row == null || row.getLookup() == null) return EMPTY_STRING;
       if (!row.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
       String lookupName = row.getLookup().replace("Lookups", "").trim();
-      return "        <Property Name=\"" + sanitizeTSimpleName(row.getStandardName()) + "\" Type=\"" + RESO_NAMESPACE + "." + sanitizeTSimpleName(lookupName) + "\" />\n";
+      return "        <Property Name=\"" + row.getStandardName() + "\" Type=\"" + RESO_NAMESPACE + ".enums." + lookupName + "\" />\n";
     }
 
     public static String buildStringMember(DataDictionaryRow row) {
       if (row == null) return EMPTY_STRING;
-      String template = "        <Property Name=\"" + sanitizeTSimpleName(row.getStandardName()) + "\" Type=\"Edm.String\"";
+      String template = "        <Property Name=\"" + row.getStandardName() + "\" Type=\"Edm.String\"";
 
       if (row.getSuggestedMaxLength() != null) template += " MaxLength=\"" + row.getSuggestedMaxLength() + "\"";
       template += " />\n";
@@ -196,7 +191,7 @@ public class EDMXProcessor extends WorksheetProcessor {
 
     public static String buildDateTimeWithOffsetMember(DataDictionaryRow row) {
       if (row == null) return EMPTY_STRING;
-      String template = "        <Property Name=\"" + sanitizeTSimpleName(row.getStandardName()) + "\" Type=\"Edm.DateTimeOffset\"";
+      String template = "        <Property Name=\"" + row.getStandardName() + "\" Type=\"Edm.DateTimeOffset\"";
 
       if (row.getSuggestedMaxLength() != null) template += " Precision=\"" + row.getSuggestedMaxLength() + "\"";
       template += " />\n";

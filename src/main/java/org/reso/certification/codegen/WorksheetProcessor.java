@@ -110,7 +110,8 @@ public abstract class WorksheetProcessor {
 
   public static DataDictionaryRow extractDataDictionaryRow(Row row) {
     return new DataDictionaryRow.Builder()
-        .setStandardName(EDMXProcessor.getStringValue(STANDARD_NAME_INDEX, row))
+        .setStandardName(getStringValue(STANDARD_NAME_INDEX, row))
+        .setDisplayName(getStringValue(DISPLAY_NAME_INDEX, row))
         .setDefinition(getStringValue(DEFINITION_INDEX, row))
         .setGroups(getArrayValue(GROUPS_INDEX, row))
         .setSimpleDataType(getStringValue(SIMPLE_DATA_TYPE_INDEX, row))
@@ -223,7 +224,7 @@ public abstract class WorksheetProcessor {
     reset();
   }
 
-  public void buildLookups() throws Exception {
+  public void buildLookups() {
     final String TAB_NAME = "Lookup Fields and Values";
     final int LOOKUP_INDEX = 0, LOOKUP_VALUE_INDEX = 1;
     DataFormatter formatter = new DataFormatter();
@@ -255,6 +256,7 @@ public abstract class WorksheetProcessor {
 
   public static final List<String> WELL_KNOWN_HEADERS = Arrays.asList(
       STANDARD_NAME,
+      DISPLAY_NAME,
       DEFINITION,
       GROUPS,
       SIMPLE_DATA_TYPE,
@@ -295,6 +297,7 @@ public abstract class WorksheetProcessor {
   public static final class WELL_KNOWN_HEADER_NAMES {
     public static final String
         STANDARD_NAME = "StandardName",
+        DISPLAY_NAME = "DisplayName",
         DEFINITION = "Definition",
         GROUPS = "Groups",
         SIMPLE_DATA_TYPE = "SimpleDataType",
@@ -323,28 +326,29 @@ public abstract class WorksheetProcessor {
   public static final class WELL_KNOWN_COLUMN_INDICES {
     public static final Integer
         STANDARD_NAME_INDEX = 0,
-        DEFINITION_INDEX = 1,
-        GROUPS_INDEX = 2,
-        SIMPLE_DATA_TYPE_INDEX = 3,
-        SUGGESTED_MAX_LENGTH_INDEX = 4,
-        SYNONYM_INDEX = 5,
-        ELEMENT_STATUS_INDEX = 6,
-        BEDES_INDEX = 7,
-        CERTIFICATION_LEVEL_INDEX = 8,
-        RECORD_ID_INDEX = 9,
-        LOOKUP_STATUS_INDEX = 10,
-        LOOKUP_INDEX = 11,
-        COLLECTION_INDEX = 12,
-        SUGGESTED_MAX_PRECISION_INDEX = 13,
-        REPEATING_ELEMENT_INDEX = 14,
-        PROPERTY_TYPES_INDEX = 15,
-        PAYLOADS_INDEX = 16,
-        SPANISH_STANDARD_NAME_INDEX = 17,
-        STATUS_CHANGE_DATE_INDEX = 18,
-        REVISED_DATE_INDEX = 19,
-        ADDED_IN_VERSION_INDEX = 20,
-        WIKI_PAGE_TITLE_INDEX = 21,
-        WIKI_PAGE_URL_INDEX = 22,
-        WIKI_PAGE_ID_INDEX = 23;
+        DISPLAY_NAME_INDEX = 1,
+        DEFINITION_INDEX = 2,
+        GROUPS_INDEX = 3,
+        SIMPLE_DATA_TYPE_INDEX = 4,
+        SUGGESTED_MAX_LENGTH_INDEX = 5,
+        SYNONYM_INDEX = 6,
+        ELEMENT_STATUS_INDEX = 7,
+        BEDES_INDEX = 8,
+        CERTIFICATION_LEVEL_INDEX = 9,
+        RECORD_ID_INDEX = 10,
+        LOOKUP_STATUS_INDEX = 11,
+        LOOKUP_INDEX = 12,
+        COLLECTION_INDEX = 13,
+        SUGGESTED_MAX_PRECISION_INDEX = 14,
+        REPEATING_ELEMENT_INDEX = 15,
+        PROPERTY_TYPES_INDEX = 16,
+        PAYLOADS_INDEX = 17,
+        SPANISH_STANDARD_NAME_INDEX = 18,
+        STATUS_CHANGE_DATE_INDEX = 19,
+        REVISED_DATE_INDEX = 20,
+        ADDED_IN_VERSION_INDEX = 21,
+        WIKI_PAGE_TITLE_INDEX = 22,
+        WIKI_PAGE_URL_INDEX = 23,
+        WIKI_PAGE_ID_INDEX = 24;
   }
 }

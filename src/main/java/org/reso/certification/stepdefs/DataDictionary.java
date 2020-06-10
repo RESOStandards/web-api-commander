@@ -24,7 +24,7 @@ public class DataDictionary {
   private static final Logger LOG = LogManager.getLogger(DataDictionary.class);
 
   //TODO: make this a dynamic property based on DD version
-  public static final String REFERENCE_RESOURCE = "reso-ddwiki-export-2020-03-05-DDW17-v1.7.xlsx";
+  public static final String REFERENCE_RESOURCE = "DDv1.7-StandardAndDisplayNames-Commander.xlsx";
 
   static final AtomicBoolean shouldValidateMetadata = new AtomicBoolean(true);
   static final AtomicReference<String> currentResourceName = new AtomicReference<>();

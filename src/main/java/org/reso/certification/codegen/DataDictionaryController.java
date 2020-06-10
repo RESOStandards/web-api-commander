@@ -30,25 +30,25 @@ public class DataDictionaryController {
    * Generates Data Dictionary references for local workbook instance using the configured WorksheetProcessor
    */
   public void processWorksheets() {
-    try {
-      Sheet worksheet;
-      int sheetIndex, rowIndex;
+    Sheet worksheet;
+    int sheetIndex, rowIndex;
 
+    try {
       //workbook consists of many sheets, process only the ones that have the name of a well-known resource
       for (sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++) {
         worksheet = workbook.getSheetAt(sheetIndex);
 
         if (DataDictionaryMetadata.v1_7.WELL_KNOWN_RESOURCES.contains(worksheet.getSheetName()) && worksheet.getPhysicalNumberOfRows() > 1) {
           processor.processResourceSheet(worksheet);
+
           //starts at row 1 to skip header row
           for (rowIndex = 1; rowIndex < worksheet.getPhysicalNumberOfRows(); rowIndex++) {
-            processor.processResourceRow(worksheet.getRow(rowIndex));
+            if (worksheet.getRow(rowIndex) != null) {
+              processor.processResourceRow(worksheet.getRow(rowIndex));
+            }
           }
           processor.finishProcessingResourceSheet(worksheet);
         }
-//        else if (DataDictionaryMetadata.v1_7.LOOKUP_FIELDS_AND_VALUES.contentEquals(worksheet.getSheetName())) {
-//
-//        }
       }
       processor.generateOutput();
     } catch (Exception ex) {
