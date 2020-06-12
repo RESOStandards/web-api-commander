@@ -2,8 +2,8 @@ package org.reso.certification.stepdefs;
 
 import com.google.inject.Inject;
 import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,7 +63,7 @@ public class DataDictionary {
         && standardFieldMap.get().get(currentResourceName.get()).containsKey(fieldName);
   }
 
-  @Given("{string} exists in the {string} metadata")
+  @When("{string} exists in the {string} metadata")
   public void existsInTheMetadata(String fieldName, String resourceName) {
     assertNotNull(getDefaultErrorMessage("field name cannot be null!"), fieldName);
     assertNotNull(getDefaultErrorMessage("resource name cannot be null!"), resourceName);
@@ -96,26 +96,32 @@ public class DataDictionary {
     assertNotNull(getDefaultErrorMessage("you must specify a Data Dictionary type name to check!"), ddTypeName);
     assertNotNull(getDefaultErrorMessage("you must specify an Edm type name to check!"), edmTypeName);
 
-
-    if ("string".equals(ddTypeName.toLowerCase())) {
-      assertTrue(getDefaultErrorMessage(ddTypeName, "data type must map to", edmTypeName),
-              edmTypeName.contentEquals("Edm.String"));
-    } else if ("date".equals(ddTypeName.toLowerCase())) {
-      assertTrue(getDefaultErrorMessage(ddTypeName, "data type must map to", edmTypeName),
-              edmTypeName.contentEquals("Edm.Date"));
-    } else if ("decimal".equals(ddTypeName.toLowerCase())) {
-      assertTrue(getDefaultErrorMessage(ddTypeName, "data type must map to", edmTypeName),
-              edmTypeName.contentEquals("Edm.Double"));
-    } else if ("integer".equals(ddTypeName.toLowerCase())) {
-      assertTrue(getDefaultErrorMessage(ddTypeName, "data type must map to", edmTypeName),
-              edmTypeName.contentEquals("Edm.Int16")
-                      || edmTypeName.contentEquals("Edm.Int32")
-                      || edmTypeName.contentEquals("Edm.Int64"));
-    } else if ("boolean".equals(ddTypeName.toLowerCase())) {
-      assertTrue(getDefaultErrorMessage(ddTypeName, "data type must map to", edmTypeName),
-              edmTypeName.contentEquals("Edm.Boolean"));
-    } else {
-      fail(getDefaultErrorMessage("could not find data type mapping for", ddTypeName));
+    switch (ddTypeName.toLowerCase()) {
+      case "string":
+        assertTrue(getDefaultErrorMessage(ddTypeName, "data type must map to", edmTypeName),
+            edmTypeName.contentEquals("Edm.String"));
+        break;
+      case "date":
+        assertTrue(getDefaultErrorMessage(ddTypeName, "data type must map to", edmTypeName),
+            edmTypeName.contentEquals("Edm.Date"));
+        break;
+      case "decimal":
+        assertTrue(getDefaultErrorMessage(ddTypeName, "data type must map to", edmTypeName),
+            edmTypeName.contentEquals("Edm.Double"));
+        break;
+      case "integer":
+        assertTrue(getDefaultErrorMessage(ddTypeName, "data type must map to", edmTypeName),
+            edmTypeName.contentEquals("Edm.Int16")
+                || edmTypeName.contentEquals("Edm.Int32")
+                || edmTypeName.contentEquals("Edm.Int64"));
+        break;
+      case "boolean":
+        assertTrue(getDefaultErrorMessage(ddTypeName, "data type must map to", edmTypeName),
+            edmTypeName.contentEquals("Edm.Boolean"));
+        break;
+      default:
+        fail(getDefaultErrorMessage("could not find data type mapping for", ddTypeName));
+        break;
     }
 
   }
@@ -130,13 +136,8 @@ public class DataDictionary {
     assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
   }
 
-  @And("{string} enum values exist in the metadata")
+  @Then("{string} standard enumeration values exist in the metadata")
   public void enumValuesExistInTheMetadata(String lookupName) {
-    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
-  }
-
-  @And("{string} enum types MUST have exactly one member")
-  public void enumTypesMUSTHaveExactlyOneMember(String lookupName) {
     assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
   }
 
@@ -166,6 +167,17 @@ public class DataDictionary {
   }
 
   @And("{string} enum types MUST allow only one member")
-  public void enumTypesMUSTAllowOnlyOneMember(String arg0) {
+  public void enumTypesMUSTAllowOnlyOneMember(String lookupName) {
+    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
+  }
+
+  @Then("{string} is defined as a single-valued enumeration")
+  public void isDefinedAsASingleValuedEnumeration(String lookupName) {
+    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
+  }
+
+  @Then("{string} is defined as a multi-valued enumeration")
+  public void isDefinedAsAMultiValuedEnumeration(String lookupName) {
+    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
   }
 }

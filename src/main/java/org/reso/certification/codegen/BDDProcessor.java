@@ -91,10 +91,7 @@ public class BDDProcessor extends WorksheetProcessor {
 
     public static String buildSynonymTest(DataDictionaryRow row, String... tags) {
     /*
-      Given when Synonyms for field F exist in the metadata
-      Then the StandardName for field F is in the metadata
-      And the data type of F is the same as the Standard Name
-      And the other info (length, scale, precision) SHOULD be
+      TODO: check for any synonyms of the standard field names in the metadata.
      */
       return null;
     }
@@ -105,8 +102,7 @@ public class BDDProcessor extends WorksheetProcessor {
           "\n  @" + row.getStandardName() + SINGLE_SPACE +
               Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + row.getStandardName() + "\n" +
-              "    Given \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
-              "    And \"" + row.getStandardName() + "\" is not a synonym for another field\n" +
+              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + row.getStandardName() + "\" MUST be \"Boolean\" data type\n";
     }
 
@@ -116,7 +112,7 @@ public class BDDProcessor extends WorksheetProcessor {
           "\n  @" + row.getStandardName() + SINGLE_SPACE +
               Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + row.getStandardName() + "\n" +
-              "    Given \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
+              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + row.getStandardName() + "\" MUST be \"Date\" data type\n";
     }
 
@@ -133,7 +129,7 @@ public class BDDProcessor extends WorksheetProcessor {
           "\n  @" + row.getStandardName() + SINGLE_SPACE +
               Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + row.getStandardName() + "\n" +
-              "    Given \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
+              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + row.getStandardName() + "\" MUST be \"Decimal\" data type\n";
 
       if (row.getSuggestedMaxLength() != null)
@@ -153,7 +149,7 @@ public class BDDProcessor extends WorksheetProcessor {
           "\n  @" + row.getStandardName() + SINGLE_SPACE +
               Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + row.getStandardName() + "\n" +
-              "    Given \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
+              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + row.getStandardName() + "\" MUST be \"Integer\" data type\n";
     }
 
@@ -163,8 +159,9 @@ public class BDDProcessor extends WorksheetProcessor {
           "\n  @" + row.getStandardName() + SINGLE_SPACE +
               Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + row.getStandardName() + "\n" +
-              "    Given \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
-              "    And \"" + row.getStandardName() + "\" enum values exist in the metadata\n";
+              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
+              "    Then \"" + row.getStandardName() + "\" is defined as a multi-valued enumeration\n" +
+              "    And \"" + row.getStandardName() + "\" standard enumeration values exist in the metadata\n";
     }
 
     public static String buildStringListSingleTest(DataDictionaryRow row, String... tags) {
@@ -173,8 +170,9 @@ public class BDDProcessor extends WorksheetProcessor {
           "\n  @" + row.getStandardName() + SINGLE_SPACE +
               Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + row.getStandardName() + "\n" +
-              "    Given \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
-              "    And \"" + row.getStandardName() + "\" enum values exist in the metadata\n";
+              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
+              "    Then \"" + row.getStandardName() + "\" is defined as a single-valued enumeration\n" +
+              "    And \"" + row.getStandardName() + "\" standard enumeration values exist in the metadata\n";
     }
 
     public static String buildStringTest(DataDictionaryRow row, String... tags) {
@@ -183,7 +181,7 @@ public class BDDProcessor extends WorksheetProcessor {
           "\n  @" + row.getStandardName() + SINGLE_SPACE +
               Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + row.getStandardName() + "\n" +
-              "    Given \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
+              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + row.getStandardName() + "\" MUST be \"String\" data type\n";
 
       if (row.getSuggestedMaxLength() != null)
@@ -199,7 +197,7 @@ public class BDDProcessor extends WorksheetProcessor {
           "\n  @" + row.getStandardName() + SINGLE_SPACE +
               Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + row.getStandardName() + "\n" +
-              "    Given \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
+              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + row.getStandardName() + "\" MUST be \"Timestamp\" data type\n";
     }
   }

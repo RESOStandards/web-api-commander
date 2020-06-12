@@ -8,7 +8,7 @@ Feature: Web API Server 1.0.2 Core Certification
     Given a RESOScript file was provided
     And Client Settings and Parameters were read from the file
     And a test container was successfully created from the given RESOScript
-    And the test container uses an authorization_code or client_credentials for authentication
+    And the test container uses an Authorization Code or Client Credentials for authentication
 
 
   #######################################
@@ -16,7 +16,7 @@ Feature: Web API Server 1.0.2 Core Certification
   #######################################
   @REQ-WA103-END3 @2.4.1 @metadata
   Scenario: REQ-WA103-END3 - Request and Validate Server Metadata
-    When XML Metadata are requested from the service root in "ClientSettings_WebAPIURI"
+    When XML Metadata are requested from the given service root
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the XML Metadata response is valid XML
@@ -46,7 +46,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And Single Valued Enumeration Data in "Parameter_SingleValueLookupField" has "Parameter_SingleLookupValue"
 
@@ -58,7 +58,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And Multiple Valued Enumeration Data in "Parameter_MultipleValueLookupField" has "Parameter_MultipleLookupValue1"
 
@@ -70,7 +70,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And Multiple Valued Enumeration Data in "Parameter_MultipleValueLookupField" has "Parameter_MultipleLookupValue1"
     And Multiple Valued Enumeration Data in "Parameter_MultipleValueLookupField" has "Parameter_MultipleLookupValue2"
@@ -115,7 +115,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And Integer data in "Parameter_IntegerField" "eq" "Parameter_IntegerValueLow"
 
@@ -127,7 +127,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And Integer data in "Parameter_IntegerField" "ne" "Parameter_IntegerValueLow"
 
@@ -139,7 +139,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And Integer data in "Parameter_IntegerField" "gt" "Parameter_IntegerValueLow"
 
@@ -151,7 +151,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And Integer data in "Parameter_IntegerField" "ge" "Parameter_IntegerValueLow"
 
@@ -163,7 +163,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And Integer data in "Parameter_IntegerField" "lt" "Parameter_IntegerValueLow"
 
@@ -175,7 +175,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And Integer data in "Parameter_IntegerField" "le" "Parameter_IntegerValueLow"
 
@@ -187,7 +187,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And Single Valued Enumeration Data in "Parameter_FilterHasField" has "Parameter_FilterHasLookupValue"
 
@@ -199,7 +199,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And Integer data in "Parameter_IntegerField" "gt" "Parameter_IntegerValueLow" "and" "lt" "Parameter_IntegerValueHigh"
 
@@ -211,7 +211,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And Integer data in "Parameter_IntegerField" "gt" "Parameter_IntegerValueLow" "or" "lt" "Parameter_IntegerValueHigh"
 
@@ -223,7 +223,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And Integer data in "Parameter_FilterNotField" "ne" "Parameter_FilterNotValue"
 
@@ -235,7 +235,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And Date data in "Parameter_TimestampField" "gt" "Parameter_DateValue"
 
@@ -247,7 +247,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And TimeOfDay data in "Parameter_TimestampField" "lt" "Parameter_TimeValue"
 
@@ -259,7 +259,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And DateTimeOffset data in "Parameter_TimestampField" "lt" "Parameter_DateTimeValue"
 
@@ -271,9 +271,9 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
-    And DateTimeOffset data in "Parameter_TimestampField" "le" now()
+    And DateTimeOffset data in "Parameter_TimestampField" "le" now
 
   @REQ-WA103-QO28.1 @2.4.4
   Scenario: REQ-WA103-QO28.1 - Query Support: $orderby asc filtered
@@ -283,7 +283,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And DateTimeOffset data in "Parameter_TimestampField" is sorted in "asc" order
 
@@ -295,7 +295,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And DateTimeOffset data in "Parameter_TimestampField" is sorted in "asc" order
 
@@ -307,7 +307,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And DateTimeOffset data in "Parameter_TimestampField" is sorted in "desc" order
 
@@ -319,7 +319,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And DateTimeOffset data in "Parameter_TimestampField" is sorted in "desc" order
 
@@ -341,7 +341,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
 
   @REQ-WA103-QR4 @2.4.2
@@ -352,7 +352,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And the number of results is less than or equal to "Parameter_TopCount"
 
@@ -364,14 +364,14 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And a GET request is made to the resolved Url in "REQ-WA103-QR5" with $skip="Parameter_TopCount"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
-    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And resource metadata contain the fields in the given select list
     And data are present for fields contained within the given select list
     And data in the "Parameter_KeyOrKeyNumeric" fields are different in the second request than in the first
 
