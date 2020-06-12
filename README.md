@@ -3,7 +3,7 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/resostandards/web-api-commander/badge)](https://www.codefactor.io/repository/github/resostandards/web-api-commander)  ![Java CI with Gradle](https://github.com/RESOStandards/web-api-commander/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=master)
 
 The RESO Web API Commander is a command line Java application that uses
-the Apache Olingo library to provide the following functionality:
+the Apache Olingo library to provide OData Client functionality as well as RESO Web API and Data Dictionary Certification.
 
 - [Getting Started](#getting-started)
 - [Using the Commander as a Web API Client](#using-the-commander-as-a-web-api-client)
@@ -20,13 +20,8 @@ the Apache Olingo library to provide the following functionality:
   * [Testing Environment](#testing-environment)
   * [Web API Usage](#web-api-usage)
   * [Running Web API Tests with the Gradle Wrapper](#running-web-api-tests-with-the-gradle-wrapper)
-  * [Convenience Methods for Web API 1.0.2 Server Gold and Platinum Certification (Recommended)](#convenience-methods-for-web-api-102-server-gold-and-platinum-certification-recommended)
+  * [Convenience Methods for Web API 1.0.2 Server Core Certification](#convenience-methods-for-web-api-102-server-core-certification)
   * [Web API Program Output](#web-api-program-output)
-- [Automated Data Dictionary Testing (In Development)](#automated-data-dictionary-testing-in-development)
-  * [Data Dictionary Usage](#data-dictionary-usage)
-  * [Running Data Dictionary Tests with the Gradle Wrapper](#running-data-dictionary-tests-with-the-gradle-wrapper)
-  * [Convenience Methods for Data Dictionary 1.5 and 1.6 Certification (Recommended)](#convenience-methods-for-data-dictionary-15-and-16-certification-recommended) 
-  * [Data Ditionary Program Output](#data-dictionary-program-output)
 - [Docker](#docker)
 - [Logging](#logging)
 - [Gradle Commands](#gradle-commands)
@@ -58,7 +53,7 @@ OpenJDK Runtime Environment (build 1.8.0_242-8u242-b08-0ubuntu3~19.10-b08)
 OpenJDK 64-Bit Server VM (build 25.242-b08, mixed mode)
 ```
 
-If you don't see something similar to this, with 1.8.0, or an error, you may have to download a Java Runtime Environment. 
+If you don't see something similar to this, with 1.8.0, or an error, you may need to download a Java SDK Environment. 
 
 [Open JDK is recommended](https://openjdk.java.net/install/index.html).
 
@@ -119,15 +114,9 @@ When using commands, if arguments aren't provided, feedback will be displayed in
 which will show how to pass each required argument. 
 
 ## Authentication
-When using the Commader from the terminal, bearer tokens are the currently-supported authentication mechanism. 
+When using the RESO Commander from the terminal, bearer tokens are the currently-supported authentication mechanism. 
 Please see subsequent sections for how to use bearer tokens to accomplish tasks other than fully-automated testing, 
 [discussed elsewhere in this README](#automated-web-api-testing-beta).
-
-Client credentials (OAuth2) are supported in RESOScript files. Please contact josh@reso.org if you are wanting 
-certification using this mechanism. See [generic.resoscript](https://github.com/RESOStandards/web-api-commander/blob/master/generic.resoscript) for a Platinum
-RESOScript template and [generic.gold.resoscript](https://github.com/RESOStandards/web-api-commander/blob/master/generic.gold.resoscript) for Gold
-on how to use client credentials parameters. Note that this has not been tested extensively and is in pre-alpha.
-
 
 ## Getting Metadata
 To get metadata, use the `--getMetadata` argument with the following 
@@ -328,8 +317,7 @@ The XML DTD for this schema is as follows:
 
 Currently in development is the ability for the Commander to be able to perform fully-automated Web API testing, 
 upon being provided a valid RESOScript file with parameters for the given server. 
-See [the generic RESOScript template for more info](./generic.resoscript) for a Platinum RESOScript template, and 
-[generic.gold.resoscript](https://github.com/RESOStandards/web-api-commander/blob/master/generic.gold.resoscript) for Gold.
+See [the generic Web API Core RESOScript template for more info](./web-api-server.core.1.0.2.resoscript).
 
 ### Cucumber Feature Specifications
 
@@ -387,47 +375,32 @@ The [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.ht
 After you have cloned the repository, as shown in the previous step, change into the directory containing 
 the source code from GitHub. Convenience methods have been provided for the various certification tasks. 
 
-The task you run will depend on the metallic level of Web API 1.0.2 Server Certification you're interested in. 
-RESOScript Templates have been created for both [Gold](generic.gold.resoscript) and [Platinum](generic.resoscript). 
-
 Prior to using the Commander for automated testing, you need to ensure your RESOScript has been created. 
-See instructions in the previously mentioned files for more information. 
+For Web API 1.0.2 Server Core Certification, use [this resoscript](web-api-server.core.1.0.2.resoscript) as a template. 
+ 
 
-### Convenience Methods for Web API 1.0.2 Server Gold and Platinum Certification (Recommended)
+### Convenience Methods for Web API 1.0.2 Server Certification
 While you may use tags to filter tests as you choose, explained in the next section, it's convenient
-to be able to run a predefined set of tests for Gold or Platinum certification. 
+to be able to run a predefined set of tests Web API Core Certification. 
 
 These tasks will also produce reports in the local `build` directory, named according to which test you ran. 
 
-#### Gold Certification
+#### Core Certification
 
-This will run the Gold tests against the Web API 1.0.2 Server provided as `WebAPIURI` in `your.resoscript` file.
+This will run the Core tests against the Web API 1.0.2 Server provided as `WebAPIURI` in your `web-api-server.core.1.0.2.resoscript` file.
 
 ##### MacOS or Linux
 ```
-$ ./gradlew testWebAPIServer_1_0_2_Gold -DpathToRESOScript=/path/to/your.resoscript -DshowResponses=true
+$ ./gradlew testWebAPIServerCore_1_0_2 -DpathToRESOScript=/path/to/your.web-api-server.core.1.0.2.resoscript -DshowResponses=true
 ```
 
 ##### Windows
 ```
-C:\path\to\web-api-commander> gradlew testWebAPIServer_1_0_2_Gold -DpathToRESOScript=C:\path\to\your.resoscript -DshowResponses=true
+C:\path\to\web-api-commander> gradlew testWebAPIServerCore_1_0_2 -DpathToRESOScript=C:\path\to\your.web-api-server.core.1.0.2.resoscript -DshowResponses=true
 ```
 
-*Note: the first time you run these tasks, they will take some time as the environment is being configured behind the 
-scenes and the code is being compiled from the contents of the source directory you downloaded in the previous step. 
-
-#### Platinum Certification
-This will run the Platinum tests against the Web API 1.0.2 Server provided as `WebAPIURI` in `your.resoscript` file.
-
-##### MacOS or Linux
-```
-$ ./gradlew testWebAPIServer_1_0_2_Platinum -DpathToRESOScript=/path/to/your.resoscript -DshowResponses=true
-```
-
-##### Windows
-```
-C:\path\to\web-api-commander> gradlew testWebAPIServer_1_0_2_Platinum -DpathToRESOScript=C:\path\to\your.resoscript -DshowResponses=true
-```
+*Note: the first time you run these tasks, they will take some time as the environment must be configured and 
+code is being compiled from the contents of the source directory downloaded in the previous step. 
 
 #### Advanced feature: Tag Filtering 
 You may also filter by tags. These are the items in the Cucumber .feature files prefixed by an `@` symbol. Expressions 
@@ -435,16 +408,16 @@ may also be used with tags. See the [Cucumber Documentation](https://cucumber.io
 
 ##### MacOS or Linux
 ```
-$ gradle testWebAPIServer_1_0_2_Platinum -DpathToRESOScript=/path/to/your.resoscript -Dcucumber.filter.tags="@core"
+$ gradle testWebAPIServerCore_1_0_2 -DpathToRESOScript=/path/to/your.web-api-server.core.1.0.2.resoscript -Dcucumber.filter.tags="@metadata"
 ```
 
 ##### Windows
 ```
-C:\path\to\web-api-commander> gradlew.bat testWebAPIServer_1_0_2_Platinum -DpathToRESOScript=C:\path\to\your.resoscript -Dcucumber.filter.tags="@core"
+C:\path\to\web-api-commander> gradlew.bat testWebAPIServerCore_1_0_2 -DpathToRESOScript=C:\path\to\your.web-api-server.core.1.0.2.resoscript -Dcucumber.filter.tags="@metadata"
 ```
 
-This would run only the tests marked as `@core` in the 
-[Web API Server 1.0.2 `.feature` file](./src/main/java/org/reso/certification/features/web-api/web-api-server-1.0.2.feature).
+This would run only the tests marked as `@metadata` in the 
+[Web API Server 1.0.2 `.feature` file](./src/main/java/org/reso/certification/features/web-api/web-api-server.core.1.0.2.feature).
 
 
 There is still some "glue code" to back the [test descriptions 
@@ -453,71 +426,80 @@ of [cucumber-jvm](https://github.com/cucumber/cucumber-jvm), which has support f
 code to cut down on copypasta test development.
 
 The backing test code is done using [JUnit5](https://junit.org/junit5/). Normally, only those who are contributing 
-test code should need to know about the implementation details of how tests are run. Libraries necessary for the Commander to run are included in the [`web-api-commander.jar`](https://github.com/RESOStandards/web-api-commander/blob/master/build/libs/web-api-commander.jar) file, aside from Gradle, which may either be installed on the local machine, or used within a Docker container (coming soon).
+test code should need to know about the implementation details of how tests are run. 
 
-*Note*: tests are currently tagged with their Web API version being 1.0.3, such as `@REQ-WA103-END3`, 
+Libraries necessary for the Commander to run are included in the [`web-api-commander.jar`](https://github.com/RESOStandards/web-api-commander/blob/master/build/libs/web-api-commander.jar) file, aside from Gradle, which may either be installed on the local machine, or used within a Docker container (coming soon).
+
+*Note*: tests are currently tagged with their Web API version implicitly being 1.0.3, such as `@REQ-WA103-END3`, 
 but the tests currently being run on the server for Web API 1.0.2 is the backwards-compatible subset of 
-Web API 1.0.3 tests. Tags are still a work in progress, and are being added for Web API 1.0.2 tests as well. 
-Please feel free to suggest additional tags that might be useful.   
+Web API 1.0.3 tests. 
 
 ### Web API Program Output
 
 A sample of the runtime terminal output follows:
 
 ```gherkin
-> Task :testWebApiServer_1_0_2_Platinum
+> Task :testWebApiServer_1_0_2_Core
 
-    @REQ-WA103-END3 @core @x.y.z @core-endorsement @metadata
-    Scenario: Request and Validate Server Metadata                                                         
-    
-    Using RESOScript: /path/to/your.resocript
-      Given a RESOScript file was provided                                                                 
-    
-    RESOScript loaded successfully!
-      And Client Settings and Parameters were read from the file                                           
-    
-    Bearer token loaded... first 4 characters: abcd
-    Service root is: https://api.server.com
-      And an OData client was successfully created from the given RESOScript                               
-    
-    Request URI: https://api.server.com/$metadata?$format=application/xml
-    Request succeeded...185032 bytes received.
-      When a GET request is made to the resolved Url in "REQ-WA103-END3"                                   
-    
-    Asserted Response Code: 200, Server Response Code: 200
-      Then the server responds with a status code of 200                                                   
-    
-    Response is valid XML!
-      And the response is valid XML                                                                        
-    
-    XML Metadata is valid!
-      And the XML metadata returned by the server are valid                                                
-    
-    Fetching Edm with OData Client from: https://api.server.com/$metadata
-    Found Default Entity Container: 'Default'
-      And a default entity container exists for the service root in "ClientSettings_WebAPIURI"             
-    
-    Edm Metadata is valid!
-      And the Edm metadata returned by the server are valid                                                
-    
-    Found EntityContainer for the given resource: 'Property'
-      And the metadata contains the "Parameter_EndpointResource" resource                                  
-    
-    Searching metadata for fields in given select list: ListingKey,BedroomsTotal,StreetName,PropertyType,ListingContractDate,ModificationTimestamp,Latitude,Longitude
-    Found: 'ListingKey'
-    Found: 'BedroomsTotal'
-    Found: 'StreetName'
-    Found: 'PropertyType'
-    Found: 'ListingContractDate'
-    Found: 'ModificationTimestamp'
-    Found: 'Latitude'
-    Found: 'Longitude'
-      And resource metadata for "Parameter_EndpointResource" contains the fields in "Parameter_SelectList" 
-    
-    
-    1 Scenarios (1 passed)
-    11 Steps (11 passed)
-    0m3.342s       
+@REQ-WA103-END3 @2.4.1 @metadata
+Scenario: REQ-WA103-END3 - Request and Validate Server Metadata                                            
+
+Using RESOScript: ./web-api-server.core.1.0.2.resoscript
+  Given a RESOScript file was provided                                                                     
+
+RESOScript loaded successfully!
+  And Client Settings and Parameters were read from the file                                               
+
+Bearer token loaded... first 4 characters: test
+Service root is: https://api.yourserver.com/OData
+  And a test container was successfully created from the given RESOScript                                  
+
+Authentication Type: authorization_code
+  And the test container uses an authorization_code or client_credentials for authentication               
+
+Requesting XML Metadata from service root at: https://api.yourserver.com/OData
+  When XML Metadata are requested from the service root in "ClientSettings_WebAPIURI"                      
+
+Asserted Response Code: 200, Server Response Code: 200
+  Then the server responds with a status code of 200                                                       
+
+Reported OData-Version header value: '4.0'
+  And the server has an OData-Version header value of "4.0" or "4.01"                                      
+
+Validating XML Metadata response to ensure it's valid XML and matches OASIS OData XSDs...
+See: https://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/schemas/
+XMLMetadata string is valid XML!
+  And the XML Metadata response is valid XML                                                               
+
+Validating XML Metadata response to ensure it's valid XML and matches OASIS OData XSDs...
+See: https://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/schemas/
+XMLMetadata string is valid XML!
+XML Metadata is valid!
+Edm Metadata is valid!
+  And the XML Metadata returned by the server are valid                                                    
+
+  And the XML Metadata returned by the server contains Edm metadata                                        
+
+  And the Edm metadata returned by the server are valid                                                    
+
+Found Default Entity Container: 'Default'
+  And the metadata contains a valid service document                                                       
+
+Resource Name: Property
+Allowed Resources: Property, Member, Office, Contacts, ContactListings, HistoryTransactional, InternetTracking, Media, OpenHouse, OUID, Prospecting, Queue, Rules, SavedSearch, Showing, Teams
+  And the given "Parameter_EndpointResource" resource exists within "Parameter_DD17_WellKnownResourceList" 
+
+Found EntityContainer for the given resource: 'Property'
+  And the metadata contains the "Parameter_EndpointResource" resource                                      
+
+Searching the default entity container for one of the following Standard Resources: Property, Member, Office, Media
+Standard Resource Names requirement met!
+  And the metadata contains at least one resource from "Parameter_WebAPI102_RequiredResourceList"          
+
+
+1 Scenarios (1 passed)
+15 Steps (15 passed)
+0m4.093s       
 ```
 
 This shows configuration parameters, requests, and responses in a lightweight-manner. 
@@ -527,102 +509,6 @@ Detailed information will be added to a local `./commander.log` file at runtime.
 ## Automated Data Dictionary Testing (In Development)
 Note that this feature is in development and not ready for use. Please contact josh@reso.org if you'd like to help
 with the development process. 
-
-### Data Dictionary Usage
-
-The Commander may be run in automated testing mode for Data Dictionary 1.5 and 1.6 Certifications using a terminal.
- 
-### Running Data Dictionary Tests with the Gradle Wrapper
-The [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) 
-provides a convenient way to automatically install Gradle when running tests. 
-
-After you have cloned the repository, as shown in the previous step, change into the directory containing 
-the source code from GitHub. Convenience methods have been provided for the various certification tasks. 
-
-The task you run will depend on the metallic level of Data Dictionary Certification you're interested in. 
-
-Prior to using the Commander for automated testing, you need to ensure your RESOScript has been created. Contact 
-josh@reso.org for more information regarding Data Dictionary testing, as it's still in development.
-
-
-### Convenience Methods for Data Dictionary 1.5 and 1.6 Certification (Recommended)
-While you may use tags to filter tests as you choose, explained in the next section, it's convenient
-to be able to run a predefined set of tests for 1.5 or 1.6 certification. 
-
-These tasks will also produce reports in the local `build` directory, named according to which test you ran. 
-
-#### DD 1.5 Certification
-This will run Data Dictionary 1.5 tests.
-
-##### MacOS or Linux
-```
-$ ./gradlew testDataDictionary_1_5
-```
-
-##### Windows
-```
-C:\path\to\web-api-commander> gradlew testDataDictionary_1_5
-```
-
-*Note: the first time you run these tasks, they will take some time as the environment is being configured behind the 
-scenes and the code is being compiled from the contents of the source directory you downloaded in the previous step. 
-
-#### DD 1.6 Certification
-This will run Data Dictionary 1.6 tests.
-
-##### MacOS or Linux
-```
-$ ./gradlew testDataDictionary_1_6
-```
-
-##### Windows
-```
-C:\path\to\web-api-commander> gradlew testDataDictionary_1_6
-```
-
-#### Advanced feature: Tag Filtering 
-You may also filter by tags. These are the items in the Cucumber .feature files prefixed by an `@` symbol. Expressions 
-may also be used with tags. See the [Cucumber Documentation](https://cucumber.io/docs/cucumber/api/#tags) for more information. 
-
-##### MacOS or Linux
-```
-$ gradlew testDataDictionary_1_6 -Dcucumber.filter.tags="@IDX_Payload"
-```
-
-##### Windows
-```
-C:\path\to\web-api-commander> gradlew testDataDictionary_1_6 -Dcucumber.filter.tags="@IDX_Payload"
-```
-
-This would run only the tests marked as `@IDX_Payload` in the 
-[Data Dictionary `.feature` files in](./src/main/java/org/reso/certification/features/data-dictionary/).
-
-### Data Dictionary Program Output
-
-A sample of the runtime terminal output follows:
-
-```gherkin
-    > Task :testDataDictionary_1_6
-    
-    @DD1.5_Decimal @DD1.6_Decimal @DD1.5 @DD1.6 @ListPrice @IDX_Payload @DD1.5_ListPrice @DD1.6_ListPrice
-    Scenario: ListPrice                                                                 
-      Given an XML Metadata file was provided                                            
-      And the given file exists                                                          
-      And the file contains valid XML                                                    
-      And the file could be read by the Commander                                        
-      Given "ListPrice" exists in the metadata                                           
-      And "ListPrice" values are not null                                                
-      Then "ListPrice" should be "Decimal" data type                                     
-      And "ListPrice" precision should be between the bounds in the metadata             
-      And "ListPrice" scale should be between the bounds in the metadata                 
-      And "ListPrice" precision should be less than or equal to the RESO maxlength of 14 
-      And "ListPrice" scale should be less than or equal to the RESO scale of 2          
-    
-    1 Scenarios (1 passed)
-    11 Steps (11 passed)
-    0m0.612s
-```
-
 
 ----
 
@@ -673,7 +559,7 @@ Docker must be running on your local machine.
 #### MacOS or Linux All-In-One Commands
 
 
-##### Gold
+##### Core
 ```
 cd ~; \
 rm -rf commander-tmp/; \
@@ -681,19 +567,7 @@ mkdir commander-tmp; \
 cd commander-tmp; \
 git clone https://github.com/RESOStandards/web-api-commander.git; \
 cd web-api-commander; \
-docker run --rm -u gradle -v "$PWD":/home/gradle/project -v /path/to/your/resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_1_0_2_Gold -DpathToRESOScript=/home/gradle/project/resoscripts/your.resoscript -DshowResponses=true
-```
-
-##### Platinum 
-
-```
-cd ~; \
-rm -rf commander-tmp/; \
-mkdir commander-tmp; \
-cd commander-tmp; \
-git clone https://github.com/RESOStandards/web-api-commander.git; \
-cd web-api-commander; \
-docker run --rm -u gradle -v "$PWD":/home/gradle/project -v /path/to/your/resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_1_0_2_Platinum -DpathToRESOScript=/home/gradle/project/resoscripts/your.resoscript -DshowResponses=true
+docker run --rm -u gradle -v "$PWD":/home/gradle/project -v /path/to/your/resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_1_0_2_Core -DpathToRESOScript=/home/gradle/project/resoscripts/your.web-api-server.core.1.0.2.resoscript -DshowResponses=true
 ```
 
 Note that this will create a directory in your home directory for the project, and build artifacts and the log will be placed in that directory, 
@@ -702,15 +576,10 @@ which is also where you will end up after runtime.
 
 #### Windows All-In-One WIP
 
-##### Gold
+##### Core
 
 ```
-cd C:\;mkdir commander-tmp;cd commander-tmp;git clone https://github.com/RESOStandards/web-api-commander.git;cd web-api-commander; docker run --rm -u gradle -v C:\current\path\web-api-commander:/home/gradle/project -v C:\path\to\your\resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_1_0_2_Gold -DpathToRESOScript=/home/gradle/project/resoscripts/your.resoscript -DshowResponses=true
-```
-
-##### Platinum
-```
-cd C:\;mkdir commander-tmp;cd commander-tmp;git clone https://github.com/RESOStandards/web-api-commander.git;cd web-api-commander;docker run --rm -u gradle -v C:\current\path\web-api-commander:/home/gradle/project -v C:\path\to\your\resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_1_0_2_Platinum -DpathToRESOScript=/home/gradle/project/resoscripts/your.resoscript -DshowResponses=true
+cd C:\;mkdir commander-tmp;cd commander-tmp;git clone https://github.com/RESOStandards/web-api-commander.git;cd web-api-commander; docker run --rm -u gradle -v C:\current\path\web-api-commander:/home/gradle/project -v C:\path\to\your\resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_1_0_2_Core -DpathToRESOScript=/home/gradle/project/resoscripts/your.web-api-server.core.1.0.2.resoscript -DshowResponses=true
 ```
 
 ---

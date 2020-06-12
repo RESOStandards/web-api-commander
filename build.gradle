@@ -72,9 +72,8 @@ tasks.withType(JavaCompile) {
   options.deprecation = true
 }
 
-
-// task for Web API Server 1.0.2 Gold Testing
-task testWebApiServer_1_0_2_Gold() {
+// task for Web API Server 1.0.2 Core Testing
+task testWebApiServer_1_0_2_Core() {
   dependsOn jar
   doLast {
     javaexec {
@@ -86,93 +85,12 @@ task testWebApiServer_1_0_2_Gold() {
           '--plugin',
           'pretty',
           '--plugin',
-          'json:build/web-api-server-1.0.2.gold.json',
+          'json:build/web-api-server.core.1.0.2.json',
           '--plugin',
-          'html:build/web-api-server-1.0.2.gold.html',
-          '--glue',
-          'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
-          'src/main/java/org/reso/certification/features/web-api',
-          '--tags',
-          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0
-              ? 'not @platinum and ' + systemProperties.get('cucumber.filter.tags') : 'not @platinum')
-      ]
-    }
-  }
-}
-
-// task for Web API Server 1.0.2 Platinum Testing - currently equivalent to all, but generates a platinum-named report.
-task testWebApiServer_1_0_2_Platinum() {
-  dependsOn jar
-  doLast {
-    javaexec {
-      main = "io.cucumber.core.cli.Main"
-      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-      systemProperties = System.getProperties()
-      args = [
-          '--strict',
-          '--plugin',
-          'pretty',
-          '--plugin',
-          'json:build/web-api-server-1.0.2.platinum.json',
-          '--plugin',
-          'html:build/web-api-server-1.0.2.platinum.html',
+          'html:build/web-api-server.core.1.0.2.html',
           '--glue',
           'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
           'src/main/java/org/reso/certification/features/web-api'
-      ]
-    }
-  }
-}
-
-// task for Data Dictionary 1.5
-task testDataDictionary_1_5() {
-  dependsOn jar
-  doLast {
-    javaexec {
-      main = "io.cucumber.core.cli.Main"
-      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-      systemProperties = System.getProperties()
-      args = [
-          '--strict',
-          '--plugin',
-          'pretty',
-          '--plugin',
-          'json:build/data-dictionary-1.5.json',
-          '--plugin',
-          'html:build/data-dictionary-1.5.html',
-          '--glue',
-          'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary',
-          '--tags',
-          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0
-              ? '@DD1.5 and ' + systemProperties.get('cucumber.filter.tags') : '@DD1.5')
-      ]
-    }
-  }
-}
-
-// task for Data Dictionary 1.6
-task testDataDictionary_1_6() {
-  dependsOn jar
-  doLast {
-    javaexec {
-      main = "io.cucumber.core.cli.Main"
-      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-      systemProperties = System.getProperties()
-      args = [
-          '--strict',
-          '--plugin',
-          'pretty',
-          '--plugin',
-          'json:build/data-dictionary-1.6.json',
-          '--plugin',
-          'html:build/data-dictionary-1.6.html',
-          '--glue',
-          'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary',
-          '--tags',
-          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0
-              ? '@DD1.6 and ' + systemProperties.get('cucumber.filter.tags') : '@DD1.6')
       ]
     }
   }
