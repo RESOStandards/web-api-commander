@@ -30,8 +30,9 @@ public abstract class WorksheetProcessor {
   DataDictionaryRow dictionaryRow;
   Sheet sheet;
   String startTimestamp;
-  Map<String, String> resourceTemplates = new LinkedHashMap<>();
-  Map<String, Set<String>> lookups = new LinkedHashMap<>();
+  static final Map<String, String> resourceTemplates = new LinkedHashMap<>();
+  static final Map<String, Set<String>> lookups = new LinkedHashMap<>();
+  static final Map<String, Map<String, DataDictionaryRow>> processedResourceRows = new LinkedHashMap<>(new LinkedHashMap<>());
 
   public WorksheetProcessor() {
     startTimestamp = Utils.getTimestamp();
@@ -164,6 +165,9 @@ public abstract class WorksheetProcessor {
 
     dictionaryRow = extractDataDictionaryRow(row);
     dictionaryRow.setParentResourceName(sheet.getSheetName());
+
+    processedResourceRows.putIfAbsent(sheet.getSheetName(), new LinkedHashMap<>());
+    processedResourceRows.get(sheet.getSheetName()).put(dictionaryRow.getSimpleDataType(), dictionaryRow);
 
     //now that row has been processed, extract field type and assemble the template
     switch (dictionaryRow.getSimpleDataType()) {

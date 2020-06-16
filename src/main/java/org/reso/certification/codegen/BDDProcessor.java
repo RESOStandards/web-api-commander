@@ -14,7 +14,9 @@ import static org.reso.certification.containers.WebAPITestContainer.SINGLE_SPACE
 
 public class BDDProcessor extends WorksheetProcessor {
   private static final Logger LOG = LogManager.getLogger(BDDProcessor.class);
-  private static final String FEATURE_EXTENSION = ".feature";
+  private static final String
+      FEATURE_EXTENSION = ".feature",
+      LOCKED_WITH_ENUMERATIONS_KEY = "Locked with Enumerations";
 
   @Override
   public void processResourceSheet(Sheet sheet) {
@@ -155,24 +157,34 @@ public class BDDProcessor extends WorksheetProcessor {
 
     public static String buildStringListMultiTest(DataDictionaryRow row, String... tags) {
       if (row == null) return null;
-      return
-          "\n  @" + row.getStandardName() + SINGLE_SPACE +
-              Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
-              "  Scenario: " + row.getStandardName() + "\n" +
-              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + row.getStandardName() + "\" is defined as a multi-valued enumeration\n" +
-              "    And \"" + row.getStandardName() + "\" standard enumeration values exist in the metadata\n";
+
+      String template = "\n  @" + row.getStandardName() + SINGLE_SPACE +
+          Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+          "  Scenario: " + row.getStandardName() + "\n" +
+          "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
+          "    Then \"" + row.getStandardName() + "\" MUST be \"Multiple Enumeration\" data type\n";
+
+      if (row.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
+        template +=
+            "    And \"" + row.getStandardName() + "\" MUST contain at least one standard enumeration\n";
+      }
+      return template;
     }
 
     public static String buildStringListSingleTest(DataDictionaryRow row, String... tags) {
       if (row == null) return null;
-      return
-          "\n  @" + row.getStandardName() + SINGLE_SPACE +
+      String template = "\n  @" + row.getStandardName() + SINGLE_SPACE +
               Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + row.getStandardName() + "\n" +
               "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + row.getStandardName() + "\" is defined as a single-valued enumeration\n" +
-              "    And \"" + row.getStandardName() + "\" standard enumeration values exist in the metadata\n";
+              "    Then \"" + row.getStandardName() + "\" MUST be \"Single Enumeration\" data type\n";
+
+      if (row.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
+        template +=
+            "    And \"" + row.getStandardName() + "\" MUST contain at least one standard enumeration\n";
+      }
+
+      return template;
     }
 
     public static String buildStringTest(DataDictionaryRow row, String... tags) {

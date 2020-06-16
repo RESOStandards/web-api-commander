@@ -151,11 +151,6 @@ public class DataDictionary {
     assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
   }
 
-  @And("{string} enum types MUST have at least one member")
-  public void enumTypesMUSTHaveAtLeastOneMember(String lookupName) {
-    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
-  }
-
   @And("{string} SHOULD have no more than the RESO Suggested Max Length of {int} item\\(s)")
   public void shouldHaveNoMoreThanTheRESOSuggestedMaxLengthOfItemS(String lookupName, Integer suggestedMaxItems) {
     assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
@@ -166,18 +161,7 @@ public class DataDictionary {
     assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
   }
 
-  @And("{string} enum types MUST allow only one member")
-  public void enumTypesMUSTAllowOnlyOneMember(String lookupName) {
-    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
-  }
-
-  @Then("{string} is defined as a single-valued enumeration")
-  public void isDefinedAsASingleValuedEnumeration(String lookupName) {
-    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
-  }
-
-  @Then("{string} is defined as a multi-valued enumeration")
-  public void isDefinedAsAMultiValuedEnumeration(String lookupName) {
-    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
+  @And("{string} MUST contain at least one standard enumeration")
+  public void mustContainAtLeastOneStandardEnumeration(String arg0) {
   }
 }
