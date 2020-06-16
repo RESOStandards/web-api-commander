@@ -25,42 +25,42 @@ public class BDDProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void processNumber() {
-    markup.append(BDDTemplates.buildNumberTest(dictionaryRow, sheet.getSheetName()));
+  void processNumber(DataDictionaryRow row) {
+    markup.append(BDDTemplates.buildNumberTest(row, sheet.getSheetName()));
   }
 
   @Override
-  void processStringListSingle() {
-    markup.append(BDDTemplates.buildStringListSingleTest(dictionaryRow, sheet.getSheetName()));
+  void processStringListSingle(DataDictionaryRow row) {
+    markup.append(BDDTemplates.buildStringListSingleTest(row, sheet.getSheetName()));
   }
 
   @Override
-  void processString() {
-    markup.append(BDDTemplates.buildStringTest(dictionaryRow, sheet.getSheetName()));
+  void processString(DataDictionaryRow row) {
+    markup.append(BDDTemplates.buildStringTest(row, sheet.getSheetName()));
   }
 
   @Override
-  void processBoolean() {
-    markup.append(BDDTemplates.buildBooleanTest(dictionaryRow, sheet.getSheetName()));
+  void processBoolean(DataDictionaryRow row) {
+    markup.append(BDDTemplates.buildBooleanTest(row, sheet.getSheetName()));
   }
 
   @Override
-  void processStringListMulti() {
-    markup.append(BDDTemplates.buildStringListMultiTest(dictionaryRow, sheet.getSheetName()));
+  void processStringListMulti(DataDictionaryRow row) {
+    markup.append(BDDTemplates.buildStringListMultiTest(row, sheet.getSheetName()));
   }
 
   @Override
-  void processDate() {
-    markup.append(BDDTemplates.buildDateTest(dictionaryRow, sheet.getSheetName()));
+  void processDate(DataDictionaryRow row) {
+    markup.append(BDDTemplates.buildDateTest(row, sheet.getSheetName()));
   }
 
   @Override
-  void processTimestamp() {
-    markup.append(BDDTemplates.buildTimestampTest(dictionaryRow, sheet.getSheetName()));
+  void processTimestamp(DataDictionaryRow row) {
+    markup.append(BDDTemplates.buildTimestampTest(row, sheet.getSheetName()));
   }
 
   @Override
-  void processCollection() {
+  void processCollection(DataDictionaryRow row) {
     LOG.debug("Collection Type is not supported!");
   }
 

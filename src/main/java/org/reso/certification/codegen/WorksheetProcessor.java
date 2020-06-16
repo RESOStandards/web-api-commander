@@ -27,7 +27,6 @@ public abstract class WorksheetProcessor {
 
   String referenceResource = null;
   StringBuffer markup;
-  DataDictionaryRow dictionaryRow;
   Sheet sheet;
   String startTimestamp;
   static final Map<String, String> resourceTemplates = new LinkedHashMap<>();
@@ -141,21 +140,21 @@ public abstract class WorksheetProcessor {
 
   abstract void processResourceSheet(Sheet sheet);
 
-  abstract void processNumber();
+  abstract void processNumber(DataDictionaryRow row);
 
-  abstract void processStringListSingle();
+  abstract void processStringListSingle(DataDictionaryRow row);
 
-  abstract void processString();
+  abstract void processString(DataDictionaryRow row);
 
-  abstract void processBoolean();
+  abstract void processBoolean(DataDictionaryRow row);
 
-  abstract void processStringListMulti();
+  abstract void processStringListMulti(DataDictionaryRow row);
 
-  abstract void processDate();
+  abstract void processDate(DataDictionaryRow row);
 
-  abstract void processTimestamp();
+  abstract void processTimestamp(DataDictionaryRow row);
 
-  abstract void processCollection();
+  abstract void processCollection(DataDictionaryRow row);
 
   abstract void generateOutput();
 
@@ -163,7 +162,7 @@ public abstract class WorksheetProcessor {
     assertTrue(getDefaultErrorMessage("sheet name was null but was expected to contain a resource name!"),
         sheet != null && sheet.getSheetName() != null);
 
-    dictionaryRow = extractDataDictionaryRow(row);
+    DataDictionaryRow dictionaryRow = extractDataDictionaryRow(row);
     dictionaryRow.setParentResourceName(sheet.getSheetName());
 
     processedResourceRows.putIfAbsent(sheet.getSheetName(), new LinkedHashMap<>());
@@ -172,28 +171,28 @@ public abstract class WorksheetProcessor {
     //now that row has been processed, extract field type and assemble the template
     switch (dictionaryRow.getSimpleDataType()) {
       case NUMBER:
-        processNumber();
+        processNumber(dictionaryRow);
         break;
       case STRING_LIST_SINGLE:
-        processStringListSingle();
+        processStringListSingle(dictionaryRow);
         break;
       case STRING:
-        processString();
+        processString(dictionaryRow);
         break;
       case BOOLEAN:
-        processBoolean();
+        processBoolean(dictionaryRow);
         break;
       case STRING_LIST_MULTI:
-        processStringListMulti();
+        processStringListMulti(dictionaryRow);
         break;
       case DATE:
-        processDate();
+        processDate(dictionaryRow);
         break;
       case TIMESTAMP:
-        processTimestamp();
+        processTimestamp(dictionaryRow);
         break;
       case COLLECTION:
-        processCollection();
+        processCollection(dictionaryRow);
         break;
       default:
         if (dictionaryRow.getSimpleDataType() != null)
