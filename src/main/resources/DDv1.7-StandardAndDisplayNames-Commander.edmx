@@ -1,25 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
   <edmx:DataServices>
-
-    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="PropertyEnums">
-      <EnumType Name="AreaSource">
-        <Member Name="Appraiser" />
-        <Member Name="Assessor" />
-        <Member Name="Builder" />
-        <Member Name="Estimated" />
-        <Member Name="Other" />
-        <Member Name="Owner" />
-        <Member Name="Plans" />
-        <Member Name="PublicRecords" />
-        <Member Name="SeeRemarks" />
-      </EnumType>
-    </Schema>
-
     <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="org.reso.metadata">
       <EntityType Name="Property">
         <Property Name="AboveGradeFinishedArea" Type="Edm.Decimal" Precision="14" Scale="2" />
-        <Property Name="AboveGradeFinishedAreaSource" Type="PropertyEnums.AreaSource" />
+        <Property Name="AboveGradeFinishedAreaSource" Type="org.reso.metadata.enums.AreaSource" />
         <Property Name="AboveGradeFinishedAreaUnits" Type="org.reso.metadata.enums.AreaUnits" />
         <Property Name="AccessCode" Type="Edm.String" MaxLength="25" />
         <Property Name="AccessibilityFeatures" Type="org.reso.metadata.enums.AccessibilityFeatures" />
@@ -1416,6 +1401,17 @@
         <Member Name="WaterSoftenerRented" />
         <Member Name="WineCooler" />
         <Member Name="WineRefrigerator" />
+      </EnumType>
+      <EnumType Name="AreaSource">
+        <Member Name="Appraiser" />
+        <Member Name="Assessor" />
+        <Member Name="Builder" />
+        <Member Name="Estimated" />
+        <Member Name="Other" />
+        <Member Name="Owner" />
+        <Member Name="Plans" />
+        <Member Name="PublicRecords" />
+        <Member Name="SeeRemarks" />
       </EnumType>
       <EnumType Name="AreaUnits">
         <Member Name="SquareFeet" />
