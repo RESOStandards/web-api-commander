@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
-<!--
-  >>> To be used as a template for Web API Server 1.0.2 Platinum Certification <<<
+<!-- >>> To be used as a template for Web API Server Core 1.0.2 Certification <<<
 
   NOTES:
     * Anything marked REQUIRED should be filled in.
@@ -133,33 +132,9 @@
     <Parameter Name="MultipleLookupValue1" Value="Refrigerator"/>
     <Parameter Name="MultipleLookupValue2" Value="Stacked"/>
 
-    <!-- REQUIRED: Bronze - Date Field for comparisons. Should be Type="Edm.Date" -->
+    <!-- REQUIRED: Core - Date Field for comparisons. Should be Type="Edm.Date" -->
     <Parameter Name="DateField" Value="ListingContractDate"/>
     <Parameter Name="TimestampField" Value="ModificationTimestamp"/>
-
-    <!-- REQUIRED: Platinum - String Field for comparisons. Should be Type="Edm.String" -->
-    <Parameter Name="StringField" Value="StreetName"/>
-
-    <!-- REQUIRED: Platinum - Expand Testing -->
-    <Parameter Name="ExpandField" Value="ListAgent"/>
-
-    <!-- REQUIRED: Platinum - GeoSpatial Testing -->
-    <Parameter Name="GeoSpatialLatitudeField" Value="Latitude"/>
-    <Parameter Name="GeoSpatialLongitudeField" Value="Longitude"/>
-    <Parameter Name="GeoSpatialField" Value="Coordinates"/>
-    <Parameter Name="GeoSpatialValue" Value="120.34342 35.13123123"/> <!-- "Longitude Latitude" -->
-
-    <!-- REQUIRED: New Fields for WS103 Testing -->
-    <Parameter Name="ValueField" Value="AboveGradeFinishedArea"/>
-    <Parameter Name="CastField" Value="AboveGradeFinishedArea"/>
-    <Parameter Name="CastFieldValue" Value="YOUR CastFieldValue GOES HERE. FOR EXAMPLE, 1200"/>
-    <Parameter Name="ConcatFieldOne" Value="StreetName"/>
-    <Parameter Name="ConcatFieldOneValue" Value="REQUIRED: Your OneValue GOES HERE>"/>
-    <Parameter Name="ConcatFieldTwo" Value="City"/>
-    <Parameter Name="ConcatFieldTwoValue" Value="YOUR TwoValue GOES HERE"/>
-    <Parameter Name="ConcatFieldBothValue"
-               Value="Your OneValue: TwoValue GOES HERE"/> <!-- format: "OneValue: TwoValue" -->
-
 
     <!--
     ############################################################
@@ -217,7 +192,8 @@
     <Parameter Name="WebAPI102_RequiredResourceList" Value="Property,Member,Office,Media" />
 
     <!-- Allowed Resources - Update to 1.8 once it's approved -->
-    <Parameter Name="DD17_WellKnownResourceList" Value="Property,Member,Office,Contacts,ContactListings,HistoryTransactional,InternetTracking,Media,OpenHouse,OUID,Prospecting,Queue,Rules,SavedSearch,Showing,Teams,TeamMembers,ContactListingNotes,OtherPhone,PropertyGreenVerification,PropertyPowerProduction,PropertyRooms,PropertyUnitTypes,SocialMedia" />
+    <Parameter Name="DD17_WellKnownResourceList"
+               Value="Property,Member,Office,Contacts,ContactListings,HistoryTransactional,InternetTracking,Media,OpenHouse,OUID,Prospecting,Queue,Rules,SavedSearch,Showing,Teams,TeamMembers,ContactListingNotes,OtherPhone,PropertyGreenVerification,PropertyPowerProduction,PropertyRooms,PropertyUnitTypes,SocialMedia" />
 
     <!-- Computed Has Value - uses SingleValueLookup field -->
     <Parameter Name="FilterHasField" Value="*Parameter_SingleValueLookupField*" />
@@ -509,13 +485,13 @@
     <Request
       RequestId="REQ-WA103-RC3"
       OutputFile="REQ-WA103-RC05_200OKRequest.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_200_OK*"
+      Url="ClientSettings_WebAPIURI*/*Parameter_200_OK*"
     />
 
     <Request
       RequestId="REQ-WA103-RC5"
       OutputFile="REQ-WA103-RC05_400BadRequest.json"
-      Url="*ClientSettings_WebAPIURI*/*Parameter_400BadRequest*"
+      Url="ClientSettings_WebAPIURI*/*Parameter_400BadRequest*"
     />
 
     <Request
