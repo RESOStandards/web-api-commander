@@ -2,6 +2,7 @@ package org.reso.certification.stepdefs;
 
 import com.google.inject.Inject;
 import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.apache.http.HttpStatus;
@@ -21,17 +22,14 @@ import static org.junit.Assume.assumeTrue;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public class DataDictionary {
-  private static final Logger LOG = LogManager.getLogger(DataDictionary.class);
-
   //TODO: make this a dynamic property based on DD version
   public static final String REFERENCE_RESOURCE = "DDv1.7-StandardAndDisplayNames-Commander.xlsx";
-
   static final AtomicBoolean shouldValidateMetadata = new AtomicBoolean(true);
   static final AtomicReference<String> currentResourceName = new AtomicReference<>();
 
   //used to keep track of the found standard fields being certified on a per-resource basis
   static final AtomicReference<Map<String, Map<String, CsdlProperty>>> standardFieldMap = new AtomicReference<>(new LinkedHashMap<>());
-
+  private static final Logger LOG = LogManager.getLogger(DataDictionary.class);
   @Inject
   WebAPITestContainer container;
 
@@ -163,5 +161,33 @@ public class DataDictionary {
 
   @And("{string} MUST contain at least one standard enumeration")
   public void mustContainAtLeastOneStandardEnumeration(String arg0) {
+  }
+
+  @Given("metadata exist in the test container")
+  public void metadataExistInTheTestContainer() {
+  }
+
+  @Then("field synonyms MUST NOT exist in the metadata")
+  public void fieldSynonymsMUSTNOTExistInTheMetadata() {
+  }
+
+  @And("enumeration synonyms MUST NOT exist in the metadata")
+  public void enumerationSynonymsMUSTNOTExistInTheMetadata() {
+  }
+
+  @Then("fields are checked for similarity with standard names")
+  public void fieldsAreCheckedForSimilarityWithStandardNames() {
+  }
+
+  @And("enumerations are checked for similarly with standard names")
+  public void enumerationsAreCheckedForSimilarlyWithStandardNames() {
+  }
+
+  @Then("fields are checked for substring matches with standard names")
+  public void fieldsAreCheckedForSubstringMatchesWithStandardNames() {
+  }
+
+  @And("enumerations are checked for substring matches with standard names")
+  public void enumerationsAreCheckedForSubstringMatchesWithStandardNames() {
   }
 }

@@ -9,7 +9,7 @@ import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.codegen.BDDProcessor;
-import org.reso.certification.codegen.DataDictionaryController;
+import org.reso.certification.codegen.DataDictionaryCodeGenerator;
 import org.reso.certification.codegen.EDMXProcessor;
 import org.reso.models.ClientSettings;
 import org.reso.models.Request;
@@ -254,14 +254,14 @@ public class App {
 
       } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)) {
         try {
-          DataDictionaryController generator = new DataDictionaryController(new BDDProcessor());
+          DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new BDDProcessor());
           generator.processWorksheets();
         } catch (Exception ex) {
           LOG.error(getDefaultErrorMessage(ex));
         }
       } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_EDMX)) {
         try {
-          DataDictionaryController generator = new DataDictionaryController(new EDMXProcessor());
+          DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new EDMXProcessor());
           generator.processWorksheets();
         } catch (Exception ex) {
           LOG.error(getDefaultErrorMessage(ex));

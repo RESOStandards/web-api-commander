@@ -4,12 +4,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.reso.commander.common.Utils;
-import org.reso.models.DataDictionaryRow;
+import org.reso.models.StandardField;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.SAXParserFactory;
 import java.io.StringReader;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_RESOURCE;
 import static org.reso.commander.common.DataDictionaryMetadata.v1_7.*;
@@ -84,87 +87,53 @@ public class EDMXProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void processNumber(DataDictionaryRow row) {
+  void processNumber(StandardField row) {
     markup.append(EDMXTemplates.buildNumberMember(row));
   }
 
   @Override
-  void processStringListSingle(DataDictionaryRow row) {
+  void processStringListSingle(StandardField row) {
     markup.append(EDMXTemplates.buildEnumTypeSingleMember(row));
   }
 
   @Override
-  void processString(DataDictionaryRow row) {
+  void processString(StandardField row) {
     markup.append(EDMXTemplates.buildStringMember(row));
   }
 
   @Override
-  void processBoolean(DataDictionaryRow row) {
+  void processBoolean(StandardField row) {
    markup.append(EDMXTemplates.buildBooleanMember(row));
   }
 
   @Override
-  void processStringListMulti(DataDictionaryRow row) {
+  void processStringListMulti(StandardField row) {
     markup.append(EDMXTemplates.buildEnumTypeMultiMember(row));
   }
 
   @Override
-  void processDate(DataDictionaryRow row) {
+  void processDate(StandardField row) {
     markup.append(EDMXTemplates.buildDateMember(row));
   }
 
   @Override
-  void processTimestamp(DataDictionaryRow row) {
+  void processTimestamp(StandardField row) {
     markup.append(EDMXTemplates.buildDateTimeWithOffsetMember(row));
   }
 
   @Override
-  void processCollection(DataDictionaryRow row) {
+  void processCollection(StandardField row) {
     LOG.debug("Collection Type is not supported at this time!");
   }
 
   @Override
   void generateOutput() {
-    StringBuilder entityContainerTag = new StringBuilder();
 
-    //add entity type definitions for each of the Data Dictionary resources to EDM
-    entityContainerTag.append("      <EntityContainer Name=\"RESO\">\n");
-    resourceTemplates.forEach((name, templateContent) ->
-            entityContainerTag
-                    .append("        <EntitySet Name=\"")
-                    .append(name).append("\" EntityType=\"" + RESO_NAMESPACE)
-                    .append(".")
-                    .append(name).append("\" />\n"));
-    entityContainerTag.append("      </EntityContainer>\n");
-
-
-    StringBuilder content = new StringBuilder();
-
-    content.append(openingDataServicesTag);
-    content.append("    <Schema xmlns=\"http://docs.oasis-open.org/odata/ns/edm\" Namespace=\"" + RESO_NAMESPACE + "\">\n");
-
-    //iterate through each of the found resources and generate their edm:EntityType content content
-    resourceTemplates.forEach((name, templateContent) -> content.append(templateContent));
-
-    content.append("\n").append(entityContainerTag.toString());
-    content.append("    </Schema>\n");
-
-    //add opening tag for enums namespace
-    content.append("\n    <Schema xmlns=\"http://docs.oasis-open.org/odata/ns/edm\" Namespace=\"" + RESO_NAMESPACE + ".enums\">");
-
-    //iterate through each of the lookup values and generate their edm:EnumType content
-    //TODO: single vs. multi, single for now
-    getLookups().forEach((lookupName, lookup) -> {
-      content.append("\n      <EnumType Name=\"").append(lookupName).append("\">");
-      lookup.forEach(member -> content.append("\n        <Member Name=\"").append(member).append("\" />"));
-      content.append("\n      </EnumType>");
-    });
-    //closing tag for enums schema definition
-    content.append("\n    </Schema>\n");
-
-    content.append(closingDataServicesTag);
-
-    final String output = content.toString();
+    final String output =
+        openingDataServicesTag +
+        buildEntityTypeMarkup() +
+        buildEnumTypeMarkup() +
+        closingDataServicesTag;
 
     try {
       //check the document that was created - will throw exceptions if that document doesn't contain valid XML
@@ -177,26 +146,145 @@ public class EDMXProcessor extends WorksheetProcessor {
     }
   }
 
+  private String buildEntityContainerMarkup() {
+    StringBuilder content = new StringBuilder();
+
+    //add entity type definitions for each of the Data Dictionary resources to EDM
+    content.append("      <EntityContainer Name=\"RESO\">\n");
+    resourceTemplates.forEach((name, templateContent) ->
+        content
+            .append("        <EntitySet Name=\"")
+            .append(name).append("\" EntityType=\"" + RESO_NAMESPACE)
+            .append(".")
+            .append(name).append("\" />\n"));
+    content.append("      </EntityContainer>\n");
+    return content.toString();
+  }
+
+  private String buildEntityTypeMarkup() {
+    StringBuilder content = new StringBuilder();
+    content.append("    <Schema xmlns=\"http://docs.oasis-open.org/odata/ns/edm\" Namespace=\"" + RESO_NAMESPACE + "\">\n");
+
+    //iterate through each of the found resources and generate their edm:EntityType content content
+    resourceTemplates.forEach((name, templateContent) -> content.append(templateContent));
+
+    content.append(buildEntityContainerMarkup());
+    content.append("    </Schema>\n");
+    return content.toString();
+  }
+
+  private String buildEnumTypeMarkup() {
+    //enumeration markup keyed by enumeration standard name
+    Map<String, String> markupMap = new LinkedHashMap<>();
+
+    //add opening tag for enums namespace
+    StringBuilder content =
+        new StringBuilder("\n    <Schema xmlns=\"http://docs.oasis-open.org/odata/ns/edm\" Namespace=\"" + RESO_NAMESPACE + ".enums\">");
+
+    processedStandardFields.forEach((resourceName, standardFieldMap) -> {
+      standardFieldMap.forEach((standardName, standardField) -> {
+        if (standardField.isSingleEnumeration()) {
+          markupMap.putIfAbsent(standardName, buildSingleEnumTypeMarkup(standardField.getLookupStandardName()));
+        }
+
+        if (standardField.isMultipleEnumeration()) {
+          markupMap.putIfAbsent(standardName, buildMultipleEnumTypeMarkup(standardField.getLookupStandardName()));
+        }
+      });
+    });
+
+    markupMap.forEach((lookupStandardName, markup) -> {
+      content.append(markup);
+    });
+
+    //closing tag for enums schema definition
+    content.append("\n    </Schema>\n");
+    return content.toString();
+  }
+
+  /*
+    <EnumType Name="ShippingMethod">
+      <Member Name="FirstClass" />
+      <Member Name="TwoDay" />
+      <Member Name="Overnight" />
+    </EnumType>
+   */
+  private String buildSingleEnumTypeMarkup(String lookupStandardName) {
+    StringBuilder content = new StringBuilder();
+
+    if (getEnumerations().get(lookupStandardName) != null) {
+      content.append("\n      <EnumType Name=\"").append(lookupStandardName).append("\">");
+
+      //iterate through each of the lookup values and generate their edm:EnumType content
+      getEnumerations().get(lookupStandardName).forEach(standardName -> {
+        content.append("\n        <Member Name=\"").append(standardName).append("\" />");
+      });
+
+      content.append("\n      </EnumType>");
+    }
+    return content.toString();
+  }
+
+  /*
+    <EnumType Name="Pattern" UnderlyingType="Edm.Int32" IsFlags="true">
+        <Member Name="Plain"             Value="0" />
+        <Member Name="Red"               Value="1" />
+        <Member Name="Blue"              Value="2" />
+        <Member Name="Yellow"            Value="4" />
+        <Member Name="Solid"             Value="8" />
+        <Member Name="Striped"           Value="16" />
+        <Member Name="SolidRed"          Value="9" />
+        <Member Name="SolidBlue"         Value="10" />
+        <Member Name="SolidYellow"       Value="12" />
+        <Member Name="RedBlueStriped"    Value="19" />
+        <Member Name="RedYellowStriped"  Value="21" />
+        <Member Name="BlueYellowStriped" Value="22" />
+      </EnumType>
+   */
+  private String buildMultipleEnumTypeMarkup(String lookupStandardName) {
+    StringBuilder content = new StringBuilder();
+
+    if (getEnumerations().get(lookupStandardName) != null) {
+      content.append("\n      <EnumType Name=\"").append(lookupStandardName).append("\"")
+          .append(" UnderlyingType=\"Edm.Int64\" IsFlags=\"true\">\n");
+
+      //iterate through each of the lookup values and generate their edm:EnumType content
+      AtomicInteger currentIndex = new AtomicInteger(0);
+      getEnumerations().get(lookupStandardName).forEach(standardName -> {
+        content.append("        <Member Name=\"").append(standardName).append("\"");
+
+        //each item needs to be a power of 2 to be unique due to bitmasking of values
+        content.append(" Value=\"").append(currentIndex.getAndIncrement() == 0 ? 0 : (long)Math.pow(2, currentIndex.get() - 2)).append("\" ");
+        content.append(" />\n");
+      });
+
+      content.append("      </EnumType>");
+    }
+
+    return content.toString();
+  }
+
+
   public static final class EDMXTemplates {
 
-    public static String buildBooleanMember(DataDictionaryRow row) {
+    public static String buildBooleanMember(StandardField row) {
       if (row == null) return EMPTY_STRING;
       return "        <Property Name=\""+ row.getStandardName() + "\" Type=\"Edm.Boolean\" />\n";
     }
 
-    public static String buildDateMember(DataDictionaryRow row) {
+    public static String buildDateMember(StandardField row) {
       if (row == null) return EMPTY_STRING;
       return "        <Property Name=\""+ row.getStandardName() + "\" Type=\"Edm.Date\" />\n";
     }
 
-    public static String buildNumberMember(DataDictionaryRow row) {
+    public static String buildNumberMember(StandardField row) {
       if (row == null) return EMPTY_STRING;
 
       if (row.getSuggestedMaxPrecision() != null) return buildDecimalMember(row);
       else return buildIntegerMember(row);
     }
 
-    public static String buildDecimalMember(DataDictionaryRow row) {
+    public static String buildDecimalMember(StandardField row) {
       if (row == null) return EMPTY_STRING;
       String template = "        <Property Name=\"" + row.getStandardName() + "\" Type=\"Edm.Decimal\"";
 
@@ -211,26 +299,26 @@ public class EDMXProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildIntegerMember(DataDictionaryRow row) {
+    public static String buildIntegerMember(StandardField row) {
       if (row == null) return EMPTY_STRING;
       return  "        <Property Name=\"" + row.getStandardName() + "\" Type=\"Edm.Int64\" />\n";
     }
 
-    public static String buildEnumTypeMultiMember(DataDictionaryRow row) {
+    public static String buildEnumTypeMultiMember(StandardField row) {
       if (row == null || row.getLookup() == null) return EMPTY_STRING;
       if (!row.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
+      return "        <Property Name=\"" + row.getStandardName() + "\" Type=\"" + RESO_NAMESPACE + ".enums." + row.getLookupStandardName() + "\" />\n";
+    }
+
+    public static String buildEnumTypeSingleMember(StandardField row) {
+      if (row == null || row.getLookup() == null) return EMPTY_STRING;
+      if (!row.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
+
       String lookupName = row.getLookup().replace("Lookups", "").trim();
       return "        <Property Name=\"" + row.getStandardName() + "\" Type=\"" + RESO_NAMESPACE + ".enums." + lookupName + "\" />\n";
     }
 
-    public static String buildEnumTypeSingleMember(DataDictionaryRow row) {
-      if (row == null || row.getLookup() == null) return EMPTY_STRING;
-      if (!row.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
-      String lookupName = row.getLookup().replace("Lookups", "").trim();
-      return "        <Property Name=\"" + row.getStandardName() + "\" Type=\"" + RESO_NAMESPACE + ".enums." + lookupName + "\" />\n";
-    }
-
-    public static String buildStringMember(DataDictionaryRow row) {
+    public static String buildStringMember(StandardField row) {
       if (row == null) return EMPTY_STRING;
       String template = "        <Property Name=\"" + row.getStandardName() + "\" Type=\"Edm.String\"";
 
@@ -240,7 +328,7 @@ public class EDMXProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildDateTimeWithOffsetMember(DataDictionaryRow row) {
+    public static String buildDateTimeWithOffsetMember(StandardField row) {
       if (row == null) return EMPTY_STRING;
       String template = "        <Property Name=\"" + row.getStandardName() + "\" Type=\"Edm.DateTimeOffset\"";
 

@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.reso.commander.common.Utils;
-import org.reso.models.DataDictionaryRow;
+import org.reso.models.StandardField;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -25,42 +25,42 @@ public class BDDProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void processNumber(DataDictionaryRow row) {
+  void processNumber(StandardField row) {
     markup.append(BDDTemplates.buildNumberTest(row, sheet.getSheetName()));
   }
 
   @Override
-  void processStringListSingle(DataDictionaryRow row) {
+  void processStringListSingle(StandardField row) {
     markup.append(BDDTemplates.buildStringListSingleTest(row, sheet.getSheetName()));
   }
 
   @Override
-  void processString(DataDictionaryRow row) {
+  void processString(StandardField row) {
     markup.append(BDDTemplates.buildStringTest(row, sheet.getSheetName()));
   }
 
   @Override
-  void processBoolean(DataDictionaryRow row) {
+  void processBoolean(StandardField row) {
     markup.append(BDDTemplates.buildBooleanTest(row, sheet.getSheetName()));
   }
 
   @Override
-  void processStringListMulti(DataDictionaryRow row) {
+  void processStringListMulti(StandardField row) {
     markup.append(BDDTemplates.buildStringListMultiTest(row, sheet.getSheetName()));
   }
 
   @Override
-  void processDate(DataDictionaryRow row) {
+  void processDate(StandardField row) {
     markup.append(BDDTemplates.buildDateTest(row, sheet.getSheetName()));
   }
 
   @Override
-  void processTimestamp(DataDictionaryRow row) {
+  void processTimestamp(StandardField row) {
     markup.append(BDDTemplates.buildTimestampTest(row, sheet.getSheetName()));
   }
 
   @Override
-  void processCollection(DataDictionaryRow row) {
+  void processCollection(StandardField row) {
     LOG.debug("Collection Type is not supported!");
   }
 
@@ -91,14 +91,7 @@ public class BDDProcessor extends WorksheetProcessor {
               "    And valid metadata were retrieved from the server\n";
     }
 
-    public static String buildSynonymTest(DataDictionaryRow row, String... tags) {
-    /*
-      TODO: check for any synonyms of the standard field names in the metadata.
-     */
-      return null;
-    }
-
-    public static String buildBooleanTest(DataDictionaryRow row, String... tags) {
+    public static String buildBooleanTest(StandardField row, String... tags) {
       if (row == null) return null;
       return
           "\n  @" + row.getStandardName() + SINGLE_SPACE +
@@ -108,7 +101,7 @@ public class BDDProcessor extends WorksheetProcessor {
               "    Then \"" + row.getStandardName() + "\" MUST be \"Boolean\" data type\n";
     }
 
-    public static String buildDateTest(DataDictionaryRow row, String... tags) {
+    public static String buildDateTest(StandardField row, String... tags) {
       if (row == null) return null;
       return
           "\n  @" + row.getStandardName() + SINGLE_SPACE +
@@ -118,14 +111,14 @@ public class BDDProcessor extends WorksheetProcessor {
               "    Then \"" + row.getStandardName() + "\" MUST be \"Date\" data type\n";
     }
 
-    public static String buildNumberTest(DataDictionaryRow row, String... tags) {
+    public static String buildNumberTest(StandardField row, String... tags) {
       if (row == null) return null;
 
       if (row.getSuggestedMaxPrecision() != null) return buildDecimalTest(row, tags);
       else return buildIntegerTest(row, tags);
     }
 
-    public static String buildDecimalTest(DataDictionaryRow row, String... tags) {
+    public static String buildDecimalTest(StandardField row, String... tags) {
       if (row == null) return null;
       String template =
           "\n  @" + row.getStandardName() + SINGLE_SPACE +
@@ -145,7 +138,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildIntegerTest(DataDictionaryRow row, String... tags) {
+    public static String buildIntegerTest(StandardField row, String... tags) {
       if (row == null) return null;
       return
           "\n  @" + row.getStandardName() + SINGLE_SPACE +
@@ -155,7 +148,7 @@ public class BDDProcessor extends WorksheetProcessor {
               "    Then \"" + row.getStandardName() + "\" MUST be \"Integer\" data type\n";
     }
 
-    public static String buildStringListMultiTest(DataDictionaryRow row, String... tags) {
+    public static String buildStringListMultiTest(StandardField row, String... tags) {
       if (row == null) return null;
 
       String template = "\n  @" + row.getStandardName() + SINGLE_SPACE +
@@ -171,7 +164,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildStringListSingleTest(DataDictionaryRow row, String... tags) {
+    public static String buildStringListSingleTest(StandardField row, String... tags) {
       if (row == null) return null;
       String template = "\n  @" + row.getStandardName() + SINGLE_SPACE +
               Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
@@ -187,7 +180,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildStringTest(DataDictionaryRow row, String... tags) {
+    public static String buildStringTest(StandardField row, String... tags) {
       if (row == null) return null;
       String template =
           "\n  @" + row.getStandardName() + SINGLE_SPACE +
@@ -203,7 +196,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildTimestampTest(DataDictionaryRow row, String... tags) {
+    public static String buildTimestampTest(StandardField row, String... tags) {
       if (row == null) return null;
       return
           "\n  @" + row.getStandardName() + SINGLE_SPACE +

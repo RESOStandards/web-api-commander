@@ -9,7 +9,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.reso.commander.common.Utils;
-import org.reso.models.DataDictionaryRow;
+import org.reso.models.StandardField;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,15 +23,41 @@ import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_RESOURCE;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public abstract class WorksheetProcessor {
+  public static final List<String> WELL_KNOWN_HEADERS = Arrays.asList(
+      STANDARD_NAME,
+      DISPLAY_NAME,
+      DEFINITION,
+      GROUPS,
+      SIMPLE_DATA_TYPE,
+      SUGGESTED_MAX_LENGTH,
+      SYNONYM,
+      ELEMENT_STATUS,
+      BEDES,
+      CERTIFICATION_LEVEL,
+      RECORD_ID,
+      LOOKUP_STATUS,
+      LOOKUP,
+      COLLECTION,
+      SUGGESTED_MAX_PRECISION,
+      REPEATING_ELEMENT,
+      PROPERTY_TYPES,
+      PAYLOADS,
+      SPANISH_STANDARD_NAME,
+      STATUS_CHANGE_DATE,
+      REVISED_DATE,
+      ADDED_IN_VERSION,
+      WIKI_PAGE_TITLE,
+      WIKI_PAGE_URL,
+      WIKI_PAGE_ID
+  );
+  static final Map<String, String> resourceTemplates = new LinkedHashMap<>();
+  static final Map<String, Set<String>> enumerations = new LinkedHashMap<>();
+  static final Map<String, Map<String, StandardField>> processedStandardFields = new LinkedHashMap<>(new LinkedHashMap<>());
   private static final Logger LOG = LogManager.getLogger(WorksheetProcessor.class);
-
   String referenceResource = null;
   StringBuffer markup;
   Sheet sheet;
   String startTimestamp;
-  static final Map<String, String> resourceTemplates = new LinkedHashMap<>();
-  static final Map<String, Set<String>> lookups = new LinkedHashMap<>();
-  static final Map<String, Map<String, DataDictionaryRow>> processedResourceRows = new LinkedHashMap<>(new LinkedHashMap<>());
 
   public WorksheetProcessor() {
     startTimestamp = Utils.getTimestamp();
@@ -72,13 +98,14 @@ public abstract class WorksheetProcessor {
 
   public static Boolean getBooleanValue(Integer index, Row row, Boolean defaultValue) {
     if (!(index >= 0)) return defaultValue;
+    final String BOOLEAN_VALUE = "yes";
+
     Boolean value = false;
     String cellValue;
     DataFormatter formatter = new DataFormatter();
     try {
       cellValue = formatter.formatCellValue(row.getCell(index));
-      //value coming from spreadsheet is "yes"
-      if (cellValue.toLowerCase().contains("yes")) {
+      if (cellValue.toLowerCase().contains(BOOLEAN_VALUE)) {
         value = true;
       }
     } catch (Exception ex) {
@@ -108,8 +135,8 @@ public abstract class WorksheetProcessor {
     return getArrayValue(index, row, new ArrayList<>());
   }
 
-  public static DataDictionaryRow extractDataDictionaryRow(Row row) {
-    return new DataDictionaryRow.Builder()
+  public static StandardField extractDataDictionaryRow(Row row) {
+    return new StandardField.Builder()
         .setStandardName(getStringValue(STANDARD_NAME_INDEX, row))
         .setDisplayName(getStringValue(DISPLAY_NAME_INDEX, row))
         .setDefinition(getStringValue(DEFINITION_INDEX, row))
@@ -140,21 +167,21 @@ public abstract class WorksheetProcessor {
 
   abstract void processResourceSheet(Sheet sheet);
 
-  abstract void processNumber(DataDictionaryRow row);
+  abstract void processNumber(StandardField row);
 
-  abstract void processStringListSingle(DataDictionaryRow row);
+  abstract void processStringListSingle(StandardField row);
 
-  abstract void processString(DataDictionaryRow row);
+  abstract void processString(StandardField row);
 
-  abstract void processBoolean(DataDictionaryRow row);
+  abstract void processBoolean(StandardField row);
 
-  abstract void processStringListMulti(DataDictionaryRow row);
+  abstract void processStringListMulti(StandardField row);
 
-  abstract void processDate(DataDictionaryRow row);
+  abstract void processDate(StandardField row);
 
-  abstract void processTimestamp(DataDictionaryRow row);
+  abstract void processTimestamp(StandardField row);
 
-  abstract void processCollection(DataDictionaryRow row);
+  abstract void processCollection(StandardField row);
 
   abstract void generateOutput();
 
@@ -162,41 +189,44 @@ public abstract class WorksheetProcessor {
     assertTrue(getDefaultErrorMessage("sheet name was null but was expected to contain a resource name!"),
         sheet != null && sheet.getSheetName() != null);
 
-    DataDictionaryRow dictionaryRow = extractDataDictionaryRow(row);
-    dictionaryRow.setParentResourceName(sheet.getSheetName());
+    StandardField standardField = extractDataDictionaryRow(row);
+    standardField.setParentResourceName(sheet.getSheetName());
 
-    processedResourceRows.putIfAbsent(sheet.getSheetName(), new LinkedHashMap<>());
-    processedResourceRows.get(sheet.getSheetName()).put(dictionaryRow.getSimpleDataType(), dictionaryRow);
+    //add empty top-level resource name map
+    processedStandardFields.putIfAbsent(sheet.getSheetName(), new LinkedHashMap<>());
+
+    //add a resource, standard field
+    processedStandardFields.get(sheet.getSheetName()).put(standardField.getStandardName(), standardField);
 
     //now that row has been processed, extract field type and assemble the template
-    switch (dictionaryRow.getSimpleDataType()) {
+    switch (standardField.getSimpleDataType()) {
       case NUMBER:
-        processNumber(dictionaryRow);
+        processNumber(standardField);
         break;
       case STRING_LIST_SINGLE:
-        processStringListSingle(dictionaryRow);
+        processStringListSingle(standardField);
         break;
       case STRING:
-        processString(dictionaryRow);
+        processString(standardField);
         break;
       case BOOLEAN:
-        processBoolean(dictionaryRow);
+        processBoolean(standardField);
         break;
       case STRING_LIST_MULTI:
-        processStringListMulti(dictionaryRow);
+        processStringListMulti(standardField);
         break;
       case DATE:
-        processDate(dictionaryRow);
+        processDate(standardField);
         break;
       case TIMESTAMP:
-        processTimestamp(dictionaryRow);
+        processTimestamp(standardField);
         break;
       case COLLECTION:
-        processCollection(dictionaryRow);
+        processCollection(standardField);
         break;
       default:
-        if (dictionaryRow.getSimpleDataType() != null)
-          LOG.debug("Data type: " + dictionaryRow.getSimpleDataType() + " is not supported!");
+        if (standardField.getSimpleDataType() != null)
+          LOG.debug("Data type: " + standardField.getSimpleDataType() + " is not supported!");
     }
   }
 
@@ -214,8 +244,8 @@ public abstract class WorksheetProcessor {
 
   public Workbook getReferenceWorkbook() {
     try {
-      return new XSSFWorkbook(
-              OPCPackage.open(Objects.requireNonNull(this.getClass().getClassLoader().getResource(getReferenceResource())).getFile()));
+      return new XSSFWorkbook(OPCPackage.open(Objects.requireNonNull(
+          this.getClass().getClassLoader().getResource(getReferenceResource())).getFile()));
     } catch (Exception ex) {
       LOG.error(getDefaultErrorMessage(ex));
     }
@@ -227,63 +257,36 @@ public abstract class WorksheetProcessor {
     reset();
   }
 
-  public void buildLookups() {
-    final String TAB_NAME = "Lookup Fields and Values";
-    final int LOOKUP_INDEX = 0, LOOKUP_VALUE_INDEX = 1;
-    DataFormatter formatter = new DataFormatter();
-    AtomicReference<String> lookup = new AtomicReference<>();
-    AtomicReference<String> lookupValue = new AtomicReference<>();
+  public void buildEnumerationMap() {
+    final String ENUMERATION_TAB_NAME = "Lookup Fields and Values";
+    final int LOOKUP_NAME_INDEX = 0, STANDARD_NAME_INDEX = 1;
 
-    Sheet sheet = getReferenceWorkbook().getSheet(TAB_NAME);
+    DataFormatter formatter = new DataFormatter();
+    AtomicReference<String> lookupName = new AtomicReference<>();
+    AtomicReference<String> standardName = new AtomicReference<>();
+
+    Sheet sheet = getReferenceWorkbook().getSheet(ENUMERATION_TAB_NAME);
     sheet.rowIterator().forEachRemaining(row -> {
       if (row.getRowNum() > 0) {
-        lookup.set(formatter.formatCellValue(row.getCell(LOOKUP_INDEX)));
-        lookupValue.set(formatter.formatCellValue(row.getCell(LOOKUP_VALUE_INDEX)));
+        lookupName.set(formatter.formatCellValue(row.getCell(LOOKUP_NAME_INDEX)));
+        standardName.set(formatter.formatCellValue(row.getCell(STANDARD_NAME_INDEX)));
 
-        if (!lookups.containsKey(lookup.get())) {
-          lookups.put(lookup.get(), new LinkedHashSet<>());
+        if (!enumerations.containsKey(lookupName.get())) {
+          enumerations.put(lookupName.get(), new LinkedHashSet<>());
         }
-        lookups.get(lookup.get()).add(lookupValue.get());
+        enumerations.get(lookupName.get()).add(standardName.get());
       }
     });
-    lookups.forEach((key, items) -> LOG.info("key: " + key + " , items: " + items.toString()));
+    enumerations.forEach((key, items) -> LOG.info("key: " + key + " , items: " + items.toString()));
   }
 
-  public Map<String, Set<String>> getLookups() {
-    return lookups;
+  public Map<String, Set<String>> getEnumerations() {
+    return enumerations;
   }
 
   public void reset() {
     markup = new StringBuffer();
   }
-
-  public static final List<String> WELL_KNOWN_HEADERS = Arrays.asList(
-      STANDARD_NAME,
-      DISPLAY_NAME,
-      DEFINITION,
-      GROUPS,
-      SIMPLE_DATA_TYPE,
-      SUGGESTED_MAX_LENGTH,
-      SYNONYM,
-      ELEMENT_STATUS,
-      BEDES,
-      CERTIFICATION_LEVEL,
-      RECORD_ID,
-      LOOKUP_STATUS,
-      LOOKUP,
-      COLLECTION,
-      SUGGESTED_MAX_PRECISION,
-      REPEATING_ELEMENT,
-      PROPERTY_TYPES,
-      PAYLOADS,
-      SPANISH_STANDARD_NAME,
-      STATUS_CHANGE_DATE,
-      REVISED_DATE,
-      ADDED_IN_VERSION,
-      WIKI_PAGE_TITLE,
-      WIKI_PAGE_URL,
-      WIKI_PAGE_ID
-  );
 
   public static final class WELL_KNOWN_DATA_TYPES {
     public static final String
