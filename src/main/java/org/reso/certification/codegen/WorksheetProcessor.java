@@ -277,7 +277,7 @@ public abstract class WorksheetProcessor {
         enumerations.get(lookupName.get()).add(standardName.get());
       }
     });
-    enumerations.forEach((key, items) -> LOG.info("key: " + key + " , items: " + items.toString()));
+    enumerations.forEach((key, items) -> LOG.debug("key: " + key + " , items: " + items.toString()));
   }
 
   public Map<String, Set<String>> getEnumerations() {

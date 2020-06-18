@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_RESOURCE;
-import static org.reso.commander.common.DataDictionaryMetadata.v1_7.*;
+import static org.reso.commander.common.DataDictionaryMetadata.v1_7.WELL_KNOWN_KEYS.*;
 
 public class EDMXProcessor extends WorksheetProcessor {
   private static final Logger LOG = LogManager.getLogger(EDMXProcessor.class);
@@ -50,13 +50,15 @@ public class EDMXProcessor extends WorksheetProcessor {
       case PROPERTY: targetKeyName = "ListingKey"; break;
       case MEMBER: targetKeyName = "MemberKey"; break;
       case OFFICE: targetKeyName = "OfficeKey"; break;
-      case CONTACTS: targetKeyName = "ContactsKey"; break;
+      case CONTACTS:
+      case CONTACT_LISTING_NOTES:
+        targetKeyName = "ContactKey"; break;
       case CONTACT_LISTINGS: targetKeyName = "ContactListingsKey"; break;
       case HISTORY_TRANSACTIONAL: targetKeyName = "HistoryTransactionalKey"; break;
       case INTERNET_TRACKING: targetKeyName = "EventKey"; break;
       case MEDIA: targetKeyName = "MediaKey"; break;
       case OPEN_HOUSE: targetKeyName = "OpenHouseKey"; break;
-      case OUID: targetKeyName = "OrganizationUniqueKey"; break;
+      case OUID: targetKeyName = "OrganizationUniqueIdKey"; break;
       case PROSPECTING: targetKeyName = "ProspectingKey"; break;
       case QUEUE: targetKeyName = "QueueTransactionKey"; break;
       case RULES: targetKeyName = "RuleKey"; break;
@@ -64,7 +66,6 @@ public class EDMXProcessor extends WorksheetProcessor {
       case SHOWING: targetKeyName = "ShowingKey"; break;
       case TEAMS: targetKeyName = "TeamKey"; break;
       case TEAM_MEMBERS: targetKeyName = "TeamMemberKey"; break;
-      case CONTACT_LISTING_NOTES: targetKeyName = "ContactKey"; break;
       case OTHER_PHONE: targetKeyName = "OtherPhoneKey"; break;
       case PROPERTY_GREEN_VERIFICATION: targetKeyName = "GreenBuildingVerificationKey"; break;
       case PROPERTY_POWER_PRODUCTION: targetKeyName = "PowerProductionKey"; break;
@@ -103,7 +104,7 @@ public class EDMXProcessor extends WorksheetProcessor {
 
   @Override
   void processBoolean(StandardField row) {
-   markup.append(EDMXTemplates.buildBooleanMember(row));
+    markup.append(EDMXTemplates.buildBooleanMember(row));
   }
 
   @Override
@@ -148,8 +149,6 @@ public class EDMXProcessor extends WorksheetProcessor {
 
   private String buildEntityContainerMarkup() {
     StringBuilder content = new StringBuilder();
-
-    //add entity type definitions for each of the Data Dictionary resources to EDM
     content.append("      <EntityContainer Name=\"RESO\">\n");
     resourceTemplates.forEach((name, templateContent) ->
         content
@@ -166,9 +165,13 @@ public class EDMXProcessor extends WorksheetProcessor {
     content.append("    <Schema xmlns=\"http://docs.oasis-open.org/odata/ns/edm\" Namespace=\"" + RESO_NAMESPACE + "\">\n");
 
     //iterate through each of the found resources and generate their edm:EntityType content content
-    resourceTemplates.forEach((name, templateContent) -> content.append(templateContent));
+    resourceTemplates.forEach((name, templateContent) -> {
+      content.append(templateContent);
+    });
 
+    //nest entity container in main namespace
     content.append(buildEntityContainerMarkup());
+
     content.append("    </Schema>\n");
     return content.toString();
   }
@@ -211,14 +214,19 @@ public class EDMXProcessor extends WorksheetProcessor {
    */
   private String buildSingleEnumTypeMarkup(String lookupStandardName) {
     StringBuilder content = new StringBuilder();
-
     if (getEnumerations().get(lookupStandardName) != null) {
       content.append("\n      <EnumType Name=\"").append(lookupStandardName).append("\">");
 
-      //iterate through each of the lookup values and generate their edm:EnumType content
-      getEnumerations().get(lookupStandardName).forEach(standardName -> {
-        content.append("\n        <Member Name=\"").append(standardName).append("\" />");
-      });
+      if (getEnumerations().get(lookupStandardName).size() > 0) {
+
+        //iterate through each of the lookup values and generate their edm:EnumType content
+        getEnumerations().get(lookupStandardName).forEach(standardName -> {
+          content.append("\n        <Member Name=\"").append(standardName).append("\" />");
+        });
+
+      } else {
+        content.append("<Annotation Term=\"org.reso.metadata.annotations\" String=\"Empty Enumeration\"/>");
+      }
 
       content.append("\n      </EnumType>");
     }
@@ -253,7 +261,7 @@ public class EDMXProcessor extends WorksheetProcessor {
       getEnumerations().get(lookupStandardName).forEach(standardName -> {
         content.append("        <Member Name=\"").append(standardName).append("\"");
 
-        //each item needs to be a power of 2 to be unique due to bitmasking of values
+        //each item needs to be a power of 2 to be unique due to bit masking of values
         content.append(" Value=\"").append(currentIndex.getAndIncrement() == 0 ? 0 : (long)Math.pow(2, currentIndex.get() - 2)).append("\" ");
         content.append(" />\n");
       });
