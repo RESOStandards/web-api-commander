@@ -13,9 +13,9 @@ import org.reso.models.StandardField;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
-import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_COLUMN_INDICES.*;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.*;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_HEADER_NAMES.COLLECTION;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_HEADER_NAMES.*;
@@ -23,33 +23,7 @@ import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_RESOURCE;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public abstract class WorksheetProcessor {
-  public static final List<String> WELL_KNOWN_HEADERS = Arrays.asList(
-      STANDARD_NAME,
-      DISPLAY_NAME,
-      DEFINITION,
-      GROUPS,
-      SIMPLE_DATA_TYPE,
-      SUGGESTED_MAX_LENGTH,
-      SYNONYM,
-      ELEMENT_STATUS,
-      BEDES,
-      CERTIFICATION_LEVEL,
-      RECORD_ID,
-      LOOKUP_STATUS,
-      LOOKUP,
-      COLLECTION,
-      SUGGESTED_MAX_PRECISION,
-      REPEATING_ELEMENT,
-      PROPERTY_TYPES,
-      PAYLOADS,
-      SPANISH_STANDARD_NAME,
-      STATUS_CHANGE_DATE,
-      REVISED_DATE,
-      ADDED_IN_VERSION,
-      WIKI_PAGE_TITLE,
-      WIKI_PAGE_URL,
-      WIKI_PAGE_ID
-  );
+
   static final Map<String, String> resourceTemplates = new LinkedHashMap<>();
   static final Map<String, Set<String>> enumerations = new LinkedHashMap<>();
   static final Map<String, Map<String, StandardField>> processedStandardFields = new LinkedHashMap<>(new LinkedHashMap<>());
@@ -59,13 +33,25 @@ public abstract class WorksheetProcessor {
   Sheet sheet;
   String startTimestamp;
 
+  Map<String, Integer> wellKnownHeaderIndexMap = new LinkedHashMap<>();
+
   public WorksheetProcessor() {
     startTimestamp = Utils.getTimestamp();
     markup = new StringBuffer();
   }
 
+  public void buildWellKnownHeaderIndexMap(Sheet sheet) {
+    wellKnownHeaderIndexMap = new LinkedHashMap<>();
+    sheet.getRow(0).cellIterator().forEachRemaining(cell ->
+            wellKnownHeaderIndexMap.put(cell.getStringCellValue(), cell.getColumnIndex()));
+  }
+
+  public Integer getWellKnownFieldIndex(String wellKnownFieldKey) {
+    return wellKnownHeaderIndexMap.get(wellKnownFieldKey);
+  }
+
   public static Integer getIntegerValue(Integer index, Row row, Integer defaultValue) {
-    if (!(index >= 0)) return defaultValue;
+    if (index == null || !(index >= 0)) return defaultValue;
     Integer value;
     DataFormatter formatter = new DataFormatter();
     try {
@@ -81,7 +67,7 @@ public abstract class WorksheetProcessor {
   }
 
   public static String getStringValue(Integer index, Row row, String defaultValue) {
-    if (!(index >= 0)) return defaultValue;
+    if (index == null || !(index >= 0)) return defaultValue;
     String value;
     DataFormatter formatter = new DataFormatter();
     try {
@@ -97,7 +83,7 @@ public abstract class WorksheetProcessor {
   }
 
   public static Boolean getBooleanValue(Integer index, Row row, Boolean defaultValue) {
-    if (!(index >= 0)) return defaultValue;
+    if (index == null || !(index >= 0)) return defaultValue;
     final String BOOLEAN_VALUE = "yes";
 
     Boolean value = false;
@@ -119,12 +105,20 @@ public abstract class WorksheetProcessor {
   }
 
   public static List<String> getArrayValue(Integer index, Row row, List<String> defaultValue) {
-    if (!(index >= 0)) return defaultValue;
-    List<String> value = new ArrayList<>();
+    if (index == null || !(index >= 0)) return defaultValue;
     DataFormatter formatter = new DataFormatter();
+    String cellValue;
+    List<String> value = new ArrayList<>();
     try {
-      value = Arrays.asList(
-          formatter.formatCellValue(row.getCell(GROUPS_INDEX)).replace(" ", "").split(","));
+      cellValue = formatter.formatCellValue(row.getCell(index));
+      if (cellValue != null && cellValue.length() > 0) {
+        //LOG.info("Cell index is: " + index + ", cell value is: " + cellValue);
+        value = Arrays.stream(cellValue
+                .replace(" ", "").split(","))
+                .map(String::trim)
+                .filter(item -> item.length() > 0)
+                .collect(Collectors.toList());
+      }
     } catch (Exception ex) {
       value = defaultValue;
     }
@@ -135,59 +129,62 @@ public abstract class WorksheetProcessor {
     return getArrayValue(index, row, new ArrayList<>());
   }
 
-  public static StandardField extractDataDictionaryRow(Row row) {
+  public StandardField extractDataDictionaryRow(Row row) {
     return new StandardField.Builder()
-        .setStandardName(getStringValue(STANDARD_NAME_INDEX, row))
-        .setDisplayName(getStringValue(DISPLAY_NAME_INDEX, row))
-        .setDefinition(getStringValue(DEFINITION_INDEX, row))
-        .setGroups(getArrayValue(GROUPS_INDEX, row))
-        .setSimpleDataType(getStringValue(SIMPLE_DATA_TYPE_INDEX, row))
-        .setSuggestedMaxLength(getIntegerValue(SUGGESTED_MAX_LENGTH_INDEX, row))
-        .setSynonym(getStringValue(SYNONYM_INDEX, row))
-        .setElementStatus(getStringValue(ELEMENT_STATUS_INDEX, row))
-        .setBedes(getStringValue(BEDES_INDEX, row))
-        .setCertificationLevel(getStringValue(CERTIFICATION_LEVEL_INDEX, row))
-        .setRecordId(getIntegerValue(RECORD_ID_INDEX, row))
-        .setLookupStatus(getStringValue(LOOKUP_STATUS_INDEX, row))
-        .setLookup(getStringValue(LOOKUP_INDEX, row))
-        .setCollection(getStringValue(COLLECTION_INDEX, row))
-        .setSuggestedMaxPrecision(getIntegerValue(SUGGESTED_MAX_PRECISION_INDEX, row))
-        .setRepeatingElement(getBooleanValue(REPEATING_ELEMENT_INDEX, row))
-        .setPropertyType(getArrayValue(PROPERTY_TYPES_INDEX, row))
-        .setPayloads(getStringValue(PAYLOADS_INDEX, row))
-        .setSpanishStandardName(getStringValue(SPANISH_STANDARD_NAME_INDEX, row))
-        .setStatusChangeDate(getStringValue(STATUS_CHANGE_DATE_INDEX, row))
-        .setRevisedDate(getStringValue(REVISED_DATE_INDEX, row))
-        .setAddedInVersion(getStringValue(ADDED_IN_VERSION_INDEX, row))
-        .setWikiPageTitle(getStringValue(WIKI_PAGE_TITLE_INDEX, row))
-        .setWikiPageURL(getStringValue(WIKI_PAGE_URL_INDEX, row))
-        .setWikiPageID(getIntegerValue(WIKI_PAGE_ID_INDEX, row))
+        .setStandardName(getStringValue(getWellKnownFieldIndex(STANDARD_NAME), row))
+        .setDisplayName(getStringValue(getWellKnownFieldIndex(DISPLAY_NAME), row))
+        .setDefinition(getStringValue(getWellKnownFieldIndex(DEFINITION), row))
+        .setGroups(getArrayValue(getWellKnownFieldIndex(GROUPS), row))
+        .setSimpleDataType(getStringValue(getWellKnownFieldIndex(SIMPLE_DATA_TYPE), row))
+        .setSuggestedMaxLength(getIntegerValue(getWellKnownFieldIndex(SUGGESTED_MAX_LENGTH), row))
+        .setSynonyms(getArrayValue(getWellKnownFieldIndex(SYNONYM), row))
+        .setElementStatus(getStringValue(getWellKnownFieldIndex(ELEMENT_STATUS), row))
+        .setBedes(getStringValue(getWellKnownFieldIndex(BEDES), row))
+        .setCertificationLevel(getStringValue(getWellKnownFieldIndex(CERTIFICATION_LEVEL), row))
+        .setRecordId(getIntegerValue(getWellKnownFieldIndex(RECORD_ID), row))
+        .setLookupStatus(getStringValue(getWellKnownFieldIndex(LOOKUP_STATUS), row))
+        .setLookup(getStringValue(getWellKnownFieldIndex(LOOKUP), row))
+        .setCollection(getStringValue(getWellKnownFieldIndex(COLLECTION), row))
+        .setSuggestedMaxPrecision(getIntegerValue(getWellKnownFieldIndex(SUGGESTED_MAX_PRECISION), row))
+        .setRepeatingElement(getBooleanValue(getWellKnownFieldIndex(REPEATING_ELEMENT), row))
+        .setPropertyTypes(getArrayValue(getWellKnownFieldIndex(PROPERTY_TYPES), row))
+        .setPayloads(getArrayValue(getWellKnownFieldIndex(PAYLOADS), row))
+        .setSpanishStandardName(getStringValue(getWellKnownFieldIndex(SPANISH_STANDARD_NAME), row))
+        .setStatusChangeDate(getStringValue(getWellKnownFieldIndex(STATUS_CHANGE_DATE), row))
+        .setRevisedDate(getStringValue(getWellKnownFieldIndex(REVISED_DATE), row))
+        .setAddedInVersion(getStringValue(getWellKnownFieldIndex(ADDED_IN_VERSION), row))
+        .setWikiPageTitle(getStringValue(getWellKnownFieldIndex(WIKI_PAGE_TITLE), row))
+        .setWikiPageURL(getStringValue(getWellKnownFieldIndex(WIKI_PAGE_URL), row))
+        .setWikiPageID(getIntegerValue(getWellKnownFieldIndex(WIKI_PAGE_ID), row))
         .build();
   }
 
   abstract void processResourceSheet(Sheet sheet);
 
-  abstract void processNumber(StandardField row);
+  abstract void processNumber(StandardField field);
 
-  abstract void processStringListSingle(StandardField row);
+  abstract void processStringListSingle(StandardField field);
 
-  abstract void processString(StandardField row);
+  abstract void processString(StandardField field);
 
-  abstract void processBoolean(StandardField row);
+  abstract void processBoolean(StandardField field);
 
-  abstract void processStringListMulti(StandardField row);
+  abstract void processStringListMulti(StandardField field);
 
-  abstract void processDate(StandardField row);
+  abstract void processDate(StandardField field);
 
-  abstract void processTimestamp(StandardField row);
+  abstract void processTimestamp(StandardField field);
 
-  abstract void processCollection(StandardField row);
+  abstract void processCollection(StandardField field);
 
   abstract void generateOutput();
 
   void processResourceRow(Row row) {
     assertTrue(getDefaultErrorMessage("sheet name was null but was expected to contain a resource name!"),
         sheet != null && sheet.getSheetName() != null);
+
+    //if there's no field in the standard name column, don't process the row
+    if (row.getCell(getWellKnownFieldIndex(STANDARD_NAME)) == null) return;
 
     StandardField standardField = extractDataDictionaryRow(row);
     standardField.setParentResourceName(sheet.getSheetName());
@@ -327,34 +324,5 @@ public abstract class WorksheetProcessor {
         WIKI_PAGE_TITLE = "Wiki Page Title",
         WIKI_PAGE_URL = "Wiki Page URL",
         WIKI_PAGE_ID = "Wiki Page ID";
-  }
-
-  public static final class WELL_KNOWN_COLUMN_INDICES {
-    public static final Integer
-        STANDARD_NAME_INDEX = 0,
-        DISPLAY_NAME_INDEX = 1,
-        DEFINITION_INDEX = 2,
-        GROUPS_INDEX = 3,
-        SIMPLE_DATA_TYPE_INDEX = 4,
-        SUGGESTED_MAX_LENGTH_INDEX = 5,
-        SYNONYM_INDEX = 6,
-        ELEMENT_STATUS_INDEX = 7,
-        BEDES_INDEX = 8,
-        CERTIFICATION_LEVEL_INDEX = 9,
-        RECORD_ID_INDEX = 10,
-        LOOKUP_STATUS_INDEX = 11,
-        LOOKUP_INDEX = 12,
-        COLLECTION_INDEX = 13,
-        SUGGESTED_MAX_PRECISION_INDEX = 14,
-        REPEATING_ELEMENT_INDEX = 15,
-        PROPERTY_TYPES_INDEX = 16,
-        PAYLOADS_INDEX = 17,
-        SPANISH_STANDARD_NAME_INDEX = 18,
-        STATUS_CHANGE_DATE_INDEX = 19,
-        REVISED_DATE_INDEX = 20,
-        ADDED_IN_VERSION_INDEX = 21,
-        WIKI_PAGE_TITLE_INDEX = 22,
-        WIKI_PAGE_URL_INDEX = 23,
-        WIKI_PAGE_ID_INDEX = 24;
   }
 }

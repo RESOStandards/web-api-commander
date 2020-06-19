@@ -190,4 +190,8 @@ public class DataDictionary {
   @And("enumerations are checked for substring matches with standard names")
   public void enumerationsAreCheckedForSubstringMatchesWithStandardNames() {
   }
+
+  @And("{string} MUST contain only standard enumerations")
+  public void mustContainOnlyStandardEnumerations(String arg0) {
+  }
 }

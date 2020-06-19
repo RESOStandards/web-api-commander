@@ -6,10 +6,11 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.reso.commander.common.Utils;
 import org.reso.models.StandardField;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+import static org.reso.certification.containers.WebAPITestContainer.EMPTY_STRING;
 import static org.reso.certification.containers.WebAPITestContainer.SINGLE_SPACE;
 
 public class BDDProcessor extends WorksheetProcessor {
@@ -26,37 +27,37 @@ public class BDDProcessor extends WorksheetProcessor {
 
   @Override
   void processNumber(StandardField row) {
-    markup.append(BDDTemplates.buildNumberTest(row, sheet.getSheetName()));
+    markup.append(BDDTemplates.buildNumberTest(row));
   }
 
   @Override
   void processStringListSingle(StandardField row) {
-    markup.append(BDDTemplates.buildStringListSingleTest(row, sheet.getSheetName()));
+    markup.append(BDDTemplates.buildStringListSingleTest(row));
   }
 
   @Override
   void processString(StandardField row) {
-    markup.append(BDDTemplates.buildStringTest(row, sheet.getSheetName()));
+    markup.append(BDDTemplates.buildStringTest(row));
   }
 
   @Override
   void processBoolean(StandardField row) {
-    markup.append(BDDTemplates.buildBooleanTest(row, sheet.getSheetName()));
+    markup.append(BDDTemplates.buildBooleanTest(row));
   }
 
   @Override
   void processStringListMulti(StandardField row) {
-    markup.append(BDDTemplates.buildStringListMultiTest(row, sheet.getSheetName()));
+    markup.append(BDDTemplates.buildStringListMultiTest(row));
   }
 
   @Override
   void processDate(StandardField row) {
-    markup.append(BDDTemplates.buildDateTest(row, sheet.getSheetName()));
+    markup.append(BDDTemplates.buildDateTest(row));
   }
 
   @Override
   void processTimestamp(StandardField row) {
-    markup.append(BDDTemplates.buildTimestampTest(row, sheet.getSheetName()));
+    markup.append(BDDTemplates.buildTimestampTest(row));
   }
 
   @Override
@@ -91,119 +92,145 @@ public class BDDProcessor extends WorksheetProcessor {
               "    And valid metadata were retrieved from the server\n";
     }
 
-    public static String buildBooleanTest(StandardField row, String... tags) {
-      if (row == null) return null;
+    /**
+     * Builds a list of tags for the given field
+     * @param field the field whose tags to extract
+     * @return an array list containing tags on specific fields when they are present
+     */
+    private static ArrayList<String> buildTags(StandardField field) {
+      ArrayList<String> tags = new ArrayList<>();
+
+      if (field.getParentResourceName() != null && field.getParentResourceName().length() > 0) {
+        tags.add(field.getParentResourceName());
+      }
+
+      tags.addAll(field.getPropertyTypes());
+      tags.addAll(field.getPayloads());
+
+      return tags;
+    }
+
+    public static String buildBooleanTest(StandardField field) {
+      if (field == null) return EMPTY_STRING;
+
       return
-          "\n  @" + row.getStandardName() + SINGLE_SPACE +
-              Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
-              "  Scenario: " + row.getStandardName() + "\n" +
-              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + row.getStandardName() + "\" MUST be \"Boolean\" data type\n";
+          "\n  @" + field.getStandardName() + SINGLE_SPACE +
+              buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+              "  Scenario: " + field.getStandardName() + "\n" +
+              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+              "    Then \"" + field.getStandardName() + "\" MUST be \"Boolean\" data type\n";
     }
 
-    public static String buildDateTest(StandardField row, String... tags) {
-      if (row == null) return null;
+    public static String buildDateTest(StandardField field) {
+      if (field == null) return EMPTY_STRING;
       return
-          "\n  @" + row.getStandardName() + SINGLE_SPACE +
-              Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
-              "  Scenario: " + row.getStandardName() + "\n" +
-              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + row.getStandardName() + "\" MUST be \"Date\" data type\n";
+          "\n  @" + field.getStandardName() + SINGLE_SPACE +
+              buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+              "  Scenario: " + field.getStandardName() + "\n" +
+              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+              "    Then \"" + field.getStandardName() + "\" MUST be \"Date\" data type\n";
     }
 
-    public static String buildNumberTest(StandardField row, String... tags) {
-      if (row == null) return null;
+    /**
+     * Provides special routing for Data Dictionary numeric types, which may be Integer or Decimal
+     * @param field the numeric field to build type markup for
+     * @return a string containing specific markup for the given field
+     */
+    public static String buildNumberTest(StandardField field) {
+      if (field == null) return EMPTY_STRING;
 
-      if (row.getSuggestedMaxPrecision() != null) return buildDecimalTest(row, tags);
-      else return buildIntegerTest(row, tags);
+      if (field.getSuggestedMaxPrecision() != null) return buildDecimalTest(field);
+      else return buildIntegerTest(field);
     }
 
-    public static String buildDecimalTest(StandardField row, String... tags) {
-      if (row == null) return null;
+    public static String buildDecimalTest(StandardField field) {
+      if (field == null) return EMPTY_STRING;
       String template =
-          "\n  @" + row.getStandardName() + SINGLE_SPACE +
-              Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
-              "  Scenario: " + row.getStandardName() + "\n" +
-              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + row.getStandardName() + "\" MUST be \"Decimal\" data type\n";
+          "\n  @" + field.getStandardName() + SINGLE_SPACE +
+              buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+              "  Scenario: " + field.getStandardName() + "\n" +
+              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+              "    Then \"" + field.getStandardName() + "\" MUST be \"Decimal\" data type\n";
 
-      if (row.getSuggestedMaxLength() != null)
+      if (field.getSuggestedMaxLength() != null)
         template +=
-            "    And \"" + row.getStandardName() + "\" precision SHOULD be less than or equal to the RESO Suggested Max Length of " + row.getSuggestedMaxLength() + "\n";
+            "    And \"" + field.getStandardName() + "\" precision SHOULD be less than or equal to the RESO Suggested Max Length of " + field.getSuggestedMaxLength() + "\n";
 
-      if (row.getSuggestedMaxPrecision() != null)
+      if (field.getSuggestedMaxPrecision() != null)
         template +=
-            "    And \"" + row.getStandardName() + "\" scale SHOULD be less than or equal to the RESO Suggested Max Scale of " + row.getSuggestedMaxPrecision() + "\n";
+            "    And \"" + field.getStandardName() + "\" scale SHOULD be less than or equal to the RESO Suggested Max Scale of " + field.getSuggestedMaxPrecision() + "\n";
 
       return template;
     }
 
-    public static String buildIntegerTest(StandardField row, String... tags) {
-      if (row == null) return null;
+    public static String buildIntegerTest(StandardField field) {
+      if (field == null) return EMPTY_STRING;
       return
-          "\n  @" + row.getStandardName() + SINGLE_SPACE +
-              Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
-              "  Scenario: " + row.getStandardName() + "\n" +
-              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + row.getStandardName() + "\" MUST be \"Integer\" data type\n";
+          "\n  @" + field.getStandardName() + SINGLE_SPACE +
+              buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+              "  Scenario: " + field.getStandardName() + "\n" +
+              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+              "    Then \"" + field.getStandardName() + "\" MUST be \"Integer\" data type\n";
     }
 
-    public static String buildStringListMultiTest(StandardField row, String... tags) {
-      if (row == null) return null;
+    public static String buildStringListMultiTest(StandardField field) {
+      if (field == null) return EMPTY_STRING;
 
-      String template = "\n  @" + row.getStandardName() + SINGLE_SPACE +
-          Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
-          "  Scenario: " + row.getStandardName() + "\n" +
-          "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
-          "    Then \"" + row.getStandardName() + "\" MUST be \"Multiple Enumeration\" data type\n";
+      String template = "\n  @" + field.getStandardName() + SINGLE_SPACE +
+          buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+          "  Scenario: " + field.getStandardName() + "\n" +
+          "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+          "    Then \"" + field.getStandardName() + "\" MUST be \"Multiple Enumeration\" data type\n";
 
-      if (row.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
+      if (field.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
         template +=
-            "    And \"" + row.getStandardName() + "\" MUST contain at least one standard enumeration\n";
+            "    And \"" + field.getStandardName() + "\" MUST contain only standard enumerations\n" +
+            "    And \"" + field.getStandardName() + "\" MUST contain at least one standard enumeration\n";
       }
       return template;
     }
 
-    public static String buildStringListSingleTest(StandardField row, String... tags) {
-      if (row == null) return null;
-      String template = "\n  @" + row.getStandardName() + SINGLE_SPACE +
-              Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
-              "  Scenario: " + row.getStandardName() + "\n" +
-              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + row.getStandardName() + "\" MUST be \"Single Enumeration\" data type\n";
+    public static String buildStringListSingleTest(StandardField field) {
+      if (field == null) return EMPTY_STRING;
+      String template = "\n  @" + field.getStandardName() + SINGLE_SPACE +
+              buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+              "  Scenario: " + field.getStandardName() + "\n" +
+              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+              "    Then \"" + field.getStandardName() + "\" MUST be \"Single Enumeration\" data type\n";
 
-      if (row.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
+      if (field.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
         template +=
-            "    And \"" + row.getStandardName() + "\" MUST contain at least one standard enumeration\n";
+            "    And \"" + field.getStandardName() + "\" MUST contain only standard enumerations\n" +
+            "    And \"" + field.getStandardName() + "\" MUST contain at least one standard enumeration\n";
       }
 
       return template;
     }
 
-    public static String buildStringTest(StandardField row, String... tags) {
-      if (row == null) return null;
+    public static String buildStringTest(StandardField field) {
+      if (field == null) return EMPTY_STRING;
       String template =
-          "\n  @" + row.getStandardName() + SINGLE_SPACE +
-              Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
-              "  Scenario: " + row.getStandardName() + "\n" +
-              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + row.getStandardName() + "\" MUST be \"String\" data type\n";
+          "\n  @" + field.getStandardName() + SINGLE_SPACE +
+              buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+              "  Scenario: " + field.getStandardName() + "\n" +
+              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+              "    Then \"" + field.getStandardName() + "\" MUST be \"String\" data type\n";
 
-      if (row.getSuggestedMaxLength() != null)
+      if (field.getSuggestedMaxLength() != null)
         template +=
-            "    And \"" + row.getStandardName() + "\" length SHOULD be less than or equal to the RESO Suggested Max Length of " + row.getSuggestedMaxLength() + "\n";
+            "    And \"" + field.getStandardName() + "\" length SHOULD be less than or equal to the RESO Suggested Max Length of " + field.getSuggestedMaxLength() + "\n";
 
       return template;
     }
 
-    public static String buildTimestampTest(StandardField row, String... tags) {
-      if (row == null) return null;
+    public static String buildTimestampTest(StandardField field) {
+      if (field == null) return EMPTY_STRING;
       return
-          "\n  @" + row.getStandardName() + SINGLE_SPACE +
-              Arrays.stream(tags).map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
-              "  Scenario: " + row.getStandardName() + "\n" +
-              "    When \"" + row.getStandardName() + "\" exists in the \"" + row.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + row.getStandardName() + "\" MUST be \"Timestamp\" data type\n";
+          "\n  @" + field.getStandardName() + SINGLE_SPACE +
+              buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+              "  Scenario: " + field.getStandardName() + "\n" +
+              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+              "    Then \"" + field.getStandardName() + "\" MUST be \"Timestamp\" data type\n";
     }
   }
 }

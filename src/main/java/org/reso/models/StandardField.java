@@ -1,5 +1,6 @@
 package org.reso.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class StandardField {
@@ -10,7 +11,7 @@ public class StandardField {
   private List<String> groups;
   private String simpleDataType;
   private Integer suggestedMaxLength;
-  private String synonym;
+  private List<String> synonyms;
   private String elementStatus;
   private String bedes;
   private String certificationLevel;
@@ -21,7 +22,7 @@ public class StandardField {
   private Integer suggestedMaxPrecision;
   private Boolean repeatingElement;
   private List<String> propertyTypes;
-  private String payloads;
+  private List<String> payloads;
   private String spanishStandardName;
   private String statusChangeDate;
   private String revisedDate;
@@ -80,7 +81,7 @@ public class StandardField {
   }
 
   public void setGroups(List<String> groups) {
-    this.groups = groups;
+    this.groups = groups == null ? new ArrayList<>() : groups;
   }
 
   public String getSimpleDataType() {
@@ -99,12 +100,12 @@ public class StandardField {
     this.suggestedMaxLength = suggestedMaxLength;
   }
 
-  public String getSynonym() {
-    return synonym;
+  public List<String> getSynonyms() {
+    return synonyms;
   }
 
-  public void setSynonym(String synonym) {
-    this.synonym = synonym;
+  public void setSynonyms(List<String> synonyms) {
+    this.synonyms = synonyms == null ? new ArrayList<>() : synonyms;
   }
 
   public String getElementStatus() {
@@ -188,15 +189,15 @@ public class StandardField {
   }
 
   public void setPropertyTypes(List<String> propertyTypes) {
-    this.propertyTypes = propertyTypes;
+    this.propertyTypes = propertyTypes == null ? new ArrayList<>() : propertyTypes;
   }
 
-  public String getPayloads() {
+  public List<String> getPayloads() {
     return payloads;
   }
 
-  public void setPayloads(String payloads) {
-    this.payloads = payloads;
+  public void setPayloads(List<String> payloads) {
+    this.payloads = payloads == null ? new ArrayList<>() : payloads;
   }
 
   public String getSpanishStandardName() {
@@ -293,8 +294,8 @@ public class StandardField {
       return this;
     }
 
-    public Builder setSynonym(String synonym) {
-      standardField.setSynonym(synonym);
+    public Builder setSynonyms(List<String> synonyms) {
+      standardField.setSynonyms(synonyms);
       return this;
     }
 
@@ -343,12 +344,12 @@ public class StandardField {
       return this;
     }
 
-    public Builder setPropertyType(List<String> propertyTypes) {
+    public Builder setPropertyTypes(List<String> propertyTypes) {
       standardField.setPropertyTypes(propertyTypes);
       return this;
     }
 
-    public Builder setPayloads(String payloads) {
+    public Builder setPayloads(List<String> payloads) {
       standardField.setPayloads(payloads);
       return this;
     }

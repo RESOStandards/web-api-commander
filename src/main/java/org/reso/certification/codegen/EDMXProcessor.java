@@ -88,42 +88,63 @@ public class EDMXProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void processNumber(StandardField row) {
-    markup.append(EDMXTemplates.buildNumberMember(row));
+  void processNumber(StandardField field) {
+    String content = EDMXTemplates.buildNumberMember(field);
+    if (content == null || content.length() <= 0) return;
+    markup.append(EDMXTemplates.buildComments(field));
+    markup.append(content);
   }
 
   @Override
-  void processStringListSingle(StandardField row) {
-    markup.append(EDMXTemplates.buildEnumTypeSingleMember(row));
+  void processStringListSingle(StandardField field) {
+    String content = EDMXTemplates.buildEnumTypeSingleMember(field);
+    if (content == null || content.length() <= 0) return;
+    markup.append(EDMXTemplates.buildComments(field));
+    markup.append(content);
   }
 
   @Override
-  void processString(StandardField row) {
-    markup.append(EDMXTemplates.buildStringMember(row));
+  void processString(StandardField field) {
+    String content = EDMXTemplates.buildStringMember(field);
+    if (content == null || content.length() <= 0) return;
+    markup.append(EDMXTemplates.buildComments(field));
+    markup.append(content);
   }
 
   @Override
-  void processBoolean(StandardField row) {
-    markup.append(EDMXTemplates.buildBooleanMember(row));
+  void processBoolean(StandardField field) {
+    String content = EDMXTemplates.buildBooleanMember(field);
+    if (content == null || content.length() <= 0) return;
+    markup.append(EDMXTemplates.buildComments(field));
+    markup.append(content);
   }
 
   @Override
-  void processStringListMulti(StandardField row) {
-    markup.append(EDMXTemplates.buildEnumTypeMultiMember(row));
+  void processStringListMulti(StandardField field) {
+    String content = EDMXTemplates.buildEnumTypeMultiMember(field);
+    if (content == null || content.length() <= 0) return;
+    markup.append(EDMXTemplates.buildComments(field));
+    markup.append(content);
   }
 
   @Override
-  void processDate(StandardField row) {
-    markup.append(EDMXTemplates.buildDateMember(row));
+  void processDate(StandardField field) {
+    String content = EDMXTemplates.buildDateMember(field);
+    if (content == null || content.length() <= 0) return;
+    markup.append(EDMXTemplates.buildComments(field));
+    markup.append(content);
   }
 
   @Override
-  void processTimestamp(StandardField row) {
-    markup.append(EDMXTemplates.buildDateTimeWithOffsetMember(row));
+  void processTimestamp(StandardField field) {
+    String content = EDMXTemplates.buildDateTimeWithOffsetMember(field);
+    if (content == null || content.length() <= 0) return;
+    markup.append(EDMXTemplates.buildComments(field));
+    markup.append(content);
   }
 
   @Override
-  void processCollection(StandardField row) {
+  void processCollection(StandardField field) {
     LOG.debug("Collection Type is not supported at this time!");
   }
 
@@ -187,11 +208,11 @@ public class EDMXProcessor extends WorksheetProcessor {
     processedStandardFields.forEach((resourceName, standardFieldMap) -> {
       standardFieldMap.forEach((standardName, standardField) -> {
         if (standardField.isSingleEnumeration()) {
-          markupMap.putIfAbsent(standardName, buildSingleEnumTypeMarkup(standardField.getLookupStandardName()));
+          markupMap.putIfAbsent(standardField.getLookupStandardName(), buildSingleEnumTypeMarkup(standardField.getLookupStandardName()));
         }
 
         if (standardField.isMultipleEnumeration()) {
-          markupMap.putIfAbsent(standardName, buildMultipleEnumTypeMarkup(standardField.getLookupStandardName()));
+          markupMap.putIfAbsent(standardField.getLookupStandardName(), buildMultipleEnumTypeMarkup(standardField.getLookupStandardName()));
         }
       });
     });
@@ -275,75 +296,81 @@ public class EDMXProcessor extends WorksheetProcessor {
 
   public static final class EDMXTemplates {
 
-    public static String buildBooleanMember(StandardField row) {
-      if (row == null) return EMPTY_STRING;
-      return "        <Property Name=\""+ row.getStandardName() + "\" Type=\"Edm.Boolean\" />\n";
+    public static String buildBooleanMember(StandardField field) {
+      if (field == null) return EMPTY_STRING;
+      return "        <Property Name=\""+ field.getStandardName() + "\" Type=\"Edm.Boolean\" />\n";
     }
 
-    public static String buildDateMember(StandardField row) {
-      if (row == null) return EMPTY_STRING;
-      return "        <Property Name=\""+ row.getStandardName() + "\" Type=\"Edm.Date\" />\n";
+    public static String buildDateMember(StandardField field) {
+      if (field == null) return EMPTY_STRING;
+      return "        <Property Name=\""+ field.getStandardName() + "\" Type=\"Edm.Date\" />\n";
     }
 
-    public static String buildNumberMember(StandardField row) {
-      if (row == null) return EMPTY_STRING;
+    public static String buildNumberMember(StandardField field) {
+      if (field == null) return EMPTY_STRING;
 
-      if (row.getSuggestedMaxPrecision() != null) return buildDecimalMember(row);
-      else return buildIntegerMember(row);
+      if (field.getSuggestedMaxPrecision() != null) return buildDecimalMember(field);
+      else return buildIntegerMember(field);
     }
 
-    public static String buildDecimalMember(StandardField row) {
-      if (row == null) return EMPTY_STRING;
-      String template = "        <Property Name=\"" + row.getStandardName() + "\" Type=\"Edm.Decimal\"";
+    public static String buildDecimalMember(StandardField field) {
+      if (field == null) return EMPTY_STRING;
+      String template = "        <Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.Decimal\"";
 
       //DD uses length as precision in this case
-      if (row.getSuggestedMaxLength() != null) template += " Precision=\"" + row.getSuggestedMaxLength() + "\"";
+      if (field.getSuggestedMaxLength() != null) template += " Precision=\"" + field.getSuggestedMaxLength() + "\"";
 
       //DD uses precision as scale in this case
-      if (row.getSuggestedMaxPrecision() != null) template += " Scale=\"" + row.getSuggestedMaxPrecision() + "\"";
+      if (field.getSuggestedMaxPrecision() != null) template += " Scale=\"" + field.getSuggestedMaxPrecision() + "\"";
 
       template += " />\n";
 
       return template;
     }
 
-    public static String buildIntegerMember(StandardField row) {
-      if (row == null) return EMPTY_STRING;
-      return  "        <Property Name=\"" + row.getStandardName() + "\" Type=\"Edm.Int64\" />\n";
+    public static String buildIntegerMember(StandardField field) {
+      if (field == null) return EMPTY_STRING;
+      return  "        <Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.Int64\" />\n";
     }
 
-    public static String buildEnumTypeMultiMember(StandardField row) {
-      if (row == null || row.getLookup() == null) return EMPTY_STRING;
-      if (!row.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
-      return "        <Property Name=\"" + row.getStandardName() + "\" Type=\"" + RESO_NAMESPACE + ".enums." + row.getLookupStandardName() + "\" />\n";
+    public static String buildEnumTypeMultiMember(StandardField field) {
+      if (field == null || field.getLookup() == null) return EMPTY_STRING;
+      if (!field.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
+      return "        <Property Name=\"" + field.getStandardName() + "\" Type=\"" + RESO_NAMESPACE + ".enums." + field.getLookupStandardName() + "\" />\n";
     }
 
-    public static String buildEnumTypeSingleMember(StandardField row) {
-      if (row == null || row.getLookup() == null) return EMPTY_STRING;
-      if (!row.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
+    public static String buildEnumTypeSingleMember(StandardField field) {
+      if (field == null || field.getLookup() == null) return EMPTY_STRING;
+      if (!field.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
 
-      String lookupName = row.getLookup().replace("Lookups", "").trim();
-      return "        <Property Name=\"" + row.getStandardName() + "\" Type=\"" + RESO_NAMESPACE + ".enums." + lookupName + "\" />\n";
+      String lookupName = field.getLookup().replace("Lookups", "").trim();
+      return "        <Property Name=\"" + field.getStandardName() + "\" Type=\"" + RESO_NAMESPACE + ".enums." + lookupName + "\" />\n";
     }
 
-    public static String buildStringMember(StandardField row) {
-      if (row == null) return EMPTY_STRING;
-      String template = "        <Property Name=\"" + row.getStandardName() + "\" Type=\"Edm.String\"";
+    public static String buildStringMember(StandardField field) {
+      if (field == null) return EMPTY_STRING;
+      String template = "        <Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.String\"";
 
-      if (row.getSuggestedMaxLength() != null) template += " MaxLength=\"" + row.getSuggestedMaxLength() + "\"";
+      if (field.getSuggestedMaxLength() != null) template += " MaxLength=\"" + field.getSuggestedMaxLength() + "\"";
       template += " />\n";
 
       return template;
     }
 
-    public static String buildDateTimeWithOffsetMember(StandardField row) {
-      if (row == null) return EMPTY_STRING;
-      String template = "        <Property Name=\"" + row.getStandardName() + "\" Type=\"Edm.DateTimeOffset\"";
+    public static String buildDateTimeWithOffsetMember(StandardField field) {
+      if (field == null) return EMPTY_STRING;
+      String template = "        <Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.DateTimeOffset\"";
 
-      if (row.getSuggestedMaxLength() != null) template += " Precision=\"" + row.getSuggestedMaxLength() + "\"";
+      if (field.getSuggestedMaxLength() != null) template += " Precision=\"" + field.getSuggestedMaxLength() + "\"";
       template += " />\n";
 
       return template;
+    }
+
+    public static String buildComments(StandardField field) {
+      if (field == null || field.getDefinition() == null || field.getDefinition().length() == 0) return EMPTY_STRING;
+
+      return "\n        <!-- " + field.getDefinition() + " -->\n";
     }
   }
 }
