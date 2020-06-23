@@ -40,7 +40,7 @@ public class DataDictionaryCodeGenerator {
         worksheet = workbook.getSheetAt(sheetIndex);
 
         if (DataDictionaryMetadata.v1_7.WELL_KNOWN_RESOURCES.contains(worksheet.getSheetName()) && worksheet.getPhysicalNumberOfRows() > 1) {
-          processor.buildWellKnownHeaderIndexMap(worksheet);
+          processor.buildWellKnownStandardFieldHeaderMap(worksheet);
           processor.processResourceSheet(worksheet);
 
           //starts at row 1 to skip header row

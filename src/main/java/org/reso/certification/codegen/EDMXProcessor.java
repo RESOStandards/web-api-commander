@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.reso.commander.common.Utils;
+import org.reso.models.StandardEnumeration;
 import org.reso.models.StandardField;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
@@ -37,7 +38,7 @@ public class EDMXProcessor extends WorksheetProcessor {
   @Override
   public void processResourceSheet(Sheet sheet) {
     this.sheet = sheet;
-    openEntityTypeTag  = "      <EntityType Name=\"" + sheet.getSheetName() + "\">\n";
+    openEntityTypeTag  = "\n      <EntityType Name=\"" + sheet.getSheetName() + "\">\n";
     closeEntityTypeTag = "      </EntityType>\n";
   }
 
@@ -217,9 +218,7 @@ public class EDMXProcessor extends WorksheetProcessor {
       });
     });
 
-    markupMap.forEach((lookupStandardName, markup) -> {
-      content.append(markup);
-    });
+    markupMap.forEach((lookupStandardName, markup) -> content.append(markup));
 
     //closing tag for enums schema definition
     content.append("\n    </Schema>\n");
@@ -236,13 +235,13 @@ public class EDMXProcessor extends WorksheetProcessor {
   private String buildSingleEnumTypeMarkup(String lookupStandardName) {
     StringBuilder content = new StringBuilder();
     if (getEnumerations().get(lookupStandardName) != null) {
-      content.append("\n      <EnumType Name=\"").append(lookupStandardName).append("\">");
+      content.append("\n\n      <EnumType Name=\"").append(lookupStandardName).append("\">\n");
 
       if (getEnumerations().get(lookupStandardName).size() > 0) {
-
         //iterate through each of the lookup values and generate their edm:EnumType content
-        getEnumerations().get(lookupStandardName).forEach(standardName -> {
-          content.append("\n        <Member Name=\"").append(standardName).append("\" />");
+        getEnumerations().get(lookupStandardName).forEach(standardEnumeration -> {
+          content.append("        ").append(EDMXTemplates.buildComments(standardEnumeration));
+          content.append("        <Member Name=\"").append(standardEnumeration.getLookupValue()).append("\" />\n");
         });
 
       } else {
@@ -274,13 +273,14 @@ public class EDMXProcessor extends WorksheetProcessor {
     StringBuilder content = new StringBuilder();
 
     if (getEnumerations().get(lookupStandardName) != null) {
-      content.append("\n      <EnumType Name=\"").append(lookupStandardName).append("\"")
+      content.append("\n\n      <EnumType Name=\"").append(lookupStandardName).append("\"")
           .append(" UnderlyingType=\"Edm.Int64\" IsFlags=\"true\">\n");
 
       //iterate through each of the lookup values and generate their edm:EnumType content
       AtomicInteger currentIndex = new AtomicInteger(0);
-      getEnumerations().get(lookupStandardName).forEach(standardName -> {
-        content.append("        <Member Name=\"").append(standardName).append("\"");
+      getEnumerations().get(lookupStandardName).forEach(standardEnumeration -> {
+        content.append("        ").append(EDMXTemplates.buildComments(standardEnumeration));
+        content.append("        <Member Name=\"").append(standardEnumeration.getLookupValue()).append("\"");
 
         //each item needs to be a power of 2 to be unique due to bit masking of values
         content.append(" Value=\"").append(currentIndex.getAndIncrement() == 0 ? 0 : (long)Math.pow(2, currentIndex.get() - 2)).append("\" ");
@@ -367,10 +367,24 @@ public class EDMXProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildComments(StandardField field) {
-      if (field == null || field.getDefinition() == null || field.getDefinition().length() == 0) return EMPTY_STRING;
+    public static String buildComments(StandardField standardField) {
+      if (standardField == null || standardField.getDefinition() == null || standardField.getDefinition().length() == 0) return EMPTY_STRING;
+      final int COLUMN_WIDTH = 105;
 
-      return "\n        <!-- " + field.getDefinition() + " -->\n";
+      //break every COLUMN_WIDTH characters only at word boundaries
+      return (standardField.getWikiPageUrl() != null && standardField.getWikiPageUrl().length() > 0 ? "\n        <!-- " + standardField.getWikiPageUrl() : "") +
+          standardField.getDefinition().replaceAll("--", "-").replaceAll(String.format("(.{1,%d})( +|$\\n?)|(.{1,%d})\n", COLUMN_WIDTH, COLUMN_WIDTH), "\n          $1")
+              + " -->\n";
+    }
+
+    public static String buildComments(StandardEnumeration standardEnumeration) {
+      if (standardEnumeration == null || standardEnumeration.getDefinition() == null || standardEnumeration.getDefinition().length() == 0) return EMPTY_STRING;
+      final int COLUMN_WIDTH = 105;
+
+      //break every COLUMN_WIDTH characters only at word boundaries
+      return (standardEnumeration.getWikiPageUrl() != null && standardEnumeration.getWikiPageUrl().length() > 0 ? "\n        <!-- " + standardEnumeration.getWikiPageUrl() : "") +
+          standardEnumeration.getDefinition().replaceAll("--", "-").replaceAll(String.format("(.{1,%d})( +|$\\n?)|(.{1,%d})\n", COLUMN_WIDTH, COLUMN_WIDTH), "\n          $1")
+          + " -->\n";
     }
   }
 }

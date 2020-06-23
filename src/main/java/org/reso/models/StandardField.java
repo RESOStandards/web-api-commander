@@ -1,8 +1,10 @@
 package org.reso.models;
 
-import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ */
 public class StandardField {
   private String standardName;
   private String displayName;
@@ -28,8 +30,8 @@ public class StandardField {
   private String revisedDate;
   private String addedInVersion;
   private String wikiPageTitle;
-  private String wikiPageURL;
-  private Integer wikiPageID;
+  private String wikiPageUrl;
+  private Integer wikiPageId;
 
 
   private StandardField() { /* private constructor use Builder instead */ }
@@ -48,104 +50,52 @@ public class StandardField {
     return standardName;
   }
 
-  public void setStandardName(String standardName) {
-    this.standardName = standardName;
-  }
-
   public String getDisplayName() {
     return displayName;
-  }
-
-  public void setDisplayName(String displayName) {
-    this.displayName = displayName;
   }
 
   public String getParentResourceName(){
     return parentResourceName;
   }
 
-  public void setParentResourceName(String parentResourceName) {
-    this.parentResourceName = parentResourceName;
-  }
-
   public String getDefinition() {
     return definition;
-  }
-
-  public void setDefinition(String definition) {
-    this.definition = definition;
   }
 
   public List<String> getGroups() {
     return groups;
   }
 
-  public void setGroups(List<String> groups) {
-    this.groups = groups == null ? new ArrayList<>() : groups;
-  }
-
   public String getSimpleDataType() {
     return simpleDataType;
-  }
-
-  public void setSimpleDataType(String simpleDataType) {
-    this.simpleDataType = simpleDataType;
   }
 
   public Integer getSuggestedMaxLength() {
     return suggestedMaxLength;
   }
 
-  public void setSuggestedMaxLength(Integer suggestedMaxLength) {
-    this.suggestedMaxLength = suggestedMaxLength;
-  }
-
   public List<String> getSynonyms() {
     return synonyms;
-  }
-
-  public void setSynonyms(List<String> synonyms) {
-    this.synonyms = synonyms == null ? new ArrayList<>() : synonyms;
   }
 
   public String getElementStatus() {
     return elementStatus;
   }
 
-  public void setElementStatus(String elementStatus) {
-    this.elementStatus = elementStatus;
-  }
-
   public String getBedes() {
     return bedes;
-  }
-
-  public void setBedes(String bedes) {
-    this.bedes = bedes;
   }
 
   public String getCertificationLevel() {
     return certificationLevel;
   }
 
-  public void setCertificationLevel(String certificationLevel) {
-    this.certificationLevel = certificationLevel;
-  }
-
   public Integer getRecordId() {
     return recordId;
   }
 
-  public void setRecordId(Integer recordId) {
-    this.recordId = recordId;
-  }
-
   public String getLookupStatus() {
     return lookupStatus;
-  }
-
-  public void setLookupStatus(String lookupStatus) {
-    this.lookupStatus = lookupStatus;
   }
 
   public String getLookup() {
@@ -156,236 +106,188 @@ public class StandardField {
     return getLookup().replace("Lookups", "").trim();
   }
 
-  public void setLookup(String lookup) {
-    this.lookup = lookup;
-  }
-
   public String getCollection() {
     return collection;
-  }
-
-  public void setCollection(String collection) {
-    this.collection = collection;
   }
 
   public Integer getSuggestedMaxPrecision() {
     return suggestedMaxPrecision;
   }
 
-  public void setSuggestedMaxPrecision(Integer suggestedMaxPrecision) {
-    this.suggestedMaxPrecision = suggestedMaxPrecision;
-  }
-
   public Boolean getRepeatingElement() {
     return repeatingElement;
-  }
-
-  public void setRepeatingElement(Boolean repeatingElement) {
-    this.repeatingElement = repeatingElement;
   }
 
   public List<String> getPropertyTypes() {
     return propertyTypes;
   }
 
-  public void setPropertyTypes(List<String> propertyTypes) {
-    this.propertyTypes = propertyTypes == null ? new ArrayList<>() : propertyTypes;
-  }
-
   public List<String> getPayloads() {
     return payloads;
-  }
-
-  public void setPayloads(List<String> payloads) {
-    this.payloads = payloads == null ? new ArrayList<>() : payloads;
   }
 
   public String getSpanishStandardName() {
     return spanishStandardName;
   }
 
-  public void setSpanishStandardName(String spanishStandardName) {
-    this.spanishStandardName = spanishStandardName;
-  }
-
   public String getStatusChangeDate() {
     return statusChangeDate;
-  }
-
-  public void setStatusChangeDate(String statusChangeDate) {
-    this.statusChangeDate = statusChangeDate;
   }
 
   public String getRevisedDate() {
     return revisedDate;
   }
 
-  public void setRevisedDate(String revisedDate) {
-    this.revisedDate = revisedDate;
-  }
-
   public String getAddedInVersion() {
     return addedInVersion;
-  }
-
-  public void setAddedInVersion(String addedInVersion) {
-    this.addedInVersion = addedInVersion;
   }
 
   public String getWikiPageTitle() {
     return wikiPageTitle;
   }
 
-  public void setWikiPageTitle(String wikiPageTitle) {
-    this.wikiPageTitle = wikiPageTitle;
+  public String getWikiPageUrl() {
+    return wikiPageUrl;
   }
 
-  public String getWikiPageURL() {
-    return wikiPageURL;
+  public Integer getWikiPageId() {
+    return wikiPageId;
   }
 
-  public void setWikiPageURL(String wikiPageURL) {
-    this.wikiPageURL = wikiPageURL;
-  }
-
-  public Integer getWikiPageID() {
-    return wikiPageID;
-  }
-
-  public void setWikiPageID(Integer wikiPageID) {
-    this.wikiPageID = wikiPageID;
+  public void setParentResourceName(String parentResourceName) {
+    this.parentResourceName = parentResourceName;
   }
 
   public static class Builder {
     StandardField standardField = new StandardField();
 
     public Builder setStandardName(String standardName) {
-      standardField.setStandardName(standardName);
+      standardField.standardName = standardName;
       return this;
     }
 
     public Builder setDisplayName(String displayName) {
-      standardField.setDisplayName(displayName);
+      standardField.displayName = displayName;
       return this;
     }
 
     public Builder setParentResourceName(String parentResourceName) {
-      standardField.setParentResourceName(parentResourceName);
+      standardField.parentResourceName = parentResourceName;
       return this;
     }
 
     public Builder setDefinition(String definition) {
-      standardField.setDefinition(definition);
+      standardField.definition = definition;
       return this;
     }
 
     public Builder setGroups(List<String> groups) {
-      standardField.setGroups(groups);
+      standardField.groups = groups;
       return this;
     }
 
-    public Builder setSimpleDataType(String dataType) {
-      standardField.setSimpleDataType(dataType);
+    public Builder setSimpleDataType(String simpleDataType) {
+      standardField.simpleDataType = simpleDataType;
       return this;
     }
 
     public Builder setSuggestedMaxLength(Integer suggestedMaxLength) {
-      standardField.setSuggestedMaxLength(suggestedMaxLength);
+      standardField.suggestedMaxLength = suggestedMaxLength;
       return this;
     }
 
     public Builder setSynonyms(List<String> synonyms) {
-      standardField.setSynonyms(synonyms);
+      standardField.synonyms = synonyms;
       return this;
     }
 
-    public Builder setElementStatus(String status) {
-      standardField.setElementStatus(status);
+    public Builder setElementStatus(String elementStatus) {
+      standardField.elementStatus = elementStatus;
       return this;
     }
 
     public Builder setBedes(String bedes) {
-      standardField.setBedes(bedes);
+      standardField.bedes = bedes;
       return this;
     }
 
     public Builder setCertificationLevel(String certificationLevel) {
-      standardField.setCertificationLevel(certificationLevel);
+      standardField.certificationLevel = certificationLevel;
       return this;
     }
 
     public Builder setRecordId(Integer recordId) {
-      standardField.setRecordId(recordId);
+      standardField.recordId = recordId;
       return this;
     }
 
     public Builder setLookup(String lookup) {
-      standardField.setLookup(lookup);
+      standardField.lookup = lookup;
       return this;
     }
 
     public Builder setLookupStatus(String lookupStatus) {
-      standardField.setLookupStatus(lookupStatus);
+      standardField.lookupStatus = lookupStatus;
       return this;
     }
 
     public Builder setCollection(String collection) {
-      standardField.setCollection(collection);
+      standardField.collection = collection;
       return this;
     }
 
     public Builder setSuggestedMaxPrecision(Integer suggestedMaxPrecision) {
-      standardField.setSuggestedMaxPrecision(suggestedMaxPrecision);
+      standardField.suggestedMaxPrecision = suggestedMaxPrecision;
       return this;
     }
 
-    public Builder setRepeatingElement(Boolean isRepeatingElement) {
-      standardField.setRepeatingElement(isRepeatingElement);
+    public Builder setRepeatingElement(Boolean repeatingElement) {
+      standardField.repeatingElement = repeatingElement;
       return this;
     }
 
     public Builder setPropertyTypes(List<String> propertyTypes) {
-      standardField.setPropertyTypes(propertyTypes);
+      standardField.propertyTypes = propertyTypes;
       return this;
     }
 
     public Builder setPayloads(List<String> payloads) {
-      standardField.setPayloads(payloads);
+      standardField.payloads = payloads;
       return this;
     }
 
     public Builder setSpanishStandardName(String spanishStandardName) {
-      standardField.setSpanishStandardName(spanishStandardName);
+      standardField.spanishStandardName = spanishStandardName;
       return this;
     }
 
     public Builder setStatusChangeDate(String statusChangeDate) {
-      standardField.setStatusChangeDate(statusChangeDate);
+      standardField.statusChangeDate = statusChangeDate;
       return this;
     }
 
     public Builder setRevisedDate(String revisedDate) {
-      standardField.setRevisedDate(revisedDate);
+      standardField.revisedDate = revisedDate;
       return this;
     }
 
     public Builder setAddedInVersion(String addedInVersion) {
-      standardField.setAddedInVersion(addedInVersion);
+      standardField.addedInVersion = addedInVersion;
       return this;
     }
 
     public Builder setWikiPageTitle(String wikiPageTitle) {
-      standardField.setWikiPageTitle(wikiPageTitle);
+      standardField.wikiPageTitle = wikiPageTitle;
       return this;
     }
 
-    public Builder setWikiPageURL(String wikiPageURL) {
-      standardField.setWikiPageURL(wikiPageURL);
+    public Builder setWikiPageURL(String wikiPageUrl) {
+      standardField.wikiPageUrl = wikiPageUrl;
       return this;
     }
 
-    public Builder setWikiPageID(Integer wikiPageID) {
-      standardField.setWikiPageID(wikiPageID);
+    public Builder setWikiPageID(Integer wikiPageId) {
+      standardField.wikiPageId = wikiPageId;
       return this;
     }
 

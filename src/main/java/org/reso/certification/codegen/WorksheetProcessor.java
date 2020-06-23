@@ -9,6 +9,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.reso.commander.common.Utils;
+import org.reso.models.StandardEnumeration;
 import org.reso.models.StandardField;
 
 import java.util.*;
@@ -17,15 +18,15 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.*;
-import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_HEADER_NAMES.COLLECTION;
-import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_HEADER_NAMES.*;
+import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_FIELD_HEADERS.COLLECTION;
+import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_FIELD_HEADERS.STANDARD_NAME;
 import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_RESOURCE;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public abstract class WorksheetProcessor {
 
   static final Map<String, String> resourceTemplates = new LinkedHashMap<>();
-  static final Map<String, Set<String>> enumerations = new LinkedHashMap<>();
+  static final Map<String, Set<StandardEnumeration>> enumerations = new LinkedHashMap<>();
   static final Map<String, Map<String, StandardField>> processedStandardFields = new LinkedHashMap<>(new LinkedHashMap<>());
   private static final Logger LOG = LogManager.getLogger(WorksheetProcessor.class);
   String referenceResource = null;
@@ -33,21 +34,32 @@ public abstract class WorksheetProcessor {
   Sheet sheet;
   String startTimestamp;
 
-  Map<String, Integer> wellKnownHeaderIndexMap = new LinkedHashMap<>();
+  Map<String, Integer> wellKnownStandardFieldHeaderMap = new LinkedHashMap<>();
+  Map<String, Integer> wellKnownStandardEnumerationHeaderMap = new LinkedHashMap<>();
 
   public WorksheetProcessor() {
     startTimestamp = Utils.getTimestamp();
     markup = new StringBuffer();
   }
 
-  public void buildWellKnownHeaderIndexMap(Sheet sheet) {
-    wellKnownHeaderIndexMap = new LinkedHashMap<>();
+  public void buildWellKnownStandardFieldHeaderMap(Sheet sheet) {
+    wellKnownStandardFieldHeaderMap = new LinkedHashMap<>();
     sheet.getRow(0).cellIterator().forEachRemaining(cell ->
-            wellKnownHeaderIndexMap.put(cell.getStringCellValue(), cell.getColumnIndex()));
+            wellKnownStandardFieldHeaderMap.put(cell.getStringCellValue(), cell.getColumnIndex()));
   }
 
-  public Integer getWellKnownFieldIndex(String wellKnownFieldKey) {
-    return wellKnownHeaderIndexMap.get(wellKnownFieldKey);
+  public Integer getWellKnownStandardFieldIndex(String wellKnownStandardFieldKey) {
+    return wellKnownStandardFieldHeaderMap.get(wellKnownStandardFieldKey);
+  }
+
+  public Integer getWellKnownStandardEnumerationIndex(String wellKnownStandardEnumerationKey) {
+    return wellKnownStandardEnumerationHeaderMap.get(wellKnownStandardEnumerationKey);
+  }
+
+  public void buildWellKnownStandardEnumerationHeaderMap(Sheet sheet) {
+    wellKnownStandardEnumerationHeaderMap = new LinkedHashMap<>();
+    sheet.getRow(0).cellIterator().forEachRemaining(cell ->
+        wellKnownStandardEnumerationHeaderMap.put(cell.getStringCellValue(), cell.getColumnIndex()));
   }
 
   public static Integer getIntegerValue(Integer index, Row row, Integer defaultValue) {
@@ -129,34 +141,57 @@ public abstract class WorksheetProcessor {
     return getArrayValue(index, row, new ArrayList<>());
   }
 
-  public StandardField extractDataDictionaryRow(Row row) {
+  public StandardField extractStandardFieldRow(Row row) {
     return new StandardField.Builder()
-        .setStandardName(getStringValue(getWellKnownFieldIndex(STANDARD_NAME), row))
-        .setDisplayName(getStringValue(getWellKnownFieldIndex(DISPLAY_NAME), row))
-        .setDefinition(getStringValue(getWellKnownFieldIndex(DEFINITION), row))
-        .setGroups(getArrayValue(getWellKnownFieldIndex(GROUPS), row))
-        .setSimpleDataType(getStringValue(getWellKnownFieldIndex(SIMPLE_DATA_TYPE), row))
-        .setSuggestedMaxLength(getIntegerValue(getWellKnownFieldIndex(SUGGESTED_MAX_LENGTH), row))
-        .setSynonyms(getArrayValue(getWellKnownFieldIndex(SYNONYM), row))
-        .setElementStatus(getStringValue(getWellKnownFieldIndex(ELEMENT_STATUS), row))
-        .setBedes(getStringValue(getWellKnownFieldIndex(BEDES), row))
-        .setCertificationLevel(getStringValue(getWellKnownFieldIndex(CERTIFICATION_LEVEL), row))
-        .setRecordId(getIntegerValue(getWellKnownFieldIndex(RECORD_ID), row))
-        .setLookupStatus(getStringValue(getWellKnownFieldIndex(LOOKUP_STATUS), row))
-        .setLookup(getStringValue(getWellKnownFieldIndex(LOOKUP), row))
-        .setCollection(getStringValue(getWellKnownFieldIndex(COLLECTION), row))
-        .setSuggestedMaxPrecision(getIntegerValue(getWellKnownFieldIndex(SUGGESTED_MAX_PRECISION), row))
-        .setRepeatingElement(getBooleanValue(getWellKnownFieldIndex(REPEATING_ELEMENT), row))
-        .setPropertyTypes(getArrayValue(getWellKnownFieldIndex(PROPERTY_TYPES), row))
-        .setPayloads(getArrayValue(getWellKnownFieldIndex(PAYLOADS), row))
-        .setSpanishStandardName(getStringValue(getWellKnownFieldIndex(SPANISH_STANDARD_NAME), row))
-        .setStatusChangeDate(getStringValue(getWellKnownFieldIndex(STATUS_CHANGE_DATE), row))
-        .setRevisedDate(getStringValue(getWellKnownFieldIndex(REVISED_DATE), row))
-        .setAddedInVersion(getStringValue(getWellKnownFieldIndex(ADDED_IN_VERSION), row))
-        .setWikiPageTitle(getStringValue(getWellKnownFieldIndex(WIKI_PAGE_TITLE), row))
-        .setWikiPageURL(getStringValue(getWellKnownFieldIndex(WIKI_PAGE_URL), row))
-        .setWikiPageID(getIntegerValue(getWellKnownFieldIndex(WIKI_PAGE_ID), row))
+        .setStandardName(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.STANDARD_NAME), row))
+        .setDisplayName(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.DISPLAY_NAME), row))
+        .setDefinition(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.DEFINITION), row))
+        .setGroups(getArrayValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.GROUPS), row))
+        .setSimpleDataType(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.SIMPLE_DATA_TYPE), row))
+        .setSuggestedMaxLength(getIntegerValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.SUGGESTED_MAX_LENGTH), row))
+        .setSynonyms(getArrayValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.SYNONYM), row))
+        .setElementStatus(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.ELEMENT_STATUS), row))
+        .setBedes(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.BEDES), row))
+        .setCertificationLevel(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.CERTIFICATION_LEVEL), row))
+        .setRecordId(getIntegerValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.RECORD_ID), row))
+        .setLookupStatus(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.LOOKUP_STATUS), row))
+        .setLookup(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.LOOKUP), row))
+        .setCollection(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.COLLECTION), row))
+        .setSuggestedMaxPrecision(getIntegerValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.SUGGESTED_MAX_PRECISION), row))
+        .setRepeatingElement(getBooleanValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.REPEATING_ELEMENT), row))
+        .setPropertyTypes(getArrayValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.PROPERTY_TYPES), row))
+        .setPayloads(getArrayValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.PAYLOADS), row))
+        .setSpanishStandardName(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.SPANISH_STANDARD_NAME), row))
+        .setStatusChangeDate(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.STATUS_CHANGE_DATE), row))
+        .setRevisedDate(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.REVISED_DATE), row))
+        .setAddedInVersion(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.ADDED_IN_VERSION), row))
+        .setWikiPageTitle(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.WIKI_PAGE_TITLE), row))
+        .setWikiPageURL(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.WIKI_PAGE_URL), row))
+        .setWikiPageID(getIntegerValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.WIKI_PAGE_ID), row))
         .build();
+  }
+
+  public StandardEnumeration extractStandardEnumerationRow(Row row) {
+    return new StandardEnumeration.Builder()
+        .setLookupField(getStringValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.LOOKUP_FIELD), row))
+        .setLookupValue(getStringValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.LOOKUP_VALUE), row))
+        .setLookupDisplayName(getStringValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.LOOKUP_DISPLAY_NAME), row))
+        .setDefinition(getStringValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.DEFINITION), row))
+        .setLookupDisplayNameSynonyms(getArrayValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.LOOKUP_DISPLAY_NAME_SYNONYMS), row))
+        .setBedes(getStringValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.BEDES), row))
+        .setReferences(getArrayValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.REFERENCES), row))
+        .setElementStatus(getStringValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.ELEMENT_STATUS), row))
+        .setLookupId(getIntegerValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.LOOKUP_ID), row))
+        .setLookupFieldId(getIntegerValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.LOOKUP_FIELD_ID), row))
+        .setSpanishLookupField(getStringValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.SPANISH_LOOKUP_FIELD), row))
+        .setSpanishLookupValue(getStringValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.SPANISH_LOOKUP_VALUE), row))
+        .setStatusChangeDate(getStringValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.STATUS_CHANGE_DATE), row))
+        .setRevisedDate(getStringValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.REVISED_DATE), row))
+        .setAddedInVersion(getStringValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.ADDED_IN_VERSION), row))
+        .setWikiPageTitle(getStringValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.WIKI_PAGE_TITLE), row))
+        .setWikiPageUrl(getStringValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.WIKI_PAGE_URL), row))
+        .build();
+
   }
 
   abstract void processResourceSheet(Sheet sheet);
@@ -184,9 +219,9 @@ public abstract class WorksheetProcessor {
         sheet != null && sheet.getSheetName() != null);
 
     //if there's no field in the standard name column, don't process the row
-    if (row.getCell(getWellKnownFieldIndex(STANDARD_NAME)) == null) return;
+    if (row.getCell(getWellKnownStandardFieldIndex(STANDARD_NAME)) == null) return;
 
-    StandardField standardField = extractDataDictionaryRow(row);
+    StandardField standardField = extractStandardFieldRow(row);
     standardField.setParentResourceName(sheet.getSheetName());
 
     //add empty top-level resource name map
@@ -259,25 +294,25 @@ public abstract class WorksheetProcessor {
     final int LOOKUP_NAME_INDEX = 0, STANDARD_NAME_INDEX = 1;
 
     DataFormatter formatter = new DataFormatter();
-    AtomicReference<String> lookupName = new AtomicReference<>();
-    AtomicReference<String> standardName = new AtomicReference<>();
-
     Sheet sheet = getReferenceWorkbook().getSheet(ENUMERATION_TAB_NAME);
+    buildWellKnownStandardEnumerationHeaderMap(sheet);
+
+    AtomicReference<StandardEnumeration> standardEnumeration = new AtomicReference<>();
+
     sheet.rowIterator().forEachRemaining(row -> {
       if (row.getRowNum() > 0) {
-        lookupName.set(formatter.formatCellValue(row.getCell(LOOKUP_NAME_INDEX)));
-        standardName.set(formatter.formatCellValue(row.getCell(STANDARD_NAME_INDEX)));
+        standardEnumeration.set(extractStandardEnumerationRow(row));
 
-        if (!enumerations.containsKey(lookupName.get())) {
-          enumerations.put(lookupName.get(), new LinkedHashSet<>());
+        if (!enumerations.containsKey(standardEnumeration.get().getLookupField())) {
+          enumerations.put(standardEnumeration.get().getLookupField(), new LinkedHashSet<>());
         }
-        enumerations.get(lookupName.get()).add(standardName.get());
+        enumerations.get(standardEnumeration.get().getLookupField()).add(standardEnumeration.get());
       }
     });
-    enumerations.forEach((key, items) -> LOG.debug("key: " + key + " , items: " + items.toString()));
+    enumerations.forEach((key, items) -> LOG.info("key: " + key + " , items: " + items.toString()));
   }
 
-  public Map<String, Set<String>> getEnumerations() {
+  public Map<String, Set<StandardEnumeration>> getEnumerations() {
     return enumerations;
   }
 
@@ -297,7 +332,10 @@ public abstract class WorksheetProcessor {
         COLLECTION = "Collection";
   }
 
-  public static final class WELL_KNOWN_HEADER_NAMES {
+  /**
+   * Must match what's in the DD spreadsheet EXACTLY
+   */
+  public static final class WELL_KNOWN_FIELD_HEADERS {
     public static final String
         STANDARD_NAME = "StandardName",
         DISPLAY_NAME = "DisplayName",
@@ -325,4 +363,30 @@ public abstract class WorksheetProcessor {
         WIKI_PAGE_URL = "Wiki Page URL",
         WIKI_PAGE_ID = "Wiki Page ID";
   }
+
+  /**
+   * Must match what's in the DD spreadsheet EXACTLY
+   */
+  public static final class WELL_KNOWN_ENUMERATION_HEADERS {
+    public static final String
+      LOOKUP_FIELD = "LookupField",
+      LOOKUP_VALUE = "LookupValue",
+      LOOKUP_DISPLAY_NAME = "LookupDisplayName",
+      DEFINITION = "Definition",
+      LOOKUP_DISPLAY_NAME_SYNONYMS = "LookupDisplayNameSynonyms",
+      BEDES = "BEDES",
+      REFERENCES = "References",
+      ELEMENT_STATUS = "ElementStatus",
+      LOOKUP_ID = "LookupID",
+      LOOKUP_FIELD_ID = "LookupFieldID",
+      SPANISH_LOOKUP_FIELD = "SpanishLookupField",
+      SPANISH_LOOKUP_VALUE = "SpanishLookupValue",
+      STATUS_CHANGE_DATE = "StatusChangeDate",
+      REVISED_DATE = "RevisedDate",
+      ADDED_IN_VERSION = "AddedInVersion",
+      WIKI_PAGE_TITLE = "Wiki Page Title",
+      WIKI_PAGE_URL = "Wiki Page URL";
+  }
 }
+
+
