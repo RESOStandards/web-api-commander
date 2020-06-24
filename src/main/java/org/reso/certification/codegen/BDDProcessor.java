@@ -180,7 +180,7 @@ public class BDDProcessor extends WorksheetProcessor {
           buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
           "  Scenario: " + field.getStandardName() + "\n" +
           "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
-          "    Then \"" + field.getStandardName() + "\" MUST be \"Multiple Enumeration\" data type\n";
+          "    Then \"" + field.getStandardName() + "\" MUST be \"Collection of Enumeration\" data type\n";
 
       if (field.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
         template +=

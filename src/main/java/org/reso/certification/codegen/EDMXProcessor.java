@@ -13,7 +13,6 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.StringReader;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_RESOURCE;
 import static org.reso.commander.common.DataDictionaryMetadata.v1_7.WELL_KNOWN_KEYS.*;
@@ -254,42 +253,30 @@ public class EDMXProcessor extends WorksheetProcessor {
   }
 
   /*
-    <EnumType Name="Pattern" UnderlyingType="Edm.Int32" IsFlags="true">
-        <Member Name="Plain"             Value="0" />
-        <Member Name="Red"               Value="1" />
-        <Member Name="Blue"              Value="2" />
-        <Member Name="Yellow"            Value="4" />
-        <Member Name="Solid"             Value="8" />
-        <Member Name="Striped"           Value="16" />
-        <Member Name="SolidRed"          Value="9" />
-        <Member Name="SolidBlue"         Value="10" />
-        <Member Name="SolidYellow"       Value="12" />
-        <Member Name="RedBlueStriped"    Value="19" />
-        <Member Name="RedYellowStriped"  Value="21" />
-        <Member Name="BlueYellowStriped" Value="22" />
-      </EnumType>
-   */
+  <EnumType Name="ShippingMethod">
+    <Member Name="FirstClass" />
+    <Member Name="TwoDay" />
+    <Member Name="Overnight" />
+  </EnumType>
+ */
   private String buildMultipleEnumTypeMarkup(String lookupStandardName) {
     StringBuilder content = new StringBuilder();
-
     if (getEnumerations().get(lookupStandardName) != null) {
-      content.append("\n\n      <EnumType Name=\"").append(lookupStandardName).append("\"")
-          .append(" UnderlyingType=\"Edm.Int64\" IsFlags=\"true\">\n");
+      content.append("\n\n      <EnumType Name=\"").append(lookupStandardName).append("\">\n");
 
-      //iterate through each of the lookup values and generate their edm:EnumType content
-      AtomicInteger currentIndex = new AtomicInteger(0);
-      getEnumerations().get(lookupStandardName).forEach(standardEnumeration -> {
-        content.append("        ").append(EDMXTemplates.buildComments(standardEnumeration));
-        content.append("        <Member Name=\"").append(standardEnumeration.getLookupValue()).append("\"");
+      if (getEnumerations().get(lookupStandardName).size() > 0) {
+        //iterate through each of the lookup values and generate their edm:EnumType content
+        getEnumerations().get(lookupStandardName).forEach(standardEnumeration -> {
+          content.append("        ").append(EDMXTemplates.buildComments(standardEnumeration));
+          content.append("        <Member Name=\"").append(standardEnumeration.getLookupValue()).append("\" />\n");
+        });
 
-        //each item needs to be a power of 2 to be unique due to bit masking of values
-        content.append(" Value=\"").append(currentIndex.getAndIncrement() == 0 ? 0 : (long)Math.pow(2, currentIndex.get() - 2)).append("\" ");
-        content.append(" />\n");
-      });
+      } else {
+        content.append("<Annotation Term=\"org.reso.metadata.annotations\" String=\"Empty Enumeration\"/>");
+      }
 
-      content.append("      </EnumType>");
+      content.append("\n      </EnumType>");
     }
-
     return content.toString();
   }
 
@@ -333,18 +320,18 @@ public class EDMXProcessor extends WorksheetProcessor {
       return  "        <Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.Int64\" />\n";
     }
 
-    public static String buildEnumTypeMultiMember(StandardField field) {
-      if (field == null || field.getLookup() == null) return EMPTY_STRING;
-      if (!field.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
-      return "        <Property Name=\"" + field.getStandardName() + "\" Type=\"" + RESO_NAMESPACE + ".enums." + field.getLookupStandardName() + "\" />\n";
-    }
-
     public static String buildEnumTypeSingleMember(StandardField field) {
       if (field == null || field.getLookup() == null) return EMPTY_STRING;
       if (!field.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
 
       String lookupName = field.getLookup().replace("Lookups", "").trim();
       return "        <Property Name=\"" + field.getStandardName() + "\" Type=\"" + RESO_NAMESPACE + ".enums." + lookupName + "\" />\n";
+    }
+
+    public static String buildEnumTypeMultiMember(StandardField field) {
+      if (field == null || field.getLookup() == null) return EMPTY_STRING;
+      if (!field.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
+      return "        <Property Name=\"" + field.getStandardName() + "\" Type=\"Collection(" + RESO_NAMESPACE + ".enums." + field.getLookupStandardName() + ")\" />\n";
     }
 
     public static String buildStringMember(StandardField field) {
