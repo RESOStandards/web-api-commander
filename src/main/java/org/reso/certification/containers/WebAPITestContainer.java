@@ -79,7 +79,7 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicBoolean isDataSystemValid = new AtomicBoolean(false);
   private final AtomicReference<Set<ValidationMessage>> schemaValidationErrors = new AtomicReference<>();
 
-  // request instance variables - these get reset with every request
+  // request instance variables - these get resetMarkupBuffer with every request
   private final AtomicReference<String> selectList = new AtomicReference<>();
   private final AtomicReference<ODataRawResponse> oDataRawResponse = new AtomicReference<>();
   private final AtomicReference<Request> request = new AtomicReference<>();

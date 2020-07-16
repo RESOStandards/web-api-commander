@@ -976,7 +976,7 @@ public class WebAPIServer_1_0_2 {
    */
   private void prepareAndExecuteRawGetRequest(String requestId) {
     try {
-      //reset local state each time a get request is run
+      //resetMarkupBuffer local state each time a get request is run
       container.resetState();
 
       assertNotNull("ERROR: request Id cannot be null!", requestId);

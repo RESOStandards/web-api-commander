@@ -11,6 +11,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.reso.commander.common.Utils;
 import org.reso.models.StandardEnumeration;
 import org.reso.models.StandardField;
+import org.reso.models.StandardRelationship;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -36,6 +37,16 @@ public abstract class WorksheetProcessor {
 
   Map<String, Integer> wellKnownStandardFieldHeaderMap = new LinkedHashMap<>();
   Map<String, Integer> wellKnownStandardEnumerationHeaderMap = new LinkedHashMap<>();
+
+  private final List<StandardRelationship> standardRelationships = new ArrayList<>();
+
+  static final int
+          TARGET_RESOURCE = 0,
+          TARGET_RESOURCE_KEY = 1,
+          TARGET_STANDARD_NAME = 2,
+          CARDINALITY = 3,
+          SOURCE_RESOURCE = 4,
+          SOURCE_RESOURCE_KEY = 5;
 
   public WorksheetProcessor() {
     startTimestamp = Utils.getTimestamp();
@@ -72,6 +83,10 @@ public abstract class WorksheetProcessor {
       value = defaultValue;
     }
     return value;
+  }
+
+  public List<StandardRelationship> getStandardRelationships() {
+    return this.standardRelationships;
   }
 
   public static Integer getIntegerValue(Integer index, Row row) {
@@ -141,7 +156,27 @@ public abstract class WorksheetProcessor {
     return getArrayValue(index, row, new ArrayList<>());
   }
 
-  public StandardField extractStandardFieldRow(Row row) {
+  public StandardRelationship deserializeStandardRelationshipRow(Row row) {
+    StandardRelationship standardRelationship = null;
+
+    try {
+      standardRelationship = StandardRelationship.Builder.build(
+          row.getCell(TARGET_RESOURCE).getStringCellValue(),
+          row.getCell(TARGET_RESOURCE_KEY, Row.CREATE_NULL_AS_BLANK).getStringCellValue(),
+          row.getCell(TARGET_STANDARD_NAME).getStringCellValue(),
+          StandardRelationship.Cardinality.stream().filter(cardinality ->
+              cardinality.getRelationshipType().contentEquals(
+                  row.getCell(CARDINALITY).getStringCellValue())).findFirst().orElseThrow(Exception::new),
+          row.getCell(SOURCE_RESOURCE).getStringCellValue(),
+          row.getCell(SOURCE_RESOURCE_KEY).getStringCellValue()
+      );
+    } catch (Exception ex) {
+      LOG.error(ex);
+    }
+    return standardRelationship;
+  }
+
+  public StandardField deserializeStandardFieldRow(Row row) {
     return new StandardField.Builder()
         .setStandardName(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.STANDARD_NAME), row))
         .setDisplayName(getStringValue(getWellKnownStandardFieldIndex(WELL_KNOWN_FIELD_HEADERS.DISPLAY_NAME), row))
@@ -171,7 +206,7 @@ public abstract class WorksheetProcessor {
         .build();
   }
 
-  public StandardEnumeration extractStandardEnumerationRow(Row row) {
+  public StandardEnumeration deserializeStandardEnumerationRow(Row row) {
     return new StandardEnumeration.Builder()
         .setLookupField(getStringValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.LOOKUP_FIELD), row))
         .setLookupValue(getStringValue(getWellKnownStandardEnumerationIndex(WELL_KNOWN_ENUMERATION_HEADERS.LOOKUP_VALUE), row))
@@ -221,7 +256,7 @@ public abstract class WorksheetProcessor {
     //if there's no field in the standard name column, don't process the row
     if (row.getCell(getWellKnownStandardFieldIndex(STANDARD_NAME)) == null) return;
 
-    StandardField standardField = extractStandardFieldRow(row);
+    StandardField standardField = deserializeStandardFieldRow(row);
     standardField.setParentResourceName(sheet.getSheetName());
 
     //add empty top-level resource name map
@@ -284,9 +319,13 @@ public abstract class WorksheetProcessor {
     return null;
   }
 
-  void finishProcessingResourceSheet(Sheet sheet) {
+  public void beforeResourceSheetProcessed(Sheet sheet) {
+    //Add any before events here
+  }
+
+  public void afterResourceSheetProcessed(Sheet sheet) {
     resourceTemplates.put(sheet.getSheetName(), markup.toString());
-    reset();
+    resetMarkupBuffer();
   }
 
   public void buildEnumerationMap() {
@@ -301,7 +340,7 @@ public abstract class WorksheetProcessor {
 
     sheet.rowIterator().forEachRemaining(row -> {
       if (row.getRowNum() > 0) {
-        standardEnumeration.set(extractStandardEnumerationRow(row));
+        standardEnumeration.set(deserializeStandardEnumerationRow(row));
 
         if (!enumerations.containsKey(standardEnumeration.get().getLookupField())) {
           enumerations.put(standardEnumeration.get().getLookupField(), new LinkedHashSet<>());
@@ -312,11 +351,24 @@ public abstract class WorksheetProcessor {
     enumerations.forEach((key, items) -> LOG.info("key: " + key + " , items: " + items.toString()));
   }
 
+  public void buildStandardRelationships(Sheet worksheet) {
+    int FIRST_ROW_INDEX = 1;
+    Row currentRow;
+    for(int rowIndex = FIRST_ROW_INDEX; rowIndex < worksheet.getPhysicalNumberOfRows(); rowIndex++) {
+      currentRow = worksheet.getRow(rowIndex);
+      if (currentRow.getCell(TARGET_RESOURCE, Row.CREATE_NULL_AS_BLANK).getStringCellValue().length() > 0
+              && !currentRow.getCell(TARGET_RESOURCE_KEY, Row.CREATE_NULL_AS_BLANK).getStringCellValue().toLowerCase().contains("keynumeric")
+              && !currentRow.getCell(SOURCE_RESOURCE_KEY, Row.CREATE_NULL_AS_BLANK).getStringCellValue().toLowerCase().contains("keynumeric")) {
+        standardRelationships.add(deserializeStandardRelationshipRow(currentRow));
+      }
+    }
+  }
+
   public Map<String, Set<StandardEnumeration>> getEnumerations() {
     return enumerations;
   }
 
-  public void reset() {
+  public void resetMarkupBuffer() {
     markup = new StringBuffer();
   }
 
@@ -388,5 +440,3 @@ public abstract class WorksheetProcessor {
       WIKI_PAGE_URL = "Wiki Page URL";
   }
 }
-
-

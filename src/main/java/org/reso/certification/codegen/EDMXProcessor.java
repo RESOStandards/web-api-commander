@@ -6,13 +6,12 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.reso.commander.common.Utils;
 import org.reso.models.StandardEnumeration;
 import org.reso.models.StandardField;
-import org.xml.sax.InputSource;
-import org.xml.sax.helpers.DefaultHandler;
+import org.reso.models.StandardRelationship;
 
-import javax.xml.parsers.SAXParserFactory;
-import java.io.StringReader;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_RESOURCE;
 import static org.reso.commander.common.DataDictionaryMetadata.v1_7.WELL_KNOWN_KEYS.*;
@@ -51,8 +50,7 @@ public class EDMXProcessor extends WorksheetProcessor {
       case MEMBER: targetKeyName = "MemberKey"; break;
       case OFFICE: targetKeyName = "OfficeKey"; break;
       case CONTACTS:
-      case CONTACT_LISTING_NOTES:
-        targetKeyName = "ContactKey"; break;
+        case CONTACT_LISTING_NOTES: targetKeyName = "ContactKey"; break;
       case CONTACT_LISTINGS: targetKeyName = "ContactListingsKey"; break;
       case HISTORY_TRANSACTIONAL: targetKeyName = "HistoryTransactionalKey"; break;
       case INTERNET_TRACKING: targetKeyName = "EventKey"; break;
@@ -81,10 +79,19 @@ public class EDMXProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void finishProcessingResourceSheet(Sheet sheet) {
-    resourceTemplates.put(sheet.getSheetName(),
-        openEntityTypeTag + getKeyMarkup(sheet.getSheetName()) + markup.toString() + closeEntityTypeTag);
-    reset();
+  public void afterResourceSheetProcessed(Sheet sheet) {
+    assert sheet != null && sheet.getSheetName() != null;
+    String resourceName = sheet.getSheetName();
+
+    String templateContent =
+      openEntityTypeTag
+        + getKeyMarkup(resourceName)
+        + markup.toString()
+        + buildNavigationPropertyMarkup(resourceName)
+        + closeEntityTypeTag;
+
+    resourceTemplates.put(resourceName, templateContent);
+    resetMarkupBuffer();
   }
 
   @Override
@@ -148,6 +155,7 @@ public class EDMXProcessor extends WorksheetProcessor {
     LOG.debug("Collection Type is not supported at this time!");
   }
 
+
   @Override
   void generateOutput() {
 
@@ -158,25 +166,28 @@ public class EDMXProcessor extends WorksheetProcessor {
         closingDataServicesTag;
 
     try {
-      //check the document that was created - will throw exceptions if that document doesn't contain valid XML
-      SAXParserFactory.newInstance().newSAXParser().parse(new InputSource(new StringReader(output)), new DefaultHandler());
 
-      //write content of the string to
+      LOG.info("\nOutput is:\n" + output);
+
+      //check the document that was created - will throw exceptions if that document doesn't contain valid XML
+      //SAXParserFactory.newInstance().newSAXParser().parse(new InputSource(new StringReader(output)), new DefaultHandler());
+
+      //write content of the string to the same directory as the source file
       Utils.createFile(getDirectoryName(), getReferenceResource().replace(".xlsx", ".edmx"), output);
     } catch (Exception ex) {
-      LOG.error(ex);
+      //LOG.error(ex);
     }
   }
 
   private String buildEntityContainerMarkup() {
     StringBuilder content = new StringBuilder();
     content.append("      <EntityContainer Name=\"RESO\">\n");
-    resourceTemplates.forEach((name, templateContent) ->
+    resourceTemplates.forEach((resourceName, templateContent) ->
         content
             .append("        <EntitySet Name=\"")
-            .append(name).append("\" EntityType=\"" + RESO_NAMESPACE)
+            .append(resourceName).append("\" EntityType=\"" + RESO_NAMESPACE)
             .append(".")
-            .append(name).append("\" />\n"));
+            .append(resourceName).append("\" />\n"));
     content.append("      </EntityContainer>\n");
     return content.toString();
   }
@@ -186,7 +197,7 @@ public class EDMXProcessor extends WorksheetProcessor {
     content.append("    <Schema xmlns=\"http://docs.oasis-open.org/odata/ns/edm\" Namespace=\"" + RESO_NAMESPACE + "\">\n");
 
     //iterate through each of the found resources and generate their edm:EntityType content content
-    resourceTemplates.forEach((name, templateContent) -> {
+    resourceTemplates.forEach((resourceName, templateContent) -> {
       content.append(templateContent);
     });
 
@@ -221,6 +232,35 @@ public class EDMXProcessor extends WorksheetProcessor {
 
     //closing tag for enums schema definition
     content.append("\n    </Schema>\n");
+    return content.toString();
+  }
+
+  private String buildNavigationPropertyMarkup(String resourceName) {
+    StringBuilder content = new StringBuilder();
+    List<StandardRelationship> standardRelationships =
+            this.getStandardRelationships().stream().filter(standardRelationship
+                    -> standardRelationship.getTargetResource().contentEquals(resourceName)).collect(Collectors.toList());
+    for (StandardRelationship standardRelationship : standardRelationships) {
+      //LOG.info(standardRelationship);
+
+      if (standardRelationship.getTargetResourceKey() != null) {
+        content.append("\n       <NavigationProperty")
+                .append(" Name=\"").append(standardRelationship.getTargetStandardName()).append("\"")
+                .append(" Type=\"org.reso.metadata.").append(standardRelationship.getSourceResource()).append("\"")
+                .append(" Partner=\"").append(standardRelationship.getSourceResource())
+                  .append("/").append(standardRelationship.getSourceResourceKey()).append("\"")
+                .append(" />");
+      } else {
+        content.append("\n       <NavigationProperty")
+                .append(" Name=\"").append(standardRelationship.getTargetStandardName()).append("\"")
+                .append(" Type=\"Collection(org.reso.metadata.").append(standardRelationship.getSourceResource()).append(")\"")
+                .append(" Partner=\"").append(standardRelationship.getSourceResource()).append("\"")
+                .append(" />");
+      }
+    }
+
+    if (content.length() > 0) content.append("\n");
+
     return content.toString();
   }
 

@@ -9,7 +9,7 @@ public interface TestContainer {
 
 
   /**
-   * Used to reset the state of the given TestContainer.
+   * Used to resetMarkupBuffer the state of the given TestContainer.
    */
   void resetState();
 }

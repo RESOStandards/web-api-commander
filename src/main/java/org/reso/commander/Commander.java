@@ -654,12 +654,13 @@ public class Commander {
    */
   public void convertEDMXToSwagger(String pathToEDMX) {
     final String FILENAME_EXTENSION = ".swagger.json";
-    final String XSLT_FILENAME = "./V4-CSDL-to-OpenAPI.xslt";
+    final String XSLT_RESOURCE_NAME = "V4-CSDL-to-OpenAPI.xslt";
 
     if (validateMetadata(pathToEDMX)) {
       try {
         TransformerFactory factory = TransformerFactory.newInstance();
-        Transformer transformer = factory.newTransformer(new StreamSource(new File(XSLT_FILENAME)));
+        Transformer transformer = factory.newTransformer(new StreamSource(Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(XSLT_RESOURCE_NAME)));
 
         Source text = new StreamSource(new File(pathToEDMX));
         transformer.transform(text, new StreamResult(new File(pathToEDMX + FILENAME_EXTENSION)));
