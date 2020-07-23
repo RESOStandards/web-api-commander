@@ -348,7 +348,7 @@ public abstract class WorksheetProcessor {
         enumerations.get(standardEnumeration.get().getLookupField()).add(standardEnumeration.get());
       }
     });
-    enumerations.forEach((key, items) -> LOG.info("key: " + key + " , items: " + items.toString()));
+    //enumerations.forEach((key, items) -> LOG.info("key: " + key + " , items: " + items.toString()));
   }
 
   public void buildStandardRelationships(Sheet worksheet) {

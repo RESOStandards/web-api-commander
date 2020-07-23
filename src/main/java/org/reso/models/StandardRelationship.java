@@ -44,7 +44,7 @@ public class StandardRelationship {
       standardRelationship.setSourceResource(sourceResource);
       standardRelationship.setSourceResourceKey(sourceResourceKey);
 
-      LOG.info(standardRelationship);
+      //LOG.info(standardRelationship);
       return standardRelationship;
     }
   }

@@ -7,7 +7,11 @@ import org.reso.commander.common.Utils;
 import org.reso.models.StandardEnumeration;
 import org.reso.models.StandardField;
 import org.reso.models.StandardRelationship;
+import org.xml.sax.InputSource;
+import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.parsers.SAXParserFactory;
+import java.io.StringReader;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -167,10 +171,10 @@ public class EDMXProcessor extends WorksheetProcessor {
 
     try {
 
-      LOG.info("\nOutput is:\n" + output);
+      //LOG.info("\nOutput is:\n" + output);
 
       //check the document that was created - will throw exceptions if that document doesn't contain valid XML
-      //SAXParserFactory.newInstance().newSAXParser().parse(new InputSource(new StringReader(output)), new DefaultHandler());
+      SAXParserFactory.newInstance().newSAXParser().parse(new InputSource(new StringReader(output)), new DefaultHandler());
 
       //write content of the string to the same directory as the source file
       Utils.createFile(getDirectoryName(), getReferenceResource().replace(".xlsx", ".edmx"), output);
@@ -247,14 +251,11 @@ public class EDMXProcessor extends WorksheetProcessor {
         content.append("\n       <NavigationProperty")
                 .append(" Name=\"").append(standardRelationship.getTargetStandardName()).append("\"")
                 .append(" Type=\"org.reso.metadata.").append(standardRelationship.getSourceResource()).append("\"")
-                .append(" Partner=\"").append(standardRelationship.getSourceResource())
-                  .append("/").append(standardRelationship.getSourceResourceKey()).append("\"")
                 .append(" />");
       } else {
         content.append("\n       <NavigationProperty")
                 .append(" Name=\"").append(standardRelationship.getTargetStandardName()).append("\"")
                 .append(" Type=\"Collection(org.reso.metadata.").append(standardRelationship.getSourceResource()).append(")\"")
-                .append(" Partner=\"").append(standardRelationship.getSourceResource()).append("\"")
                 .append(" />");
       }
     }
