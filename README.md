@@ -14,6 +14,7 @@ the Apache Olingo library to provide OData Client functionality as well as RESO 
 - [Getting results from a given `uri`](#getting-results-from-a-given-uri)
 - [Getting raw results from a given `uri`](#getting-raw-results-from-a-given-uri)
 - [Converting metadata to Open API 2 format](#converting-metadata-to-open-api-2-format)
+- [Displaying Queries for RESOScript Files](#displaying-queries-for-resoscript-files)
 - [Running RESOScript Files](#running-resoscript-files)
 - [Automated Web API Testing (beta)](#automated-web-api-testing-beta)
   * [Cucumber Feature Specifications](#cucumber-feature-specifications)
@@ -232,6 +233,42 @@ $ java -jar web-api-commander.jar --convertEDMXtoOpenAPI --inputFile <i>
 Any errors will be displayed, and the output file is automatically created by appending `.swagger.json` to
 the given EDMX `inputFile` name.
 
+## Displaying Queries for RESOScript Files
+A RESOScript file usually contains a server's service root and one or more Requests that can either 
+be used in batch-format or can be used during testing.
+
+To resolve all parameters and display the queries to be run with your RESOScript, use the following command:
+
+```
+$ java -jar web-api-commander.jar --generateQueries --inputFile /path/to/your.resoscript
+```
+
+This should display something similar to the following:
+
+```
+==============================================================
+Web API Commander Starting... Press <ctrl+c> at any time to exit.
+==============================================================
+Displaying 44 Request(s)
+RESOScript: src/test/resources/mock.web-api-server.core.1.0.2.resoscript
+==============================================================
+
+
+===========================
+Request: #1
+===========================
+Request Id: metadata-validation
+Resolved URL: https://api.reso.org/OData/$metadata
+
+  
+===========================
+Request: #2
+===========================
+Request Id: fetch-by-id
+Resolved URL: https://api.reso.org/OData/Property('12345')?$select=ListingKey
+
+...
+```
 
 ## Running RESOScript Files
 The Web API Commander is able to run RESO's XML-based scripting format, otherwise known as a RESOScript.
@@ -239,7 +276,7 @@ The Web API Commander is able to run RESO's XML-based scripting format, otherwis
 In order to run an RESOScript file, use a command similar to the following:
 
 ```
-$ java -jar out/web-api-commander.jar --runRESOScript --i /path/to/your/inputFile --useEdmEnabledClient
+$ java -jar web-api-commander.jar --runRESOScript --inputFile /path/to/your.resoscript
 ```
 
 Notice that the EDM Enabled client has been requested in the above command. This turns on strict OData checking, which 

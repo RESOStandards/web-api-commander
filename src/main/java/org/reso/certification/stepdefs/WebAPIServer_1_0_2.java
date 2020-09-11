@@ -65,15 +65,6 @@ public class WebAPIServer_1_0_2 implements En {
 
     runBackground();
 
-    /*
-     * REQ-WA103-END2 - validate DataSystem endpoint, if present.
-     */
-    And("^the results match the expected DataSystem JSON schema$", () -> {
-      getTestContainer().validateDataSystem();
-      assertEquals("ERROR: JSON Schema validation produced errors!", 0, getTestContainer().getSchemaValidationErrors().size());
-    });
-
-
     And("^the XML Metadata returned by the server contains Edm metadata$", () -> {
       getTestContainer().setEdm(
           Commander.deserializeEdm(getTestContainer().getXMLResponseData(), getTestContainer().getCommander().getClient())

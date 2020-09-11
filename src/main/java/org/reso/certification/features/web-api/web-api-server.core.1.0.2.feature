@@ -30,14 +30,14 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
 
   @fetch-by-id @2.4.1
-  Scenario: fetch-by-id - fetch by KeyOrKeyNumeric Field
+  Scenario: fetch-by-id - fetch by Key Field
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "fetch-by-id"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
-    And the response has singleton results in "Parameter_KeyOrKeyNumericField"
-    And the provided "Parameter_KeyOrKeyNumericValue" is returned in "Parameter_KeyOrKeyNumericField"
+    And the response has singleton results in "Parameter_KeyField"
+    And the provided "Parameter_KeyValue" is returned in "Parameter_KeyField"
 
   @select @2.4.2
   Scenario: select - Query Support: $select
@@ -79,7 +79,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the response has results
     And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
     And data are present for fields contained within the given select list
-    And data in the "Parameter_KeyOrKeyNumeric" fields are different in the second request than in the first
+    And data in the "Parameter_Key" fields are different in the second request than in the first
 
   @orderby-asc @2.4.4
   Scenario: orderby-asc - Query Support: $orderby asc no filter

@@ -56,6 +56,8 @@ public class App {
     boolean useEdmEnabledClient;
     int pageLimit, pageSize;
 
+    Settings settings = null;
+
     //created with the commanderBuilder throughout the initialization body
     Commander commander;
 
@@ -82,7 +84,6 @@ public class App {
       }
 
       //if we're running a batch, initialize variables from the settings file rather than from command line options
-      Settings settings = null;
       if (cmd.hasOption(APP_OPTIONS.ACTIONS.RUN_RESOSCRIPT)) {
 
         LOG.debug("Loading RESOScript: " + inputFilename);
@@ -126,6 +127,7 @@ public class App {
 
       //If the RESOScript option was passed, then the correct commander instance should exist at this point
       if (cmd.hasOption(APP_OPTIONS.ACTIONS.RUN_RESOSCRIPT)) {
+        assert settings != null;
         int numRequests = settings.getRequests().size();
 
         LOG.info(REPORT_DIVIDER);
@@ -247,6 +249,55 @@ public class App {
 
         //converts metadata in input source file to output file
         commander.convertEDMXToSwagger(inputFilename);
+
+      } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_QUERIES)) {
+        APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_QUERIES);
+
+        LOG.debug("Loading RESOScript: " + inputFilename);
+        settings = Settings.loadFromRESOScript(new File(inputFilename));
+        LOG.debug("RESOScript loaded successfully!");
+
+        int numRequests = settings.getRequests().size();
+
+        LOG.info(REPORT_DIVIDER);
+        LOG.info("Web API Commander Starting... Press <ctrl+c> at any time to exit.");
+        LOG.info(REPORT_DIVIDER);
+
+        LOG.info("Displaying " + numRequests + " Request(s)");
+        LOG.info("RESOScript: " + inputFilename);
+        LOG.info(REPORT_DIVIDER + "\n\n");
+
+        String resolvedUrl = null;
+        Request request = null;
+        for (int i = 0; i < numRequests; i++) {
+          try {
+            request = settings.getRequestsAsList().get(i);
+
+            //TODO: create dynamic JUnit (or similar) test runner
+            LOG.info(REPORT_DIVIDER_SMALL);
+            LOG.info("Request: #" + (i + 1));
+            LOG.info(REPORT_DIVIDER_SMALL);
+
+            if (request.getRequestId() != null && request.getRequestId().length() > 0) {
+              LOG.info("Request Id: " + request.getRequestId());
+            }
+
+            resolvedUrl = Settings.resolveParameters(request, settings).getUrl();
+            LOG.info("Resolved URL: " + resolvedUrl);
+
+            //only run tests if they have URLs that resolve
+            if (!(resolvedUrl != null && resolvedUrl.length() > 0 && request.getOutputFile() != null && request.getOutputFile().length() > 0)) {
+              LOG.info("Request " + request.getRequestId() + " has an empty URL. Skipping...");
+            }
+          } catch (Exception ex) {
+            LOG.error("Exception thrown in RUN_RESOSCRIPT Action. Exception is: \n" + ex.toString());
+            LOG.error("Stack trace:");
+            Arrays.stream(ex.getStackTrace()).forEach(stackTraceElement -> LOG.error(stackTraceElement.toString()));
+          }
+          LOG.info("\n  ");
+        }
+
+        System.exit(OK); //terminate the program after the batch completes
 
       } else {
         printHelp(APP_OPTIONS.getOptions());
@@ -380,8 +431,8 @@ public class App {
         validationResponse = validateOptions(cmd, BEARER_TOKEN, URI, OUTPUT_FILE);
       } else if (action.matches(ACTIONS.CONVERT_EDMX_TO_OPEN_API)) {
         validationResponse = validateOptions(cmd, INPUT_FILE);
-      }
-
+      } else if (action.matches(ACTIONS.GENERATE_QUERIES))
+        validationResponse = validateOptions(cmd, INPUT_FILE);
       if (validationResponse != null) {
         printErrorMsgAndExit("ERROR: the following options are required when using " + action
             + "\n" + validationResponse + "\n\n");
@@ -484,7 +535,10 @@ public class App {
           .addOption(Option.builder().argName("w").longOpt(ACTIONS.SAVE_RAW_GET_REQUEST)
               .desc("Performs GET from <requestURI> using the given <bearerToken> and saves output to <outputFile>.").build())
           .addOption(Option.builder().argName("c").longOpt(ACTIONS.CONVERT_EDMX_TO_OPEN_API)
-              .desc("Converts EDMX in <inputFile> to Open API, saving it in <inputFile>.swagger.json").build());
+              .desc("Converts EDMX in <inputFile> to Open API, saving it in <inputFile>.swagger.json").build())
+          .addOption(Option.builder().argName("q").longOpt(ACTIONS.GENERATE_QUERIES)
+              .desc("Resolves queries in a given RESOScript <inputFile> and displays them in standard out.").build());
+
 
       return new Options()
           .addOption(helpOption)
@@ -509,6 +563,7 @@ public class App {
       static String GET_ENTITIES = "getEntities";
       static String SAVE_RAW_GET_REQUEST = "saveRawGetRequest";
       static String CONVERT_EDMX_TO_OPEN_API = "convertEDMXtoOpenAPI";
+      static String GENERATE_QUERIES = "generateQueries";
     }
   }
 }
