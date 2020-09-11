@@ -240,6 +240,6 @@ public class Request {
 
   public static final class WELL_KNOWN {
     public static final String
-        METADATA_ENDPOINT = "REQ-WA103-END3";
+        METADATA_ENDPOINT = "metadata-validation";
   }
 }

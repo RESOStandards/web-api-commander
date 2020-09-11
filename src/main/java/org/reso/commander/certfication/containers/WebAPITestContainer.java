@@ -301,7 +301,7 @@ public final class WebAPITestContainer implements TestContainer {
         assertNotNull(getDefaultErrorMessage("Metadata request URI was null! Please check your RESOScript."), requestUri);
 
         ODataRawRequest request = getCommander().getClient().getRetrieveRequestFactory().getRawRequest(URI.create(requestUri));
-        request.setFormat(ContentType.JSON.toContentTypeString());
+        request.setFormat(ContentType.APPLICATION_XML.toContentTypeString());
 
         LOG.info("Requesting XML Metadata from service root at: " + getServiceRoot());
         ODataRawResponse response = request.execute();

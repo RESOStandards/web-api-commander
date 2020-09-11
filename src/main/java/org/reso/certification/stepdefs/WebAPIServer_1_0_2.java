@@ -102,7 +102,7 @@ public class WebAPIServer_1_0_2 implements En {
     });
 
     /*
-     * REQ-WA103-QR1
+     * fetch-by-id
      */
     And("^the provided \"([^\"]*)\" is returned in \"([^\"]*)\"$", (String parameterUniqueIdValue, String parameterUniqueId) -> {
       try {
@@ -132,7 +132,7 @@ public class WebAPIServer_1_0_2 implements En {
     });
 
     /*
-     * REQ-WA103-QR3 - $select
+     * select - $select
      */
     And("^data are present for fields contained within the given select list$", () -> {
       try {
@@ -176,7 +176,7 @@ public class WebAPIServer_1_0_2 implements En {
 
 
     /*
-     * REQ-WA103-QR4 - $top
+     * top - $top
      * $top=*Parameter_TopCount*
      */
     And("^the results contain at most \"([^\"]*)\" records$", (String parameterTopCount) -> {
@@ -196,7 +196,7 @@ public class WebAPIServer_1_0_2 implements En {
 
 
     /*
-     * REQ-WA103-QR5 - $skip
+     * skip - $skip
      * $skip=*Parameter_TopCount*
      */
     And("^a GET request is made to the resolved Url in \"([^\"]*)\" with \\$skip=\"([^\"]*)\"$", (String requestId, String parameterTopCount) -> {

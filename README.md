@@ -20,7 +20,7 @@ the Apache Olingo library to provide OData Client functionality as well as RESO 
   * [Testing Environment](#testing-environment)
   * [Web API Usage](#web-api-usage)
   * [Running Web API Tests with the Gradle Wrapper](#running-web-api-tests-with-the-gradle-wrapper)
-  * [Convenience Methods for Web API 1.0.2 Server Core Certification](#convenience-methods-for-web-api-102-server-core-certification)
+  * [Convenience Methods for Web API 1.0.2 Server Core Certification](#web-API-1.0.2-server-core-certification)
   * [Web API Program Output](#web-api-program-output)
 - [Docker](#docker)
 - [Logging](#logging)
@@ -31,7 +31,7 @@ the Apache Olingo library to provide OData Client functionality as well as RESO 
 
 There are essentially two ways to run the Commander:
 * [As a Web API Client](#using-the-commander-as-a-web-api-client) 
-* As an automated testing tool for the [Web API](#web-api-usage) or [Data Dictionary](#data-dictionary-usage)
+* As an automated testing tool for the [Web API](#web-api-usage)
 
 
 ### Using the Commander as a Web API Client 
@@ -379,7 +379,7 @@ Prior to using the Commander for automated testing, you need to ensure your RESO
 For Web API 1.0.2 Server Core Certification, use [this resoscript](web-api-server.core.1.0.2.resoscript) as a template. 
  
 
-### Convenience Methods for Web API 1.0.2 Server Certification
+### Web API 1.0.2 Server Core Certification
 While you may use tags to filter tests as you choose, explained in the next section, it's convenient
 to be able to run a predefined set of tests Web API Core Certification. 
 
@@ -430,7 +430,7 @@ test code should need to know about the implementation details of how tests are 
 
 Libraries necessary for the Commander to run are included in the [`web-api-commander.jar`](https://github.com/RESOStandards/web-api-commander/blob/master/build/libs/web-api-commander.jar) file, aside from Gradle, which may either be installed on the local machine, or used within a Docker container (coming soon).
 
-*Note*: tests are currently tagged with their Web API version implicitly being 1.0.3, such as `@REQ-WA103-END3`, 
+*Note*: tests are currently tagged with their Web API version implicitly being 1.0.3, such as `@metadata-validation`, 
 but the tests currently being run on the server for Web API 1.0.2 is the backwards-compatible subset of 
 Web API 1.0.3 tests. 
 
@@ -441,8 +441,8 @@ A sample of the runtime terminal output follows:
 ```gherkin
 > Task :testWebApiServer_1_0_2_Core
 
-@REQ-WA103-END3 @2.4.1 @metadata
-Scenario: REQ-WA103-END3 - Request and Validate Server Metadata                                            
+@metadata-validation @2.4.1 @metadata
+Scenario: metadata-validation - Request and Validate Server Metadata                                            
 
 Using RESOScript: ./web-api-server.core.1.0.2.resoscript
   Given a RESOScript file was provided                                                                     
