@@ -496,9 +496,10 @@ public class WebAPIServer_1_0_2 implements En {
     /*
      * Single-Valued enumerations
      */
-    And("^Single Valued Enumeration Data in \"([^\"]*)\" has \"([^\"]*)\"$", (String parameterFieldName, String parameterAssertedValue) -> {
+    And("^Single Valued Enumeration Data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
       try {
-        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
+
+        final String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
         AtomicReference<String> fieldValue = new AtomicReference<>();
         AtomicReference<String> assertedValue = new AtomicReference<>();
 
@@ -509,8 +510,13 @@ public class WebAPIServer_1_0_2 implements En {
 
         from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           fieldValue.set(item.get(fieldName).toString());
-          result.set(fieldValue.get().contentEquals(assertedValue.get()));
-          LOG.info("Assert True: " + fieldValue.get() + " equals " + assertedValue.get() + " ==> " + result.get());
+          if (op.toLowerCase().contentEquals(EQ) || op.toLowerCase().contentEquals(HAS)) {
+            result.set(fieldValue.get().contentEquals(assertedValue.get()));
+          } else if (op.toLowerCase().contentEquals(NE)) {
+            result.set(!fieldValue.get().contentEquals(assertedValue.get()));
+          }
+
+          LOG.info("Assert True: " + fieldValue.get() + op + assertedValue.get() + " ==> " + result.get());
           assertTrue(result.get());
         });
       } catch (Exception ex) {
@@ -588,7 +594,6 @@ public class WebAPIServer_1_0_2 implements En {
      */
     And("^\"([^\"]*)\" data in Date Field \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String stringDatePart, String parameterFieldName, String op, String parameterAssertedValue) -> {
       String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
-      AtomicReference<Integer> fieldValue = new AtomicReference<>();
       AtomicInteger assertedValue = new AtomicInteger();
       AtomicReference<String> datePart = new AtomicReference<>(stringDatePart.toLowerCase());
       AtomicReference<String> operator = new AtomicReference<>(op.toLowerCase());
@@ -608,21 +613,21 @@ public class WebAPIServer_1_0_2 implements En {
     And("^\"([^\"]*)\" data in Timestamp Field \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String stringDatePart, String parameterFieldName, String op, String parameterAssertedValue) -> {
       try {
         String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
-        Double assertedValue;
+        double assertedValue;
         String datePart = stringDatePart.toLowerCase();
         String operator = op.toLowerCase();
 
         try {
           assertedValue = Double.parseDouble(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
 
-          if (assertedValue % 1 == 0) LOG.info("Asserted value is: " + assertedValue.intValue());
+          if (assertedValue % 1 == 0) LOG.info("Asserted value is: " + (int) assertedValue);
           else LOG.info("Asserted value is: " + assertedValue);
 
           //TODO: re-consolidate fractional with other date part ops
           if (datePart.contentEquals(FRACTIONAL)) {
             assertTrue(TestUtils.compareFractionalSecondsPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, operator, assertedValue));
           } else {
-            assertTrue(TestUtils.compareTimestampPayloadToAssertedDatePartValue(getTestContainer().getResponseData(), datePart, fieldName, operator, assertedValue.intValue()));
+            assertTrue(TestUtils.compareTimestampPayloadToAssertedDatePartValue(getTestContainer().getResponseData(), datePart, fieldName, operator, (int) assertedValue));
           }
         } catch (Exception ex) {
           fail(getDefaultErrorMessage(ex));

@@ -715,6 +715,7 @@ public final class TestUtils {
                 OR = "or",
                 NE = "ne",
                 EQ = "eq",
+                HAS = "has",
                 GREATER_THAN = "gt",
                 GREATER_THAN_OR_EQUAL = "ge",
                 LESS_THAN = "lt",

@@ -28,6 +28,7 @@ Feature: Web API Server 1.0.2 Core Certification
     When a GET request is made to the resolved Url in "service-document"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
+    And the response is valid JSON
 
   @fetch-by-id @2.4.1
   Scenario: fetch-by-id - fetch by Key Field
@@ -130,7 +131,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And DateTimeOffset data in "Parameter_TimestampField" is sorted in "desc" order
 
   @filter-int-and @2.4.4
-  Scenario: filter-int-and - Query Support: $filter - Integer Comparison: and
+  Scenario: filter-int-and - $filter - Integer Comparison: and
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "filter-int-and"
     Then the server responds with a status code of 200
@@ -142,7 +143,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And Integer data in "Parameter_IntegerField" "gt" "Parameter_IntegerValueLow" "and" "lt" "Parameter_IntegerValueHigh"
 
   @filter-int-or @2.4.4
-  Scenario: filter-int-or - Query Support: $filter - Integer Comparison: or
+  Scenario: filter-int-or - $filter - Integer Comparison: or
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "filter-int-or"
     Then the server responds with a status code of 200
@@ -154,7 +155,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And Integer data in "Parameter_IntegerField" "gt" "Parameter_IntegerValueLow" "or" "lt" "Parameter_IntegerValueHigh"
 
   @filter-int-not @2.4.4
-  Scenario: filter-int-not - Query Support: $filter - Integer Comparison: not() (operator)
+  Scenario: filter-int-not - $filter - Integer Comparison: not() operator
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "filter-int-not"
     Then the server responds with a status code of 200
@@ -166,7 +167,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And Integer data in "Parameter_FilterNotField" "ne" "Parameter_FilterNotValue"
 
   @filter-int-eq @2.4.4
-  Scenario: filter-int-eq - Query Support: $filter - Integer Comparison: eq
+  Scenario: filter-int-eq - $filter - Integer Comparison: eq
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "filter-int-eq"
     Then the server responds with a status code of 200
@@ -178,7 +179,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And Integer data in "Parameter_IntegerField" "eq" "Parameter_IntegerValueLow"
 
   @filter-int-ne @2.4.4
-  Scenario: filter-int-ne - Query Support: $filter - Integer Comparison: ne
+  Scenario: filter-int-ne - $filter - Integer Comparison: ne
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "filter-int-ne"
     Then the server responds with a status code of 200
@@ -190,7 +191,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And Integer data in "Parameter_IntegerField" "ne" "Parameter_IntegerValueLow"
 
   @filter-int-gt @2.4.4
-  Scenario: filter-int-gt - Query Support: $filter - Integer Comparison: gt
+  Scenario: filter-int-gt - $filter - Integer Comparison: gt
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "filter-int-gt"
     Then the server responds with a status code of 200
@@ -202,7 +203,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And Integer data in "Parameter_IntegerField" "gt" "Parameter_IntegerValueLow"
 
   @filter-int-ge @2.4.4
-  Scenario: filter-int-ge - Query Support: $filter - Integer Comparison: ge
+  Scenario: filter-int-ge - $filter - Integer Comparison: ge
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "filter-int-ge"
     Then the server responds with a status code of 200
@@ -214,7 +215,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And Integer data in "Parameter_IntegerField" "ge" "Parameter_IntegerValueLow"
 
   @filter-int-lt @2.4.4
-  Scenario: filter-int-lt - Query Support: $filter - Integer Comparison: lt
+  Scenario: filter-int-lt - $filter - Integer Comparison: lt
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "filter-int-lt"
     Then the server responds with a status code of 200
@@ -226,7 +227,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And Integer data in "Parameter_IntegerField" "lt" "Parameter_IntegerValueLow"
 
   @filter-int-le @2.4.4
-  Scenario: filter-int-le - Query Support: $filter - Integer Comparison: le
+  Scenario: filter-int-le - $filter - Integer Comparison: le
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "filter-int-le"
     Then the server responds with a status code of 200
@@ -246,6 +247,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
+    And Single Valued Enumeration Data in "Parameter_SingleValueLookupField" "eq" "Parameter_SingleLookupValue"
 
   #TODO
   @filter-enum-ne @2.4.4
@@ -345,7 +347,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the response has results
     And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
     And data are present for fields contained within the given select list
-    And DateTimeOffset data in "Parameter_TimestampField" "gt" now()
+    And DateTimeOffset data in "Parameter_TimestampField" "gt" "Parameter_DateTimeValue"
 
   #TODO
   @filter-datetime-ge @2.4.4
@@ -358,7 +360,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the response has results
     And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
     And data are present for fields contained within the given select list
-    And DateTimeOffset data in "Parameter_TimestampField" "ge" now()
+    And DateTimeOffset data in "Parameter_TimestampField" "ge" "Parameter_DateTimeValue"
 
   @filter-datetime-lt @2.4.4
   Scenario: filter-datetime-lt - TimestampField lt DateTimeOffset
@@ -384,6 +386,19 @@ Feature: Web API Server 1.0.2 Core Certification
     And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
     And data are present for fields contained within the given select list
     And DateTimeOffset data in "Parameter_TimestampField" "le" now()
+
+  #TODO
+  @filter-datetime-ne @2.4.4
+  Scenario: filter-datetime-ne - TimestampField le DateTimeOffset
+    Given valid metadata have been retrieved
+    When a GET request is made to the resolved Url in "filter-datetime-ne"
+    Then the server responds with a status code of 200
+    And the server has an OData-Version header value of "4.0" or "4.01"
+    And the response is valid JSON
+    And the response has results
+    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And data are present for fields contained within the given select list
+    And DateTimeOffset data in "Parameter_TimestampField" "ne" now()
 
   #TODO
   @filter-enum-coll-any @2.4.9
@@ -415,7 +430,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the response has results
     And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
     And data are present for fields contained within the given select list
-    And Single Valued Enumeration Data in "Parameter_SingleValueLookupField" has "Parameter_SingleLookupValue"
+    And Single Valued Enumeration Data in "Parameter_SingleValueLookupField" "has" "Parameter_SingleLookupValue"
 
   @filter-enum-multi-has @2.4.10
   Scenario: filter-enum-multi-has - Support Multi Value Lookups
@@ -447,18 +462,18 @@ Feature: Web API Server 1.0.2 Core Certification
   #  RESPONSE CODE TESTING
   #######################################F
 
-  @REQ-WA103-RC5 @2.4.2
-  Scenario: REQ-WA103-RC5 - 400 Bad Request
+  @response-code-400 @2.4.2
+  Scenario: response-code-400 - 400 Bad Request
     Given valid metadata have been retrieved
-    When a GET request is made to the resolved Url in "REQ-WA103-RC5"
+    When a GET request is made to the resolved Url in "response-code-400"
     Then the server responds with a status code of 400
     # Disable this check for now until Olingo-1380 is fixed - see: https://issues.apache.org/jira/browse/OLINGO-1380
     # And the server has an OData-Version header value of "4.0" or "4.01"
 
-  @REQ-WA103-RC07 @2.5.2
-  Scenario: REQ-WA103-RC07 - 404 Not Found Request
+  @response-code-404 @2.5.2
+  Scenario: response-code-404 - 404 Not Found Request
     Given valid metadata have been retrieved
-    When a GET request is made to the resolved Url in "REQ-WA103-RC07"
+    When a GET request is made to the resolved Url in "response-code-404"
     Then the server responds with a status code of 404
     # Disable this check for now until Olingo-1380 is fixed - see: https://issues.apache.org/jira/browse/OLINGO-1380
     # And the server has an OData-Version header value of "4.0" or "4.01"

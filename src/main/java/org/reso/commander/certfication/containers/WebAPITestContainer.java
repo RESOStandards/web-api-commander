@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -614,7 +615,7 @@ public final class WebAPITestContainer implements TestContainer {
   public WebAPITestContainer validateDataSystem() {
     if (getResponseData() != null) {
       try {
-        JsonSchemaFactory factory = JsonSchemaFactory.getInstance();
+        JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4);
         InputStream is = Thread.currentThread().getContextClassLoader()
             .getResourceAsStream("datasystem.schema.4.json");
         JsonSchema schema = factory.getSchema(is);
