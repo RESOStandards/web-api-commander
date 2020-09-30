@@ -12,16 +12,16 @@ Feature: Check Data Dictionary Variations
     And valid metadata are loaded into the test container
 
   Scenario: Check for Data Dictionary Synonyms
-    Given metadata exist in the test container
+    When metadata are checked for synonyms
     Then field synonyms MUST NOT exist in the metadata
     And enumeration synonyms MUST NOT exist in the metadata
 
   Scenario: Check for Similar Standard Names
-    Given metadata exist in the test container
-    Then fields are checked for similarity with standard names
-    And enumerations are checked for similarly with standard names
+    When metadata are checked for similar standard names
+    Then fields that are similar to standard names MAY cause certification to fail
+    And enumerations that are similar to standard names MAY cause Certification to fail
 
   Scenario: Check for Substring Matches of Standard Names
-    Given metadata exist in the test container
-    Then fields are checked for substring matches with standard names
-    And enumerations are checked for substring matches with standard names
+    When metadata are checked for substring matches of standard names
+    Then fields with substring matches of standard names MAY cause certification to fail
+    And enumerations with substring matches of standard names MAY cause certification to fail

@@ -200,32 +200,32 @@ public class DataDictionary {
     assertDataTypeMapping(fieldName, dataTypeName, foundTypeName);
   }
 
-  private void assertDataTypeMapping(String fieldName, String ddTypeName, String foundTypeName) {
-    assertNotNull(getDefaultErrorMessage("you must specify a Data Dictionary type name to check!"), ddTypeName);
+  private void assertDataTypeMapping(String fieldName, String assertedTypeName, String foundTypeName) {
+    assertNotNull(getDefaultErrorMessage("you must specify a Data Dictionary type name to check!"), assertedTypeName);
     assertNotNull(getDefaultErrorMessage("you must specify an Edm type name to check!"), foundTypeName);
-    EdmEnumType enumType = null;
+    EdmEnumType enumType;
 
-    switch (ddTypeName.toLowerCase()) {
+    switch (assertedTypeName.toLowerCase()) {
       case "string":
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", ddTypeName, "but found", foundTypeName),
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", assertedTypeName, "but found", foundTypeName),
             foundTypeName.contentEquals("Edm.String"));
         break;
       case "date":
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", ddTypeName, "but found", foundTypeName),
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", assertedTypeName, "but found", foundTypeName),
             foundTypeName.contentEquals("Edm.Date"));
         break;
       case "decimal":
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", ddTypeName, "but found", foundTypeName),
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", assertedTypeName, "but found", foundTypeName),
             foundTypeName.contentEquals("Edm.Decimal"));
         break;
       case "integer":
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", ddTypeName, "but found", foundTypeName),
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", assertedTypeName, "but found", foundTypeName),
             foundTypeName.contentEquals("Edm.Int16")
                 || foundTypeName.contentEquals("Edm.Int32")
                 || foundTypeName.contentEquals("Edm.Int64"));
         break;
       case "boolean":
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", ddTypeName, "but found", foundTypeName),
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", assertedTypeName, "but found", foundTypeName),
             foundTypeName.contentEquals("Edm.Boolean"));
         break;
       case "single enumeration":
@@ -235,67 +235,67 @@ public class DataDictionary {
             "could not find a definition for", foundTypeName, "in the Entity Data Model!"), enumType);
         assertFalse(getDefaultErrorMessage("isFlags is True but MUST be false for single-valued enumerations!"), enumType.isFlags());
         break;
-      case "collection of enumeration":
+      case "multiple enumeration":
         //check for enum type by FQDN in the Edm cached in the container
         enumType = container.getEdm().getEnumType(new FullQualifiedName(foundTypeName));
         assertNotNull(getDefaultErrorMessage(
             "could not find a definition for", foundTypeName, "in the Entity Data Model!"), enumType);
-        assertFalse(getDefaultErrorMessage("isFlags is True but MUST be false for single-valued enumerations!"), enumType.isFlags());
-        LOG.info("Found Collection of Enumerations for " + foundTypeName +
-            " with the following members: \n\t" + container.getEdm().getEnumType(new FullQualifiedName(foundTypeName)).getMemberNames());
+
+        boolean isCollection = container.getFieldMap().get(currentResourceName.get()).get(fieldName).isCollection();
+
+        if (isCollection) {
+          LOG.info("Found Collection of Enumerations for " + foundTypeName +
+              " with the following members: \n\t" + container.getEdm().getEnumType(new FullQualifiedName(foundTypeName)).getMemberNames());
+        } else {
+          assertTrue(getDefaultErrorMessage("Multi-Enumerations MUST have IsFlags=true"), enumType.isFlags());
+          LOG.info("Found Edm.EnumType Enumerations with IsFlags=true for " + foundTypeName +
+              " with the following members: \n\t" + container.getEdm().getEnumType(new FullQualifiedName(foundTypeName)).getMemberNames());
+        }
         break;
       case "timestamp":
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", ddTypeName, "but found ", foundTypeName),
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", assertedTypeName, "but found ", foundTypeName),
             foundTypeName.contentEquals("Edm.DateTimeOffset"));
         break;
       default:
-        fail(getDefaultErrorMessage("could not find data type mapping for", ddTypeName));
+        fail(getDefaultErrorMessage("could not find data type mapping for", assertedTypeName));
         break;
     }
-
   }
 
   @And("{string} precision SHOULD be less than or equal to the RESO Suggested Max Length of {int}")
   public void precisionSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxLengthOf(String fieldName, Integer suggestedPrecision) {
-    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
   }
 
   @And("{string} scale SHOULD be less than or equal to the RESO Suggested Max Scale of {int}")
   public void scaleSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxScaleOf(String fieldName, Integer suggestedMaxScale) {
-    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
   }
 
   @Then("{string} standard enumeration values exist in the metadata")
   public void enumValuesExistInTheMetadata(String lookupName) {
-    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
   }
 
   @And("{string} MUST only contain enum values found in the metadata")
   public void mustOnlyContainEnumValuesFoundInTheMetadata(String lookupName) {
-    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
   }
 
   @And("{string} length SHOULD be less than or equal to the RESO Suggested Max Length of {int}")
   public void lengthSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxLengthOf(String fieldName, Integer suggestedMaxLength) {
-    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
   }
 
   @And("{string} SHOULD have no more than the RESO Suggested Max Length of {int} item\\(s)")
   public void shouldHaveNoMoreThanTheRESOSuggestedMaxLengthOfItemS(String lookupName, Integer suggestedMaxItems) {
-    assumeTrue("Skipped: " + lookupName, isFieldContainedInMetadata(lookupName));
   }
 
-  @And("{string} is not a synonym for another field")
-  public void isNotASynonymForAnotherField(String fieldName) {
-    assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
+  @And("{string} MUST contain only standard enumerations")
+  public void mustContainOnlyStandardEnumerations(String fieldName) {
   }
 
   @And("{string} MUST contain at least one standard enumeration")
   public void mustContainAtLeastOneStandardEnumeration(String enumName) {
   }
 
-  @Given("metadata exist in the test container")
-  public void metadataExistInTheTestContainer() {
+  @When("metadata are checked for synonyms")
+  public void metadataAreCheckedForSynonyms() {
   }
 
   @Then("field synonyms MUST NOT exist in the metadata")
@@ -306,23 +306,27 @@ public class DataDictionary {
   public void enumerationSynonymsMUSTNOTExistInTheMetadata() {
   }
 
-  @Then("fields are checked for similarity with standard names")
-  public void fieldsAreCheckedForSimilarityWithStandardNames() {
+  @When("metadata are checked for similar standard names")
+  public void metadataAreCheckedForSimilarStandardNames() {
   }
 
-  @And("enumerations are checked for similarly with standard names")
-  public void enumerationsAreCheckedForSimilarlyWithStandardNames() {
+  @Then("fields that are similar to standard names MAY cause certification to fail")
+  public void fieldsThatAreSimilarToStandardNamesMAYCauseCertificationToFail() {
   }
 
-  @Then("fields are checked for substring matches with standard names")
-  public void fieldsAreCheckedForSubstringMatchesWithStandardNames() {
+  @And("enumerations that are similar to standard names MAY cause Certification to fail")
+  public void enumerationsThatAreSimilarToStandardNamesMAYCauseCertificationToFail() {
   }
 
-  @And("enumerations are checked for substring matches with standard names")
-  public void enumerationsAreCheckedForSubstringMatchesWithStandardNames() {
+  @When("metadata are checked for substring matches of standard names")
+  public void metadataAreCheckedForSubstringMatchesOfStandardNames() {
   }
 
-  @And("{string} MUST contain only standard enumerations")
-  public void mustContainOnlyStandardEnumerations(String arg0) {
+  @Then("fields with substring matches of standard names MAY cause certification to fail")
+  public void fieldsWithSubstringMatchesOfStandardNamesMAYCauseCertificationToFail() {
+  }
+
+  @And("enumerations with substring matches of standard names MAY cause certification to fail")
+  public void enumerationsWithSubstringMatchesOfStandardNamesMAYCauseCertificationToFail() {
   }
 }
