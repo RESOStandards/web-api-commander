@@ -38,20 +38,24 @@ public class Utils {
    * @param fileName the name of the file to create
    * @param content the content to write to the file
    */
-  public static void createFile(String directoryName, String fileName, String content) {
-    if (directoryName == null || fileName == null) return;
+  public static File createFile(String directoryName, String fileName, String content) {
+    if (directoryName == null || fileName == null) return null;
     String outputPath = System.getProperty("user.dir") + File.separator + directoryName;
     File baseDirectory = new File(outputPath);
-    FileWriter writer = null;
+    FileWriter writer;
+    File outputFile = null;
+
     try {
       if (!baseDirectory.exists()) {
         if (!baseDirectory.mkdirs()) throw new Exception("ERROR: could not create directory: " + baseDirectory);
       }
-      writer = new FileWriter(new File(outputPath + File.separator + fileName));
+      outputFile = new File(outputPath + File.separator + fileName);
+      writer = new FileWriter(outputFile);
       writer.write(new String(content.getBytes(StandardCharsets.UTF_8)));
       writer.flush();
     } catch (Exception ex) {
       LOG.error("Filename: " + fileName + ". Could not create file: " + ex);
     }
+    return outputFile;
   }
 }

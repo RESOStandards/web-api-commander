@@ -6,7 +6,6 @@ import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
-import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.codegen.BDDProcessor;
 import org.reso.certification.codegen.DataDictionaryCodeGenerator;
@@ -50,7 +49,7 @@ public class App {
   public static void main(String[] params) {
     // create the command line parser
     CommandLineParser parser = new org.apache.commons.cli.DefaultParser();
-    Edm metadata = null;
+    String metadata = null;
 
     //available Commander variables
     String serviceRoot = null, bearerToken = null, clientId = null, clientSecret = null,
@@ -200,15 +199,35 @@ public class App {
         System.exit(OK); //terminate the program after the batch completes
       }
 
+    //otherwise, load from command line
+    serviceRoot = cmd.getOptionValue(APP_OPTIONS.SERVICE_ROOT, null);
+    bearerToken = cmd.getOptionValue(APP_OPTIONS.BEARER_TOKEN, null);
+    clientId = cmd.getOptionValue(ClientSettings.CLIENT_IDENTIFICATION, null);
+    clientSecret = cmd.getOptionValue(ClientSettings.CLIENT_SECRET, null);
+    tokenUri = cmd.getOptionValue(ClientSettings.TOKEN_URI, null);
+    scope = cmd.getOptionValue(ClientSettings.CLIENT_SCOPE, null);
+
+    //create Commander instance
+    commander = commanderBuilder
+        .clientId(clientId)
+        .clientSecret(clientSecret)
+        .tokenUri(tokenUri)
+        .scope(scope)
+        .serviceRoot(serviceRoot)
+        .bearerToken(bearerToken)
+        .useEdmEnabledClient(true)
+        .build();
+
       /* otherwise, not a batch request...
          proceed with the selected command-line option */
 
       if (cmd.hasOption(APP_OPTIONS.ACTIONS.GET_METADATA)) {
         APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GET_METADATA);
 
-        //TODO: this isn't the metadata but the entity data model (edm), change to XML Metadata
-        metadata = commander.prepareEdmMetadataRequest().execute().getBody();
-        getMetadataReport(metadata);
+        commander.saveXmlMetadataRequestToFile(cmd.getOptionValue(APP_OPTIONS.SERVICE_ROOT), cmd.getOptionValue(APP_OPTIONS.OUTPUT_FILE));
+
+        //also create a metadata report -- add an option for this
+        //getMetadataReport(commander.prepareEdmMetadataRequest().execute().getBody());
 
       } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.VALIDATE_METADATA)) {
         APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.VALIDATE_METADATA);
@@ -220,10 +239,11 @@ public class App {
 
         //function delegate to handle updating the status
         AtomicInteger pageCount = new AtomicInteger(1); //1-based counting
+        Commander commanderInstance = commander;
         final Function<ClientEntitySet, Void> resultsSerializer = clientEntitySet -> {
           //TODO: very primitive progress meter, replace
           System.out.print("|" + clientEntitySet.getEntities().size());
-          commander.serializeEntitySet(clientEntitySet, "page" + pageCount.getAndIncrement() + "-" + outputFile, contentType);
+          commanderInstance.serializeEntitySet(clientEntitySet, "page" + pageCount.getAndIncrement() + "-" + outputFile, contentType);
           return null;
         };
 
@@ -245,12 +265,6 @@ public class App {
         APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.SAVE_RAW_GET_REQUEST);
 
         commander.saveGetRequest(uri, outputFile);
-
-      } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.CONVERT_EDMX_TO_OPEN_API)) {
-        APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.CONVERT_EDMX_TO_OPEN_API);
-
-        //converts metadata in input source file to output file
-        commander.convertEDMXToSwagger(inputFilename);
 
       } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)) {
         try {
@@ -385,10 +399,7 @@ public class App {
         validationResponse = validateOptions(cmd, BEARER_TOKEN, URI, OUTPUT_FILE);
       } else if (action.matches(ACTIONS.SAVE_RAW_GET_REQUEST)) {
         validationResponse = validateOptions(cmd, BEARER_TOKEN, URI, OUTPUT_FILE);
-      } else if (action.matches(ACTIONS.CONVERT_EDMX_TO_OPEN_API)) {
-        validationResponse = validateOptions(cmd, INPUT_FILE);
       }
-
       if (validationResponse != null) {
         printErrorMsgAndExit("ERROR: the following options are required when using " + action
             + "\n" + validationResponse + "\n\n");
@@ -493,9 +504,7 @@ public class App {
           .addOption(Option.builder().argName("v").longOpt(ACTIONS.VALIDATE_METADATA)
               .desc("Validates previously-fetched metadata in the <inputFile> path.").build())
           .addOption(Option.builder().argName("w").longOpt(ACTIONS.SAVE_RAW_GET_REQUEST)
-              .desc("Performs GET from <requestURI> using the given <bearerToken> and saves output to <outputFile>.").build())
-          .addOption(Option.builder().argName("c").longOpt(ACTIONS.CONVERT_EDMX_TO_OPEN_API)
-              .desc("Converts EDMX in <inputFile> to Open API, saving it in <inputFile>.swagger.json").build());
+              .desc("Performs GET from <requestURI> using the given <bearerToken> and saves output to <outputFile>.").build());
 
       return new Options()
           .addOption(helpOption)
@@ -521,7 +530,6 @@ public class App {
       public static final String VALIDATE_METADATA = "validateMetadata";
       public static final String GET_ENTITIES = "getEntities";
       public static final String SAVE_RAW_GET_REQUEST = "saveRawGetRequest";
-      public static final String CONVERT_EDMX_TO_OPEN_API = "convertEDMXToOpenAPI";
     }
   }
 }

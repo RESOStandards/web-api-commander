@@ -200,7 +200,7 @@ public class WebAPIServer_1_0_2 {
     AtomicReference<CsdlEntityContainer> entityContainer = new AtomicReference<>();
 
     try {
-      entityContainer.set(TestUtils.findDefaultEntityContainer(container.getEdm(), container.getXMLMetadata()));
+      entityContainer.set(TestUtils.findDefaultEntityContainer(container.getEdm(), container.fetchXMLMetadata()));
 
       assertNotNull("ERROR: server metadata does not contain the given resource name: " + resourceName,
           entityContainer.get().getEntitySet(resourceName));
@@ -885,7 +885,7 @@ public class WebAPIServer_1_0_2 {
     String resourceName = Settings.resolveParametersString(parameterEndpointResource, container.getSettings());
 
     List<CsdlNavigationProperty> navigationProperties
-        = TestUtils.findNavigationPropertiesForEntityTypeName(container.getEdm(), container.getXMLMetadata(), resourceName);
+        = TestUtils.findNavigationPropertiesForEntityTypeName(container.getEdm(), container.fetchXMLMetadata(), resourceName);
 
     assertTrue("ERROR: no navigation properties found for the given '" + resourceName + "' resource!",
         navigationProperties.size() > 0);

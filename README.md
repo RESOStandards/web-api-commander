@@ -13,7 +13,7 @@ the Apache Olingo library to provide OData Client functionality as well as RESO 
 - [Validating Metadata stored in an EDMX file](#validating-metadata-stored-in-an-edmx-file)
 - [Getting results from a given `uri`](#getting-results-from-a-given-uri)
 - [Getting raw results from a given `uri`](#getting-raw-results-from-a-given-uri)
-- [Converting metadata to Open API 2 format](#converting-metadata-to-open-api-2-format)
+- [Converting metadata to Open API 3 format](#converting-metadata-to-open-api-3-format)
 - [Running RESOScript Files](#running-resoscript-files)
 - [Automated Web API Testing (beta)](#automated-web-api-testing-beta)
   * [Cucumber Feature Specifications](#cucumber-feature-specifications)
@@ -78,8 +78,6 @@ usage: java -jar web-api-commander
     --bearerToken <b>       Bearer token to be used with the request.
     --contentType <t>       Results format: JSON (default),
                             JSON_NO_METADATA, JSON_FULL_METADATA, XML.
-    --convertEDMXToOpenAPI  Converts EDMX in <inputFile> to Open API, saving it
-                            in <inputFile>.swagger.json
     --entityName <n>        The name of the entity to fetch, e.g.
                             Property.
     --getEntities           Executes GET on <uri> using the given
@@ -212,26 +210,8 @@ Note: this option is currently being rolled into `--getEntities` with
 been made.
   
 
-## Converting metadata to Open API 2 format
-
-The WebAPI Commander also supports converting files in EDMX format to 
-OpenAPI / Swagger 2.0 format. This gives servers an alternative 
-representation besides the OData-specific representation used by EDMX. 
-
-It's worth mentioning that translation from EDMX to OpenAPI/Swagger is 
-*lossy*, meaning that some EDMX elements will not be translated. This 
-is due to the fact that EDMX is more specific than OpenAPI, for instance with type 
-representations like Integers.
-
-The EDMX converter may be called as follows:
-
-```
-$ java -jar web-api-commander.jar --convertEDMXToOpenAPI --inputFile <i>
-``` 
-
-Any errors will be displayed, and the output file is automatically created by appending `.swagger.json` to
-the given EDMX `inputFile` name.
-
+## Converting metadata to Open API 3 format
+See documentation regarding running the [nodejs-based tools in odata-openapi/lib/README.md](odata-openapi/lib/README.md).
 
 ## Running RESOScript Files
 The Web API Commander is able to run RESO's XML-based scripting format, otherwise known as a RESOScript.

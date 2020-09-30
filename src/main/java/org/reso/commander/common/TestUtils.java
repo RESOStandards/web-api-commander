@@ -717,7 +717,7 @@ public final class TestUtils {
     try {
       if (!container.getHaveMetadataBeenRequested()) {
         //will lazy-load metadata from the server if not yet requested
-        container.getXMLMetadata();
+        container.fetchXMLMetadata();
       }
       container.validateMetadata();
       assertTrue("XML Metadata at the given service root is not valid! " + container.getServiceRoot(),
@@ -753,20 +753,22 @@ public final class TestUtils {
     assertNotNull(container);
     assertNotNull("Commander is null!", container.getCommander());
 
-    final String serviceRoot = Settings.resolveParametersString(container.getServiceRoot(), container.getSettings());
-    assertEquals(getDefaultErrorMessage("given service root doesn't match the one configured in the Commander"),
-        serviceRoot,
-        container.getCommander().getServiceRoot());
+    if (!container.getHaveMetadataBeenRequested()) {
+      final String serviceRoot = Settings.resolveParametersString(container.getServiceRoot(), container.getSettings());
+      assertEquals(getDefaultErrorMessage("given service root doesn't match the one configured in the Commander"),
+          serviceRoot,
+          container.getCommander().getServiceRoot());
 
-    try {
-      assertNotNull(getDefaultErrorMessage("could not find valid XML Metadata for given service root:", serviceRoot),
-          container.getXMLMetadata());
+      try {
+        assertNotNull(getDefaultErrorMessage("could not find valid XML Metadata for given service root:", serviceRoot),
+            container.fetchXMLMetadata());
 
-    } catch (ODataClientErrorException cex) {
-      container.setResponseCode(cex.getStatusLine().getStatusCode());
-      fail(getDefaultErrorMessage(cex));
-    } catch (Exception ex) {
-      fail(getDefaultErrorMessage(ex));
+      } catch (ODataClientErrorException cex) {
+        container.setResponseCode(cex.getStatusLine().getStatusCode());
+        fail(getDefaultErrorMessage(cex));
+      } catch (Exception ex) {
+        fail(getDefaultErrorMessage(ex));
+      }
     }
   }
 
@@ -805,7 +807,7 @@ public final class TestUtils {
     try {
       //NOTE: this is here so that tests may be run individually
       if (!container.getHaveMetadataBeenRequested()) {
-        container.getXMLMetadata();
+        container.fetchXMLMetadata();
         container.validateMetadata();
       }
       assertTrue(getDefaultErrorMessage("Valid metadata could not be retrieved from the server! Please check the log for more information."),

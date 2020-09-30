@@ -131,7 +131,7 @@ task testDataDictionary_1_7() {
   }
 }
 
-//used for internal Commander testing
+//used for internal Commander Web API acceptance testing
 test {
   dependsOn assemble, compileTestJava
   doLast {

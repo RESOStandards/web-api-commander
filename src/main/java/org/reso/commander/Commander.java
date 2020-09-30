@@ -28,19 +28,19 @@ import org.xml.sax.*;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import static java.nio.file.Paths.get;
+import static org.junit.Assert.assertNotNull;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 /**
@@ -269,6 +269,18 @@ public class Commander {
   }
 
   /**
+   * Deserializes metadata from a given path
+   * @param pathToMetadata the path to the metadata
+   * @param client an instance of a Commander client
+   * @return the XMLMetadata for the given item
+   * @throws IOException
+   */
+  public static XMLMetadata deserializeXMLMetadataFromPath(String pathToMetadata, ODataClient client) throws IOException {
+    //deserialize response into XML Metadata - will throw an exception if metadata are invalid
+    return Commander.deserializeXMLMetadata(deserializeFileFromPath(pathToMetadata).toString(), client);
+  }
+
+  /**
    * Deserializes Edm from XML Metadata
    *
    * @param xmlMetadataString a string containing XML metadata
@@ -280,6 +292,35 @@ public class Commander {
    */
   public static Edm deserializeEdm(String xmlMetadataString, ODataClient client) {
     return client.getReader().readMetadata(new ByteArrayInputStream(xmlMetadataString.getBytes(StandardCharsets.UTF_8)));
+  }
+
+  /**
+   * Deserializes Edm from XML Metadata
+   *
+   * @param pathToMetadataFile a string containing the path to the raw XML Metadata file
+   * @param client            an instance of an OData Client
+   * @return the Edm contained within the xmlMetadataString
+   * <p>
+   * TODO: rewrite the separate Edm request in the Web API server test code to only make one request and convert
+   * to Edm from the XML Metadata that was received.
+   */
+  public static Edm deserializeEdmFromPath(String pathToMetadataFile, ODataClient client) {
+    return client.getReader().readMetadata(deserializeFileFromPath(pathToMetadataFile));
+  }
+
+  public static InputStream deserializeFileFromPath(String pathToFile) {
+    try {
+      return Files.newInputStream(get(pathToFile));
+    } catch (IOException e) {
+      LOG.fatal(getDefaultErrorMessage("Could not open file: " + pathToFile));
+    }
+    return null;
+  }
+
+  public static String convertInputStreamToString(InputStream inputStream) {
+    return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+      .lines()
+      .collect(Collectors.joining("\n"));
   }
 
   /**
@@ -585,6 +626,24 @@ public class Commander {
     return data;
   }
 
+  public void saveXmlMetadataRequestToFile(String requestUri, String outputFileName) {
+    assertNotNull(getDefaultErrorMessage("Metadata request URI was null! Please check your RESOScript."), requestUri);
+
+    ODataRawRequest request = getClient().getRetrieveRequestFactory().getRawRequest(URI.create(requestUri));
+    request.setFormat(ContentType.APPLICATION_XML.toContentTypeString());
+
+    LOG.info("Requesting XML Metadata from service root at: " + getServiceRoot());
+    ODataRawResponse response = request.execute();
+    LOG.debug("Response code for metadata request: " + response.getStatusCode());
+
+    try {
+      FileUtils.copyInputStreamToFile(response.getRawResponse(), new File(outputFileName));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+  }
+
   /**
    * Gets a ClientEntitySet for the given uri string.
    *
@@ -644,34 +703,6 @@ public class Commander {
       System.exit(NOT_OK);
     }
     return totalPageCount;
-  }
-
-  /**
-   * Converts metadata in EDMX format to metadata in Swagger 2.0 format.
-   * Converted file will have the same name as the input file, with .swagger.json appended to the name.
-   *
-   * @param pathToEDMX the metadata file to convert.
-   */
-  public void convertEDMXToSwagger(String pathToEDMX) {
-    final String FILENAME_EXTENSION = ".swagger.json";
-    final String XSLT_RESOURCE_NAME = "V4-CSDL-to-OpenAPI.xslt";
-
-    if (validateMetadata(pathToEDMX)) {
-      try {
-        TransformerFactory factory = TransformerFactory.newInstance();
-        Transformer transformer = factory.newTransformer(new StreamSource(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(XSLT_RESOURCE_NAME)));
-
-        Source text = new StreamSource(new File(pathToEDMX));
-        transformer.transform(text, new StreamResult(new File(pathToEDMX + FILENAME_EXTENSION)));
-
-      } catch (Exception ex) {
-        LOG.error("ERROR: convertMetadata failed. " + ex.toString());
-        System.exit(NOT_OK);
-      }
-    } else {
-      LOG.error("ERROR: invalid metadata! Please ensure metadata is valid using validateMetadata() before proceeding.");
-    }
   }
 
   /**

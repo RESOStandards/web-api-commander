@@ -1,11 +1,15 @@
 Feature: Check Data Dictionary Variations
 
   Background:
-    Given a RESOScript file was provided
-    And Client Settings and Parameters were read from the file
-    And a test container was successfully created from the given RESOScript
+    Given a RESOScript or Metadata file are provided
+    When a RESOScript file is provided
+    Then Client Settings and Parameters can be read from the RESOScript
+    And a test container was successfully created from the given RESOScript file
     And the test container uses an Authorization Code or Client Credentials for authentication
     And valid metadata were retrieved from the server
+    When a metadata file is provided
+    Then a test container was successfully created from the given metadata file
+    And valid metadata are loaded into the test container
 
   Scenario: Check for Data Dictionary Synonyms
     Given metadata exist in the test container

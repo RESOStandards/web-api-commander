@@ -2,10 +2,10 @@ package org.reso.certification.containers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Singleton;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.ValidationMessage;
-import io.cucumber.guice.ScenarioScoped;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,7 +45,7 @@ import static org.reso.commander.common.TestUtils.JSON_VALUE_PATH;
 /**
  * Encapsulates Commander Requests and Responses during runtime
  */
-@ScenarioScoped
+@Singleton
 public final class WebAPITestContainer implements TestContainer {
   public static final String FIELD_SEPARATOR = ",";
   public static final String EMPTY_STRING = "";
@@ -68,8 +68,11 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicReference<String> redirectUri = new AtomicReference<>();
   private final AtomicReference<String> scope = new AtomicReference<>();
   private final AtomicReference<String> pathToRESOScript = new AtomicReference<>();
+  private final AtomicReference<String> pathToMetadata = new AtomicReference<>();
   private final AtomicReference<String> xmlResponseData = new AtomicReference<>();
   private final AtomicBoolean showResponses = new AtomicBoolean(false);
+  private final AtomicBoolean shouldValidateMetadata = new AtomicBoolean(true);
+  private final AtomicBoolean isInitialized = new AtomicBoolean(false);
 
   // Metadata and DataSystem state variables
   private final AtomicBoolean isValidXMLMetadata = new AtomicBoolean(false);
@@ -78,6 +81,7 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicBoolean haveMetadataBeenRequested = new AtomicBoolean(false);
   private final AtomicBoolean isDataSystemValid = new AtomicBoolean(false);
   private final AtomicReference<Set<ValidationMessage>> schemaValidationErrors = new AtomicReference<>();
+  private final AtomicBoolean isUsingMetadataFile = new AtomicBoolean(false);
 
   // request instance variables - these get resetMarkupBuffer with every request
   private final AtomicReference<String> selectList = new AtomicReference<>();
@@ -100,38 +104,51 @@ public final class WebAPITestContainer implements TestContainer {
   private static final AtomicReference<Map<String, Map<String, CsdlProperty>>> fieldMap = new AtomicReference<>();
 
   /**
-   * Initializes the container
+   * Initializes the container with a singleton instance of the RESO Commander
    */
   public void initialize() {
-    setServiceRoot(getSettings().getClientSettings().get(ClientSettings.SERVICE_ROOT));
+    if (getIsInitialized()) return;
+    Commander.Builder builder = new Commander.Builder().useEdmEnabledClient(true);
 
-    //TODO: add base64 un-encode when applicable
-    setBearerToken(getSettings().getClientSettings().get(ClientSettings.BEARER_TOKEN));
-    if (getAuthToken() != null && getAuthToken().length() > 0) {
-      LOG.info("Bearer token loaded... first 4 characters: " + getAuthToken().substring(0, 4));
-    }
+    if (!isUsingMetadataFile.get()) {
+      setServiceRoot(getSettings().getClientSettings().get(ClientSettings.SERVICE_ROOT));
 
-    setClientId(getSettings().getClientSettings().get(ClientSettings.CLIENT_IDENTIFICATION));
-    setClientSecret(getSettings().getClientSettings().get(ClientSettings.CLIENT_SECRET));
-    setAuthorizationUri(getSettings().getClientSettings().get(ClientSettings.AUTHORIZATION_URI));
-    setTokenUri(getSettings().getClientSettings().get(ClientSettings.TOKEN_URI));
-    setRedirectUri(getSettings().getClientSettings().get(ClientSettings.REDIRECT_URI));
-    setScope(getSettings().getClientSettings().get(ClientSettings.CLIENT_SCOPE));
+      //TODO: add base64 un-encode when applicable
+      setBearerToken(getSettings().getClientSettings().get(ClientSettings.BEARER_TOKEN));
+      if (getAuthToken() != null && getAuthToken().length() > 0) {
+        LOG.info("Bearer token loaded... first 4 characters: " + getAuthToken().substring(0, 4));
+      }
 
-    LOG.info("Service root is: " + getServiceRoot());
+      setClientId(getSettings().getClientSettings().get(ClientSettings.CLIENT_IDENTIFICATION));
+      setClientSecret(getSettings().getClientSettings().get(ClientSettings.CLIENT_SECRET));
+      setAuthorizationUri(getSettings().getClientSettings().get(ClientSettings.AUTHORIZATION_URI));
+      setTokenUri(getSettings().getClientSettings().get(ClientSettings.TOKEN_URI));
+      setRedirectUri(getSettings().getClientSettings().get(ClientSettings.REDIRECT_URI));
+      setScope(getSettings().getClientSettings().get(ClientSettings.CLIENT_SCOPE));
 
-    if (getCommander() == null) {
-      //create Commander instance
-      setCommander(new Commander.Builder()
+      LOG.info("Service root is: " + getServiceRoot());
+
+      builder
           .clientId(getClientId())
           .clientSecret(getClientSecret())
           .tokenUri(getTokenUri())
           .scope(getScope())
           .serviceRoot(getServiceRoot())
-          .bearerToken(getAuthToken())
-          .useEdmEnabledClient(shouldUseEdmClient())
-          .build());
+          .bearerToken(getAuthToken());
     }
+
+    //singleton Commander instance
+    setCommander(builder.build());
+    LOG.debug("Commander created!");
+    isInitialized.set(true);
+  }
+
+  public void initialize(String pathToMetadataFile) {
+    if (getIsInitialized()) return;
+    assertNotNull(getDefaultErrorMessage("pathToMetadataFile MUST not be null!", pathToMetadataFile));
+    this.setPathToMetadata(pathToMetadataFile);
+    this.isUsingMetadataFile.set(pathToMetadataFile != null);
+    this.initialize();
   }
 
   /**
@@ -178,14 +195,14 @@ public final class WebAPITestContainer implements TestContainer {
    */
   private void buildFieldMap() {
     try {
-      fieldMap.set(new HashMap<>());
+      fieldMap.set(new LinkedHashMap<>());
 
-      LOG.info("Building Field Map...");
+      LOG.debug("Building Field Map...");
 
-      assertNotNull(getDefaultErrorMessage("no XML Metadata found in the container!"), getXMLMetadata());
+      assertNotNull(getDefaultErrorMessage("no XML Metadata found in the container!"), fetchXMLMetadata());
       assertNotNull(getDefaultErrorMessage("no Entity Data Model (edm) found in the container!"), getEdm());
 
-      XMLMetadata xmlMetadata = getXMLMetadata();
+      XMLMetadata xmlMetadata = fetchXMLMetadata();
       Edm edm = getEdm();
 
       //build a map of all of the discovered fields on the server for the given resource by field name
@@ -194,15 +211,15 @@ public final class WebAPITestContainer implements TestContainer {
         List<CsdlProperty> csdlProperties = TestUtils.findEntityTypesForEntityTypeName(edm, xmlMetadata, resourceName);
 
         if (csdlProperties != null) {
-          LOG.info("Found '" + resourceName + "' resource");
+          LOG.debug("Found '" + resourceName + "' resource");
           csdlProperties.forEach(csdlProperty -> {
-            if (!fieldMap.get().containsKey(resourceName)) fieldMap.get().put(resourceName, new HashMap<>());
+            if (!fieldMap.get().containsKey(resourceName)) fieldMap.get().put(resourceName, new LinkedHashMap<>());
             fieldMap.get().get(resourceName).put(csdlProperty.getName(), csdlProperty);
           });
         }
       });
       assertTrue("ERROR: No field were found in the server's metadata!", fieldMap.get().size() > 0);
-      LOG.info("Metadata Field Map created!");
+      LOG.debug("Metadata Field Map created!");
 
     } catch (Exception ex) {
       LOG.error(getDefaultErrorMessage(ex));
@@ -223,23 +240,6 @@ public final class WebAPITestContainer implements TestContainer {
    */
   public void setXMLResponseData(String xmlResponseData) {
     this.xmlResponseData.set(xmlResponseData);
-  }
-
-  /**
-   * If the server is using a DataSystem endpoint that's not rooted at the Service Root, the EDM client
-   * will fail the request. Cannot use the Edm client for those that do.
-   *
-   * @return true if the Olingo Edm client should be used, false otherwise.
-   */
-  private boolean shouldUseEdmClient() {
-    /* Cannot use EdmEnabled client with a server that has a DataSystem endpoint that's not rooted at the Service Root */
-    String dataSystemEndpoint = getSettings().getParameters().getValue(Parameters.WELL_KNOWN.DATASYSTEM_ENDPOINT),
-        serviceRoot = getSettings().getClientSettings().get(ClientSettings.SERVICE_ROOT);
-
-    assertNotNull(getDefaultErrorMessage(Parameters.WELL_KNOWN.DATASYSTEM_ENDPOINT, "cannot be null!"), dataSystemEndpoint);
-    assertNotNull(getDefaultErrorMessage(ClientSettings.SERVICE_ROOT, "cannot be null!"), serviceRoot);
-
-    return dataSystemEndpoint.startsWith(serviceRoot);
   }
 
   /**
@@ -341,14 +341,14 @@ public final class WebAPITestContainer implements TestContainer {
    * @return XMLMetadata representation of the server metadata.
    * @implNote the data in this item are cached in the test container once fetched
    */
-  public XMLMetadata getXMLMetadata() throws Exception {
+  public XMLMetadata fetchXMLMetadata() throws Exception {
     if (xmlMetadata.get() == null) {
       try {
         String requestUri = Settings.resolveParameters(getSettings().getRequest(Request.WELL_KNOWN.METADATA_ENDPOINT), getSettings()).getUrl();
         assertNotNull(getDefaultErrorMessage("Metadata request URI was null! Please check your RESOScript."), requestUri);
 
         ODataRawRequest request = getCommander().getClient().getRetrieveRequestFactory().getRawRequest(URI.create(requestUri));
-        request.setFormat(ContentType.JSON.toContentTypeString());
+        request.setFormat(ContentType.APPLICATION_XML.toContentTypeString());
 
         LOG.info("Requesting XML Metadata from service root at: " + getServiceRoot());
         ODataRawResponse response = request.execute();
@@ -363,6 +363,10 @@ public final class WebAPITestContainer implements TestContainer {
         haveMetadataBeenRequested.set(true);
       }
     }
+    return xmlMetadata.get();
+  }
+
+  public XMLMetadata getXMLMetadata() {
     return xmlMetadata.get();
   }
 
@@ -606,6 +610,12 @@ public final class WebAPITestContainer implements TestContainer {
     this.scope.set(scope);
   }
 
+  public String getPathToMetadata() {return pathToMetadata.get();}
+
+  public void setPathToMetadata(String path) {
+    this.pathToMetadata.set(path);
+  }
+
   public String getPathToRESOScript() {
     return pathToRESOScript.get();
   }
@@ -749,8 +759,8 @@ public final class WebAPITestContainer implements TestContainer {
   public WebAPITestContainer validateXMLMetadata() {
     try {
       //note that this will lazy-load XML metadata when it's not present
-      assertNotNull(getDefaultErrorMessage("XML metadata was not found!"), getXMLMetadata());
-      boolean isValid = getCommander().validateMetadata(getXMLMetadata());
+      assertNotNull(getDefaultErrorMessage("XML metadata was not found!"), fetchXMLMetadata());
+      boolean isValid = getCommander().validateMetadata(fetchXMLMetadata());
       setIsValidXMLMetadata(isValid);
       LOG.info("XML Metadata is " + (isValid ? "valid" : "invalid") + "!");
     } catch (Exception ex) {
@@ -793,6 +803,22 @@ public final class WebAPITestContainer implements TestContainer {
 
   public Set<ValidationMessage> getSchemaValidationErrors() {
     return schemaValidationErrors.get();
+  }
+
+  public Boolean getShouldValidateMetadata() {
+    return shouldValidateMetadata.get();
+  }
+
+  public void setShouldValidateMetadata(boolean value) {
+    shouldValidateMetadata.set(value);
+  }
+
+  public boolean getIsInitialized() {
+    return isInitialized.get();
+  }
+
+  public void setIsInitialized(boolean value) {
+    isInitialized.set(value);
   }
 
   public static final class ODATA_QUERY_PARAMS {
