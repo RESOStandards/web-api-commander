@@ -131,6 +131,17 @@ task testDataDictionary_1_7() {
   }
 }
 
+task generateReports() {
+  doLast {
+    javaexec {
+      classpath = sourceSets.main.runtimeClasspath
+      main = "org.reso.certification.reporting.ReportGenerator"
+      args = ["build/data-dictionary-1.7.json", "cucumber-reporting"]
+    }
+     //generateReport(System.getProperty("pathToJsonReport"), System.getProperty("outputFile"))
+  }
+}
+
 //used for internal Commander Web API acceptance testing
 test {
   dependsOn assemble, compileTestJava

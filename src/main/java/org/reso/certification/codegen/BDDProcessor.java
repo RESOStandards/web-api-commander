@@ -105,6 +105,9 @@ public class BDDProcessor extends WorksheetProcessor {
     private static ArrayList<String> buildTags(StandardField field) {
       ArrayList<String> tags = new ArrayList<>();
 
+      //use this to add each field name tag
+      //tags.add(field.getStandardName());
+
       if (field.getParentResourceName() != null && field.getParentResourceName().length() > 0) {
         tags.add(field.getParentResourceName());
       }
@@ -119,8 +122,7 @@ public class BDDProcessor extends WorksheetProcessor {
       if (field == null) return EMPTY_STRING;
 
       return
-          "\n  @" + field.getStandardName() + SINGLE_SPACE +
-              buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+          "\n" + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + field.getStandardName() + "\" MUST be \"Boolean\" data type\n";
@@ -129,8 +131,7 @@ public class BDDProcessor extends WorksheetProcessor {
     public static String buildDateTest(StandardField field) {
       if (field == null) return EMPTY_STRING;
       return
-          "\n  @" + field.getStandardName() + SINGLE_SPACE +
-              buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+          "\n" + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + field.getStandardName() + "\" MUST be \"Date\" data type\n";
@@ -151,8 +152,7 @@ public class BDDProcessor extends WorksheetProcessor {
     public static String buildDecimalTest(StandardField field) {
       if (field == null) return EMPTY_STRING;
       String template =
-          "\n  @" + field.getStandardName() + SINGLE_SPACE +
-              buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+          "\n" + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + field.getStandardName() + "\" MUST be \"Decimal\" data type\n";
@@ -171,8 +171,7 @@ public class BDDProcessor extends WorksheetProcessor {
     public static String buildIntegerTest(StandardField field) {
       if (field == null) return EMPTY_STRING;
       return
-          "\n  @" + field.getStandardName() + SINGLE_SPACE +
-              buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+          "\n" + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + field.getStandardName() + "\" MUST be \"Integer\" data type\n";
@@ -181,8 +180,8 @@ public class BDDProcessor extends WorksheetProcessor {
     public static String buildStringListMultiTest(StandardField field) {
       if (field == null) return EMPTY_STRING;
 
-      String template = "\n  @" + field.getStandardName() + SINGLE_SPACE +
-          buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+      String template =
+          "\n" + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
           "  Scenario: " + field.getStandardName() + "\n" +
           "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
           "    Then \"" + field.getStandardName() + "\" MUST be \"Multiple Enumeration\" data type\n";
@@ -197,8 +196,8 @@ public class BDDProcessor extends WorksheetProcessor {
 
     public static String buildStringListSingleTest(StandardField field) {
       if (field == null) return EMPTY_STRING;
-      String template = "\n  @" + field.getStandardName() + SINGLE_SPACE +
-              buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+      String template =
+          "\n" + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + field.getStandardName() + "\" MUST be \"Single Enumeration\" data type\n";
@@ -215,8 +214,7 @@ public class BDDProcessor extends WorksheetProcessor {
     public static String buildStringTest(StandardField field) {
       if (field == null) return EMPTY_STRING;
       String template =
-          "\n  @" + field.getStandardName() + SINGLE_SPACE +
-              buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+          "\n" + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + field.getStandardName() + "\" MUST be \"String\" data type\n";
@@ -231,8 +229,7 @@ public class BDDProcessor extends WorksheetProcessor {
     public static String buildTimestampTest(StandardField field) {
       if (field == null) return EMPTY_STRING;
       return
-          "\n  @" + field.getStandardName() + SINGLE_SPACE +
-              buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+          "\n" + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + field.getStandardName() + "\" MUST be \"Timestamp\" data type\n";
