@@ -216,7 +216,7 @@ public class DataDictionary {
         break;
       case "decimal":
         assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", assertedTypeName, "but found", foundTypeName),
-            foundTypeName.contentEquals("Edm.Decimal"));
+            foundTypeName.contentEquals("Edm.Decimal") || foundTypeName.contentEquals("Edm.Double"));
         break;
       case "integer":
         assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", assertedTypeName, "but found", foundTypeName),

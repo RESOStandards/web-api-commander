@@ -136,7 +136,7 @@ task generateReports() {
     javaexec {
       classpath = sourceSets.main.runtimeClasspath
       main = "org.reso.certification.reporting.ReportGenerator"
-      args = ["build/data-dictionary-1.7.json", "cucumber-reporting"]
+      args = ["build/data-dictionary-1.7.json", "DD-1.7-report-" + Date.newInstance().format("yyyymmddHHmmss")]
     }
      //generateReport(System.getProperty("pathToJsonReport"), System.getProperty("outputFile"))
   }
