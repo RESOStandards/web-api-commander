@@ -50,6 +50,7 @@ dependencies {
   compile 'net.masterthought:cucumber-reporting:5.1.1'
 
   compile 'com.networknt:json-schema-validator:1.0.35'
+  compile 'com.google.code.gson:gson:2.8.6'
 
   implementation 'org.mockito:mockito-core:3.3.3'
 }
@@ -82,6 +83,8 @@ tasks.withType(JavaCompile) {
 
 // task for Web API Server 1.0.2 Core Testing
 task testWebApiServer_1_0_2_Core() {
+  group = 'RESO Certification'
+  description = "Runs Web API Core 1.0.2 Automated Acceptance Tests."
   dependsOn jar
   doLast {
     javaexec {
@@ -106,6 +109,8 @@ task testWebApiServer_1_0_2_Core() {
 
 // task for Data Dictionary 1.7
 task testDataDictionary_1_7() {
+  group = 'RESO Certification'
+  description = "Runs Data Dictionary 1.7 Automated Acceptance Tests."
   dependsOn jar
   doLast {
     javaexec {
@@ -132,13 +137,14 @@ task testDataDictionary_1_7() {
 }
 
 task generateReports() {
+  group = 'RESO Certification'
+  description = "Generates reports from existing JSON test results."
   doLast {
     javaexec {
       classpath = sourceSets.main.runtimeClasspath
       main = "org.reso.certification.reporting.ReportGenerator"
-      args = ["build/data-dictionary-1.7.json", "DD-1.7-report-" + Date.newInstance().format("yyyymmddHHmmss")]
+      args = System.getProperties().values()
     }
-     //generateReport(System.getProperty("pathToJsonReport"), System.getProperty("outputFile"))
   }
 }
 

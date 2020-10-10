@@ -189,14 +189,14 @@ public class DataDictionary {
 
     }
 
-    if (isFieldContainedInMetadata(fieldName)) LOG.info("Found: " + fieldName);
+    if (isFieldContainedInMetadata(fieldName)) LOG.info("\nFound Field: " + fieldName);
     assumeTrue("Skipped: " + fieldName, isFieldContainedInMetadata(fieldName));
   }
 
   @Then("{string} MUST be {string} data type")
   public void mustBeDataType(String fieldName, String dataTypeName) {
     String foundTypeName = container.getFieldMap().get(currentResourceName.get()).get(fieldName).getType();
-    LOG.info("Found data type: " + foundTypeName);
+    LOG.info("Field data type: " + foundTypeName);
     assertDataTypeMapping(fieldName, dataTypeName, foundTypeName);
   }
 
