@@ -200,44 +200,122 @@ public class DataDictionary {
     assertDataTypeMapping(fieldName, dataTypeName, foundTypeName);
   }
 
+  private static class TypeMappings {
+
+    public static class DataDictionaryTypes {
+      public static final String
+        STRING = "String",
+        DATE = "Date",
+        DECIMAL = "Decimal",
+        INTEGER = "Integer",
+        BOOLEAN = "Boolean",
+        SINGLE_ENUM = "Single Enumeration",
+        MULTI_ENUM = "Multiple Enumeration",
+        TIMESTAMP = "Timestamp";
+    }
+
+    public static class ODataTypes {
+      public static final String
+        STRING = "Edm.String",
+        DATE = "Edm.Date",
+        DECIMAL = "Edm.Decimal",
+        DOUBLE = "Edm.Double",
+        INT16 = "Edm.Int16",
+        INT32 = "Edm.Int32",
+        INT64 = "Edm.Int64",
+        BOOLEAN = "Edm.Boolean",
+        DATETIME_OFFSET = "Edm.DateTimeOffset";
+    }
+  }
+
   private void assertDataTypeMapping(String fieldName, String assertedTypeName, String foundTypeName) {
     assertNotNull(getDefaultErrorMessage("you must specify a Data Dictionary type name to check!"), assertedTypeName);
     assertNotNull(getDefaultErrorMessage("you must specify an Edm type name to check!"), foundTypeName);
     EdmEnumType enumType;
+    boolean isIntegerType = false;
 
-    switch (assertedTypeName.toLowerCase()) {
-      case "string":
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", assertedTypeName, "but found", foundTypeName),
-            foundTypeName.contentEquals("Edm.String"));
+    final boolean isPrimitiveType =
+        foundTypeName.contentEquals(TypeMappings.ODataTypes.INT16)
+        || foundTypeName.contentEquals(TypeMappings.ODataTypes.INT32)
+        || foundTypeName.contentEquals(TypeMappings.ODataTypes.INT64)
+        || foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING)
+        || foundTypeName.contentEquals(TypeMappings.ODataTypes.DATE)
+        || foundTypeName.contentEquals(TypeMappings.ODataTypes.DATETIME_OFFSET)
+        || foundTypeName.contentEquals(TypeMappings.ODataTypes.BOOLEAN)
+        || foundTypeName.contentEquals(TypeMappings.ODataTypes.DECIMAL)
+        || foundTypeName.contentEquals(TypeMappings.ODataTypes.DOUBLE);
+
+    switch (assertedTypeName) {
+      case TypeMappings.DataDictionaryTypes.STRING:
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", assertedTypeName, "but found", foundTypeName),
+            foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING));
         break;
-      case "date":
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", assertedTypeName, "but found", foundTypeName),
-            foundTypeName.contentEquals("Edm.Date"));
+      case TypeMappings.DataDictionaryTypes.DATE:
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", assertedTypeName, "but found", foundTypeName),
+            foundTypeName.contentEquals(TypeMappings.ODataTypes.DATE));
         break;
-      case "decimal":
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", assertedTypeName, "but found", foundTypeName),
-            foundTypeName.contentEquals("Edm.Decimal") || foundTypeName.contentEquals("Edm.Double"));
+      case TypeMappings.DataDictionaryTypes.DECIMAL:
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", assertedTypeName, "but found", foundTypeName),
+            foundTypeName.contentEquals(TypeMappings.ODataTypes.DECIMAL)
+                || foundTypeName.contentEquals(TypeMappings.ODataTypes.DOUBLE));
         break;
-      case "integer":
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", assertedTypeName, "but found", foundTypeName),
-            foundTypeName.contentEquals("Edm.Int16")
-                || foundTypeName.contentEquals("Edm.Int32")
-                || foundTypeName.contentEquals("Edm.Int64"));
+      case TypeMappings.DataDictionaryTypes.INTEGER:
+        isIntegerType = foundTypeName.contentEquals(TypeMappings.ODataTypes.INT16)
+            || foundTypeName.contentEquals(TypeMappings.ODataTypes.INT32)
+            || foundTypeName.contentEquals(TypeMappings.ODataTypes.INT64);
+
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", assertedTypeName, "but found", foundTypeName),
+            isIntegerType);
         break;
-      case "boolean":
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", assertedTypeName, "but found", foundTypeName),
-            foundTypeName.contentEquals("Edm.Boolean"));
+      case TypeMappings.DataDictionaryTypes.BOOLEAN:
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", assertedTypeName, "but found", foundTypeName),
+            foundTypeName.contentEquals(TypeMappings.ODataTypes.BOOLEAN));
         break;
-      case "single enumeration":
+      case TypeMappings.DataDictionaryTypes.SINGLE_ENUM:
+        if (foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING)) {
+          LOG.error(getDefaultErrorMessage("String types are not allowed for enumerated fields at the current time.", "\nSee RCP-031 for further information:",
+              "https://members.reso.org/pages/viewpage.action?pageId=67962918#RCP-WEBAPI-031DataDictionaryRepresentationintheWebAPI-DataTypeMappings.1"));
+        }
+
+        assertFalse(getDefaultErrorMessage("Enumerated data type MUST declare a unique nominal type.",
+            "Found primitive type of", foundTypeName, "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565"),
+            isPrimitiveType);
+
         //check for enum type by FQDN in the Edm cached in the container
         enumType = container.getEdm().getEnumType(new FullQualifiedName(foundTypeName));
+
+        isIntegerType = enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT16)
+            || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT32)
+            || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT64);
+
+        assertTrue(getDefaultErrorMessage("Enumerated Types MUST use an underlying type of",
+            TypeMappings.ODataTypes.INT16, "OR", TypeMappings.ODataTypes.INT32,  "OR", TypeMappings.ODataTypes.INT64), isIntegerType);
+
         assertNotNull(getDefaultErrorMessage(
             "could not find a definition for", foundTypeName, "in the Entity Data Model!"), enumType);
+
         assertFalse(getDefaultErrorMessage("isFlags is True but MUST be false for single-valued enumerations!"), enumType.isFlags());
         break;
-      case "multiple enumeration":
+      case TypeMappings.DataDictionaryTypes.MULTI_ENUM:
+        if (foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING)) {
+          LOG.error(getDefaultErrorMessage("String types are not allowed for enumerated fields at the current time.", "\nSee RCP-031 for further information:",
+              "https://members.reso.org/pages/viewpage.action?pageId=67962918#RCP-WEBAPI-031DataDictionaryRepresentationintheWebAPI-DataTypeMappings.1"));
+        }
+
+        assertFalse(getDefaultErrorMessage("Enumerated data type MUST declare a unique nominal type.",
+            "Found primitive type of", foundTypeName, "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565"),
+            isPrimitiveType);
+
         //check for enum type by FQDN in the Edm cached in the container
         enumType = container.getEdm().getEnumType(new FullQualifiedName(foundTypeName));
+
+        isIntegerType = enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT16)
+            || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT32)
+            || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT64);
+
+        assertTrue(getDefaultErrorMessage("Enumerated Types MUST use an underlying type of",
+            TypeMappings.ODataTypes.INT16, "OR", TypeMappings.ODataTypes.INT32,  "OR", TypeMappings.ODataTypes.INT64), isIntegerType);
+
         assertNotNull(getDefaultErrorMessage(
             "could not find a definition for", foundTypeName, "in the Entity Data Model!"), enumType);
 
@@ -252,9 +330,9 @@ public class DataDictionary {
               " with the following members: \n\t" + container.getEdm().getEnumType(new FullQualifiedName(foundTypeName)).getMemberNames());
         }
         break;
-      case "timestamp":
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST must map to", assertedTypeName, "but found ", foundTypeName),
-            foundTypeName.contentEquals("Edm.DateTimeOffset"));
+      case TypeMappings.DataDictionaryTypes.TIMESTAMP:
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", assertedTypeName, "but found", foundTypeName),
+            foundTypeName.contentEquals(TypeMappings.ODataTypes.DATETIME_OFFSET));
         break;
       default:
         fail(getDefaultErrorMessage("could not find data type mapping for", assertedTypeName));
@@ -264,10 +342,38 @@ public class DataDictionary {
 
   @And("{string} precision SHOULD be less than or equal to the RESO Suggested Max Length of {int}")
   public void precisionSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxLengthOf(String fieldName, Integer suggestedPrecision) {
+    Integer precision = container.getFieldMap(currentResourceName.get()) != null
+        && container.getFieldMap(currentResourceName.get()).containsKey(fieldName)
+        ? container.getFieldMap(currentResourceName.get()).get(fieldName).getPrecision() : null;
+
+    if (precision != null && precision > suggestedPrecision) {
+      LOG.warn("Precision for field " + fieldName + "SHOULD be less than or equal to the RESO Suggested Max Length of " + suggestedPrecision
+      + " but was " + precision);
+    }
   }
 
   @And("{string} scale SHOULD be less than or equal to the RESO Suggested Max Scale of {int}")
   public void scaleSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxScaleOf(String fieldName, Integer suggestedMaxScale) {
+    Integer scale = container.getFieldMap(currentResourceName.get()) != null
+        && container.getFieldMap(currentResourceName.get()).containsKey(fieldName)
+        ? container.getFieldMap(currentResourceName.get()).get(fieldName).getPrecision() : null;
+
+    if (scale != null && scale > suggestedMaxScale) {
+      LOG.warn("Precision for field " + fieldName + "SHOULD be less than or equal to the RESO Suggested Max Length of " + suggestedMaxScale
+          + " but was " + scale);
+    }
+  }
+
+  @And("{string} length SHOULD be less than or equal to the RESO Suggested Max Length of {int}")
+  public void lengthSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxLengthOf(String fieldName, Integer suggestedMaxLength) {
+    Integer length = container.getFieldMap(currentResourceName.get()) != null
+        && container.getFieldMap(currentResourceName.get()).containsKey(fieldName)
+        ? container.getFieldMap(currentResourceName.get()).get(fieldName).getPrecision() : null;
+
+    if (length != null && length > suggestedMaxLength) {
+      LOG.warn("Precision for field " + fieldName + "SHOULD be less than or equal to the RESO Suggested Max Length of " + suggestedMaxLength
+          + " but was " + length);
+    }
   }
 
   @Then("{string} standard enumeration values exist in the metadata")
@@ -276,14 +382,6 @@ public class DataDictionary {
 
   @And("{string} MUST only contain enum values found in the metadata")
   public void mustOnlyContainEnumValuesFoundInTheMetadata(String lookupName) {
-  }
-
-  @And("{string} length SHOULD be less than or equal to the RESO Suggested Max Length of {int}")
-  public void lengthSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxLengthOf(String fieldName, Integer suggestedMaxLength) {
-  }
-
-  @And("{string} SHOULD have no more than the RESO Suggested Max Length of {int} item\\(s)")
-  public void shouldHaveNoMoreThanTheRESOSuggestedMaxLengthOfItemS(String lookupName, Integer suggestedMaxItems) {
   }
 
   @And("{string} MUST contain only standard enumerations")
