@@ -297,7 +297,7 @@ The XML DTD for this schema is as follows:
 
 Currently in development is the ability for the Commander to be able to perform fully-automated Web API testing, 
 upon being provided a valid RESOScript file with parameters for the given server. 
-See [the generic Web API Core RESOScript template for more info](./web-api-server.core.1.0.2.resoscript).
+See [the generic Web API Core RESOScript template for more info](sample-web-api-server.core.1.0.2.resoscript).
 
 ### Cucumber Feature Specifications
 
@@ -356,7 +356,7 @@ After you have cloned the repository, as shown in the previous step, change into
 the source code from GitHub. Convenience methods have been provided for the various certification tasks. 
 
 Prior to using the Commander for automated testing, you need to ensure your RESOScript has been created. 
-For Web API 1.0.2 Server Core Certification, use [this resoscript](web-api-server.core.1.0.2.resoscript) as a template. 
+For Web API 1.0.2 Server Core Certification, use [this resoscript](sample-web-api-server.core.1.0.2.resoscript) as a template. 
  
 
 ### Convenience Methods for Web API 1.0.2 Server Certification

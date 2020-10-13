@@ -1,6 +1,8 @@
 package org.reso.certification.stepdefs;
 
 import com.google.inject.Inject;
+import io.cucumber.datatable.DataTable;
+import io.cucumber.java.PendingException;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -10,7 +12,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.Commander;
 import org.reso.commander.common.TestUtils;
@@ -20,8 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
@@ -35,11 +35,13 @@ public class DataDictionary {
   WebAPITestContainer container;
 
   //TODO: make this a dynamic property based on DD version
-  public static final String REFERENCE_RESOURCE = "DDv1.7-StandardAndDisplayNames-20200922210930847.xlsx";
+  public static final String REFERENCE_WORKSHEET = "DDv1.7-StandardAndDisplayNames-20200922210930847.xlsx";
   static final AtomicReference<String> currentResourceName = new AtomicReference<>();
 
   //used to keep track of the found standard fields being certified on a per-resource basis
-  static final AtomicReference<Map<String, Map<String, CsdlProperty>>> standardFieldMap = new AtomicReference<>(new LinkedHashMap<>());
+  //static final AtomicReference<Map<String, Map<String, CsdlProperty>>> fieldMap = new AtomicReference<>(new LinkedHashMap<>());
+
+  //named args
   private static final String SHOW_RESPONSES = "showResponses";
   private static final String PATH_TO_METADATA = "pathToMetadata";
   private static final String PATH_TO_RESOSCRIPT = "pathToRESOScript";
@@ -53,10 +55,9 @@ public class DataDictionary {
   private final boolean isUsingMetadata = pathToMetadata != null;
 
   private boolean isFieldContainedInMetadata(String fieldName) {
-    return standardFieldMap.get().containsKey(currentResourceName.get())
-        && standardFieldMap.get().get(currentResourceName.get()).containsKey(fieldName);
+    return container.getFieldMap().containsKey(currentResourceName.get())
+        && container.getFieldMap().get(currentResourceName.get()).containsKey(fieldName);
   }
-
 
   @Given("a RESOScript or Metadata file are provided")
   public void aRESOScriptOrMetadataFileAreProvided() {
@@ -170,7 +171,6 @@ public class DataDictionary {
     }
   }
 
-
   @When("{string} exists in the {string} metadata")
   public void existsInTheMetadata(String fieldName, String resourceName) {
     assertNotNull(getDefaultErrorMessage("field name cannot be null!"), fieldName);
@@ -180,12 +180,12 @@ public class DataDictionary {
 
     if (container.getFieldMap().containsKey(currentResourceName.get())) {
       //add keyed hash for the given resource name if it doesn't exist
-      if (!standardFieldMap.get().containsKey(currentResourceName.get()))
-        standardFieldMap.get().put(currentResourceName.get(), new LinkedHashMap<>());
+      if (!container.getFieldMap().containsKey(currentResourceName.get()))
+        container.getFieldMap().put(currentResourceName.get(), new LinkedHashMap<>());
 
       //if the field for the given resource contains the given field, then add it to the standard field map
       if (container.getFieldMap(currentResourceName.get()).containsKey(fieldName))
-        standardFieldMap.get().get(resourceName).put(fieldName, container.getFieldMap(resourceName).get(fieldName));
+        container.getFieldMap().get(resourceName).put(fieldName, container.getFieldMap(resourceName).get(fieldName));
 
     }
 
@@ -200,9 +200,21 @@ public class DataDictionary {
     assertDataTypeMapping(fieldName, dataTypeName, foundTypeName);
   }
 
-  private static class TypeMappings {
+  @And("{string} MAY contain any of the standard lookups")
+  public void mayContainAnyOfTheStandardLookups(String fieldName, DataTable dataTable) {
+    List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
+    throw new PendingException();
+  }
 
-    public static class DataDictionaryTypes {
+  @And("{string} MUST contain at least one of the following standard lookups")
+  public void mustContainAtLeastOneOfTheFollowingStandardLookups(String fieldName, DataTable dataTable) {
+    List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
+    throw new PendingException();
+  }
+
+  private static final class TypeMappings {
+
+    public static final class DataDictionaryTypes {
       public static final String
         STRING = "String",
         DATE = "Date",
@@ -214,7 +226,7 @@ public class DataDictionary {
         TIMESTAMP = "Timestamp";
     }
 
-    public static class ODataTypes {
+    public static final class ODataTypes {
       public static final String
         STRING = "Edm.String",
         DATE = "Edm.Date",
@@ -234,16 +246,17 @@ public class DataDictionary {
     EdmEnumType enumType;
     boolean isIntegerType = false;
 
-    final boolean isPrimitiveType =
-        foundTypeName.contentEquals(TypeMappings.ODataTypes.INT16)
-        || foundTypeName.contentEquals(TypeMappings.ODataTypes.INT32)
-        || foundTypeName.contentEquals(TypeMappings.ODataTypes.INT64)
-        || foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING)
-        || foundTypeName.contentEquals(TypeMappings.ODataTypes.DATE)
-        || foundTypeName.contentEquals(TypeMappings.ODataTypes.DATETIME_OFFSET)
-        || foundTypeName.contentEquals(TypeMappings.ODataTypes.BOOLEAN)
-        || foundTypeName.contentEquals(TypeMappings.ODataTypes.DECIMAL)
-        || foundTypeName.contentEquals(TypeMappings.ODataTypes.DOUBLE);
+    final boolean isPrimitiveType = Arrays.stream(new String[] {
+        TypeMappings.ODataTypes.INT16,
+        TypeMappings.ODataTypes.INT32,
+        TypeMappings.ODataTypes.INT64,
+        TypeMappings.ODataTypes.STRING,
+        TypeMappings.ODataTypes.DATE,
+        TypeMappings.ODataTypes.DATETIME_OFFSET,
+        TypeMappings.ODataTypes.BOOLEAN,
+        TypeMappings.ODataTypes.DECIMAL,
+        TypeMappings.ODataTypes.DOUBLE
+    }).anyMatch(foundTypeName::contentEquals);
 
     switch (assertedTypeName) {
       case TypeMappings.DataDictionaryTypes.STRING:
@@ -294,7 +307,8 @@ public class DataDictionary {
         assertNotNull(getDefaultErrorMessage(
             "could not find a definition for", foundTypeName, "in the Entity Data Model!"), enumType);
 
-        assertFalse(getDefaultErrorMessage("isFlags is True but MUST be false for single-valued enumerations!"), enumType.isFlags());
+        assertFalse(getDefaultErrorMessage("IsFlags=\"true\" but MUST be false for single-valued enumerations!"),
+            enumType.isFlags());
         break;
       case TypeMappings.DataDictionaryTypes.MULTI_ENUM:
         if (foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING)) {
@@ -303,7 +317,8 @@ public class DataDictionary {
         }
 
         assertFalse(getDefaultErrorMessage("Enumerated data type MUST declare a unique nominal type.",
-            "Found primitive type of", foundTypeName, "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565"),
+            "Found primitive type of", foundTypeName,
+            "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565"),
             isPrimitiveType);
 
         //check for enum type by FQDN in the Edm cached in the container
@@ -325,7 +340,7 @@ public class DataDictionary {
           LOG.info("Found Collection of Enumerations for " + foundTypeName +
               " with the following members: \n\t" + container.getEdm().getEnumType(new FullQualifiedName(foundTypeName)).getMemberNames());
         } else {
-          assertTrue(getDefaultErrorMessage("Multi-Enumerations MUST have IsFlags=true"), enumType.isFlags());
+          assertTrue(getDefaultErrorMessage("Multi-Enumerations MUST have IsFlags=\"true\""), enumType.isFlags());
           LOG.info("Found Edm.EnumType Enumerations with IsFlags=true for " + foundTypeName +
               " with the following members: \n\t" + container.getEdm().getEnumType(new FullQualifiedName(foundTypeName)).getMemberNames());
         }
@@ -340,44 +355,40 @@ public class DataDictionary {
     }
   }
 
-  @And("{string} precision SHOULD be less than or equal to the RESO Suggested Max Length of {int}")
-  public void precisionSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxLengthOf(String fieldName, Integer suggestedPrecision) {
+  @And("{string} precision SHOULD be equal to the RESO Suggested Max Length of {int}")
+  public void precisionSHOULDBeEqualToTheRESOSuggestedMaxLengthOf(String fieldName, Integer suggestedPrecision) {
     Integer precision = container.getFieldMap(currentResourceName.get()) != null
         && container.getFieldMap(currentResourceName.get()).containsKey(fieldName)
         ? container.getFieldMap(currentResourceName.get()).get(fieldName).getPrecision() : null;
 
-    if (precision != null && precision > suggestedPrecision) {
-      LOG.warn("Precision for field " + fieldName + "SHOULD be less than or equal to the RESO Suggested Max Length of " + suggestedPrecision
-      + " but was " + precision);
+    if (!Objects.equals(precision, suggestedPrecision)) {
+      LOG.warn("Precision for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Length of " + suggestedPrecision
+          + " but was " + precision);
     }
   }
 
-  @And("{string} scale SHOULD be less than or equal to the RESO Suggested Max Scale of {int}")
-  public void scaleSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxScaleOf(String fieldName, Integer suggestedMaxScale) {
+  @And("{string} scale SHOULD be equal to the RESO Suggested Max Scale of {int}")
+  public void scaleSHOULDBeEqualToTheRESOSuggestedMaxScaleOf(String fieldName, Integer suggestedMaxScale) {
     Integer scale = container.getFieldMap(currentResourceName.get()) != null
         && container.getFieldMap(currentResourceName.get()).containsKey(fieldName)
         ? container.getFieldMap(currentResourceName.get()).get(fieldName).getPrecision() : null;
 
-    if (scale != null && scale > suggestedMaxScale) {
-      LOG.warn("Precision for field " + fieldName + "SHOULD be less than or equal to the RESO Suggested Max Length of " + suggestedMaxScale
+    if (!Objects.equals(scale, suggestedMaxScale)) {
+      LOG.warn("Precision for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Length of " + suggestedMaxScale
           + " but was " + scale);
     }
   }
 
-  @And("{string} length SHOULD be less than or equal to the RESO Suggested Max Length of {int}")
-  public void lengthSHOULDBeLessThanOrEqualToTheRESOSuggestedMaxLengthOf(String fieldName, Integer suggestedMaxLength) {
+  @And("{string} length SHOULD be equal to the RESO Suggested Max Length of {int}")
+  public void lengthSHOULDBeEqualToTheRESOSuggestedMaxLengthOf(String fieldName, Integer suggestedMaxLength) {
     Integer length = container.getFieldMap(currentResourceName.get()) != null
         && container.getFieldMap(currentResourceName.get()).containsKey(fieldName)
         ? container.getFieldMap(currentResourceName.get()).get(fieldName).getPrecision() : null;
 
-    if (length != null && length > suggestedMaxLength) {
-      LOG.warn("Precision for field " + fieldName + "SHOULD be less than or equal to the RESO Suggested Max Length of " + suggestedMaxLength
+    if (!Objects.equals(length, suggestedMaxLength)) {
+      LOG.warn("Precision for field " + fieldName + " SHOULD be equal to the RESO Suggested Max Length of " + suggestedMaxLength
           + " but was " + length);
     }
-  }
-
-  @Then("{string} standard enumeration values exist in the metadata")
-  public void enumValuesExistInTheMetadata(String lookupName) {
   }
 
   @And("{string} MUST only contain enum values found in the metadata")
@@ -402,6 +413,10 @@ public class DataDictionary {
 
   @And("enumeration synonyms MUST NOT exist in the metadata")
   public void enumerationSynonymsMUSTNOTExistInTheMetadata() {
+    container.getEnumMap().keySet().forEach(key -> {
+      //ohai
+      LOG.info(key);
+    });
   }
 
   @When("metadata are checked for similar standard names")
@@ -427,4 +442,5 @@ public class DataDictionary {
   @And("enumerations with substring matches of standard names MAY cause certification to fail")
   public void enumerationsWithSubstringMatchesOfStandardNamesMAYCauseCertificationToFail() {
   }
+
 }

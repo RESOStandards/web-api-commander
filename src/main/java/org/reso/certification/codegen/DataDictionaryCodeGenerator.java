@@ -6,7 +6,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.reso.commander.common.DataDictionaryMetadata;
 
-import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_RESOURCE;
+import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_WORKSHEET;
 
 public class DataDictionaryCodeGenerator {
   private static final Logger LOG = LogManager.getLogger(DataDictionaryCodeGenerator.class);
@@ -21,7 +21,7 @@ public class DataDictionaryCodeGenerator {
   public DataDictionaryCodeGenerator(WorksheetProcessor processor) throws Exception {
     if (processor == null) throw new Exception("Data Dictionary processor cannot be null!");
     this.processor = processor;
-    processor.setReferenceResource(REFERENCE_RESOURCE);
+    processor.setReferenceResource(REFERENCE_WORKSHEET);
     workbook = processor.getReferenceWorkbook();
     processor.buildEnumerationMap();
   }

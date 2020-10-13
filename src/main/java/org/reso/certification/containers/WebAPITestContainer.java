@@ -19,6 +19,7 @@ import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.client.api.uri.QueryOption;
 import org.apache.olingo.commons.api.edm.Edm;
+import org.apache.olingo.commons.api.edm.provider.CsdlEnumType;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.commander.Commander;
@@ -102,6 +103,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   //singleton variables
   private static final AtomicReference<Map<String, Map<String, CsdlProperty>>> fieldMap = new AtomicReference<>();
+  private static final AtomicReference<Map<String, Map<String, CsdlEnumType>>> enumMap = new AtomicReference<>();
 
   /**
    * Initializes the container with a singleton instance of the RESO Commander
@@ -195,20 +197,22 @@ public final class WebAPITestContainer implements TestContainer {
    */
   private void buildFieldMap() {
     try {
-      fieldMap.set(new LinkedHashMap<>());
+      if (fieldMap.get() == null) fieldMap.set(new LinkedHashMap<>());
 
       LOG.debug("Building Field Map...");
 
       assertNotNull(getDefaultErrorMessage("no XML Metadata found in the container!"), fetchXMLMetadata());
       assertNotNull(getDefaultErrorMessage("no Entity Data Model (edm) found in the container!"), getEdm());
 
-      XMLMetadata xmlMetadata = fetchXMLMetadata();
-      Edm edm = getEdm();
-
       //build a map of all of the discovered fields on the server for the given resource by field name
       //TODO: add multiple Data Dictionary version support
       DataDictionaryMetadata.v1_7.WELL_KNOWN_RESOURCES.forEach(resourceName -> {
-        List<CsdlProperty> csdlProperties = TestUtils.findEntityTypesForEntityTypeName(edm, xmlMetadata, resourceName);
+        List<CsdlProperty> csdlProperties = null;
+        try {
+          csdlProperties = TestUtils.findEntityTypesForEntityTypeName(getEdm(), fetchXMLMetadata(), resourceName);
+        } catch (Exception e) {
+          LOG.error(e);
+        }
 
         if (csdlProperties != null) {
           LOG.debug("Found '" + resourceName + "' resource");
@@ -225,6 +229,31 @@ public final class WebAPITestContainer implements TestContainer {
       LOG.error(getDefaultErrorMessage(ex));
     }
   }
+
+  public Map<String, Map<String, CsdlEnumType>> getEnumMap() {
+    if (enumMap.get() == null) buildEnumMap();
+    return enumMap.get();
+  }
+
+  private void buildEnumMap() {
+    if (enumMap.get() == null) enumMap.set(new LinkedHashMap<>());
+
+    LOG.debug("Building Enum Map...");
+    try {
+      assertNotNull(getDefaultErrorMessage("no XML Metadata found in the container!"), fetchXMLMetadata());
+      assertNotNull(getDefaultErrorMessage("no Entity Data Model (edm) found in the container!"), getEdm());
+
+      fetchXMLMetadata().getSchemas().forEach(csdlSchema -> {
+        csdlSchema.getEnumTypes();
+      });
+
+    } catch (Exception e) {
+      LOG.error(e);
+    }
+
+  }
+
+
 
   /**
    * Gets XML Response data from the container

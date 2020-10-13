@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.*;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_FIELD_HEADERS.COLLECTION;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_FIELD_HEADERS.STANDARD_NAME;
-import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_RESOURCE;
+import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_WORKSHEET;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public abstract class WorksheetProcessor {
@@ -298,7 +298,7 @@ public abstract class WorksheetProcessor {
   }
 
   String getDirectoryName() {
-    return startTimestamp + "-" + REFERENCE_RESOURCE.toLowerCase().substring(0, REFERENCE_RESOURCE.lastIndexOf("."));
+    return startTimestamp + "-" + REFERENCE_WORKSHEET.toLowerCase().substring(0, REFERENCE_WORKSHEET.lastIndexOf("."));
   }
 
   public String getReferenceResource() {
