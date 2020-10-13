@@ -820,7 +820,7 @@ public final class TestUtils {
   /**
    * Contains the list of supported operators for use in query expressions.
    */
-  public static class Operators {
+  public static final class Operators {
     public static final String
         AND = "and",
         OR = "or",
@@ -837,7 +837,7 @@ public final class TestUtils {
         TO_UPPER = "toupper";
   }
 
-  public static class DateParts {
+  public static final class DateParts {
     public static final String
         YEAR = "year",
         MONTH = "month",
@@ -846,6 +846,34 @@ public final class TestUtils {
         MINUTE = "minute",
         SECOND = "second",
         FRACTIONAL = "fractional";
+  }
+
+  public static final class TypeMappings {
+
+    public static final class DataDictionaryTypes {
+      public static final String
+          STRING = "String",
+          DATE = "Date",
+          DECIMAL = "Decimal",
+          INTEGER = "Integer",
+          BOOLEAN = "Boolean",
+          SINGLE_ENUM = "Single Enumeration",
+          MULTI_ENUM = "Multiple Enumeration",
+          TIMESTAMP = "Timestamp";
+    }
+
+    public static final class ODataTypes {
+      public static final String
+          STRING = "Edm.String",
+          DATE = "Edm.Date",
+          DECIMAL = "Edm.Decimal",
+          DOUBLE = "Edm.Double",
+          INT16 = "Edm.Int16",
+          INT32 = "Edm.Int32",
+          INT64 = "Edm.Int64",
+          BOOLEAN = "Edm.Boolean",
+          DATETIME_OFFSET = "Edm.DateTimeOffset";
+    }
   }
 }
 

@@ -2,7 +2,6 @@ package org.reso.certification.stepdefs;
 
 import com.google.inject.Inject;
 import io.cucumber.datatable.DataTable;
-import io.cucumber.java.PendingException;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -11,10 +10,12 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.commons.api.edm.EdmEnumType;
+import org.apache.olingo.commons.api.edm.EdmMember;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.Commander;
 import org.reso.commander.common.TestUtils;
+import org.reso.commander.common.TestUtils.TypeMappings;
 import org.reso.models.Settings;
 
 import java.io.File;
@@ -23,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
@@ -36,7 +38,9 @@ public class DataDictionary {
 
   //TODO: make this a dynamic property based on DD version
   public static final String REFERENCE_WORKSHEET = "DDv1.7-StandardAndDisplayNames-20200922210930847.xlsx";
+
   static final AtomicReference<String> currentResourceName = new AtomicReference<>();
+  static final AtomicReference<DataTable> currentLookup = new AtomicReference<>();
 
   //used to keep track of the found standard fields being certified on a per-resource basis
   //static final AtomicReference<Map<String, Map<String, CsdlProperty>>> fieldMap = new AtomicReference<>(new LinkedHashMap<>());
@@ -186,7 +190,6 @@ public class DataDictionary {
       //if the field for the given resource contains the given field, then add it to the standard field map
       if (container.getFieldMap(currentResourceName.get()).containsKey(fieldName))
         container.getFieldMap().get(resourceName).put(fieldName, container.getFieldMap(resourceName).get(fieldName));
-
     }
 
     if (isFieldContainedInMetadata(fieldName)) LOG.info("\nFound Field: " + fieldName);
@@ -200,44 +203,62 @@ public class DataDictionary {
     assertDataTypeMapping(fieldName, dataTypeName, foundTypeName);
   }
 
-  @And("{string} MAY contain any of the standard lookups")
-  public void mayContainAnyOfTheStandardLookups(String fieldName, DataTable dataTable) {
-    List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
-    throw new PendingException();
+  @And("{string} MAY contain any of the following standard lookups")
+  public void mayContainAnyOfTheFollowingStandardLookups(String fieldName, DataTable dataTable) {
+    final Map<String, EdmMember> foundMembers = getFoundMembers(fieldName);
+    final Set<EdmMember> foundStandardMembers = getFoundStandardMembers(foundMembers, dataTable);
   }
 
   @And("{string} MUST contain at least one of the following standard lookups")
   public void mustContainAtLeastOneOfTheFollowingStandardLookups(String fieldName, DataTable dataTable) {
+    final FullQualifiedName fqdn = container.getFieldMap(currentResourceName.get()).get(fieldName).getTypeAsFQNObject();
+    final EdmEnumType enumType = container.getEdm().getEnumType(fqdn);
     List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
-    throw new PendingException();
+
+    final Map<String, EdmMember> foundMembers = getFoundMembers(fieldName);
+    final Set<EdmMember> foundStandardMembers = getFoundStandardMembers(foundMembers, dataTable);
+
+    assertTrue(getDefaultErrorMessage(fieldName, "MUST contain at least one standard enumeration!"),
+        foundStandardMembers.size() > 0);
   }
 
-  private static final class TypeMappings {
+  private Map<String, EdmMember> getFoundMembers(String fieldName) {
+    final FullQualifiedName fqdn = container.getFieldMap(currentResourceName.get()).get(fieldName).getTypeAsFQNObject();
+    final EdmEnumType enumType = container.getEdm().getEnumType(fqdn);
 
-    public static final class DataDictionaryTypes {
-      public static final String
-        STRING = "String",
-        DATE = "Date",
-        DECIMAL = "Decimal",
-        INTEGER = "Integer",
-        BOOLEAN = "Boolean",
-        SINGLE_ENUM = "Single Enumeration",
-        MULTI_ENUM = "Multiple Enumeration",
-        TIMESTAMP = "Timestamp";
+    final Map<String, EdmMember> foundMembers = new LinkedHashMap<>();
+
+    enumType.getMemberNames().forEach(name -> {
+      foundMembers.put(name, enumType.getMember(name));
+    });
+
+    if (foundMembers.size() > 0) {
+      LOG.info("Found " + foundMembers.size() + " Enumeration"
+          + (foundMembers.size() != 1 ? "s" : "") + ":\n\t[" + String.join(", ", foundMembers.keySet()) + "]");
     }
 
-    public static final class ODataTypes {
-      public static final String
-        STRING = "Edm.String",
-        DATE = "Edm.Date",
-        DECIMAL = "Edm.Decimal",
-        DOUBLE = "Edm.Double",
-        INT16 = "Edm.Int16",
-        INT32 = "Edm.Int32",
-        INT64 = "Edm.Int64",
-        BOOLEAN = "Edm.Boolean",
-        DATETIME_OFFSET = "Edm.DateTimeOffset";
+    return foundMembers;
+  }
+
+  private Set<EdmMember> getFoundStandardMembers(Map<String, EdmMember> foundMembers, DataTable dataTable) {
+    final Set<EdmMember> foundStandardMembers = new LinkedHashSet<>();
+    List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
+
+    String lookupValue;
+    final String LOOKUP_VALUE_KEY = "lookupValue";
+    for (Map<String, String> row : rows) {
+      lookupValue = row.get(LOOKUP_VALUE_KEY);
+      if (foundMembers.containsKey(lookupValue)) {
+        foundStandardMembers.add(foundMembers.get(lookupValue));
+      }
     }
+
+    if (foundStandardMembers.size() > 0) {
+      LOG.info("Found " + foundStandardMembers.size() + " RESO Standard Enumeration"
+          + (foundStandardMembers.size() != 1 ? "s" : "")
+          + ":\n\t[" + foundStandardMembers.stream().map(EdmMember::getName).collect(Collectors.joining(", ")) + "]");
+    }
+    return foundStandardMembers;
   }
 
   private void assertDataTypeMapping(String fieldName, String assertedTypeName, String foundTypeName) {
@@ -335,11 +356,7 @@ public class DataDictionary {
             "could not find a definition for", foundTypeName, "in the Entity Data Model!"), enumType);
 
         boolean isCollection = container.getFieldMap().get(currentResourceName.get()).get(fieldName).isCollection();
-
-        if (isCollection) {
-          LOG.info("Found Collection of Enumerations for " + foundTypeName +
-              " with the following members: \n\t" + container.getEdm().getEnumType(new FullQualifiedName(foundTypeName)).getMemberNames());
-        } else {
+        if (!isCollection) {
           assertTrue(getDefaultErrorMessage("Multi-Enumerations MUST have IsFlags=\"true\""), enumType.isFlags());
           LOG.info("Found Edm.EnumType Enumerations with IsFlags=true for " + foundTypeName +
               " with the following members: \n\t" + container.getEdm().getEnumType(new FullQualifiedName(foundTypeName)).getMemberNames());
@@ -413,10 +430,10 @@ public class DataDictionary {
 
   @And("enumeration synonyms MUST NOT exist in the metadata")
   public void enumerationSynonymsMUSTNOTExistInTheMetadata() {
-    container.getEnumMap().keySet().forEach(key -> {
-      //ohai
-      LOG.info(key);
-    });
+//    container.getEnumMap().keySet().forEach(key -> {
+//      //ohai
+//      LOG.info(key);
+//    });
   }
 
   @When("metadata are checked for similar standard names")

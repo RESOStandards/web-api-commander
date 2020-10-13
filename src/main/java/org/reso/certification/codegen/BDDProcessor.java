@@ -212,16 +212,14 @@ public class BDDProcessor extends WorksheetProcessor {
               "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + field.getStandardName() + "\" MUST be \"Multiple Enumeration\" data type\n";
 
-      if (field.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
-        template +=
-            "    And \"" + field.getStandardName() + "\" MUST contain only standard enumerations\n" +
-                (enumMarkup.length() > 0
-                    ? "    And \"" + field.getStandardName() + "\" MUST contain at least one of the following standard lookups\n" + enumMarkup
-                    : EMPTY_STRING);
-      } else {
-        template += (enumMarkup.length() > 0
-              ? "    And \"" + field.getStandardName() + "\" MAY contain any of the standard lookups\n" + enumMarkup
-              : EMPTY_STRING);
+      if (enumMarkup.length() > 0) {
+        if (field.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
+          template +=
+              "    And \"" + field.getStandardName() + "\" MUST contain at least one of the following standard lookups\n" + enumMarkup +
+              "    And \"" + field.getStandardName() + "\" MUST contain only standard enumerations\n";
+        } else {
+          template += "    And \"" + field.getStandardName() + "\" MAY contain any of the following standard lookups\n" + enumMarkup;
+        }
       }
 
       return template;
@@ -238,16 +236,14 @@ public class BDDProcessor extends WorksheetProcessor {
               "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + field.getStandardName() + "\" MUST be \"Single Enumeration\" data type\n";
 
-      if (field.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
-        template +=
-            "    And \"" + field.getStandardName() + "\" MUST contain only standard enumerations\n" +
-                (enumMarkup.length() > 0
-                    ? "    And \"" + field.getStandardName() + "\" MUST contain at least one of the following standard lookups\n" + enumMarkup
-                    : EMPTY_STRING);
-      } else {
-        template += (enumMarkup.length() > 0
-            ? "    And \"" + field.getStandardName() + "\" MAY contain any of the standard lookups\n" + enumMarkup
-            : EMPTY_STRING);
+      if (enumMarkup.length() > 0) {
+        if (field.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
+          template +=
+              "    And \"" + field.getStandardName() + "\" MUST contain at least one of the following standard lookups\n" + enumMarkup +
+                  "    And \"" + field.getStandardName() + "\" MUST contain only standard enumerations\n";
+        } else {
+          template += "    And \"" + field.getStandardName() + "\" MAY contain any of the following standard lookups\n" + enumMarkup;
+        }
       }
 
       return template;

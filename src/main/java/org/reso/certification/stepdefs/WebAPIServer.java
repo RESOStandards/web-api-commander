@@ -46,8 +46,8 @@ import static org.reso.commander.common.TestUtils.DateParts.FRACTIONAL;
 import static org.reso.commander.common.TestUtils.*;
 import static org.reso.commander.common.TestUtils.Operators.*;
 
-public class WebAPIServer_1_0_2 {
-  private static final Logger LOG = LogManager.getLogger(WebAPIServer_1_0_2.class);
+public class WebAPIServer {
+  private static final Logger LOG = LogManager.getLogger(WebAPIServer.class);
 
   @Inject
   WebAPITestContainer container;
