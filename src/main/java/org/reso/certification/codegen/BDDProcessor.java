@@ -20,6 +20,7 @@ public class BDDProcessor extends WorksheetProcessor {
   private static final String
       FEATURE_EXTENSION = ".feature",
       LOCKED_WITH_ENUMERATIONS_KEY = "Locked with Enumerations";
+  private static final int EXAMPLES_PADDING_AMOUNT = 6;
 
   @Override
   public void processResourceSheet(Sheet sheet) {
@@ -121,23 +122,40 @@ public class BDDProcessor extends WorksheetProcessor {
       return tags;
     }
 
+    private static String padLeft(String s, int n) {
+      String[] padding = new String[n];
+      Arrays.fill(padding, " ");
+      return String.join("", padding) + s;
+    }
+
+    private static String generateSynonymsMarkup(StandardField field) {
+      String template = EMPTY_STRING;
+
+      if (field.getSynonyms().size() > 0) {
+        template += "    And the following synonyms for \"" + field.getStandardName() + "\" MUST NOT exist in the metadata\n" +
+            field.getSynonyms().stream().map(synonym -> padLeft("| " + synonym + " |\n", EXAMPLES_PADDING_AMOUNT)).collect(Collectors.joining());
+      }
+      return template;
+    }
+
     public static String buildBooleanTest(StandardField field) {
       if (field == null) return EMPTY_STRING;
 
-      return
-          "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
-              "  Scenario: " + field.getStandardName() + "\n" +
-              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + field.getStandardName() + "\" MUST be \"Boolean\" data type\n";
+      return "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+          "  Scenario: " + field.getStandardName() + "\n" +
+          "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+          "    Then \"" + field.getStandardName() + "\" MUST be \"Boolean\" data type\n" +
+          generateSynonymsMarkup(field);
     }
 
     public static String buildDateTest(StandardField field) {
       if (field == null) return EMPTY_STRING;
-      return
-          "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
-              "  Scenario: " + field.getStandardName() + "\n" +
-              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + field.getStandardName() + "\" MUST be \"Date\" data type\n";
+
+      return "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+          "  Scenario: " + field.getStandardName() + "\n" +
+          "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+          "    Then \"" + field.getStandardName() + "\" MUST be \"Date\" data type\n" +
+          generateSynonymsMarkup(field);
     }
 
     /**
@@ -159,7 +177,8 @@ public class BDDProcessor extends WorksheetProcessor {
           "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + field.getStandardName() + "\" MUST be \"Decimal\" data type\n";
+              "    Then \"" + field.getStandardName() + "\" MUST be \"Decimal\" data type\n" +
+              generateSynonymsMarkup(field);
 
       if (field.getSuggestedMaxLength() != null)
         template +=
@@ -174,26 +193,25 @@ public class BDDProcessor extends WorksheetProcessor {
 
     public static String buildIntegerTest(StandardField field) {
       if (field == null) return EMPTY_STRING;
-      return
-          "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
-              "  Scenario: " + field.getStandardName() + "\n" +
-              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + field.getStandardName() + "\" MUST be \"Integer\" data type\n";
+
+      return "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+          "  Scenario: " + field.getStandardName() + "\n" +
+          "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+          "    Then \"" + field.getStandardName() + "\" MUST be \"Integer\" data type\n" +
+          generateSynonymsMarkup(field);
     }
 
-    private static String buildStandardEnumerationMarkup(String lookupName, int leftPaddingAmount) {
-      if (enumerations.containsKey(lookupName)) {
-        String[] leftPadding = new String[leftPaddingAmount];
-        Arrays.fill(leftPadding, SINGLE_SPACE);
+    private static String buildStandardEnumerationMarkup(String lookupName) {
+      if (standardEnumerationsMap.containsKey(lookupName)) {
         StringBuilder markup = new StringBuilder();
-        final String LEFT_PADDING = String.join(EMPTY_STRING, leftPadding);
 
-        for (StandardEnumeration lookup : enumerations.get(lookupName)) {
+        for (StandardEnumeration lookup : standardEnumerationsMap.get(lookupName)) {
           markup
-              .append(LEFT_PADDING)
-              .append("| ").append(lookup.getLookupValue()).append(" | ").append(lookup.getLookupDisplayName()).append(" |\n");
+              .append(padLeft("| ", EXAMPLES_PADDING_AMOUNT))
+              .append(lookup.getLookupValue()).append(" | ")
+              .append(lookup.getLookupDisplayName()).append(" |\n");
         }
-        if (markup.length() > 0) markup.insert(0, LEFT_PADDING + "| lookupValue | lookupDisplayName |\n");
+        if (markup.length() > 0) markup.insert(0,  padLeft("| lookupValue | lookupDisplayName |\n", EXAMPLES_PADDING_AMOUNT));
         return markup.toString();
       }
 
@@ -204,13 +222,40 @@ public class BDDProcessor extends WorksheetProcessor {
     public static String buildStringListMultiTest(StandardField field) {
       if (field == null) return EMPTY_STRING;
 
-      final String enumMarkup = buildStandardEnumerationMarkup(field.getLookupStandardName(), 6);
+      final String enumMarkup = buildStandardEnumerationMarkup(field.getLookupStandardName());
 
       String template =
           "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + field.getStandardName() + "\" MUST be \"Multiple Enumeration\" data type\n";
+              "    Then \"" + field.getStandardName() + "\" MUST be \"Multiple Enumeration\" data type\n" +
+              generateSynonymsMarkup(field);
+
+      if (enumMarkup.length() > 0) {
+        if (field.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
+          template +=
+              "    And \"" + field.getStandardName() + "\" MUST contain at least one of the following standard lookups\n" + enumMarkup +
+              "    And \"" + field.getStandardName() + "\" MUST contain only standard enumerations\n";
+        } else {
+          template +=
+              "    And \"" + field.getStandardName() + "\" MAY contain any of the following standard lookups\n" + enumMarkup;
+        }
+      }
+
+      return template;
+    }
+
+    public static String buildStringListSingleTest(StandardField field) {
+      if (field == null) return EMPTY_STRING;
+
+      final String enumMarkup = buildStandardEnumerationMarkup(field.getLookupStandardName());
+
+      String template =
+          "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+              "  Scenario: " + field.getStandardName() + "\n" +
+              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+              "    Then \"" + field.getStandardName() + "\" MUST be \"Single Enumeration\" data type\n" +
+              generateSynonymsMarkup(field);
 
       if (enumMarkup.length() > 0) {
         if (field.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
@@ -225,37 +270,14 @@ public class BDDProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildStringListSingleTest(StandardField field) {
-      if (field == null) return EMPTY_STRING;
-
-      final String enumMarkup = buildStandardEnumerationMarkup(field.getLookupStandardName(), 6);
-
-      String template =
-          "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
-              "  Scenario: " + field.getStandardName() + "\n" +
-              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + field.getStandardName() + "\" MUST be \"Single Enumeration\" data type\n";
-
-      if (enumMarkup.length() > 0) {
-        if (field.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
-          template +=
-              "    And \"" + field.getStandardName() + "\" MUST contain at least one of the following standard lookups\n" + enumMarkup +
-                  "    And \"" + field.getStandardName() + "\" MUST contain only standard enumerations\n";
-        } else {
-          template += "    And \"" + field.getStandardName() + "\" MAY contain any of the following standard lookups\n" + enumMarkup;
-        }
-      }
-
-      return template;
-    }
-
     public static String buildStringTest(StandardField field) {
       if (field == null) return EMPTY_STRING;
       String template =
           "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + field.getStandardName() + "\" MUST be \"String\" data type\n";
+              "    Then \"" + field.getStandardName() + "\" MUST be \"String\" data type\n" +
+              generateSynonymsMarkup(field);
 
       if (field.getSuggestedMaxLength() != null)
         template +=
@@ -266,11 +288,12 @@ public class BDDProcessor extends WorksheetProcessor {
 
     public static String buildTimestampTest(StandardField field) {
       if (field == null) return EMPTY_STRING;
-      return
-          "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
-              "  Scenario: " + field.getStandardName() + "\n" +
-              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
-              "    Then \"" + field.getStandardName() + "\" MUST be \"Timestamp\" data type\n";
+
+      return "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
+          "  Scenario: " + field.getStandardName() + "\n" +
+          "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+          "    Then \"" + field.getStandardName() + "\" MUST be \"Timestamp\" data type\n" +
+          generateSynonymsMarkup(field);
     }
   }
 }

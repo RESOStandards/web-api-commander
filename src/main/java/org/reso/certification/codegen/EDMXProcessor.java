@@ -217,7 +217,7 @@ public class EDMXProcessor extends WorksheetProcessor {
     StringBuilder content =
         new StringBuilder("\n    <Schema xmlns=\"http://docs.oasis-open.org/odata/ns/edm\" Namespace=\"" + RESO_NAMESPACE + ".enums\">");
 
-    processedStandardFields.forEach((resourceName, standardFieldMap) -> {
+    standardFieldsMap.forEach((resourceName, standardFieldMap) -> {
       standardFieldMap.forEach((standardName, standardField) -> {
         if (standardField.isSingleEnumeration()) {
           markupMap.putIfAbsent(standardField.getLookupStandardName(), buildSingleEnumTypeMarkup(standardField.getLookupStandardName()));

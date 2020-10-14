@@ -27,8 +27,8 @@ import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 public abstract class WorksheetProcessor {
 
   static final Map<String, String> resourceTemplates = new LinkedHashMap<>();
-  static final Map<String, Set<StandardEnumeration>> enumerations = new LinkedHashMap<>();
-  static final Map<String, Map<String, StandardField>> processedStandardFields = new LinkedHashMap<>(new LinkedHashMap<>());
+  static final Map<String, Set<StandardEnumeration>> standardEnumerationsMap = new LinkedHashMap<>();
+  static final Map<String, Map<String, StandardField>> standardFieldsMap = new LinkedHashMap<>(new LinkedHashMap<>());
   private static final Logger LOG = LogManager.getLogger(WorksheetProcessor.class);
   String referenceResource = null;
   StringBuffer markup;
@@ -53,10 +53,11 @@ public abstract class WorksheetProcessor {
     markup = new StringBuffer();
   }
 
-  public void buildWellKnownStandardFieldHeaderMap(Sheet sheet) {
-    wellKnownStandardFieldHeaderMap = new LinkedHashMap<>();
+  public static Map<String, Integer> buildWellKnownStandardFieldHeaderMap(Sheet sheet) {
+    Map<String, Integer> headerMap = new LinkedHashMap<>();
     sheet.getRow(0).cellIterator().forEachRemaining(cell ->
-            wellKnownStandardFieldHeaderMap.put(cell.getStringCellValue(), cell.getColumnIndex()));
+            headerMap.put(cell.getStringCellValue(), cell.getColumnIndex()));
+    return headerMap;
   }
 
   public Integer getWellKnownStandardFieldIndex(String wellKnownStandardFieldKey) {
@@ -249,7 +250,7 @@ public abstract class WorksheetProcessor {
 
   abstract void generateOutput();
 
-  void processResourceRow(Row row) {
+  public void processResourceRow(Row row) {
     assertTrue(getDefaultErrorMessage("sheet name was null but was expected to contain a resource name!"),
         sheet != null && sheet.getSheetName() != null);
 
@@ -260,10 +261,10 @@ public abstract class WorksheetProcessor {
     standardField.setParentResourceName(sheet.getSheetName());
 
     //add empty top-level resource name map
-    processedStandardFields.putIfAbsent(sheet.getSheetName(), new LinkedHashMap<>());
+    standardFieldsMap.putIfAbsent(sheet.getSheetName(), new LinkedHashMap<>());
 
     //add a resource, standard field
-    processedStandardFields.get(sheet.getSheetName()).put(standardField.getStandardName(), standardField);
+    standardFieldsMap.get(sheet.getSheetName()).put(standardField.getStandardName(), standardField);
 
     //now that row has been processed, extract field type and assemble the template
     switch (standardField.getSimpleDataType()) {
@@ -342,10 +343,10 @@ public abstract class WorksheetProcessor {
       if (row.getRowNum() > 0) {
         standardEnumeration.set(deserializeStandardEnumerationRow(row));
 
-        if (!enumerations.containsKey(standardEnumeration.get().getLookupField())) {
-          enumerations.put(standardEnumeration.get().getLookupField(), new LinkedHashSet<>());
+        if (!standardEnumerationsMap.containsKey(standardEnumeration.get().getLookupField())) {
+          standardEnumerationsMap.put(standardEnumeration.get().getLookupField(), new LinkedHashSet<>());
         }
-        enumerations.get(standardEnumeration.get().getLookupField()).add(standardEnumeration.get());
+        standardEnumerationsMap.get(standardEnumeration.get().getLookupField()).add(standardEnumeration.get());
       }
     });
     //enumerations.forEach((key, items) -> LOG.info("key: " + key + " , items: " + items.toString()));
@@ -365,7 +366,7 @@ public abstract class WorksheetProcessor {
   }
 
   public Map<String, Set<StandardEnumeration>> getEnumerations() {
-    return enumerations;
+    return standardEnumerationsMap;
   }
 
   public void resetMarkupBuffer() {

@@ -40,7 +40,8 @@ public class DataDictionary {
   public static final String REFERENCE_WORKSHEET = "DDv1.7-StandardAndDisplayNames-20200922210930847.xlsx";
 
   static final AtomicReference<String> currentResourceName = new AtomicReference<>();
-  static final AtomicReference<DataTable> currentLookup = new AtomicReference<>();
+  static final AtomicReference<Map<String, EdmMember>> foundMembers = new AtomicReference<>(new LinkedHashMap<>());
+  static final AtomicReference<Set<EdmMember>> foundStandardMembers = new AtomicReference<>(new LinkedHashSet<>());
 
   //used to keep track of the found standard fields being certified on a per-resource basis
   //static final AtomicReference<Map<String, Map<String, CsdlProperty>>> fieldMap = new AtomicReference<>(new LinkedHashMap<>());
@@ -205,23 +206,27 @@ public class DataDictionary {
 
   @And("{string} MAY contain any of the following standard lookups")
   public void mayContainAnyOfTheFollowingStandardLookups(String fieldName, DataTable dataTable) {
-    final Map<String, EdmMember> foundMembers = getFoundMembers(fieldName);
-    final Set<EdmMember> foundStandardMembers = getFoundStandardMembers(foundMembers, dataTable);
+    foundMembers.set(getFoundMembers(fieldName));
+    foundStandardMembers.set(getFoundStandardMembers(foundMembers.get(), dataTable));
+
+    assumeTrue("No RESO Standard Enumerations found for field: " + fieldName,
+        foundStandardMembers.get().size() > 0);
   }
 
   @And("{string} MUST contain at least one of the following standard lookups")
   public void mustContainAtLeastOneOfTheFollowingStandardLookups(String fieldName, DataTable dataTable) {
-    final FullQualifiedName fqdn = container.getFieldMap(currentResourceName.get()).get(fieldName).getTypeAsFQNObject();
-    final EdmEnumType enumType = container.getEdm().getEnumType(fqdn);
-    List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
-
-    final Map<String, EdmMember> foundMembers = getFoundMembers(fieldName);
-    final Set<EdmMember> foundStandardMembers = getFoundStandardMembers(foundMembers, dataTable);
+    foundMembers.set(getFoundMembers(fieldName));
+    foundStandardMembers.set(getFoundStandardMembers(foundMembers.get(), dataTable));
 
     assertTrue(getDefaultErrorMessage(fieldName, "MUST contain at least one standard enumeration!"),
-        foundStandardMembers.size() > 0);
+        foundStandardMembers.get().size() > 0);
   }
 
+  /**
+   * Gets the set of found enumeration members for the given field
+   * @param fieldName the field name of the field whose enumeration to get
+   * @return a map of lookup value and lookup display name
+   */
   private Map<String, EdmMember> getFoundMembers(String fieldName) {
     final FullQualifiedName fqdn = container.getFieldMap(currentResourceName.get()).get(fieldName).getTypeAsFQNObject();
     final EdmEnumType enumType = container.getEdm().getEnumType(fqdn);
@@ -240,6 +245,12 @@ public class DataDictionary {
     return foundMembers;
   }
 
+  /**
+   * Gets the set of found RESO Standard member names in a given found members Map
+   * @param foundMembers a map of the enumeration members that was found in the metadata for a given field
+   * @param dataTable data table of standard lookup value and lookup display name items
+   * @return a set of EdmMembers from the Lookup metadata that contains the standard items in the data table
+   */
   private Set<EdmMember> getFoundStandardMembers(Map<String, EdmMember> foundMembers, DataTable dataTable) {
     final Set<EdmMember> foundStandardMembers = new LinkedHashSet<>();
     List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
@@ -261,7 +272,15 @@ public class DataDictionary {
     return foundStandardMembers;
   }
 
-  private void assertDataTypeMapping(String fieldName, String assertedTypeName, String foundTypeName) {
+  /**
+   * Determines whether the given field name has the correct data type, according to the mappings in the
+   * Data Dictionary specification and RCP-031.
+   * @apiNote SEE: https://docs.google.com/document/d/15DFf9kDX_mlGCJVOch2fztl8W5h-yd18N0_03Sb4HwM/edit#heading=h.dw8owdmv988f
+   * @param fieldName the field name of the field to assert the mapping for
+   * @param assertedTypeName the asserted type name (from the BDD tests, usually)
+   * @param foundTypeName the type name that was found in the metadata
+   */
+  protected final void assertDataTypeMapping(String fieldName, String assertedTypeName, String foundTypeName) {
     assertNotNull(getDefaultErrorMessage("you must specify a Data Dictionary type name to check!"), assertedTypeName);
     assertNotNull(getDefaultErrorMessage("you must specify an Edm type name to check!"), foundTypeName);
     EdmEnumType enumType;
@@ -279,6 +298,7 @@ public class DataDictionary {
         TypeMappings.ODataTypes.DOUBLE
     }).anyMatch(foundTypeName::contentEquals);
 
+    //TODO: make functions
     switch (assertedTypeName) {
       case TypeMappings.DataDictionaryTypes.STRING:
         assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", assertedTypeName, "but found", foundTypeName),
@@ -408,10 +428,6 @@ public class DataDictionary {
     }
   }
 
-  @And("{string} MUST only contain enum values found in the metadata")
-  public void mustOnlyContainEnumValuesFoundInTheMetadata(String lookupName) {
-  }
-
   @And("{string} MUST contain only standard enumerations")
   public void mustContainOnlyStandardEnumerations(String fieldName) {
   }
@@ -420,44 +436,10 @@ public class DataDictionary {
   public void mustContainAtLeastOneStandardEnumeration(String enumName) {
   }
 
-  @When("metadata are checked for synonyms")
-  public void metadataAreCheckedForSynonyms() {
+  @And("the following synonyms for {string} MUST NOT exist in the metadata")
+  public void theFollowingSynonymsForMUSTNOTExistInTheMetadata(String fieldName, List<String> synonyms) {
+    synonyms.forEach(synonym ->
+        assertFalse(getDefaultErrorMessage("Synonym", "\"" + synonym + "\"", "for fieldName", "\"" + fieldName + "\"", "was found in the metadata!"),
+            container.getFieldMap(currentResourceName.get()).containsKey(synonym)));
   }
-
-  @Then("field synonyms MUST NOT exist in the metadata")
-  public void fieldSynonymsMUSTNOTExistInTheMetadata() {
-  }
-
-  @And("enumeration synonyms MUST NOT exist in the metadata")
-  public void enumerationSynonymsMUSTNOTExistInTheMetadata() {
-//    container.getEnumMap().keySet().forEach(key -> {
-//      //ohai
-//      LOG.info(key);
-//    });
-  }
-
-  @When("metadata are checked for similar standard names")
-  public void metadataAreCheckedForSimilarStandardNames() {
-  }
-
-  @Then("fields that are similar to standard names MAY cause certification to fail")
-  public void fieldsThatAreSimilarToStandardNamesMAYCauseCertificationToFail() {
-  }
-
-  @And("enumerations that are similar to standard names MAY cause Certification to fail")
-  public void enumerationsThatAreSimilarToStandardNamesMAYCauseCertificationToFail() {
-  }
-
-  @When("metadata are checked for substring matches of standard names")
-  public void metadataAreCheckedForSubstringMatchesOfStandardNames() {
-  }
-
-  @Then("fields with substring matches of standard names MAY cause certification to fail")
-  public void fieldsWithSubstringMatchesOfStandardNamesMAYCauseCertificationToFail() {
-  }
-
-  @And("enumerations with substring matches of standard names MAY cause certification to fail")
-  public void enumerationsWithSubstringMatchesOfStandardNamesMAYCauseCertificationToFail() {
-  }
-
 }

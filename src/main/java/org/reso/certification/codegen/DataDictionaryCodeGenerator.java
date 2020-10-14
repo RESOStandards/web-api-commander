@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.reso.commander.common.DataDictionaryMetadata;
 
+import static org.reso.certification.codegen.WorksheetProcessor.buildWellKnownStandardFieldHeaderMap;
 import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_WORKSHEET;
 
 public class DataDictionaryCodeGenerator {
@@ -49,7 +50,7 @@ public class DataDictionaryCodeGenerator {
         if (DataDictionaryMetadata.v1_7.WELL_KNOWN_RESOURCES.contains(currentWorksheet.getSheetName()) && currentWorksheet.getPhysicalNumberOfRows() > 1) {
           processor.beforeResourceSheetProcessed(currentWorksheet);
 
-          processor.buildWellKnownStandardFieldHeaderMap(currentWorksheet);
+          processor.wellKnownStandardFieldHeaderMap = buildWellKnownStandardFieldHeaderMap(currentWorksheet);
           processor.processResourceSheet(currentWorksheet);
 
           //starts at row 1 to skip header row
