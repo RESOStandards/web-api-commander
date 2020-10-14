@@ -230,31 +230,6 @@ public final class WebAPITestContainer implements TestContainer {
     }
   }
 
-  public Map<String, Map<String, CsdlEnumType>> getEnumMap() {
-    if (enumMap.get() == null) buildEnumMap();
-    return enumMap.get();
-  }
-
-  private void buildEnumMap() {
-    if (enumMap.get() == null) enumMap.set(new LinkedHashMap<>());
-
-    LOG.debug("Building Enum Map...");
-    try {
-      assertNotNull(getDefaultErrorMessage("no XML Metadata found in the container!"), fetchXMLMetadata());
-      assertNotNull(getDefaultErrorMessage("no Entity Data Model (edm) found in the container!"), getEdm());
-
-      fetchXMLMetadata().getSchemas().forEach(csdlSchema -> {
-        csdlSchema.getEnumTypes();
-      });
-
-    } catch (Exception e) {
-      LOG.error(e);
-    }
-
-  }
-
-
-
   /**
    * Gets XML Response data from the container
    * @return the XML response data in the container

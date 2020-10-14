@@ -35,6 +35,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -273,11 +274,10 @@ public class Commander {
    * @param pathToMetadata the path to the metadata
    * @param client an instance of a Commander client
    * @return the XMLMetadata for the given item
-   * @throws IOException
    */
-  public static XMLMetadata deserializeXMLMetadataFromPath(String pathToMetadata, ODataClient client) throws IOException {
+  public static XMLMetadata deserializeXMLMetadataFromPath(String pathToMetadata, ODataClient client) {
     //deserialize response into XML Metadata - will throw an exception if metadata are invalid
-    return Commander.deserializeXMLMetadata(deserializeFileFromPath(pathToMetadata).toString(), client);
+    return Commander.deserializeXMLMetadata(Objects.requireNonNull(deserializeFileFromPath(pathToMetadata)).toString(), client);
   }
 
   /**

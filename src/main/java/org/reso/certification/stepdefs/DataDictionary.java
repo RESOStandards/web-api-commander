@@ -9,6 +9,8 @@ import io.cucumber.java.en.When;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.olingo.client.api.edm.xml.XMLMetadata;
+import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmMember;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
@@ -20,6 +22,7 @@ import org.reso.models.Settings;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -38,13 +41,11 @@ public class DataDictionary {
 
   //TODO: make this a dynamic property based on DD version
   public static final String REFERENCE_WORKSHEET = "DDv1.7-StandardAndDisplayNames-20200922210930847.xlsx";
+  public static final String REFERENCE_METADATA = "DDv1.7-StandardAndDisplayNames-20200922210930847.edmx";
 
   static final AtomicReference<String> currentResourceName = new AtomicReference<>();
   static final AtomicReference<Map<String, EdmMember>> foundMembers = new AtomicReference<>(new LinkedHashMap<>());
   static final AtomicReference<Set<EdmMember>> foundStandardMembers = new AtomicReference<>(new LinkedHashSet<>());
-
-  //used to keep track of the found standard fields being certified on a per-resource basis
-  //static final AtomicReference<Map<String, Map<String, CsdlProperty>>> fieldMap = new AtomicReference<>(new LinkedHashMap<>());
 
   //named args
   private static final String SHOW_RESPONSES = "showResponses";
@@ -428,12 +429,41 @@ public class DataDictionary {
     }
   }
 
-  @And("{string} MUST contain only standard enumerations")
-  public void mustContainOnlyStandardEnumerations(String fieldName) {
+  XMLMetadata referenceMetadata = null;
+  private XMLMetadata getReferenceMetadata() {
+    if (referenceMetadata == null) {
+      URL resource = Thread.currentThread().getContextClassLoader().getResource(REFERENCE_METADATA);
+      assert resource != null;
+      referenceMetadata = Commander
+          .deserializeXMLMetadata(Commander.convertInputStreamToString(Commander.deserializeFileFromPath(resource.getPath())),
+              container.getCommander().getClient());
+    }
+    return referenceMetadata;
   }
 
-  @And("{string} MUST contain at least one standard enumeration")
-  public void mustContainAtLeastOneStandardEnumeration(String enumName) {
+  Edm referenceEdm = null;
+  private Edm getReferenceEdm() {
+    if (referenceEdm == null) {
+      URL resource = Thread.currentThread().getContextClassLoader().getResource(REFERENCE_METADATA);
+      assert resource != null;
+      referenceEdm = Commander
+          .deserializeEdm(Commander.convertInputStreamToString(Commander.deserializeFileFromPath(resource.getPath())),
+              container.getCommander().getClient());
+    }
+    return referenceEdm;
+  }
+
+  @And("{string} MUST contain only standard enumerations")
+  public void mustContainOnlyStandardEnumerations(String fieldName) {
+    final String REFERENCE_ENUMS_NAMESPACE = "org.reso.metadata.enums";
+    FullQualifiedName fqn = container.getFieldMap().get(currentResourceName.get()).get(fieldName).getTypeAsFQNObject();
+
+    container.getEdm().getEnumType(fqn).getMemberNames().forEach(name -> {
+      assertNotNull(getDefaultErrorMessage("Lookups for field", fieldName, "MUST only contain Standard Enumerations!"),
+          getReferenceMetadata().getSchema(REFERENCE_ENUMS_NAMESPACE).getEnumType(fieldName).getMember(name));
+    });
+
+    LOG.info("PASSED: Field \"" + fieldName + "\" only contains Standard Names!");
   }
 
   @And("the following synonyms for {string} MUST NOT exist in the metadata")
