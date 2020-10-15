@@ -301,15 +301,16 @@ public class DataDictionary {
     //TODO: make functions
     switch (assertedTypeName) {
       case TypeMappings.DataDictionaryTypes.STRING:
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", assertedTypeName, "but found", foundTypeName),
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.STRING, "but found", foundTypeName),
             foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING));
         break;
       case TypeMappings.DataDictionaryTypes.DATE:
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", assertedTypeName, "but found", foundTypeName),
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.DATE, "but found", foundTypeName),
             foundTypeName.contentEquals(TypeMappings.ODataTypes.DATE));
         break;
       case TypeMappings.DataDictionaryTypes.DECIMAL:
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", assertedTypeName, "but found", foundTypeName),
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.DECIMAL, "OR",
+            TypeMappings.ODataTypes.DOUBLE, "but found", foundTypeName),
             foundTypeName.contentEquals(TypeMappings.ODataTypes.DECIMAL)
                 || foundTypeName.contentEquals(TypeMappings.ODataTypes.DOUBLE));
         break;
@@ -318,11 +319,13 @@ public class DataDictionary {
             || foundTypeName.contentEquals(TypeMappings.ODataTypes.INT32)
             || foundTypeName.contentEquals(TypeMappings.ODataTypes.INT64);
 
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", assertedTypeName, "but found", foundTypeName),
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.INT64,
+            "OR", TypeMappings.ODataTypes.INT32,
+            "OR", TypeMappings.ODataTypes.INT16, "but found", foundTypeName),
             isIntegerType);
         break;
       case TypeMappings.DataDictionaryTypes.BOOLEAN:
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", assertedTypeName, "but found", foundTypeName),
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.BOOLEAN, "but found", foundTypeName),
             foundTypeName.contentEquals(TypeMappings.ODataTypes.BOOLEAN));
         break;
       case TypeMappings.DataDictionaryTypes.SINGLE_ENUM:
@@ -381,7 +384,7 @@ public class DataDictionary {
         }
         break;
       case TypeMappings.DataDictionaryTypes.TIMESTAMP:
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", assertedTypeName, "but found", foundTypeName),
+        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.DATETIME_OFFSET, "but found", foundTypeName),
             foundTypeName.contentEquals(TypeMappings.ODataTypes.DATETIME_OFFSET));
         break;
       default:
@@ -428,7 +431,7 @@ public class DataDictionary {
       LOG.warn("Length for field " + fieldName + " SHOULD be equal to the RESO Suggested Max Length of " + suggestedMaxLength
           + " but was " + length);
     } else {
-      LOG.info("Length for field " + fieldName +  " is equal to the RESO Suggested Max Scale of " + length);
+      LOG.info("Length for field " + fieldName +  " is equal to the RESO Suggested Max Length of " + length);
     }
   }
 
