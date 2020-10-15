@@ -176,6 +176,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Gets the field map from the well-known resource name passed in the given RESOScript
+   *
    * @return a map of all Csdl properties keyed by field name.
    */
   public Map<String, Map<String, CsdlProperty>> getFieldMap() {
@@ -185,6 +186,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Returns a field map for the given Entity Type (Resource) name
+   *
    * @param entityTypeName the name of the entity type to search for
    * @return a field map, possibly empty, containing any fields that were found for the given resource
    */
@@ -232,6 +234,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Gets XML Response data from the container
+   *
    * @return the XML response data in the container
    */
   public String getXMLResponseData() {
@@ -240,6 +243,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Sets XML Response data in the container
+   *
    * @param xmlResponseData the response data to set
    */
   public void setXMLResponseData(String xmlResponseData) {
@@ -376,6 +380,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * XML Metadata setter
+   *
    * @param xmlMetadata the XML metadata to set
    */
   public void setXMLMetadata(XMLMetadata xmlMetadata) {
@@ -384,6 +389,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Commander getter
+   *
    * @return the local Commander instance
    */
   public Commander getCommander() {
@@ -392,6 +398,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Commander setter
+   *
    * @param commander the Commander to set
    */
   public void setCommander(Commander commander) {
@@ -400,6 +407,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * OData response getter
+   *
    * @return the local OData response
    */
   public ODataRawResponse getODataRawResponse() {
@@ -408,6 +416,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * OData response setter
+   *
    * @param oDataRawResponse the OData response to set
    */
   public void setODataRawResponse(ODataRawResponse oDataRawResponse) {
@@ -416,6 +425,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Request getter
+   *
    * @return the local Request instance
    */
   public Request getRequest() {
@@ -424,6 +434,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Request setter
+   *
    * @param request the Request to set
    */
   public void setRequest(Request request) {
@@ -432,6 +443,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Request setter
+   *
    * @param requestId the Request Id of the Request
    */
   public void setRequest(String requestId) {
@@ -440,6 +452,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Request URI getter
+   *
    * @return the URI of the current request
    */
   public URI getRequestUri() {
@@ -448,6 +461,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Request URI setter
+   *
    * @param requestUri the URI of the current request
    */
   public void setRequestUri(URI requestUri) {
@@ -456,6 +470,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Response code getter
+   *
    * @return the Response code of the last request
    */
   public Integer getResponseCode() {
@@ -464,6 +479,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Response code setter
+   *
    * @param responseCode the response code to set
    */
   public void setResponseCode(Integer responseCode) {
@@ -472,6 +488,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Response Data getter
+   *
    * @return the local response data
    */
   public String getResponseData() {
@@ -480,6 +497,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Response code setter
+   *
    * @param responseData the response data to set
    */
   public void setResponseData(String responseData) {
@@ -488,6 +506,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Initial response data getter
+   *
    * @return the local response data
    */
   public String getInitialResponseData() {
@@ -496,6 +515,7 @@ public final class WebAPITestContainer implements TestContainer {
 
   /**
    * Initial response data setter
+   *
    * @param initialResponseData the response data to set
    */
   public void setInitialResponseData(String initialResponseData) {
@@ -614,7 +634,9 @@ public final class WebAPITestContainer implements TestContainer {
     this.scope.set(scope);
   }
 
-  public String getPathToMetadata() {return pathToMetadata.get();}
+  public String getPathToMetadata() {
+    return pathToMetadata.get();
+  }
 
   public void setPathToMetadata(String path) {
     this.pathToMetadata.set(path);
@@ -748,7 +770,7 @@ public final class WebAPITestContainer implements TestContainer {
     return this;
   }
 
-  public WebAPITestContainer validateEdm() {
+  public void validateEdm() {
     try {
       assertNotNull("ERROR: No Entity Data Model (Edm) Exists!", getEdm());
       boolean isValid = getCommander().validateMetadata(getEdm());
@@ -757,10 +779,9 @@ public final class WebAPITestContainer implements TestContainer {
     } catch (Exception ex) {
       fail("ERROR: could not validate Edm Metadata!\n" + ex.toString());
     }
-    return this;
   }
 
-  public WebAPITestContainer validateXMLMetadata() {
+  public void validateXMLMetadata() {
     try {
       //note that this will lazy-load XML metadata when it's not present
       assertNotNull(getDefaultErrorMessage("XML metadata was not found!"), fetchXMLMetadata());
@@ -770,7 +791,6 @@ public final class WebAPITestContainer implements TestContainer {
     } catch (Exception ex) {
       fail("ERROR: could not validate XML Metadata!\n" + ex.toString());
     }
-    return this;
   }
 
   public WebAPITestContainer validateXMLMetadataXML() {

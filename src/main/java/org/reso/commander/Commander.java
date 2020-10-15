@@ -186,7 +186,7 @@ public class Commander {
    */
   private static URI buildSkipUri(String requestUri, Integer pageSize, Integer skip) {
     try {
-      URIBuilder uriBuilder = null;
+      URIBuilder uriBuilder;
       URI preparedUri = prepareURI(requestUri);
 
       if (requestUri != null && requestUri.length() > 0 && preparedUri != null) {
@@ -572,8 +572,8 @@ public class Commander {
    */
   public Integer saveGetRequest(String requestUri, String outputFilePath) {
     final String ERROR_EXTENSION = ".ERROR";
-    File outputFile = null;
-    InputStream inputStream = null;
+    File outputFile;
+    InputStream inputStream;
     ODataRawResponse oDataRawResponse = null;
     Integer responseCode = null;
 
@@ -607,7 +607,7 @@ public class Commander {
   }
 
   /**
-   * Executes a raw OData request in the current commander instance without trying to intepret the results
+   * Executes a raw OData request in the current commander instance without trying to interpret the results
    *
    * @param requestUri the URI to make the request to
    * @return a string containing the serialized response, or null
@@ -739,7 +739,7 @@ public class Commander {
    * Error handler class for SAX parser
    */
   public static class SimpleErrorHandler implements ErrorHandler {
-    public void warning(SAXParseException e) throws SAXException {
+    public void warning(SAXParseException e) {
       LOG.warn(e.getMessage());
     }
 

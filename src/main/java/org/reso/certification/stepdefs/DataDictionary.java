@@ -1,5 +1,6 @@
 package org.reso.certification.stepdefs;
 
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.And;
@@ -10,10 +11,10 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
-import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmMember;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.api.edm.provider.CsdlEnumMember;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.Commander;
 import org.reso.commander.common.TestUtils;
@@ -234,9 +235,7 @@ public class DataDictionary {
 
     final Map<String, EdmMember> foundMembers = new LinkedHashMap<>();
 
-    enumType.getMemberNames().forEach(name -> {
-      foundMembers.put(name, enumType.getMember(name));
-    });
+    enumType.getMemberNames().forEach(name -> foundMembers.put(name, enumType.getMember(name)));
 
     if (foundMembers.size() > 0) {
       LOG.info("Found " + foundMembers.size() + " Enumeration"
@@ -248,29 +247,29 @@ public class DataDictionary {
 
   /**
    * Gets the set of found RESO Standard member names in a given found members Map
-   * @param foundMembers a map of the enumeration members that was found in the metadata for a given field
+   * @param members a map of the enumeration members that was found in the metadata for a given field
    * @param dataTable data table of standard lookup value and lookup display name items
    * @return a set of EdmMembers from the Lookup metadata that contains the standard items in the data table
    */
-  private Set<EdmMember> getFoundStandardMembers(Map<String, EdmMember> foundMembers, DataTable dataTable) {
-    final Set<EdmMember> foundStandardMembers = new LinkedHashSet<>();
+  private Set<EdmMember> getFoundStandardMembers(Map<String, EdmMember> members, DataTable dataTable) {
+    final String LOOKUP_VALUE = "lookupValue";
     List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
 
-    String lookupValue;
-    final String LOOKUP_VALUE_KEY = "lookupValue";
-    for (Map<String, String> row : rows) {
-      lookupValue = row.get(LOOKUP_VALUE_KEY);
-      if (foundMembers.containsKey(lookupValue)) {
-        foundStandardMembers.add(foundMembers.get(lookupValue));
-      }
+    Set<String> standardMembers = rows.stream().map(row -> row.get(LOOKUP_VALUE)).collect(Collectors.toCollection(LinkedHashSet::new));
+    Set<String> foundMembers = members.keySet();
+    Set<String> difference = Sets.difference(foundMembers, standardMembers);
+    Set<String> intersection = Sets.intersection(foundMembers, standardMembers);
+
+    if (intersection.size() > 0) {
+      LOG.info("Found " + intersection.size() + " RESO Standard Enumeration"
+          + (intersection.size() != 1 ? "s" : "") + ":\n\t[" + String.join(", ", intersection) + "]");
     }
 
-    if (foundStandardMembers.size() > 0) {
-      LOG.info("Found " + foundStandardMembers.size() + " RESO Standard Enumeration"
-          + (foundStandardMembers.size() != 1 ? "s" : "")
-          + ":\n\t[" + foundStandardMembers.stream().map(EdmMember::getName).collect(Collectors.joining(", ")) + "]");
+    if (difference.size() > 0) {
+      LOG.info("Found " + difference.size() + " Non-standard Enumeration"
+          + (difference.size() != 1 ? "s" : "") + ":\n\t[" + String.join(", ", difference) + "]");
     }
-    return foundStandardMembers;
+    return intersection.stream().map(members::get).collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   /**
@@ -285,7 +284,7 @@ public class DataDictionary {
     assertNotNull(getDefaultErrorMessage("you must specify a Data Dictionary type name to check!"), assertedTypeName);
     assertNotNull(getDefaultErrorMessage("you must specify an Edm type name to check!"), foundTypeName);
     EdmEnumType enumType;
-    boolean isIntegerType = false;
+    boolean isIntegerType;
 
     final boolean isPrimitiveType = Arrays.stream(new String[] {
         TypeMappings.ODataTypes.INT16,
@@ -379,8 +378,6 @@ public class DataDictionary {
         boolean isCollection = container.getFieldMap().get(currentResourceName.get()).get(fieldName).isCollection();
         if (!isCollection) {
           assertTrue(getDefaultErrorMessage("Multi-Enumerations MUST have IsFlags=\"true\""), enumType.isFlags());
-          LOG.info("Found Edm.EnumType Enumerations with IsFlags=true for " + foundTypeName +
-              " with the following members: \n\t" + container.getEdm().getEnumType(new FullQualifiedName(foundTypeName)).getMemberNames());
         }
         break;
       case TypeMappings.DataDictionaryTypes.TIMESTAMP:
@@ -393,15 +390,17 @@ public class DataDictionary {
     }
   }
 
-  @And("{string} precision SHOULD be equal to the RESO Suggested Max Length of {int}")
-  public void precisionSHOULDBeEqualToTheRESOSuggestedMaxLengthOf(String fieldName, Integer suggestedPrecision) {
+  @And("{string} precision SHOULD be equal to the RESO Suggested Max Precision of {int}")
+  public void precisionSHOULDBeEqualToTheRESOSuggestedMaxPrecisionOf(String fieldName, Integer suggestedPrecision) {
     Integer precision = container.getFieldMap(currentResourceName.get()) != null
         && container.getFieldMap(currentResourceName.get()).containsKey(fieldName)
         ? container.getFieldMap(currentResourceName.get()).get(fieldName).getPrecision() : null;
 
     if (!Objects.equals(precision, suggestedPrecision)) {
-      LOG.warn("Precision for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Length of " + suggestedPrecision
+      LOG.warn("Precision for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Precision of " + suggestedPrecision
           + " but was " + precision);
+    } else {
+      LOG.info("Precision for field " + fieldName +  " is equal to the RESO Suggested Max Scale of " + suggestedPrecision);
     }
   }
 
@@ -409,11 +408,13 @@ public class DataDictionary {
   public void scaleSHOULDBeEqualToTheRESOSuggestedMaxScaleOf(String fieldName, Integer suggestedMaxScale) {
     Integer scale = container.getFieldMap(currentResourceName.get()) != null
         && container.getFieldMap(currentResourceName.get()).containsKey(fieldName)
-        ? container.getFieldMap(currentResourceName.get()).get(fieldName).getPrecision() : null;
+        ? container.getFieldMap(currentResourceName.get()).get(fieldName).getScale() : null;
 
     if (!Objects.equals(scale, suggestedMaxScale)) {
-      LOG.warn("Precision for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Length of " + suggestedMaxScale
+      LOG.warn("Scale for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Scale of " + suggestedMaxScale
           + " but was " + scale);
+    } else {
+      LOG.info("Scale for field " + fieldName +  " is equal to the RESO Suggested Max Scale of " + suggestedMaxScale);
     }
   }
 
@@ -421,11 +422,13 @@ public class DataDictionary {
   public void lengthSHOULDBeEqualToTheRESOSuggestedMaxLengthOf(String fieldName, Integer suggestedMaxLength) {
     Integer length = container.getFieldMap(currentResourceName.get()) != null
         && container.getFieldMap(currentResourceName.get()).containsKey(fieldName)
-        ? container.getFieldMap(currentResourceName.get()).get(fieldName).getPrecision() : null;
+        ? container.getFieldMap(currentResourceName.get()).get(fieldName).getMaxLength() : null;
 
     if (!Objects.equals(length, suggestedMaxLength)) {
-      LOG.warn("Precision for field " + fieldName + " SHOULD be equal to the RESO Suggested Max Length of " + suggestedMaxLength
+      LOG.warn("Length for field " + fieldName + " SHOULD be equal to the RESO Suggested Max Length of " + suggestedMaxLength
           + " but was " + length);
+    } else {
+      LOG.info("Length for field " + fieldName +  " is equal to the RESO Suggested Max Scale of " + length);
     }
   }
 
@@ -441,27 +444,18 @@ public class DataDictionary {
     return referenceMetadata;
   }
 
-  Edm referenceEdm = null;
-  private Edm getReferenceEdm() {
-    if (referenceEdm == null) {
-      URL resource = Thread.currentThread().getContextClassLoader().getResource(REFERENCE_METADATA);
-      assert resource != null;
-      referenceEdm = Commander
-          .deserializeEdm(Commander.convertInputStreamToString(Commander.deserializeFileFromPath(resource.getPath())),
-              container.getCommander().getClient());
-    }
-    return referenceEdm;
-  }
-
   @And("{string} MUST contain only standard enumerations")
   public void mustContainOnlyStandardEnumerations(String fieldName) {
     final String REFERENCE_ENUMS_NAMESPACE = "org.reso.metadata.enums";
     FullQualifiedName fqn = container.getFieldMap().get(currentResourceName.get()).get(fieldName).getTypeAsFQNObject();
 
-    container.getEdm().getEnumType(fqn).getMemberNames().forEach(name -> {
-      assertNotNull(getDefaultErrorMessage("Lookups for field", fieldName, "MUST only contain Standard Enumerations!"),
-          getReferenceMetadata().getSchema(REFERENCE_ENUMS_NAMESPACE).getEnumType(fieldName).getMember(name));
-    });
+    Set<String> foundMembers = new LinkedHashSet<>(container.getEdm().getEnumType(fqn).getMemberNames());
+    Set<String> standardMembers = getReferenceMetadata().getSchema(REFERENCE_ENUMS_NAMESPACE).getEnumType(fieldName)
+        .getMembers().stream().map(CsdlEnumMember::getName).collect(Collectors.toCollection(LinkedHashSet::new));
+
+    assertTrue(getDefaultErrorMessage("Lookups for field", fieldName, "MUST only contain Standard Enumerations!",
+        "\nFound the following non-standard enumerations:", "[" + String.join(", ", Sets.difference(foundMembers, standardMembers)) + "]"),
+        standardMembers.containsAll(foundMembers));
 
     LOG.info("PASSED: Field \"" + fieldName + "\" only contains Standard Names!");
   }
@@ -469,7 +463,8 @@ public class DataDictionary {
   @And("the following synonyms for {string} MUST NOT exist in the metadata")
   public void theFollowingSynonymsForMUSTNOTExistInTheMetadata(String fieldName, List<String> synonyms) {
     synonyms.forEach(synonym ->
-        assertFalse(getDefaultErrorMessage("Synonym", "\"" + synonym + "\"", "for fieldName", "\"" + fieldName + "\"", "was found in the metadata!"),
+        assertFalse(getDefaultErrorMessage("Synonym", "\"" + synonym + "\"", "of fieldName", "\"" + fieldName + "\"", "found in the metadata!",
+            "\nSynonyms are not allowed!"),
             container.getFieldMap(currentResourceName.get()).containsKey(synonym)));
   }
 }

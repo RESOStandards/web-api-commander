@@ -180,13 +180,17 @@ public class BDDProcessor extends WorksheetProcessor {
               "    Then \"" + field.getStandardName() + "\" MUST be \"Decimal\" data type\n" +
               generateSynonymsMarkup(field);
 
+      //TODO Length is actually scale for Decimal fields by the DD! :/
       if (field.getSuggestedMaxLength() != null)
         template +=
-            "    And \"" + field.getStandardName() + "\" precision SHOULD be equal to the RESO Suggested Max Length of " + field.getSuggestedMaxLength() + "\n";
+            "    And \"" + field.getStandardName() + "\" precision SHOULD be equal to the RESO Suggested Max Precision of " +
+                field.getSuggestedMaxLength() + "\n";
 
+      //TODO Precision is actually Scale for Decimal fields by the DD! :/
       if (field.getSuggestedMaxPrecision() != null)
         template +=
-            "    And \"" + field.getStandardName() + "\" scale SHOULD be equal to the RESO Suggested Max Scale of " + field.getSuggestedMaxPrecision() + "\n";
+            "    And \"" + field.getStandardName() + "\" scale SHOULD be equal to the RESO Suggested Max Scale of " +
+                field.getSuggestedMaxPrecision() + "\n";
 
       return template;
     }
