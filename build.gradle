@@ -51,6 +51,7 @@ dependencies {
 
   compile 'com.networknt:json-schema-validator:1.0.35'
   compile 'com.google.code.gson:gson:2.8.6'
+  compile 'org.apache.commons:commons-text:1.9'
 
   implementation 'org.mockito:mockito-core:3.3.3'
 }

@@ -242,7 +242,8 @@ public class BDDProcessor extends WorksheetProcessor {
               "    And \"" + field.getStandardName() + "\" MUST contain only standard enumerations\n";
         } else {
           template +=
-              "    And \"" + field.getStandardName() + "\" MAY contain any of the following standard lookups\n" + enumMarkup;
+              "    And \"" + field.getStandardName() + "\" MAY contain any of the following standard lookups\n" + enumMarkup +
+              "    But \"" + field.getStandardName() + "\" MUST NOT contain any similar lookups\n";
         }
       }
 
@@ -267,7 +268,9 @@ public class BDDProcessor extends WorksheetProcessor {
               "    And \"" + field.getStandardName() + "\" MUST contain at least one of the following standard lookups\n" + enumMarkup +
               "    And \"" + field.getStandardName() + "\" MUST contain only standard enumerations\n";
         } else {
-          template += "    And \"" + field.getStandardName() + "\" MAY contain any of the following standard lookups\n" + enumMarkup;
+          template +=
+              "    And \"" + field.getStandardName() + "\" MAY contain any of the following standard lookups\n" + enumMarkup +
+              "    But \"" + field.getStandardName() + "\" MUST NOT contain any similar lookups\n";
         }
       }
 

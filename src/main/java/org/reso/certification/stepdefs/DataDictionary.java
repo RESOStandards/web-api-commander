@@ -3,16 +3,15 @@ package org.reso.certification.stepdefs;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import io.cucumber.datatable.DataTable;
-import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
+import io.cucumber.java.en.*;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmMember;
+import org.apache.olingo.commons.api.edm.EdmNamed;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlEnumMember;
 import org.reso.certification.containers.WebAPITestContainer;
@@ -47,11 +46,13 @@ public class DataDictionary {
   static final AtomicReference<String> currentResourceName = new AtomicReference<>();
   static final AtomicReference<Map<String, EdmMember>> foundMembers = new AtomicReference<>(new LinkedHashMap<>());
   static final AtomicReference<Set<EdmMember>> foundStandardMembers = new AtomicReference<>(new LinkedHashSet<>());
+  static final AtomicReference<Map<String, String>> currentLookups = new AtomicReference<>();
 
   //named args
   private static final String SHOW_RESPONSES = "showResponses";
   private static final String PATH_TO_METADATA = "pathToMetadata";
   private static final String PATH_TO_RESOSCRIPT = "pathToRESOScript";
+  private static final String LOOKUP_VALUE = "lookupValue";
 
   //extract any params here
   private final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES));
@@ -208,11 +209,13 @@ public class DataDictionary {
 
   @And("{string} MAY contain any of the following standard lookups")
   public void mayContainAnyOfTheFollowingStandardLookups(String fieldName, DataTable dataTable) {
+    currentLookups.set(dataTable.asMap(String.class, String.class));
     foundMembers.set(getFoundMembers(fieldName));
     foundStandardMembers.set(getFoundStandardMembers(foundMembers.get(), dataTable));
 
-    assumeTrue("No RESO Standard Enumerations found for field: " + fieldName,
-        foundStandardMembers.get().size() > 0);
+    if (foundStandardMembers.get().size() == 0) {
+      LOG.info("No RESO Standard Enumerations found for field: " + fieldName);
+    }
   }
 
   @And("{string} MUST contain at least one of the following standard lookups")
@@ -252,7 +255,6 @@ public class DataDictionary {
    * @return a set of EdmMembers from the Lookup metadata that contains the standard items in the data table
    */
   private Set<EdmMember> getFoundStandardMembers(Map<String, EdmMember> members, DataTable dataTable) {
-    final String LOOKUP_VALUE = "lookupValue";
     List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
 
     Set<String> standardMembers = rows.stream().map(row -> row.get(LOOKUP_VALUE)).collect(Collectors.toCollection(LinkedHashSet::new));
@@ -368,7 +370,8 @@ public class DataDictionary {
         //check for enum type by FQDN in the Edm cached in the container
         enumType = container.getEdm().getEnumType(new FullQualifiedName(foundTypeName));
 
-        isIntegerType = enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT16)
+        isIntegerType =
+               enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT16)
             || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT32)
             || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT64);
 
@@ -435,18 +438,6 @@ public class DataDictionary {
     }
   }
 
-  XMLMetadata referenceMetadata = null;
-  private XMLMetadata getReferenceMetadata() {
-    if (referenceMetadata == null) {
-      URL resource = Thread.currentThread().getContextClassLoader().getResource(REFERENCE_METADATA);
-      assert resource != null;
-      referenceMetadata = Commander
-          .deserializeXMLMetadata(Commander.convertInputStreamToString(Commander.deserializeFileFromPath(resource.getPath())),
-              container.getCommander().getClient());
-    }
-    return referenceMetadata;
-  }
-
   @And("{string} MUST contain only standard enumerations")
   public void mustContainOnlyStandardEnumerations(String fieldName) {
     final String REFERENCE_ENUMS_NAMESPACE = "org.reso.metadata.enums";
@@ -469,5 +460,45 @@ public class DataDictionary {
         assertFalse(getDefaultErrorMessage("Synonym", "\"" + synonym + "\"", "of fieldName", "\"" + fieldName + "\"", "found in the metadata!",
             "\nSynonyms are not allowed!"),
             container.getFieldMap(currentResourceName.get()).containsKey(synonym)));
+  }
+
+  private static int getDistanceThreshold(String word) {
+    if (word.length() < 4) return 1;
+    if (word.length() < 8) return 2;
+    //if (word.length() < 10) return 3;
+    if (word.length() < 12) return 3;
+    if (word.length() < 16) return 4;
+    return 5;
+  }
+
+  @But("{string} MUST NOT contain any similar lookups")
+  public void mustNOTContainAnySimilarLookups(String fieldName) {
+    if (currentLookups.get() == null) return;
+    Map<String, EdmMember> similarMembers = new LinkedHashMap<>();
+    Set<String> standardMembers = foundStandardMembers.get().stream().map(EdmNamed::getName).collect(Collectors.toCollection(LinkedHashSet::new));
+    Set<String> difference = Sets.difference(foundMembers.get().keySet(), standardMembers);
+
+    for (String nonstandardField : difference) {
+      for (String lookupName : currentLookups.get().keySet()) {
+        if (LevenshteinDistance.getDefaultInstance().apply(lookupName, nonstandardField) < getDistanceThreshold(lookupName)) {
+          similarMembers.put(lookupName, foundMembers.get().get(nonstandardField));
+        }
+      }
+    }
+    assertFalse(getDefaultErrorMessage("Lookups were found that are similar to RESO Standard Lookup Values!\n",
+        "{RESO Standard=Yours} -->", similarMembers.toString()),
+        similarMembers.size() > 0);
+  }
+
+  XMLMetadata referenceMetadata = null;
+  private XMLMetadata getReferenceMetadata() {
+    if (referenceMetadata == null) {
+      URL resource = Thread.currentThread().getContextClassLoader().getResource(REFERENCE_METADATA);
+      assert resource != null;
+      referenceMetadata = Commander
+          .deserializeXMLMetadata(Commander.convertInputStreamToString(Commander.deserializeFileFromPath(resource.getPath())),
+              container.getCommander().getClient());
+    }
+    return referenceMetadata;
   }
 }
