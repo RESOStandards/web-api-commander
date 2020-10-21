@@ -129,7 +129,7 @@ task testDataDictionary_1_7() {
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
           'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0',
-          '--tags',
+          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0 ? '--tags' : ''),
           (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0
               ? systemProperties.get('cucumber.filter.tags') : '')
       ]

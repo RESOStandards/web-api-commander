@@ -22,6 +22,7 @@ import org.reso.models.Settings;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -439,7 +440,7 @@ public class DataDictionary {
   }
 
   @And("{string} MUST contain only standard enumerations")
-  public void mustContainOnlyStandardEnumerations(String fieldName) {
+  public void mustContainOnlyStandardEnumerations(String fieldName) throws URISyntaxException {
     final String REFERENCE_ENUMS_NAMESPACE = "org.reso.metadata.enums";
     FullQualifiedName fqn = container.getFieldMap().get(currentResourceName.get()).get(fieldName).getTypeAsFQNObject();
 
@@ -491,12 +492,13 @@ public class DataDictionary {
   }
 
   XMLMetadata referenceMetadata = null;
-  private XMLMetadata getReferenceMetadata() {
+  private XMLMetadata getReferenceMetadata() throws URISyntaxException {
     if (referenceMetadata == null) {
       URL resource = Thread.currentThread().getContextClassLoader().getResource(REFERENCE_METADATA);
       assert resource != null;
+      String path = new File(resource.toURI()).toString();
       referenceMetadata = Commander
-          .deserializeXMLMetadata(Commander.convertInputStreamToString(Commander.deserializeFileFromPath(resource.getPath())),
+          .deserializeXMLMetadata(Commander.convertInputStreamToString(Commander.deserializeFileFromPath(path)),
               container.getCommander().getClient());
     }
     return referenceMetadata;
