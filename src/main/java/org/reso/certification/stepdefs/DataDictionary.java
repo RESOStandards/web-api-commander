@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.*;
-import org.apache.commons.text.similarity.LevenshteinDistance;
+import me.xdrop.fuzzywuzzy.FuzzySearch;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -480,7 +480,10 @@ public class DataDictionary {
 
     for (String nonstandardField : difference) {
       for (String lookupName : currentLookups.get().keySet()) {
-        if (LevenshteinDistance.getDefaultInstance().apply(lookupName, nonstandardField) < getDistanceThreshold(lookupName)) {
+        if (nonstandardField.endsWith(lookupName)) {
+          continue;
+        }
+        if (lookupName.equalsIgnoreCase(nonstandardField) || FuzzySearch.ratio(lookupName, nonstandardField) > 85) {
           similarMembers.put(lookupName, foundMembers.get().get(nonstandardField));
         }
       }
