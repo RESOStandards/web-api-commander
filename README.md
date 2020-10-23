@@ -3,10 +3,10 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/resostandards/web-api-commander/badge)](https://www.codefactor.io/repository/github/resostandards/web-api-commander)  ![Java CI with Gradle](https://github.com/RESOStandards/web-api-commander/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=master)
 
 The RESO Web API Commander is a command line Java application that uses
-the Apache Olingo library to provide OData Client functionality as well as RESO Web API and Data Dictionary Certification.
+the Apache Olingo library to provide OData Client functionality as well as RESO Web API and Data Dictionary Certification through [Cucumber JVM](https://cucumber.io/docs/installation/java/).
 
 - [Getting Started](#getting-started)
-- [Using the Commander as a Web API Client](#using-the-commander-as-a-web-api-client)
+- [Java and the JDK](#java-and-the-jdk)
 - [Display Help](#display-help)
 - [Authentication](#authentication)
 - [Getting Metadata](#getting-metadata)
@@ -29,39 +29,46 @@ the Apache Olingo library to provide OData Client functionality as well as RESO 
 
 ## Getting Started
 
-There are essentially two ways to run the Commander:
+The RESO Commander may be used in the following ways:
 * [As a Web API Client](#using-the-commander-as-a-web-api-client) 
-* As an automated testing tool for the [Web API](#web-api-usage) or [Data Dictionary](#data-dictionary-usage)
+* [As an automated testing tool for the RESO Web API](#web-api-usage) 
+* [As an automated testing tool for the RESO Data Dictionary](#data-dictionary-usage)
 
+Before you can use the RESO Commander, you must have a Java 1.8-10 JDK installed. 
 
-### Using the Commander as a Web API Client 
+### Java and the JDK
 
-Your operating system probably already has Java installed, but you need 1.8.0 to run the Commander. 
+Your operating system probably already has a Java runtime installed. This is all you need to run the [Commander as a Web API Client](#using-the-commander-as-a-web-api-client). 
 
-To check your version, type: 
+To run the Commander as an automated testing tool, the Java JDK 1.8.x is required. Java 10 will work as well, but Java JDK 11+ hasn't been tested yet and may not behave as expected.
 
-```
-$ java -version
-```
-
-in your operating system's terminal and you will see something similar to the following: 
+To check your version of Java, type: 
 
 ```
 $ java -version
-openjdk version "1.8.0_242"
-OpenJDK Runtime Environment (build 1.8.0_242-8u242-b08-0ubuntu3~19.10-b08)
-OpenJDK 64-Bit Server VM (build 25.242-b08, mixed mode)
+```
+If you have the Java SE runtime installed, the output will look similar to the following:
+```
+$ java -version
+Java version "1.8.x" (or a higher version)
+Java<TM> SE Runtime Environment ...
 ```
 
-If you don't see something similar to this, with 1.8.0, or an error, you may need to download a Java SDK Environment. 
+If you have a Java JDK installed, your output will look something like:
+```
+$ java -version
+openjdk version "1.8.0_265"
+OpenJDK Runtime Environment (build 1.8.0_265-8u265-b01-0ubuntu2~20.04-b01)
+OpenJDK 64-Bit Server VM (build 25.265-b01, mixed mode)
+```
 
-[Open JDK is recommended](https://openjdk.java.net/install/index.html).
+If you don't see something like this, you may need to install a Java SE Runtime or JDK.
+* To use the Commander as a Web API Client: use [Java SE](https://www.oracle.com/java/technologies/javase-jre8-downloads.html).
+* To use the Commander as an automated testing tool, 
+** [Open JDK is recommended](https://openjdk.java.net/install/index.html).
+** [Oracle's SE Development kit may also be used](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html), but there may be additional licensing terms to accept.
 
-[Oracle's SE Development kit may also be used](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html), but there may be additional licensing terms to accept.
-
-Once you have done this, you can [download the Commander JAR file](https://github.com/RESOStandards/web-api-commander/tree/master/build/libs) 
-and use it for the operations which support using the Commander as a Web API client. 
-For automated testing, see [here](#automated-web-api-testing-beta) instead. 
+Once the Java SE Runtime is installed, you may [download the Commander JAR file](https://github.com/RESOStandards/web-api-commander/tree/master/build/libs) 
 
 ## Display Help
 

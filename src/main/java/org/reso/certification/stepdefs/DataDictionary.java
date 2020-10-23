@@ -1,6 +1,8 @@
 package org.reso.certification.stepdefs;
 
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.*;
@@ -18,10 +20,12 @@ import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.Commander;
 import org.reso.commander.common.TestUtils;
 import org.reso.commander.common.TestUtils.TypeMappings;
+import org.reso.models.IgnoredItem;
 import org.reso.models.Settings;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -31,6 +35,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
+import static org.reso.commander.Commander.NOT_OK;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public class DataDictionary {
@@ -47,6 +52,7 @@ public class DataDictionary {
   static final AtomicReference<Map<String, EdmMember>> foundMembers = new AtomicReference<>(new LinkedHashMap<>());
   static final AtomicReference<Set<EdmMember>> foundStandardMembers = new AtomicReference<>(new LinkedHashSet<>());
   static final AtomicReference<Map<String, String>> currentLookups = new AtomicReference<>();
+  static final AtomicReference<Map<String, Map<String, Set<String>>>> ignoredItems = new AtomicReference<>(new LinkedHashMap<>());
 
   //named args
   private static final String SHOW_RESPONSES = "showResponses";
@@ -71,12 +77,6 @@ public class DataDictionary {
   public void aRESOScriptOrMetadataFileAreProvided() {
     assertTrue("ERROR: one of pathToRESOScript OR pathToMetadata MUST be present in command arguments, see README",
         pathToRESOScript != null || pathToMetadata != null);
-
-    if (isUsingRESOScript) {
-      LOG.debug("Using RESOScript: " + pathToRESOScript);
-    } else if (isUsingMetadata) {
-      LOG.debug("Using Metadata: " + pathToMetadata);
-    }
   }
 
   @And("a test container was successfully created from the given RESOScript file")
@@ -130,19 +130,20 @@ public class DataDictionary {
       try {
         final String xmlMetadataString = new String(Files.readAllBytes(Paths.get(pathToMetadata)));
 
-        assertTrue("XML Metadata MUST be valid XML according to the OASIS XSDs!", Commander.validateXML(xmlMetadataString));
+        assertTrue("XML Metadata MUST be valid XML according to the OASIS XSDs!",
+            Commander.validateXML(xmlMetadataString));
         container.setXMLResponseData(xmlMetadataString);
 
         container.setXMLMetadata(Commander.deserializeXMLMetadata(xmlMetadataString, container.getCommander().getClient()));
-        assertTrue("XML Metadata MUST be valid OData XML Metadata!", Commander.validateMetadata(container.getXMLMetadata(), container.getCommander().getClient()));
+        assertTrue("XML Metadata MUST be valid OData XML Metadata!",
+            Commander.validateMetadata(container.getXMLMetadata(), container.getCommander().getClient()));
 
         container.setEdm(Commander.deserializeEdm(xmlMetadataString, container.getCommander().getClient()));
-        assertTrue("Edm metadata MUST be valid!", Commander.validateMetadata(container.getEdm(), container.getCommander().getClient()));
+        assertTrue("Edm metadata MUST be valid!",
+            Commander.validateMetadata(container.getEdm(), container.getCommander().getClient()));
       } catch (IOException e) {
         e.printStackTrace();
       }
-    } else {
-      LOG.debug("Using cached metadata!");
     }
   }
 
@@ -151,7 +152,8 @@ public class DataDictionary {
     if (isUsingRESOScript) {
       assertNotNull(container.getCommander());
       assertTrue("ERROR: Commander must either have a valid Authorization Code or Client Credentials configuration.",
-          container.getCommander().isAuthTokenClient() || (container.getCommander().isOAuth2Client() && container.getCommander().hasValidAuthConfig()));
+          container.getCommander().isAuthTokenClient()
+              || (container.getCommander().isOAuth2Client() && container.getCommander().hasValidAuthConfig()));
     }
   }
 
@@ -163,8 +165,10 @@ public class DataDictionary {
       //request metadata from server using service root in RESOScript file
       TestUtils.assertXMLMetadataAreRequestedFromTheServer(container);
 
-      //ensure request succeeded
-      assertEquals(container.getResponseCode().intValue(), HttpStatus.SC_OK);
+      if (container.getResponseCode() != HttpStatus.SC_OK) {
+        LOG.error(getDefaultErrorMessage("Could not retrieve metadata from", container.getServiceRoot() + "/$metadata"));
+        System.exit(NOT_OK);
+      }
 
       //metadata validation tests
       TestUtils.assertValidXMLMetadata(container);
@@ -188,12 +192,14 @@ public class DataDictionary {
 
     if (container.getFieldMap().containsKey(currentResourceName.get())) {
       //add keyed hash for the given resource name if it doesn't exist
-      if (!container.getFieldMap().containsKey(currentResourceName.get()))
+      if (!container.getFieldMap().containsKey(currentResourceName.get())) {
         container.getFieldMap().put(currentResourceName.get(), new LinkedHashMap<>());
+      }
 
       //if the field for the given resource contains the given field, then add it to the standard field map
-      if (container.getFieldMap(currentResourceName.get()).containsKey(fieldName))
+      if (container.getFieldMap(currentResourceName.get()).containsKey(fieldName)) {
         container.getFieldMap().get(resourceName).put(fieldName, container.getFieldMap(resourceName).get(fieldName));
+      }
     }
 
     if (isFieldContainedInMetadata(fieldName)) LOG.info("\nFound Field: " + fieldName);
@@ -265,6 +271,11 @@ public class DataDictionary {
     if (intersection.size() > 0) {
       LOG.info("Found " + intersection.size() + " RESO Standard Enumeration"
           + (intersection.size() != 1 ? "s" : "") + ":\n\t[" + String.join(", ", intersection) + "]");
+    }
+
+    if (standardMembers.size() > 0) {
+      LOG.info(standardMembers.size() + " Possible RESO Standard Enumeration"
+          + (standardMembers.size() != 1 ? "s" : "") + ":\n\t[" + String.join(", ", standardMembers) + "]");
     }
 
     if (difference.size() > 0) {
@@ -445,7 +456,9 @@ public class DataDictionary {
 
     Set<String> foundMembers = new LinkedHashSet<>(container.getEdm().getEnumType(fqn).getMemberNames());
     Set<String> standardMembers = getReferenceMetadata().getSchema(REFERENCE_ENUMS_NAMESPACE).getEnumType(fieldName)
-        .getMembers().stream().map(CsdlEnumMember::getName).collect(Collectors.toCollection(LinkedHashSet::new));
+        .getMembers().stream()
+            .map(CsdlEnumMember::getName)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
     assertTrue(getDefaultErrorMessage("Lookups for field", fieldName, "MUST only contain Standard Enumerations!",
         "\nFound the following non-standard enumerations:", "[" + String.join(", ", Sets.difference(foundMembers, standardMembers)) + "]"),
@@ -463,30 +476,61 @@ public class DataDictionary {
   }
 
   private static int getDistanceThreshold(String word) {
-    if (word.length() < 4) return 1;
-    if (word.length() < 8) return 2;
-    //if (word.length() < 10) return 3;
-    if (word.length() < 12) return 3;
-    if (word.length() < 16) return 4;
-    return 5;
+    final double TOLERANCE = 0.20;
+    return (int) (TOLERANCE * word.length());
+  }
+
+  private void populateIgnoredItems() {
+    final String IGNORED_ITEMS = "ignored.json";
+    String ignoredJson = Commander.convertInputStreamToString(Thread.currentThread().getContextClassLoader().getResourceAsStream(IGNORED_ITEMS));
+    Type targetClassType = new TypeToken<ArrayList<IgnoredItem>>(){}.getType();
+    Collection<IgnoredItem> ignored = new Gson().fromJson(ignoredJson, targetClassType);
+    ignored.forEach(ignoredItem -> {
+      if (!ignoredItems.get().containsKey(ignoredItem.getLookup())) {
+        ignoredItems.get().put(ignoredItem.getLookup(), new LinkedHashMap<>());
+      }
+      ignoredItems.get().get(ignoredItem.getLookup()).put(ignoredItem.getValue(), new LinkedHashSet<>(ignoredItem.getIgnored()));
+    });
   }
 
   @But("{string} MUST NOT contain any similar lookups")
   public void mustNOTContainAnySimilarLookups(String fieldName) {
     if (currentLookups.get() == null) return;
+
+    //deserialize the ignored items list
+    if (ignoredItems.get().size() == 0) populateIgnoredItems();
+
     Map<String, EdmMember> similarMembers = new LinkedHashMap<>();
-    Set<String> standardMembers = foundStandardMembers.get().stream().map(EdmNamed::getName).collect(Collectors.toCollection(LinkedHashSet::new));
+    Set<String> standardMembers = foundStandardMembers.get().stream()
+        .map(EdmNamed::getName)
+        .filter(item -> !item.contentEquals(LOOKUP_VALUE))
+        .collect(Collectors.toCollection(LinkedHashSet::new));
     Set<String> difference = Sets.difference(foundMembers.get().keySet(), standardMembers);
 
+    int distance, lastDistance;
     for (String nonstandardField : difference) {
+      lastDistance = 0;
       for (String lookupName : currentLookups.get().keySet()) {
-        if (LevenshteinDistance.getDefaultInstance().apply(lookupName, nonstandardField) < getDistanceThreshold(lookupName)) {
-          similarMembers.put(lookupName, foundMembers.get().get(nonstandardField));
+        //TODO: gross, clean up
+        if (!(ignoredItems.get().containsKey(fieldName) && ignoredItems.get().get(fieldName).containsKey(lookupName)
+            && ignoredItems.get().get(fieldName).get(lookupName).contains(nonstandardField))) {
+          if (lookupName.compareToIgnoreCase(nonstandardField) == 0) {
+            similarMembers.put(lookupName, foundMembers.get().get(nonstandardField));
+          } else {
+            distance = LevenshteinDistance.getDefaultInstance().apply(lookupName, nonstandardField);
+            if (distance < getDistanceThreshold(lookupName)) {
+              if (lastDistance < distance) {
+                lastDistance = distance;
+                similarMembers.put(lookupName, foundMembers.get().get(nonstandardField));
+              }
+            }
+          }
         }
       }
     }
+
     assertFalse(getDefaultErrorMessage("Lookups were found that are similar to RESO Standard Lookup Values!\n",
-        "{RESO Standard=Yours} -->", similarMembers.toString()),
+        "{RESO Standard=Yours}\n", similarMembers.toString()),
         similarMembers.size() > 0);
   }
 
