@@ -58,4 +58,23 @@ public class Utils {
     }
     return outputFile;
   }
+
+  final static int DEFAULT_COLUMN_WIDTH = 105;
+  final static String DEFAULT_SPACE_REPLACEMENT = "\n";
+
+  public static String wrapColumns(String content, String spaceReplacement) {
+    return wrapColumns(content, DEFAULT_COLUMN_WIDTH, spaceReplacement);
+  }
+
+  public static String wrapColumns(String content) {
+    return wrapColumns(content, DEFAULT_COLUMN_WIDTH, DEFAULT_SPACE_REPLACEMENT);
+  }
+
+  public static String wrapColumns(String content, int columnWidth) {
+    return wrapColumns(content, columnWidth, DEFAULT_SPACE_REPLACEMENT);
+  }
+
+  public static String wrapColumns(String content, int columnWidth, String spaceReplacement) {
+    return content.replaceAll(String.format("(.{1,%d})( +|$\\n?)|(.{1,%d})\n", columnWidth, columnWidth), spaceReplacement + "$1");
+  }
 }

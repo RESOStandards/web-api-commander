@@ -225,8 +225,11 @@ public class App {
         commander.saveXmlMetadataRequestToFile(cmd.getOptionValue(APP_OPTIONS.SERVICE_ROOT), cmd.getOptionValue(APP_OPTIONS.OUTPUT_FILE));
 
         //also create a metadata report -- add an option for this
-        //getMetadataReport(commander.prepareEdmMetadataRequest().execute().getBody());
+        //generateMetadataReport(commander.prepareEdmMetadataRequest().execute().getBody());
 
+      } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT)) {
+        APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT);
+        LOG.info(generateMetadataReport(deserializeEdmFromPath(inputFilename, commander.getClient())));
       } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.VALIDATE_METADATA)) {
         APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.VALIDATE_METADATA);
 
@@ -391,6 +394,8 @@ public class App {
         validationResponse = validateOptions(cmd, INPUT_FILE);
       } else if (action.matches(ACTIONS.GET_METADATA)) {
         validationResponse = validateOptions(cmd, SERVICE_ROOT, BEARER_TOKEN, OUTPUT_FILE);
+      } else if (action.matches(ACTIONS.GENERATE_METADATA_REPORT)) {
+        validationResponse = validateOptions(cmd, INPUT_FILE);
       } else if (action.matches(ACTIONS.VALIDATE_METADATA)) {
         validationResponse = validateOptions(cmd, INPUT_FILE);
       } else if (action.matches(ACTIONS.GET_ENTITIES)) {
@@ -494,6 +499,8 @@ public class App {
             .desc("Generates reference metadata in EDMX format.").build())
           .addOption(Option.builder().argName("m").longOpt(ACTIONS.GET_METADATA)
             .desc("Fetches metadata from <serviceRoot> using <bearerToken> and saves results in <outputFile>.").build())
+          .addOption(Option.builder().argName("m").longOpt(ACTIONS.GENERATE_METADATA_REPORT)
+              .desc("Generates metadata report from given <inputFile>.").build())
           .addOption(Option.builder().argName("g").longOpt(ACTIONS.GET_ENTITIES)
             .desc("Executes GET on <uri> using the given <bearerToken> and optional <serviceRoot> when " +
                   "--useEdmEnabledClient is specified. Optionally takes a --pageLimit parameter, default " + PAGE_LIMIT + " , which will fetch that number " +
@@ -528,6 +535,7 @@ public class App {
       public static final String VALIDATE_METADATA = "validateMetadata";
       public static final String GET_ENTITIES = "getEntities";
       public static final String SAVE_RAW_GET_REQUEST = "saveRawGetRequest";
+      public static final String GENERATE_METADATA_REPORT = "generateMetadataReport";
     }
   }
 }

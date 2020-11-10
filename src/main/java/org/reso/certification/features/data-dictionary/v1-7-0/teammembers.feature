@@ -158,7 +158,6 @@ Feature: TeamMembers
       | lookupValue | lookupDisplayName |
       | AdministrationAssistant | Administration Assistant |
       | BuyerAgent | Buyer Agent |
-      | BuyerAgent | Buyer Agent |
       | LeadManager | Lead Manager |
       | ListingAgent | Listing Agent |
       | MarketingAssistant | Marketing Assistant |

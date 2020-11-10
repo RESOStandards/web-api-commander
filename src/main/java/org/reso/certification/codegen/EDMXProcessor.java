@@ -4,9 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.reso.commander.common.Utils;
-import org.reso.models.StandardEnumeration;
-import org.reso.models.StandardField;
-import org.reso.models.StandardRelationship;
+import org.reso.models.ReferenceStandardLookup;
+import org.reso.models.ReferenceStandardField;
+import org.reso.models.ReferenceStandardRelationship;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_WORKSHEET;
 import static org.reso.commander.common.DataDictionaryMetadata.v1_7.WELL_KNOWN_KEYS.*;
+import static org.reso.commander.common.Utils.wrapColumns;
 
 public class EDMXProcessor extends WorksheetProcessor {
   private static final Logger LOG = LogManager.getLogger(EDMXProcessor.class);
@@ -99,7 +100,7 @@ public class EDMXProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void processNumber(StandardField field) {
+  void processNumber(ReferenceStandardField field) {
     String content = EDMXTemplates.buildNumberMember(field);
     if (content == null || content.length() <= 0) return;
     markup.append(EDMXTemplates.buildComments(field));
@@ -107,7 +108,7 @@ public class EDMXProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void processStringListSingle(StandardField field) {
+  void processStringListSingle(ReferenceStandardField field) {
     String content = EDMXTemplates.buildEnumTypeSingleMember(field);
     if (content == null || content.length() <= 0) return;
     markup.append(EDMXTemplates.buildComments(field));
@@ -115,7 +116,7 @@ public class EDMXProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void processString(StandardField field) {
+  void processString(ReferenceStandardField field) {
     String content = EDMXTemplates.buildStringMember(field);
     if (content == null || content.length() <= 0) return;
     markup.append(EDMXTemplates.buildComments(field));
@@ -123,7 +124,7 @@ public class EDMXProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void processBoolean(StandardField field) {
+  void processBoolean(ReferenceStandardField field) {
     String content = EDMXTemplates.buildBooleanMember(field);
     if (content == null || content.length() <= 0) return;
     markup.append(EDMXTemplates.buildComments(field));
@@ -131,7 +132,7 @@ public class EDMXProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void processStringListMulti(StandardField field) {
+  void processStringListMulti(ReferenceStandardField field) {
     String content = EDMXTemplates.buildEnumTypeMultiMember(field);
     if (content == null || content.length() <= 0) return;
     markup.append(EDMXTemplates.buildComments(field));
@@ -139,7 +140,7 @@ public class EDMXProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void processDate(StandardField field) {
+  void processDate(ReferenceStandardField field) {
     String content = EDMXTemplates.buildDateMember(field);
     if (content == null || content.length() <= 0) return;
     markup.append(EDMXTemplates.buildComments(field));
@@ -147,7 +148,7 @@ public class EDMXProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void processTimestamp(StandardField field) {
+  void processTimestamp(ReferenceStandardField field) {
     String content = EDMXTemplates.buildDateTimeWithOffsetMember(field);
     if (content == null || content.length() <= 0) return;
     markup.append(EDMXTemplates.buildComments(field));
@@ -155,7 +156,7 @@ public class EDMXProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void processCollection(StandardField field) {
+  void processCollection(ReferenceStandardField field) {
     LOG.debug("Collection Type is not supported at this time!");
   }
 
@@ -218,13 +219,13 @@ public class EDMXProcessor extends WorksheetProcessor {
         new StringBuilder("\n    <Schema xmlns=\"http://docs.oasis-open.org/odata/ns/edm\" Namespace=\"" + RESO_NAMESPACE + ".enums\">");
 
     standardFieldsMap.forEach((resourceName, standardFieldMap) -> {
-      standardFieldMap.forEach((standardName, standardField) -> {
-        if (standardField.isSingleEnumeration()) {
-          markupMap.putIfAbsent(standardField.getLookupStandardName(), buildSingleEnumTypeMarkup(standardField.getLookupStandardName()));
+      standardFieldMap.forEach((standardName, referenceStandardField) -> {
+        if (referenceStandardField.isSingleEnumeration()) {
+          markupMap.putIfAbsent(referenceStandardField.getLookupStandardName(), buildSingleEnumTypeMarkup(referenceStandardField.getLookupStandardName()));
         }
 
-        if (standardField.isMultipleEnumeration()) {
-          markupMap.putIfAbsent(standardField.getLookupStandardName(), buildMultipleEnumTypeMarkup(standardField.getLookupStandardName()));
+        if (referenceStandardField.isMultipleEnumeration()) {
+          markupMap.putIfAbsent(referenceStandardField.getLookupStandardName(), buildMultipleEnumTypeMarkup(referenceStandardField.getLookupStandardName()));
         }
       });
     });
@@ -238,21 +239,21 @@ public class EDMXProcessor extends WorksheetProcessor {
 
   private String buildNavigationPropertyMarkup(String resourceName) {
     StringBuilder content = new StringBuilder();
-    List<StandardRelationship> standardRelationships =
-        this.getStandardRelationships().stream().filter(standardRelationship
-            -> standardRelationship.getTargetResource().contentEquals(resourceName)).collect(Collectors.toList());
-    for (StandardRelationship standardRelationship : standardRelationships) {
-      //LOG.info(standardRelationship);
+    List<ReferenceStandardRelationship> referenceStandardRelationships =
+        this.getStandardRelationships().stream().filter(referenceStandardRelationship
+            -> referenceStandardRelationship.getTargetResource().contentEquals(resourceName)).collect(Collectors.toList());
+    for (ReferenceStandardRelationship referenceStandardRelationship : referenceStandardRelationships) {
+      //LOG.info(referenceStandardRelationship);
 
-      if (standardRelationship.getTargetResourceKey() != null) {
+      if (referenceStandardRelationship.getTargetResourceKey() != null) {
         content.append("\n       <NavigationProperty")
-            .append(" Name=\"").append(standardRelationship.getTargetStandardName()).append("\"")
-            .append(" Type=\"org.reso.metadata.").append(standardRelationship.getSourceResource()).append("\"")
+            .append(" Name=\"").append(referenceStandardRelationship.getTargetStandardName()).append("\"")
+            .append(" Type=\"org.reso.metadata.").append(referenceStandardRelationship.getSourceResource()).append("\"")
             .append(" />");
       } else {
         content.append("\n       <NavigationProperty")
-            .append(" Name=\"").append(standardRelationship.getTargetStandardName()).append("\"")
-            .append(" Type=\"Collection(org.reso.metadata.").append(standardRelationship.getSourceResource()).append(")\"")
+            .append(" Name=\"").append(referenceStandardRelationship.getTargetStandardName()).append("\"")
+            .append(" Type=\"Collection(org.reso.metadata.").append(referenceStandardRelationship.getSourceResource()).append(")\"")
             .append(" />");
       }
     }
@@ -276,10 +277,10 @@ public class EDMXProcessor extends WorksheetProcessor {
       content.append("      <EnumType Name=\"").append(lookupStandardName).append("\">");
 
       //iterate through each of the lookup values and generate their edm:EnumType content
-      getEnumerations().get(lookupStandardName).forEach(standardEnumeration -> {
+      getEnumerations().get(lookupStandardName).forEach(referenceStandardLookup -> {
         content
-            .append("        ").append(EDMXTemplates.buildComments(standardEnumeration))
-            .append("        <Member Name=\"").append(standardEnumeration.getLookupValue()).append("\"/>\n");
+            .append("        ").append(EDMXTemplates.buildComments(referenceStandardLookup))
+            .append("        <Member Name=\"").append(referenceStandardLookup.getLookupValue()).append("\"/>\n");
       });
 
       content.append("      </EnumType>\n");
@@ -309,10 +310,10 @@ public class EDMXProcessor extends WorksheetProcessor {
       content.append("      <EnumType Name=\"").append(lookupStandardName).append("\">");
 
       //iterate through each of the lookup values and generate their edm:EnumType content
-      getEnumerations().get(lookupStandardName).forEach(standardEnumeration -> {
+      getEnumerations().get(lookupStandardName).forEach(referenceStandardLookup -> {
         content
-          .append("        ").append(EDMXTemplates.buildComments(standardEnumeration))
-          .append("        <Member Name=\"").append(standardEnumeration.getLookupValue()).append("\"/>\n");
+          .append("        ").append(EDMXTemplates.buildComments(referenceStandardLookup))
+          .append("        <Member Name=\"").append(referenceStandardLookup.getLookupValue()).append("\"/>\n");
       });
 
       content.append("      </EnumType>\n");
@@ -330,24 +331,24 @@ public class EDMXProcessor extends WorksheetProcessor {
 
   public static final class EDMXTemplates {
 
-    public static String buildBooleanMember(StandardField field) {
+    public static String buildBooleanMember(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
       return "        <Property Name=\""+ field.getStandardName() + "\" Type=\"Edm.Boolean\" />\n";
     }
 
-    public static String buildDateMember(StandardField field) {
+    public static String buildDateMember(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
       return "        <Property Name=\""+ field.getStandardName() + "\" Type=\"Edm.Date\" />\n";
     }
 
-    public static String buildNumberMember(StandardField field) {
+    public static String buildNumberMember(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
 
       if (field.getSuggestedMaxPrecision() != null) return buildDecimalMember(field);
       else return buildIntegerMember(field);
     }
 
-    public static String buildDecimalMember(StandardField field) {
+    public static String buildDecimalMember(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
       String template = "        <Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.Decimal\"";
 
@@ -362,12 +363,12 @@ public class EDMXProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildIntegerMember(StandardField field) {
+    public static String buildIntegerMember(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
       return  "        <Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.Int64\" />\n";
     }
 
-    public static String buildEnumTypeSingleMember(StandardField field) {
+    public static String buildEnumTypeSingleMember(ReferenceStandardField field) {
       if (field == null || field.getLookup() == null) return EMPTY_STRING;
       if (!field.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
 
@@ -375,13 +376,13 @@ public class EDMXProcessor extends WorksheetProcessor {
       return "        <Property Name=\"" + field.getStandardName() + "\" Type=\"" + RESO_NAMESPACE + ".enums." + lookupName + "\" />\n";
     }
 
-    public static String buildEnumTypeMultiMember(StandardField field) {
+    public static String buildEnumTypeMultiMember(ReferenceStandardField field) {
       if (field == null || field.getLookup() == null) return EMPTY_STRING;
       if (!field.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
       return "        <Property Name=\"" + field.getStandardName() + "\" Type=\"Collection(" + RESO_NAMESPACE + ".enums." + field.getLookupStandardName() + ")\" />\n";
     }
 
-    public static String buildStringMember(StandardField field) {
+    public static String buildStringMember(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
       String template = "        <Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.String\"";
 
@@ -391,7 +392,7 @@ public class EDMXProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildDateTimeWithOffsetMember(StandardField field) {
+    public static String buildDateTimeWithOffsetMember(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
       String template = "        <Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.DateTimeOffset\"";
 
@@ -401,23 +402,22 @@ public class EDMXProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildComments(StandardField standardField) {
-      if (standardField == null || standardField.getDefinition() == null || standardField.getDefinition().length() == 0) return EMPTY_STRING;
-      final int COLUMN_WIDTH = 105;
+    public static String buildComments(ReferenceStandardField referenceStandardField) {
+      if (referenceStandardField == null || referenceStandardField.getDefinition() == null || referenceStandardField.getDefinition().length() == 0) return EMPTY_STRING;
 
       //break every COLUMN_WIDTH characters only at word boundaries
-      return (standardField.getWikiPageUrl() != null && standardField.getWikiPageUrl().length() > 0 ? "\n        <!-- " + standardField.getWikiPageUrl() : "") +
-          standardField.getDefinition().replaceAll("--", "-").replaceAll(String.format("(.{1,%d})( +|$\\n?)|(.{1,%d})\n", COLUMN_WIDTH, COLUMN_WIDTH), "\n          $1")
+      return (referenceStandardField.getWikiPageUrl() != null && referenceStandardField.getWikiPageUrl().length() > 0 ?
+          "\n        <!-- " + referenceStandardField.getWikiPageUrl() : "") +
+          wrapColumns(referenceStandardField.getDefinition().replaceAll("--", "-"), "\n          ")
           + " -->\n";
     }
 
-    public static String buildComments(StandardEnumeration standardEnumeration) {
-      if (standardEnumeration == null || standardEnumeration.getDefinition() == null || standardEnumeration.getDefinition().length() == 0) return EMPTY_STRING;
-      final int COLUMN_WIDTH = 105;
+    public static String buildComments(ReferenceStandardLookup referenceStandardLookup) {
+      if (referenceStandardLookup == null || referenceStandardLookup.getDefinition() == null || referenceStandardLookup.getDefinition().length() == 0) return EMPTY_STRING;
 
       //break every COLUMN_WIDTH characters only at word boundaries
-      return (standardEnumeration.getWikiPageUrl() != null && standardEnumeration.getWikiPageUrl().length() > 0 ? "\n        <!-- " + standardEnumeration.getWikiPageUrl() : "") +
-          standardEnumeration.getDefinition().replaceAll("--", "-").replaceAll(String.format("(.{1,%d})( +|$\\n?)|(.{1,%d})\n", COLUMN_WIDTH, COLUMN_WIDTH), "\n          $1")
+      return (referenceStandardLookup.getWikiPageUrl() != null && referenceStandardLookup.getWikiPageUrl().length() > 0 ? "\n        <!-- " + referenceStandardLookup.getWikiPageUrl() : "") +
+          wrapColumns(referenceStandardLookup.getDefinition().replaceAll("--", "-"),"\n          ")
           + " -->\n";
     }
   }

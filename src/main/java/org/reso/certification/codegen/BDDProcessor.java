@@ -4,8 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.reso.commander.common.Utils;
-import org.reso.models.StandardEnumeration;
-import org.reso.models.StandardField;
+import org.reso.models.ReferenceStandardLookup;
+import org.reso.models.ReferenceStandardField;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,42 +29,42 @@ public class BDDProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void processNumber(StandardField row) {
+  void processNumber(ReferenceStandardField row) {
     markup.append(BDDTemplates.buildNumberTest(row));
   }
 
   @Override
-  void processStringListSingle(StandardField row) {
+  void processStringListSingle(ReferenceStandardField row) {
     markup.append(BDDTemplates.buildStringListSingleTest(row));
   }
 
   @Override
-  void processString(StandardField row) {
+  void processString(ReferenceStandardField row) {
     markup.append(BDDTemplates.buildStringTest(row));
   }
 
   @Override
-  void processBoolean(StandardField row) {
+  void processBoolean(ReferenceStandardField row) {
     markup.append(BDDTemplates.buildBooleanTest(row));
   }
 
   @Override
-  void processStringListMulti(StandardField row) {
+  void processStringListMulti(ReferenceStandardField row) {
     markup.append(BDDTemplates.buildStringListMultiTest(row));
   }
 
   @Override
-  void processDate(StandardField row) {
+  void processDate(ReferenceStandardField row) {
     markup.append(BDDTemplates.buildDateTest(row));
   }
 
   @Override
-  void processTimestamp(StandardField row) {
+  void processTimestamp(ReferenceStandardField row) {
     markup.append(BDDTemplates.buildTimestampTest(row));
   }
 
   @Override
-  void processCollection(StandardField row) {
+  void processCollection(ReferenceStandardField row) {
     LOG.debug("Collection Type is not supported!");
   }
 
@@ -106,7 +106,7 @@ public class BDDProcessor extends WorksheetProcessor {
      * @param field the field whose tags to extract
      * @return an array list containing tags on specific fields when they are present
      */
-    private static ArrayList<String> buildTags(StandardField field) {
+    private static ArrayList<String> buildTags(ReferenceStandardField field) {
       ArrayList<String> tags = new ArrayList<>();
 
       //use this to add each field name tag
@@ -128,7 +128,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return String.join("", padding) + s;
     }
 
-    private static String generateSynonymsMarkup(StandardField field) {
+    private static String generateSynonymsMarkup(ReferenceStandardField field) {
       String template = EMPTY_STRING;
 
       if (field.getSynonyms().size() > 0) {
@@ -138,7 +138,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildBooleanTest(StandardField field) {
+    public static String buildBooleanTest(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
 
       return "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
@@ -148,7 +148,7 @@ public class BDDProcessor extends WorksheetProcessor {
           generateSynonymsMarkup(field);
     }
 
-    public static String buildDateTest(StandardField field) {
+    public static String buildDateTest(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
 
       return "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
@@ -164,14 +164,14 @@ public class BDDProcessor extends WorksheetProcessor {
      * @param field the numeric field to build type markup for
      * @return a string containing specific markup for the given field
      */
-    public static String buildNumberTest(StandardField field) {
+    public static String buildNumberTest(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
 
       if (field.getSuggestedMaxPrecision() != null) return buildDecimalTest(field);
       else return buildIntegerTest(field);
     }
 
-    public static String buildDecimalTest(StandardField field) {
+    public static String buildDecimalTest(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
       String template =
           "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
@@ -195,7 +195,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildIntegerTest(StandardField field) {
+    public static String buildIntegerTest(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
 
       return "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
@@ -209,7 +209,7 @@ public class BDDProcessor extends WorksheetProcessor {
       if (standardEnumerationsMap.containsKey(lookupName)) {
         StringBuilder markup = new StringBuilder();
 
-        for (StandardEnumeration lookup : standardEnumerationsMap.get(lookupName)) {
+        for (ReferenceStandardLookup lookup : standardEnumerationsMap.get(lookupName)) {
           markup
               .append(padLeft("| ", EXAMPLES_PADDING_AMOUNT))
               .append(lookup.getLookupValue()).append(" | ")
@@ -223,7 +223,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return EMPTY_STRING;
     }
 
-    public static String buildStringListMultiTest(StandardField field) {
+    public static String buildStringListMultiTest(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
 
       final String enumMarkup = buildStandardEnumerationMarkup(field.getLookupStandardName());
@@ -250,7 +250,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildStringListSingleTest(StandardField field) {
+    public static String buildStringListSingleTest(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
 
       final String enumMarkup = buildStandardEnumerationMarkup(field.getLookupStandardName());
@@ -277,7 +277,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildStringTest(StandardField field) {
+    public static String buildStringTest(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
       String template =
           "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
@@ -293,7 +293,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return template;
     }
 
-    public static String buildTimestampTest(StandardField field) {
+    public static String buildTimestampTest(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
 
       return "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +

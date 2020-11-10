@@ -20,6 +20,7 @@ import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.Commander;
 import org.reso.commander.common.TestUtils;
 import org.reso.commander.common.TestUtils.TypeMappings;
+import org.reso.commander.common.Utils;
 import org.reso.models.IgnoredItem;
 import org.reso.models.Settings;
 
@@ -45,33 +46,36 @@ public class DataDictionary {
   WebAPITestContainer container;
 
   //TODO: make this a dynamic property based on DD version
-  public static final String REFERENCE_WORKSHEET = "DDv1.7-StandardAndDisplayNames-20200922210930847.xlsx";
-  public static final String REFERENCE_METADATA = "DDv1.7-StandardAndDisplayNames-20200922210930847.edmx";
+  public static final String REFERENCE_WORKSHEET = "RESODataDictionary-1.7.xlsx";
+  public static final String REFERENCE_METADATA = "RESODataDictionary-1.7.edmx";
 
-  static final AtomicReference<String> currentResourceName = new AtomicReference<>();
-  static final AtomicReference<Map<String, EdmMember>> foundMembers = new AtomicReference<>(new LinkedHashMap<>());
-  static final AtomicReference<Set<EdmMember>> foundStandardMembers = new AtomicReference<>(new LinkedHashSet<>());
-  static final AtomicReference<Map<String, String>> currentLookups = new AtomicReference<>();
-  static final AtomicReference<Map<String, Map<String, Set<String>>>> ignoredItems = new AtomicReference<>(new LinkedHashMap<>());
+  //local variables
+  private static final AtomicReference<String> currentResourceName = new AtomicReference<>();
+  private static final AtomicReference<Map<String, EdmMember>> foundMembers = new AtomicReference<>(new LinkedHashMap<>());
+  private static final AtomicReference<Set<EdmMember>> foundStandardMembers = new AtomicReference<>(new LinkedHashSet<>());
+  private static final AtomicReference<Map<String, String>> currentLookups = new AtomicReference<>();
+  private static final AtomicReference<Map<String, Map<String, Set<String>>>> ignoredItems = new AtomicReference<>(new LinkedHashMap<>());
+
+  private static XMLMetadata referenceMetadata = null;
+  private static boolean areMetadataValid = false;
 
   //named args
-  private static final String SHOW_RESPONSES = "showResponses";
-  private static final String PATH_TO_METADATA = "pathToMetadata";
-  private static final String PATH_TO_RESOSCRIPT = "pathToRESOScript";
+  private static final String SHOW_RESPONSES_ARG = "showResponses";
+  private static final String USE_STRICT_MODE_ARG = "strict";
+  private static final String PATH_TO_METADATA_ARG = "pathToMetadata";
+  private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final String LOOKUP_VALUE = "lookupValue";
 
   //extract any params here
-  private final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES));
-  private final String pathToMetadata = System.getProperty(PATH_TO_METADATA);
-  private final String pathToRESOScript = System.getProperty(PATH_TO_RESOSCRIPT);
+  private final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES_ARG));
+  private final boolean strictMode = Boolean.parseBoolean(System.getProperty(USE_STRICT_MODE_ARG));
+  private final String pathToMetadata = System.getProperty(PATH_TO_METADATA_ARG);
+  private final String pathToRESOScript = System.getProperty(PATH_TO_RESOSCRIPT_ARG);
 
+  //derived variables
   private final boolean isUsingRESOScript = pathToRESOScript != null;
   private final boolean isUsingMetadata = pathToMetadata != null;
 
-  private boolean isFieldContainedInMetadata(String fieldName) {
-    return container.getFieldMap().containsKey(currentResourceName.get())
-        && container.getFieldMap().get(currentResourceName.get()).containsKey(fieldName);
-  }
 
   @Given("a RESOScript or Metadata file are provided")
   public void aRESOScriptOrMetadataFileAreProvided() {
@@ -117,10 +121,25 @@ public class DataDictionary {
     }
   }
 
+  @And("the test container uses an Authorization Code or Client Credentials for authentication")
+  public void theTestContainerUsesAnAuthorizationCodeOrClientCredentialsForAuthentication() {
+    if (isUsingRESOScript) {
+      assertNotNull(container.getCommander());
+      assertTrue("ERROR: Commander must either have a valid Authorization Code or Client Credentials configuration.",
+          container.getCommander().isAuthTokenClient()
+              || (container.getCommander().isOAuth2Client() && container.getCommander().hasValidAuthConfig()));
+    }
+  }
+
   @When("a metadata file is provided")
   public void aMetadataFileIsProvided() {
+    boolean result = false;
     if (isUsingMetadata) {
-      assertTrue(pathToMetadata != null && Files.exists(Paths.get(pathToMetadata)));
+      result = pathToMetadata != null && Files.exists(Paths.get(pathToMetadata));
+      if (!result) {
+        LOG.error(getDefaultErrorMessage("Path to given metadata file does not exist: " + PATH_TO_METADATA_ARG + "=" + pathToMetadata));
+        System.exit(NOT_OK);
+      }
     }
   }
 
@@ -141,27 +160,21 @@ public class DataDictionary {
         container.setEdm(Commander.deserializeEdm(xmlMetadataString, container.getCommander().getClient()));
         assertTrue("Edm metadata MUST be valid!",
             Commander.validateMetadata(container.getEdm(), container.getCommander().getClient()));
+
+        //if we have gotten to this point without exceptions, then metadata are valid
+        areMetadataValid = container.hasValidMetadata();
+
       } catch (IOException e) {
         e.printStackTrace();
       }
     }
   }
 
-  @And("the test container uses an Authorization Code or Client Credentials for authentication")
-  public void theTestContainerUsesAnAuthorizationCodeOrClientCredentialsForAuthentication() {
-    if (isUsingRESOScript) {
-      assertNotNull(container.getCommander());
-      assertTrue("ERROR: Commander must either have a valid Authorization Code or Client Credentials configuration.",
-          container.getCommander().isAuthTokenClient()
-              || (container.getCommander().isOAuth2Client() && container.getCommander().hasValidAuthConfig()));
-    }
-  }
-
   @And("valid metadata were retrieved from the server")
   public void validMetadataWereRetrievedFromTheServer() {
+    boolean result = false;
 
     if (isUsingRESOScript && container.getShouldValidateMetadata()) {
-
       //request metadata from server using service root in RESOScript file
       TestUtils.assertXMLMetadataAreRequestedFromTheServer(container);
 
@@ -180,11 +193,20 @@ public class DataDictionary {
 
       //everything succeeded, mark validation successful
       container.setShouldValidateMetadata(false);
+
+      //if we have gotten to this point without exceptions, then metadata are valid
+      areMetadataValid = container.hasValidMetadata();
     }
   }
 
   @When("{string} exists in the {string} metadata")
   public void existsInTheMetadata(String fieldName, String resourceName) {
+
+    if (strictMode && !areMetadataValid) {
+      LOG.error(getDefaultErrorMessage("Metadata validation failed, but is required to pass when using strict mode!"));
+      System.exit(NOT_OK);
+    }
+
     assertNotNull(getDefaultErrorMessage("field name cannot be null!"), fieldName);
     assertNotNull(getDefaultErrorMessage("resource name cannot be null!"), resourceName);
 
@@ -243,12 +265,11 @@ public class DataDictionary {
     final EdmEnumType enumType = container.getEdm().getEnumType(fqdn);
 
     final Map<String, EdmMember> foundMembers = new LinkedHashMap<>();
-
     enumType.getMemberNames().forEach(name -> foundMembers.put(name, enumType.getMember(name)));
 
     if (foundMembers.size() > 0) {
       LOG.info("Found " + foundMembers.size() + " Enumeration"
-          + (foundMembers.size() != 1 ? "s" : "") + ":\n\t[" + String.join(", ", foundMembers.keySet()) + "]");
+          + (foundMembers.size() != 1 ? "s" : "") + ": " + Utils.wrapColumns("[" + String.join(", ", foundMembers.keySet()) + "]", 80, "\n\t"));
     }
 
     return foundMembers;
@@ -270,12 +291,12 @@ public class DataDictionary {
 
     if (intersection.size() > 0) {
       LOG.info("Found " + intersection.size() + " RESO Standard Enumeration"
-          + (intersection.size() != 1 ? "s" : "") + ":\n\t[" + String.join(", ", intersection) + "]");
+          + (intersection.size() != 1 ? "s" : "") + ": " + Utils.wrapColumns("[" + String.join(", ", intersection) + "]", "\n\t"));
     }
 
     if (standardMembers.size() > 0) {
       LOG.info(standardMembers.size() + " Possible RESO Standard Enumeration"
-          + (standardMembers.size() != 1 ? "s" : "") + ":\n\t[" + String.join(", ", standardMembers) + "]");
+          + (standardMembers.size() != 1 ? "s" : "") + ": " + Utils.wrapColumns("[" + String.join(", ", standardMembers) + "]", "\n\t"));
     }
 
     if (difference.size() > 0) {
@@ -461,7 +482,7 @@ public class DataDictionary {
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
     assertTrue(getDefaultErrorMessage("Lookups for field", fieldName, "MUST only contain Standard Enumerations!",
-        "\nFound the following non-standard enumerations:", "[" + String.join(", ", Sets.difference(foundMembers, standardMembers)) + "]"),
+        "\nFound the following non-standard enumerations:", Utils.wrapColumns("[" + String.join(", ", Sets.difference(foundMembers, standardMembers)) + "]")),
         standardMembers.containsAll(foundMembers));
 
     LOG.info("PASSED: Field \"" + fieldName + "\" only contains Standard Names!");
@@ -476,7 +497,7 @@ public class DataDictionary {
   }
 
   private static int getDistanceThreshold(String word) {
-    final double TOLERANCE = 0.20;
+    final double TOLERANCE = 0.25;
     return (int) (TOLERANCE * word.length());
   }
 
@@ -530,11 +551,10 @@ public class DataDictionary {
     }
 
     assertFalse(getDefaultErrorMessage("Lookups were found that are similar to RESO Standard Lookup Values!\n",
-        "{RESO Standard=Yours}\n", similarMembers.toString()),
+        similarMembers.keySet().stream().map(member -> "\t{RESO: " + member + ", Yours: " + similarMembers.get(member) + "}").collect(Collectors.joining("\n"))),
         similarMembers.size() > 0);
   }
 
-  XMLMetadata referenceMetadata = null;
   private XMLMetadata getReferenceMetadata() {
     if (referenceMetadata == null) {
       URL resource = Thread.currentThread().getContextClassLoader().getResource(REFERENCE_METADATA);
@@ -544,5 +564,10 @@ public class DataDictionary {
               container.getCommander().getClient());
     }
     return referenceMetadata;
+  }
+
+  private boolean isFieldContainedInMetadata(String fieldName) {
+    return container.getFieldMap().containsKey(currentResourceName.get())
+        && container.getFieldMap().get(currentResourceName.get()).containsKey(fieldName);
   }
 }

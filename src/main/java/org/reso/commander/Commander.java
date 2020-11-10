@@ -1,5 +1,6 @@
 package org.reso.commander;
 
+import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
@@ -23,6 +24,7 @@ import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.auth.OAuth2HttpClientFactory;
 import org.reso.auth.TokenHttpClientFactory;
 import org.reso.commander.common.TestUtils;
+import org.reso.models.MetadataReport;
 import org.xml.sax.*;
 
 import javax.xml.XMLConstants;
@@ -211,49 +213,19 @@ public class Commander {
    *
    * @param metadata any metadata in Edm format
    */
-  public static String getMetadataReport(Edm metadata) {
-    StringBuilder reportBuilder = new StringBuilder();
+  public static String generateMetadataReport(Edm metadata) {
+    MetadataReport report = new MetadataReport(metadata);
+    GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting();
+    gsonBuilder.registerTypeAdapter(MetadataReport.class, report);
 
-    reportBuilder.append("\n\n" + REPORT_DIVIDER);
-    reportBuilder.append("\nMetadata Report");
-    reportBuilder.append("\n" + REPORT_DIVIDER);
+    try {
+      FileUtils.copyInputStreamToFile(new ByteArrayInputStream(gsonBuilder.create().toJson(report).getBytes()),
+          new File("metadata-report.json"));
+    } catch (Exception ex) {
+      LOG.error(getDefaultErrorMessage(ex));
+    }
 
-    //Note: other treatments may be added to this summary info
-    metadata.getSchemas().forEach(schema -> {
-      reportBuilder.append("\n\nNamespace: ").append(schema.getNamespace());
-      reportBuilder.append("\n" + REPORT_DIVIDER_SMALL);
-
-      schema.getTypeDefinitions().forEach(a ->
-          reportBuilder.append("\nType Definition:").append(a.getName()));
-
-      schema.getEntityTypes().forEach(a -> {
-        reportBuilder.append("\nEntity Type: ").append(a.getName());
-        a.getKeyPropertyRefs().forEach(ref ->
-            reportBuilder.append("\n\tKey Field: ").append(ref.getName()));
-        a.getPropertyNames().forEach(n -> reportBuilder.append("\n\tName: ").append(n));
-      });
-
-      schema.getEnumTypes().forEach(edmEnumType -> {
-        reportBuilder.append("\nEnum Type: ")
-            .append(edmEnumType.getName())
-            .append(" (").append(schema.getNamespace()).append(", ")
-            .append(edmEnumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString())
-            .append(")");
-
-        edmEnumType.getMemberNames().forEach(n -> reportBuilder.append("\n\tName: ").append(n));
-      });
-
-      schema.getComplexTypes().forEach(a ->
-          reportBuilder.append("\nComplex Entity Type: ").append(a.getFullQualifiedName().getFullQualifiedNameAsString()));
-
-      schema.getAnnotationGroups().forEach(a ->
-          reportBuilder.append("\nAnnotation: ").append(a.getQualifier()).append(", Target Path: ").append(a.getTargetPath()));
-
-      schema.getTerms().forEach(a ->
-          reportBuilder.append("\nTerm: ").append(a.getFullQualifiedName().getFullQualifiedNameAsString()));
-    });
-
-    return reportBuilder.toString();
+    return report.toString();
   }
 
   /**
