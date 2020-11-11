@@ -1,3 +1,6 @@
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+
 plugins {
   // Apply the java plugin to add support for Java
   id 'java'
@@ -108,24 +111,45 @@ task testWebApiServer_1_0_2_Core() {
   }
 }
 
+String pathToMetadata = null,
+    pathToRESOScript = null,
+    certFileName = null,
+    certOutputDir = null
+
 // task for Data Dictionary 1.7
 task testDataDictionary_1_7() {
   group = 'RESO Certification'
-  description = "Runs Data Dictionary 1.7 Automated Acceptance Tests."
+  description = 'Runs Data Dictionary 1.7 Automated Acceptance Tests.'
   dependsOn jar
   doLast {
     javaexec {
-      main = "io.cucumber.core.cli.Main"
+      main = 'io.cucumber.core.cli.Main'
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
+
+      pathToMetadata = System.getProperty('pathToMetadata', null)
+      pathToRESOScript = System.getProperty('pathToRESOScript', null)
+      DateFormat df = new SimpleDateFormat("yyyyMMddHHMMssS")
+
+      if (pathToMetadata != null) {
+        certFileName = pathToMetadata
+            .substring(Math.max(pathToMetadata.lastIndexOf(File.separator)+1, 0), pathToMetadata.lastIndexOf('.'))
+      } else if (pathToRESOScript != null) {
+        certFileName = pathToRESOScript
+            .substring(Math.max(pathToRESOScript.lastIndexOf(File.separator)+1, 0), pathToRESOScript.lastIndexOf('.'))
+      }
+
+      certOutputDir = 'DD1.7-results' + (certFileName != null ? '-' + certFileName : '') + '-' + df.format(new Date())
+      System.setProperty('certOutputDir', certOutputDir)
+
       args = [
           '--strict',
           '--plugin',
           'pretty',
           '--plugin',
-          'json:build/data-dictionary-1.7.json',
+          'json:' + certOutputDir + '/data-dictionary-1.7.json',
           '--plugin',
-          'html:build/data-dictionary-1.7.html',
+          'html:' + certOutputDir + '/data-dictionary-1.7.html',
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
           'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0',
@@ -137,22 +161,44 @@ task testDataDictionary_1_7() {
   }
 }
 
-task generateReports() {
+task generateCertificationReports_DD_1_7() {
   group = 'RESO Certification'
-  description = "Generates reports from existing JSON test results."
+  description = 'Generates reports from existing JSON test results.\nExample: \n\t' +
+      './gradlew generateCertificationReport_DD_1_7 -DpathToJsonResults=/path/to/data-dictionary-1.7.json -Dminimal=true'
   doLast {
     javaexec {
-      classpath = sourceSets.main.runtimeClasspath
-      main = "org.reso.certification.reporting.ReportGenerator"
+      System.setProperty('reportDescription', 'RESO Data Dictionary 1.7 Certification Report')
       systemProperties = System.getProperties()
-      args = []
+      classpath = sourceSets.main.runtimeClasspath
+      main = 'org.reso.certification.reporting.CertificationReportGenerator'
+    }
+  }
+}
+
+task testDataDictionaryReferenceMetadata_1_7() {
+  group = 'RESO Certification'
+  description = 'Runs Data Dictionary tests against reference metadata'
+  doLast {
+    javaexec {
+      main = "io.cucumber.core.cli.Main"
+      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      System.setProperty('pathToMetadata', 'src/main/resources/RESODataDictionary-1.7.edmx')
+      systemProperties = System.getProperties()
+      args = [
+          '--strict',
+          '--plugin',
+          'pretty',
+          '--glue',
+          'org.reso.certification.stepdefs#DataDictionary',
+          'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
+      ]
     }
   }
 }
 
 //used for internal Commander Web API acceptance testing
 test {
-  dependsOn assemble, compileTestJava
+  dependsOn assemble, compileTestJava, testDataDictionaryReferenceMetadata_1_7
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"

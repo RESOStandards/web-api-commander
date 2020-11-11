@@ -229,7 +229,7 @@ public class App {
 
       } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT)) {
         APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT);
-        LOG.info(generateMetadataReport(deserializeEdmFromPath(inputFilename, commander.getClient())));
+        LOG.info(generateMetadataReport(deserializeEdmFromPath(inputFilename, commander.getClient()), inputFilename));
       } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.VALIDATE_METADATA)) {
         APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.VALIDATE_METADATA);
 

@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 
 import static java.nio.file.Paths.get;
 import static org.junit.Assert.assertNotNull;
+import static org.reso.certification.containers.WebAPITestContainer.EMPTY_STRING;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 /**
@@ -213,19 +214,25 @@ public class Commander {
    *
    * @param metadata any metadata in Edm format
    */
-  public static String generateMetadataReport(Edm metadata) {
+  public static String generateMetadataReport(Edm metadata, String fileName) {
+    final String DEFAULT_FILENAME = "metadata-report.json";
     MetadataReport report = new MetadataReport(metadata);
     GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting();
     gsonBuilder.registerTypeAdapter(MetadataReport.class, report);
 
     try {
       FileUtils.copyInputStreamToFile(new ByteArrayInputStream(gsonBuilder.create().toJson(report).getBytes()),
-          new File("metadata-report.json"));
+          new File(fileName != null ? fileName.replaceAll(".edmx|.xml", EMPTY_STRING)  + ".metadata-report.json"
+              : DEFAULT_FILENAME));
     } catch (Exception ex) {
       LOG.error(getDefaultErrorMessage(ex));
     }
 
     return report.toString();
+  }
+
+  public static String generateMetadataReport(Edm metadata) {
+    return generateMetadataReport(metadata, null);
   }
 
   /**

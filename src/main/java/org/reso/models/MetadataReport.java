@@ -5,6 +5,7 @@ import org.apache.olingo.commons.api.edm.*;
 import org.reso.commander.common.Utils;
 
 import java.lang.reflect.Type;
+import java.util.Date;
 import java.util.List;
 
 import static org.reso.commander.Commander.REPORT_DIVIDER;
@@ -24,9 +25,11 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
   public String toString() {
     StringBuilder reportBuilder = new StringBuilder();
 
-    reportBuilder.append("\n\n" + REPORT_DIVIDER);
-    reportBuilder.append("\nMetadata Report");
-    reportBuilder.append("\n" + REPORT_DIVIDER);
+    reportBuilder
+      .append("\n\n" + REPORT_DIVIDER)
+      .append("\nRESO Metadata Report")
+      .append("\n").append(new Date())
+      .append("\n" + REPORT_DIVIDER);
 
     JsonElement metadataReport = serialize(this, MetadataReport.class, null);
     reportBuilder.append(FieldJson.buildReportString(metadataReport));
@@ -35,8 +38,17 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
     return reportBuilder.toString();
   }
 
+  /**
+   * FieldJson uses a JSON payload with the following structure:
+   *
+   *    {
+   *       "resourceName": "Property",
+   *       "fieldName": "AboveGradeFinishedArea",
+   *       "type": "Edm.Decimal"
+   *     }
+   */
   private static final class FieldJson implements JsonSerializer<FieldJson> {
-    static final String OBJECT_TYPE_KEY = "objectType", OBJECT_TYPE = "field",
+    static final String
         RESOURCE_NAME_KEY = "resourceName", FIELD_NAME_KEY = "fieldName", TYPE_KEY = "type",
         VALUE_KEY= "value", ANNOTATIONS_KEY = "annotations", FIELDS_KEY = "fields";
 
@@ -84,7 +96,6 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
     @Override
     public JsonElement serialize(FieldJson src, Type typeOfSrc, JsonSerializationContext context) {
       JsonObject field = new JsonObject();
-      field.addProperty(OBJECT_TYPE_KEY, OBJECT_TYPE);
       field.addProperty(RESOURCE_NAME_KEY, src.resourceName);
       field.addProperty(FIELD_NAME_KEY, src.edmElement.getName());
       field.addProperty(TYPE_KEY, src.edmElement.getType().getFullQualifiedName().getFullQualifiedNameAsString());
@@ -109,8 +120,17 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
     }
   }
 
+  /**
+   * LookupJson uses a JSON payload with the following structure:
+   *
+   *    {
+   *       "lookupName": "org.reso.metadata.enums.CommunityFeatures",
+   *       "lookupValue": "Stables",
+   *       "type": "Edm.Int32"
+   *     }
+   */
   private static final class LookupJson implements JsonSerializer<LookupJson> {
-    static final String OBJECT_TYPE_KEY = "objectType", OBJECT_TYPE = "lookup",
+    static final String
         LOOKUP_NAME_KEY = "lookupName", LOOKUP_VALUE_KEY = "lookupValue",
         TYPE_KEY = "type", VALUE_KEY= "value", ANNOTATIONS_KEY = "annotations",
         LOOKUPS_KEY = "lookups";
@@ -159,7 +179,6 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
     @Override
     public JsonElement serialize(LookupJson src, Type typeOfSrc, JsonSerializationContext context) {
       JsonObject membersJsonObject = new JsonObject();
-      membersJsonObject.addProperty(OBJECT_TYPE_KEY, OBJECT_TYPE);
       membersJsonObject.addProperty(LOOKUP_NAME_KEY, src.edmEnumType.getFullQualifiedName().toString());
       membersJsonObject.addProperty(LOOKUP_VALUE_KEY, src.memberName);
       membersJsonObject.addProperty(TYPE_KEY, src.edmEnumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString());
@@ -185,7 +204,12 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
 
   @Override
   public JsonElement serialize(MetadataReport src, Type typeOfSrc, JsonSerializationContext context) {
-    final String GENERATED_ON_KEY = "generatedOn", FIELDS_KEY = "fields", LOOKUPS_KEY = "lookups";
+    final String
+        DESCRIPTION_KEY = "description", DESCRIPTION = "RESO Data Dictionary Metadata Report",
+        VERSION_KEY = "version", VERSION = "1.7",
+        GENERATED_ON_KEY = "generatedOn",
+        FIELDS_KEY = "fields",
+        LOOKUPS_KEY = "lookups";
 
     JsonArray fields = new JsonArray();
     JsonArray lookups = new JsonArray();
@@ -209,6 +233,8 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
     });
 
     JsonObject metadataReport = new JsonObject();
+    metadataReport.addProperty(DESCRIPTION_KEY, DESCRIPTION);
+    metadataReport.addProperty(VERSION_KEY, VERSION);
     metadataReport.addProperty(GENERATED_ON_KEY, Utils.getTimestamp());
     metadataReport.add(FIELDS_KEY, fields);
     metadataReport.add(LOOKUPS_KEY, lookups);

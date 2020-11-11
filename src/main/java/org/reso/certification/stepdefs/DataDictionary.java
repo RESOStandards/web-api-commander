@@ -38,6 +38,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 import static org.reso.commander.Commander.NOT_OK;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
+import static org.reso.commander.common.Utils.pluralize;
 
 public class DataDictionary {
   private static final Logger LOG = LogManager.getLogger(DataDictionary.class);
@@ -79,8 +80,10 @@ public class DataDictionary {
 
   @Given("a RESOScript or Metadata file are provided")
   public void aRESOScriptOrMetadataFileAreProvided() {
-    assertTrue("ERROR: one of pathToRESOScript OR pathToMetadata MUST be present in command arguments, see README",
-        pathToRESOScript != null || pathToMetadata != null);
+    if (pathToRESOScript == null && pathToMetadata == null) {
+      LOG.error(getDefaultErrorMessage("one of pathToRESOScript OR pathToMetadata MUST be present in command arguments, see README"));
+      System.exit(NOT_OK);
+    }
   }
 
   @And("a test container was successfully created from the given RESOScript file")
@@ -162,6 +165,7 @@ public class DataDictionary {
             Commander.validateMetadata(container.getEdm(), container.getCommander().getClient()));
 
         //if we have gotten to this point without exceptions, then metadata are valid
+        container.validateMetadata();
         areMetadataValid = container.hasValidMetadata();
 
       } catch (IOException e) {
@@ -269,7 +273,7 @@ public class DataDictionary {
 
     if (foundMembers.size() > 0) {
       LOG.info("Found " + foundMembers.size() + " Enumeration"
-          + (foundMembers.size() != 1 ? "s" : "") + ": " + Utils.wrapColumns("[" + String.join(", ", foundMembers.keySet()) + "]", 80, "\n\t"));
+          + pluralize(foundMembers.size()) + ": " + Utils.wrapColumns("[" + String.join(", ", foundMembers.keySet()) + "]", 80, "\n\t"));
     }
 
     return foundMembers;
@@ -291,17 +295,17 @@ public class DataDictionary {
 
     if (intersection.size() > 0) {
       LOG.info("Found " + intersection.size() + " RESO Standard Enumeration"
-          + (intersection.size() != 1 ? "s" : "") + ": " + Utils.wrapColumns("[" + String.join(", ", intersection) + "]", "\n\t"));
+          + pluralize(intersection.size()) + ": " + Utils.wrapColumns("[" + String.join(", ", intersection) + "]", "\n\t"));
     }
 
     if (standardMembers.size() > 0) {
       LOG.info(standardMembers.size() + " Possible RESO Standard Enumeration"
-          + (standardMembers.size() != 1 ? "s" : "") + ": " + Utils.wrapColumns("[" + String.join(", ", standardMembers) + "]", "\n\t"));
+          + pluralize(standardMembers.size()) + ": " + Utils.wrapColumns("[" + String.join(", ", standardMembers) + "]", "\n\t"));
     }
 
     if (difference.size() > 0) {
       LOG.info("Found " + difference.size() + " Non-standard Enumeration"
-          + (difference.size() != 1 ? "s" : "") + ":\n\t[" + String.join(", ", difference) + "]");
+          + pluralize(difference.size()) + ": [" + Utils.wrapColumns(String.join(", ", difference) + "]", "\n\t"));
     }
     return intersection.stream().map(members::get).collect(Collectors.toCollection(LinkedHashSet::new));
   }
@@ -550,9 +554,11 @@ public class DataDictionary {
       }
     }
 
-    assertFalse(getDefaultErrorMessage("Lookups were found that are similar to RESO Standard Lookup Values!\n",
-        similarMembers.keySet().stream().map(member -> "\t{RESO: " + member + ", Yours: " + similarMembers.get(member) + "}").collect(Collectors.joining("\n"))),
-        similarMembers.size() > 0);
+    assertFalse(getDefaultErrorMessage("Lookups were found that are similar to RESO Standard Lookup Values!\n\n",
+        similarMembers.keySet().stream()
+            .map(member -> "\t{RESO: " + member + ", Yours: " + similarMembers.get(member) + "}")
+            .collect(Collectors.joining("\n")),
+        "\n"), similarMembers.size() > 0);
   }
 
   private XMLMetadata getReferenceMetadata() {

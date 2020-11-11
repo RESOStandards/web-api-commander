@@ -40,7 +40,8 @@ public class Utils {
    */
   public static File createFile(String directoryName, String fileName, String content) {
     if (directoryName == null || fileName == null) return null;
-    String outputPath = System.getProperty("user.dir") + File.separator + directoryName;
+    String outputPath = directoryName.contains(System.getProperty("user.dir")) ? directoryName
+        : System.getProperty("user.dir") + File.separator + directoryName;
     File baseDirectory = new File(outputPath);
     FileWriter writer;
     File outputFile = null;
@@ -57,6 +58,10 @@ public class Utils {
       LOG.error("Filename: " + fileName + ". Could not create file: " + ex);
     }
     return outputFile;
+  }
+
+  public static String pluralize(int lengthAttribute) {
+    return lengthAttribute != 1 ? "s" : "";
   }
 
   final static int DEFAULT_COLUMN_WIDTH = 105;

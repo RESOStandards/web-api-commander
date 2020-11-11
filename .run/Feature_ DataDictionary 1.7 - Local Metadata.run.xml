@@ -1,0 +1,21 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Feature: DataDictionary 1.7 - Local Metadata" type="CucumberJavaRunConfigurationType" factoryName="Cucumber java">
+    <option name="CUCUMBER_CORE_VERSION" value="4.5" />
+    <option name="FILE_PATH" value="$PROJECT_DIR$/src/main/java/org/reso/certification/features/data-dictionary/v1-7-0/" />
+    <option name="GLUE" value="org.reso.certification.stepdefs" />
+    <option name="MAIN_CLASS_NAME" value="io.cucumber.core.cli.Main" />
+    <module name="web-api-commander.main" />
+    <option name="PROGRAM_PARAMETERS" value=" --plugin org.jetbrains.plugins.cucumber.java.run.CucumberJvm4SMFormatter --strict" />
+    <option name="SUGGESTED_NAME" value="Feature: web-api-server-1.0.2" />
+    <option name="VM_PARAMETERS" value="-DpathToMetadata=$PROJECT_DIR$/src/main/resources/RESODataDictionary-1.7.edmx -Dcucumber.filter.tags=&quot;&quot;" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="io.cucumber.core.cli.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
