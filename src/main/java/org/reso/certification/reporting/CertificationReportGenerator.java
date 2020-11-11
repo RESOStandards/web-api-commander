@@ -13,8 +13,13 @@ import org.reso.commander.common.Utils;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.reso.commander.Commander.NOT_OK;
+import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public class CertificationReportGenerator {
   private static final Logger LOG = LogManager.getLogger(CertificationReportGenerator.class);
@@ -26,8 +31,16 @@ public class CertificationReportGenerator {
   private static final boolean USE_MINIMAL_REPORT = Boolean.parseBoolean(System.getProperty("minimal", "false"));
   private static final String DEFAULT_REPORT_DESCRIPTION = "Certification Report";
   private static final String projectName = System.getProperty("reportDescription", DEFAULT_REPORT_DESCRIPTION);
+  private static final String MINIMAL_JSON_EXTENSION = ".minimal.json";
 
   public static void main(String[] args) {
+
+    if (!Files.exists(Paths.get(PATH_TO_JSON_RESULTS))) {
+      LOG.error(getDefaultErrorMessage("path to JSON results does not exist!" +
+          "\npathToJsonResults=\"" + PATH_TO_JSON_RESULTS + "\""));
+      System.exit(NOT_OK);
+    }
+
     List<String> jsonFiles = new ArrayList<>();
     Configuration configuration = new Configuration(new File(outputDirectoryName), projectName);
 
@@ -39,7 +52,7 @@ public class CertificationReportGenerator {
     reportBuilder.generateReports();
 
     //remove minimal report file
-    if (USE_MINIMAL_REPORT && jsonFiles.size() > 0 && jsonFiles.get(0).contains("minimal.json"))
+    if (USE_MINIMAL_REPORT && jsonFiles.size() > 0 && jsonFiles.get(0).contains(MINIMAL_JSON_EXTENSION))
       new File(jsonFiles.get(0)).deleteOnExit();
   }
 
@@ -92,7 +105,7 @@ public class CertificationReportGenerator {
 
       String outputFilename = PATH_TO_JSON_RESULTS
           .substring(PATH_TO_JSON_RESULTS.lastIndexOf(File.separator) + 1)
-          .replace(".json", ".minimal.json");
+          .replace(".json", MINIMAL_JSON_EXTENSION);
       return Utils.createFile(outputDirectoryName, outputFilename, filteredScenarios.toString()).toString();
 
     } catch (IOException e) {

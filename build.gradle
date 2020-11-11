@@ -129,7 +129,6 @@ task testDataDictionary_1_7() {
 
       pathToMetadata = System.getProperty('pathToMetadata', null)
       pathToRESOScript = System.getProperty('pathToRESOScript', null)
-      DateFormat df = new SimpleDateFormat("yyyyMMddHHMMssS")
 
       if (pathToMetadata != null) {
         certFileName = pathToMetadata
@@ -139,8 +138,8 @@ task testDataDictionary_1_7() {
             .substring(Math.max(pathToRESOScript.lastIndexOf(File.separator)+1, 0), pathToRESOScript.lastIndexOf('.'))
       }
 
+      DateFormat df = new SimpleDateFormat("yyyyMMddHHMMssS")
       certOutputDir = 'DD1.7-results' + (certFileName != null ? '-' + certFileName : '') + '-' + df.format(new Date())
-      System.setProperty('certOutputDir', certOutputDir)
 
       args = [
           '--strict',
@@ -161,10 +160,12 @@ task testDataDictionary_1_7() {
   }
 }
 
-task generateCertificationReports_DD_1_7() {
+task generateCertificationReport_DD_1_7() {
   group = 'RESO Certification'
-  description = 'Generates reports from existing JSON test results.\nExample: \n\t' +
-      './gradlew generateCertificationReport_DD_1_7 -DpathToJsonResults=/path/to/data-dictionary-1.7.json -Dminimal=true'
+  description = 'Generates reports from existing JSON test results.' +
+    '\n\nExample:' +
+    '\n./gradlew generateCertificationReport_DD_1_7 -DpathToJsonResults=/path/to/data-dictionary-1.7.json -Dminimal=true\n\n'
+
   doLast {
     javaexec {
       System.setProperty('reportDescription', 'RESO Data Dictionary 1.7 Certification Report')
@@ -177,7 +178,13 @@ task generateCertificationReports_DD_1_7() {
 
 task testDataDictionaryReferenceMetadata_1_7() {
   group = 'RESO Certification'
-  description = 'Runs Data Dictionary tests against reference metadata'
+  description = 'Runs Data Dictionary tests against reference metadata' +
+      '\n\nRESOScript Example:' +
+      '\n./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dcucumber.filter.tags=""' +
+      '\n\nMetadata File Example:' +
+      '\n./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dcucumber.filter.tags=""' +
+      '\n\nTo enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n\n'
+
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"

@@ -39,6 +39,7 @@ import static org.junit.Assume.assumeTrue;
 import static org.reso.commander.Commander.NOT_OK;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.Utils.pluralize;
+import static org.reso.commander.common.Utils.wrapColumns;
 
 public class DataDictionary {
   private static final Logger LOG = LogManager.getLogger(DataDictionary.class);
@@ -339,16 +340,16 @@ public class DataDictionary {
     //TODO: make functions
     switch (assertedTypeName) {
       case TypeMappings.DataDictionaryTypes.STRING:
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.STRING, "but found", foundTypeName),
+        assertTrue(wrapColumns(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.STRING, "but found", foundTypeName)),
             foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING));
         break;
       case TypeMappings.DataDictionaryTypes.DATE:
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.DATE, "but found", foundTypeName),
+        assertTrue(wrapColumns(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.DATE, "but found", foundTypeName)),
             foundTypeName.contentEquals(TypeMappings.ODataTypes.DATE));
         break;
       case TypeMappings.DataDictionaryTypes.DECIMAL:
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.DECIMAL, "OR",
-            TypeMappings.ODataTypes.DOUBLE, "but found", foundTypeName),
+        assertTrue(wrapColumns(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.DECIMAL, "OR",
+            TypeMappings.ODataTypes.DOUBLE, "but found", foundTypeName)),
             foundTypeName.contentEquals(TypeMappings.ODataTypes.DECIMAL)
                 || foundTypeName.contentEquals(TypeMappings.ODataTypes.DOUBLE));
         break;
@@ -357,9 +358,9 @@ public class DataDictionary {
             || foundTypeName.contentEquals(TypeMappings.ODataTypes.INT32)
             || foundTypeName.contentEquals(TypeMappings.ODataTypes.INT64);
 
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.INT64,
+        assertTrue(wrapColumns(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.INT64,
             "OR", TypeMappings.ODataTypes.INT32,
-            "OR", TypeMappings.ODataTypes.INT16, "but found", foundTypeName),
+            "OR", TypeMappings.ODataTypes.INT16, "but found", foundTypeName)),
             isIntegerType);
         break;
       case TypeMappings.DataDictionaryTypes.BOOLEAN:
@@ -368,12 +369,12 @@ public class DataDictionary {
         break;
       case TypeMappings.DataDictionaryTypes.SINGLE_ENUM:
         if (foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING)) {
-          LOG.error(getDefaultErrorMessage("String types are not allowed for enumerated fields at the current time.", "\nSee RCP-031 for further information:",
-              "https://members.reso.org/pages/viewpage.action?pageId=67962918#RCP-WEBAPI-031DataDictionaryRepresentationintheWebAPI-DataTypeMappings.1"));
+          LOG.error(wrapColumns(getDefaultErrorMessage("String types are not allowed for enumerated fields at the current time.", "\nSee RCP-031 for further information:",
+              "https://members.reso.org/pages/viewpage.action?pageId=67962918#RCP-WEBAPI-031DataDictionaryRepresentationintheWebAPI-DataTypeMappings.1")));
         }
 
-        assertFalse(getDefaultErrorMessage("Enumerated data type MUST declare a unique nominal type.",
-            "Found primitive type of", foundTypeName, "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565"),
+        assertFalse(wrapColumns(getDefaultErrorMessage("Enumerated data type MUST declare a unique nominal type.",
+            "Found primitive type of", foundTypeName, "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565")),
             isPrimitiveType);
 
         //check for enum type by FQDN in the Edm cached in the container
@@ -383,24 +384,24 @@ public class DataDictionary {
             || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT32)
             || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT64);
 
-        assertTrue(getDefaultErrorMessage("Enumerated Types MUST use an underlying type of",
-            TypeMappings.ODataTypes.INT16, "OR", TypeMappings.ODataTypes.INT32,  "OR", TypeMappings.ODataTypes.INT64), isIntegerType);
+        assertTrue(wrapColumns(getDefaultErrorMessage("Enumerated Types MUST use an underlying type of",
+            TypeMappings.ODataTypes.INT16, "OR", TypeMappings.ODataTypes.INT32,  "OR", TypeMappings.ODataTypes.INT64)), isIntegerType);
 
-        assertNotNull(getDefaultErrorMessage(
-            "could not find a definition for", foundTypeName, "in the Entity Data Model!"), enumType);
+        assertNotNull(wrapColumns(getDefaultErrorMessage(
+            "could not find a definition for", foundTypeName, "in the Entity Data Model!")), enumType);
 
-        assertFalse(getDefaultErrorMessage("IsFlags=\"true\" but MUST be false for single-valued enumerations!"),
+        assertFalse(wrapColumns(getDefaultErrorMessage("IsFlags=\"true\" but MUST be false for single-valued enumerations!")),
             enumType.isFlags());
         break;
       case TypeMappings.DataDictionaryTypes.MULTI_ENUM:
         if (foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING)) {
-          LOG.error(getDefaultErrorMessage("String types are not allowed for enumerated fields at the current time.", "\nSee RCP-031 for further information:",
-              "https://members.reso.org/pages/viewpage.action?pageId=67962918#RCP-WEBAPI-031DataDictionaryRepresentationintheWebAPI-DataTypeMappings.1"));
+          LOG.error(wrapColumns(getDefaultErrorMessage("String types are not allowed for enumerated fields at the current time.", "\nSee RCP-031 for further information:",
+              "https://members.reso.org/pages/viewpage.action?pageId=67962918#RCP-WEBAPI-031DataDictionaryRepresentationintheWebAPI-DataTypeMappings.1")));
         }
 
-        assertFalse(getDefaultErrorMessage("Enumerated data type MUST declare a unique nominal type.",
+        assertFalse(wrapColumns(getDefaultErrorMessage("Enumerated data type MUST declare a unique nominal type.",
             "Found primitive type of", foundTypeName,
-            "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565"),
+            "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565")),
             isPrimitiveType);
 
         //check for enum type by FQDN in the Edm cached in the container
@@ -411,23 +412,25 @@ public class DataDictionary {
             || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT32)
             || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT64);
 
-        assertTrue(getDefaultErrorMessage("Enumerated Types MUST use an underlying type of",
-            TypeMappings.ODataTypes.INT16, "OR", TypeMappings.ODataTypes.INT32,  "OR", TypeMappings.ODataTypes.INT64), isIntegerType);
+        assertTrue(wrapColumns(getDefaultErrorMessage("Enumerated Types MUST use an underlying type of",
+            TypeMappings.ODataTypes.INT16, "OR", TypeMappings.ODataTypes.INT32,  "OR", TypeMappings.ODataTypes.INT64)),
+            isIntegerType);
 
-        assertNotNull(getDefaultErrorMessage(
-            "could not find a definition for", foundTypeName, "in the Entity Data Model!"), enumType);
+        assertNotNull(wrapColumns(getDefaultErrorMessage(
+            "could not find a definition for", foundTypeName, "in the Entity Data Model!")), enumType);
 
         boolean isCollection = container.getFieldMap().get(currentResourceName.get()).get(fieldName).isCollection();
         if (!isCollection) {
-          assertTrue(getDefaultErrorMessage("Multi-Enumerations MUST have IsFlags=\"true\""), enumType.isFlags());
+          assertTrue(wrapColumns(getDefaultErrorMessage("Multi-Enumerations MUST have IsFlags=\"true\"")),
+              enumType.isFlags());
         }
         break;
       case TypeMappings.DataDictionaryTypes.TIMESTAMP:
-        assertTrue(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.DATETIME_OFFSET, "but found", foundTypeName),
+        assertTrue(wrapColumns(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.DATETIME_OFFSET, "but found", foundTypeName)),
             foundTypeName.contentEquals(TypeMappings.ODataTypes.DATETIME_OFFSET));
         break;
       default:
-        fail(getDefaultErrorMessage("could not find data type mapping for", assertedTypeName));
+        fail(wrapColumns(getDefaultErrorMessage("could not find data type mapping for", assertedTypeName)));
         break;
     }
   }
@@ -485,8 +488,8 @@ public class DataDictionary {
             .map(CsdlEnumMember::getName)
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
-    assertTrue(getDefaultErrorMessage("Lookups for field", fieldName, "MUST only contain Standard Enumerations!",
-        "\nFound the following non-standard enumerations:", Utils.wrapColumns("[" + String.join(", ", Sets.difference(foundMembers, standardMembers)) + "]")),
+    assertTrue("\n" + getDefaultErrorMessage("Lookups for field", fieldName, "MUST only contain Standard Enumerations!",
+        "\nFound the following non-standard enumerations:", Utils.wrapColumns("[" + String.join(", ", Sets.difference(foundMembers, standardMembers)) + "]")) + "\n",
         standardMembers.containsAll(foundMembers));
 
     LOG.info("PASSED: Field \"" + fieldName + "\" only contains Standard Names!");
@@ -495,8 +498,8 @@ public class DataDictionary {
   @And("the following synonyms for {string} MUST NOT exist in the metadata")
   public void theFollowingSynonymsForMUSTNOTExistInTheMetadata(String fieldName, List<String> synonyms) {
     synonyms.forEach(synonym ->
-        assertFalse(getDefaultErrorMessage("Synonym", "\"" + synonym + "\"", "of fieldName", "\"" + fieldName + "\"", "found in the metadata!",
-            "\nSynonyms are not allowed!"),
+        assertFalse(wrapColumns(getDefaultErrorMessage("Synonym", "\"" + synonym + "\"", "of fieldName", "\"" + fieldName + "\"", "found in the metadata!",
+            "\nSynonyms are not allowed!")),
             container.getFieldMap(currentResourceName.get()).containsKey(synonym)));
   }
 
@@ -554,7 +557,7 @@ public class DataDictionary {
       }
     }
 
-    assertFalse(getDefaultErrorMessage("Lookups were found that are similar to RESO Standard Lookup Values!\n\n",
+    assertFalse("\n" + getDefaultErrorMessage("Lookups were found that are similar to RESO Standard Lookup Values!\n\n",
         similarMembers.keySet().stream()
             .map(member -> "\t{RESO: " + member + ", Yours: " + similarMembers.get(member) + "}")
             .collect(Collectors.joining("\n")),

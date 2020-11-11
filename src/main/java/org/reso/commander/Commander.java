@@ -319,9 +319,9 @@ public class Commander {
       return client.metadataValidation().isServiceDocument(metadata)
           && client.metadataValidation().isV4Metadata(metadata);
     } catch (NullPointerException nex) {
-      LOG.error("ERROR: Validation Failed! Null pointer exception while trying to validate metadata.");
+      LOG.error(getDefaultErrorMessage("Metadata validation Failed! See error messages and commander.log for further information."));
     } catch (Exception ex) {
-      LOG.error("ERROR: Validation Failed! General error occurred when validating metadata.\n" + ex.getMessage());
+      LOG.error(getDefaultErrorMessage("Metadata validation Failed! General error occurred when validating metadata.\n" + ex.getMessage()));
       if (ex.getCause() != null) {
         LOG.error("Caused by: " + ex.getCause().getMessage());
       }
@@ -344,9 +344,9 @@ public class Commander {
       //if Edm metadata are invalid, the previous line will throw an exception and this line won't be reached.
       return true;
     } catch (NullPointerException nex) {
-      LOG.error("ERROR: Validation Failed! Null pointer exception while trying to validate metadata.");
+      LOG.error(getDefaultErrorMessage("Metadata validation Failed! See error messages and commander.log for further information."));
     } catch (Exception ex) {
-      LOG.error("ERROR: Validation Failed! General error occurred when validating metadata.\n" + ex.getMessage());
+      LOG.error(getDefaultErrorMessage("Metadata validation Failed! General error occurred when validating metadata.\n" + ex.getMessage()));
       if (ex.getCause() != null) {
         LOG.error("Caused by: " + ex.getCause().getMessage());
       }
