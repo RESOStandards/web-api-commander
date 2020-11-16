@@ -507,7 +507,7 @@ You may filter by tags in any of the Web API or Data Dictionary tests. These are
 $ gradle testWebAPIServerCore_1_0_2 -DpathToRESOScript=/path/to/your.web-api-server.core.1.0.2.resoscript -Dcucumber.filter.tags="@metadata"
 ```
 
-** Run Data Dictionary Tests on IDX Fields Only**
+**Run Data Dictionary Tests on IDX Fields Only**
 ```
 $ ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/your/dd1.7.resoscript -DshowResponses=true -Dcucumber.filter.tags="@IDX"
 ```
