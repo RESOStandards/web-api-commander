@@ -23,10 +23,7 @@ import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public class CertificationReportGenerator {
   private static final Logger LOG = LogManager.getLogger(CertificationReportGenerator.class);
-
-  private static final String defaultPathToJsonResults = "build/data-dictionary-1.7.json";
-
-  private static final String PATH_TO_JSON_RESULTS = System.getProperty("pathToJsonResults", defaultPathToJsonResults);
+  private static final String PATH_TO_JSON_RESULTS = System.getProperty("pathToJsonResults", null);
   private static final String outputDirectoryName = PATH_TO_JSON_RESULTS.substring(0, PATH_TO_JSON_RESULTS.lastIndexOf(File.separator)); //"DD-1.7-report-" + Utils.getTimestamp();
   private static final boolean USE_MINIMAL_REPORT = Boolean.parseBoolean(System.getProperty("minimal", "false"));
   private static final String DEFAULT_REPORT_DESCRIPTION = "Certification Report";
@@ -35,9 +32,9 @@ public class CertificationReportGenerator {
 
   public static void main(String[] args) {
 
-    if (!Files.exists(Paths.get(PATH_TO_JSON_RESULTS))) {
+    if (PATH_TO_JSON_RESULTS == null || !Files.exists(Paths.get(PATH_TO_JSON_RESULTS))) {
       LOG.error(getDefaultErrorMessage("path to JSON results does not exist!" +
-          "\npathToJsonResults=\"" + PATH_TO_JSON_RESULTS + "\""));
+          (PATH_TO_JSON_RESULTS != null ? "\npathToJsonResults=\"" + PATH_TO_JSON_RESULTS + "\"" : "")));
       System.exit(NOT_OK);
     }
 

@@ -1,345 +1,228 @@
+
 # RESO Web API Commander
 
-[![CodeFactor](https://www.codefactor.io/repository/github/resostandards/web-api-commander/badge)](https://www.codefactor.io/repository/github/resostandards/web-api-commander)  ![Java CI with Gradle](https://github.com/RESOStandards/web-api-commander/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=master)
+![CodeFactor](https://www.codefactor.io/repository/github/resostandards/web-api-commander/badge)](https://www.codefactor.io/repository/github/resostandards/web-api-commander)  ![Java CI with Gradle](https://github.com/RESOStandards/web-api-commander/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=master)
 
-The RESO Web API Commander is a command line Java application that uses
-the Apache Olingo library to provide OData Client functionality as well as RESO Web API and Data Dictionary Certification through [Cucumber JVM](https://cucumber.io/docs/installation/java/).
-
-- [Getting Started](#getting-started)
-- [Java and the JDK](#java-and-the-jdk)
-- [Display Help](#display-help)
-- [Authentication](#authentication)
-- [Getting Metadata](#getting-metadata)
-- [Validating Metadata stored in an EDMX file](#validating-metadata-stored-in-an-edmx-file)
-- [Getting results from a given `uri`](#getting-results-from-a-given-uri)
-- [Getting raw results from a given `uri`](#getting-raw-results-from-a-given-uri)
-- [Converting metadata to Open API 3 format](#converting-metadata-to-open-api-3-format)
-- [Running RESOScript Files](#running-resoscript-files)
-- [Automated Web API Testing (beta)](#automated-web-api-testing-beta)
-  * [Cucumber Feature Specifications](#cucumber-feature-specifications)
-  * [Testing Environment](#testing-environment)
-  * [Web API Usage](#web-api-usage)
-  * [Running Web API Tests with the Gradle Wrapper](#running-web-api-tests-with-the-gradle-wrapper)
-  * [Convenience Methods for Web API 1.0.2 Server Core Certification](#convenience-methods-for-web-api-102-server-core-certification)
-  * [Web API Program Output](#web-api-program-output)
-- [Docker](#docker)
-- [Logging](#logging)
-- [Gradle Commands](#gradle-commands)
-- [Coming Soon](#coming-soon)
+The RESO Web API Commander is an OData client library and command-line client, as well as an automated RESO Certification testing tool.
 
 ## Getting Started
+To begin using the Commander, choose one of the following topics:
 
-The RESO Commander may be used in the following ways:
-* [As a Web API Client](#using-the-commander-as-a-web-api-client) 
-* [As an automated testing tool for the RESO Web API](#web-api-usage) 
-* [As an automated testing tool for the RESO Data Dictionary](#data-dictionary-usage)
+[Command-line Web API Tools](#command-line-web-api-tools)
+[RESO Certification](#reso-certification)
+[Commander as a Web API client library](#using-the-commander-as-a-web-api-client-library)
 
-Before you can use the RESO Commander, you must have a Java 1.8-10 JDK installed. 
+# Command-line Web API Tools
+**Introduction**
+[Java Requirements](#java-requirements)  
+[Display Help](#display-help)  
+[Authentication](#authentication)  
 
-### Java and the JDK
+**Client Commands**
+[Getting Metadata](#getting-metadata)  
+[Validating Metadata stored in an EDMX file](#validating-metadata-stored-in-an-edmx-file)  
+[Saving Results from a Given `uri`](#saving-results-from-a-given-uri)
+[Running RESOScript Files](#running-resoscript-files)
 
-Your operating system probably already has a Java runtime installed. This is all you need to run the [Commander as a Web API Client](#using-the-commander-as-a-web-api-client). 
+**Additional Commands**
+[Generating RESO Data Dictionary Acceptance Tests](#generating-data-dictionary-acceptance-tests)
+[Generating RESO Reference Metadata](#generating-reso-reference-metadata)
+[Converting metadata to Open API 3 format](#converting-metadata-to-open-api-3-format)  
 
-To run the Commander as an automated testing tool, the Java JDK 1.8.x is required. Java 10 will work as well, but Java JDK 11+ hasn't been tested yet and may not behave as expected.
 
-To check your version of Java, type: 
+## Java Requirements
+Your operating system probably already has a Java Runtime Environment (JRE) installed. This is all you need to run the [Commander as a Web API Client](#using-the-commander-as-a-web-api-client). 
 
+To check your version of Java, type the following in a command line environment:
 ```
 $ java -version
 ```
-If you have the Java SE runtime installed, the output will look similar to the following:
+If you have the Java SE Runtime Environment installed, the output will look similar to the following:
 ```
 $ java -version
 Java version "1.8.x" (or a higher version)
 Java<TM> SE Runtime Environment ...
 ```
+If you don't see something like this, you need to install the [Java SE](https://www.oracle.com/java/technologies/javase-jre8-downloads.html) runtime.
 
-If you have a Java JDK installed, your output will look something like:
-```
-$ java -version
-openjdk version "1.8.0_265"
-OpenJDK Runtime Environment (build 1.8.0_265-8u265-b01-0ubuntu2~20.04-b01)
-OpenJDK 64-Bit Server VM (build 25.265-b01, mixed mode)
-```
-
-If you don't see something like this, you may need to install a Java SE Runtime or JDK.
-* To use the Commander as a Web API Client: use [Java SE](https://www.oracle.com/java/technologies/javase-jre8-downloads.html).
-* To use the Commander as an automated testing tool, 
-** [Open JDK is recommended](https://openjdk.java.net/install/index.html).
-** [Oracle's SE Development kit may also be used](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html), but there may be additional licensing terms to accept.
-
-Once the Java SE Runtime is installed, you may [download the Commander JAR file](https://github.com/RESOStandards/web-api-commander/tree/master/build/libs) 
+Once the Java SE Runtime is installed, you may [download the Commander JAR file](build/libs/web-api-commander.jar) 
 
 ## Display Help
 
-Assuming [you have downloaded `web-api-commander.jar`](https://github.com/RESOStandards/web-api-commander/tree/master/build/libs) at this point, help is available from the command line by passing `--help` OR just passing no arguments. 
-
+Assuming [you've downloaded `web-api-commander.jar`](build/libs/web-api-commander.jar) at this point, help is available from the command line by passing `--help` or just passing no arguments, as follows:
 ```
-/path/to/web-api-commander$ java -jar web-api-commander.jar
+$ java -jar path/to/web-api-commander.jar
 ```
 
 Doing so displays the following information:
-
 ```
 usage: java -jar web-api-commander
-    --bearerToken <b>       Bearer token to be used with the request.
-    --contentType <t>       Results format: JSON (default),
-                            JSON_NO_METADATA, JSON_FULL_METADATA, XML.
-    --entityName <n>        The name of the entity to fetch, e.g.
-                            Property.
-    --getEntities           Executes GET on <uri> using the given
-                            <bearerToken> and optional <serviceRoot> when
-                            --useEdmEnabledClient is specified. Optionally
-                            takes a <limit>, which will fetch that number
-                            of results. Pass --limit -1 to fetch all
-                            results.
-    --getMetadata           Fetches metadata from <serviceRoot> using
-                            <bearerToken> and saves results in
-                            <outputFile>.
-    --help                  print help
-    --inputFile <i>         Path to input file.
-    --limit <l>             The number of records to fetch, or -1 to fetch
-                            all.
-    --outputFile <o>        Path to output file.
-    --runRESOScript         Runs commands in RESOScript file given as
-                            <inputFile>.
-    --saveRawGetRequest     Performs GET from <requestURI> using the given
-                            <bearerToken> and saves output to
-                            <outputFile>.
-    --serviceRoot <s>       Service root URL on the host.
-    --uri <u>               URI for raw request. Use 'single quotes' to
-                            enclose.
-    --useEdmEnabledClient   present if an EdmEnabledClient should be used.
-    --validateMetadata      Validates previously-fetched metadata in the
-                            <inputFile> path.
-
+    --bearerToken <b>             Bearer token to be used with the
+                                  request.
+    --contentType <t>             Results format: JSON (default),
+                                  JSON_NO_METADATA, JSON_FULL_METADATA,
+                                  XML.
+    --entityName <n>              The name of the entity to fetch, e.g.
+                                  Property.
+    --generateDDAcceptanceTests   Generates acceptance tests in the
+                                  current directory.
+    --generateMetadataReport      Generates metadata report from given
+                                  <inputFile>.
+    --generateReferenceEDMX       Generates reference metadata in EDMX
+                                  format.
+    --getMetadata                 Fetches metadata from <serviceRoot>
+                                  using <bearerToken> and saves results in
+                                  <outputFile>.
+    --help                        print help
+    --inputFile <i>               Path to input file.
+    --outputFile <o>              Path to output file.
+    --runRESOScript               Runs commands in RESOScript file given
+                                  as <inputFile>.
+    --saveGetRequest              Performs GET from <requestURI> using the
+                                  given <bearerToken> and saves output to
+                                  <outputFile>.
+    --serviceRoot <s>             Service root URL on the host.
+    --uri <u>                     URI for raw request. Use 'single quotes'
+                                  to enclose.
+    --validateMetadata            Validates previously-fetched metadata in
+                                  the <inputFile> path.
 ```
-
-When using commands, if arguments aren't provided, feedback will be displayed in the terminal, as well as the help screen, 
-which will show how to pass each required argument. 
+When using commands, if required arguments aren't provided, relevant feedback will be displayed in the terminal.
 
 ## Authentication
-When using the RESO Commander from the terminal, bearer tokens are the currently-supported authentication mechanism. 
-Please see subsequent sections for how to use bearer tokens to accomplish tasks other than fully-automated testing, 
-[discussed elsewhere in this README](#automated-web-api-testing-beta).
+The RESO Commander only supports passing OAuth2 "Bearer" tokens from the command line at this time. For those using OAuth2 Client Credentials, please see the section on _[Running RESOScript files](#running-resoscript-files)_.
+
 
 ## Getting Metadata
-To get metadata, use the `--getMetadata` argument with the following 
+To get metadata from a given server, use the `--getMetadata` argument with the following 
 options:
 
 ```
-$ java -jar web-api-commander.jar --getMetadata --serviceRoot <s> --bearerToken <b> --outputFile <o>
+$ java -jar path/to/web-api-commander.jar --getMetadata --serviceRoot https://api.server.com/serviceRoot --outputFile metadata.xml --bearerToken abc123
 ```
 
-where `serviceRoot` is the path to the root of the OData WebAPI server.
+where `serviceRoot` is the path to the _root_ of the OData WebAPI server.
 
 Assuming everything goes well, metadata will be retrieved from the host 
-and written to the provided `--outputFile`.
-
-**Note**: additional validation is done after metadata have been received. 
-Errors in metadata won't cause the program to terminate, but validation 
-information will be displayed. Also, it's worth mentioning that some
-of the validation error messages "out-of-the-box" from the Olingo
-Library we're using to validate with can be pretty cryptic. Please
-open an issue if you find things that need better explanations. 
-
+and written to the provided `--outputFile`, and the following output will be displayed:
+```
+Requesting metadata from: https://api.server.com/serviceRoot/$metadata
+Metadata request succeeded.
+```
 
 ## Validating Metadata stored in an EDMX file
-Sometimes it's useful to validate an already-downloaded EDMX file. 
+Sometimes it's useful to validate a local OData XML Metadata (EDMX) file. 
 
-Since parsing EDMX is an incremental process, validation terminates 
-_each time_ invalid items are encountered. Therefore, the workflow for 
-correcting an EDMX document that contains errors would be to run the 
+Since parsing EDMX is an incremental process, validation terminates _each time_ invalid items are encountered. Therefore, the workflow for correcting an EDMX document that contains errors would be to run the 
 Commander repeatedly, fixing errors that are encountered along the way.
 
-To validate metadata that's already been downloaded, call the Web API 
-Commander with the following options:
-
+To validate metadata that's already been downloaded, call Commander with the following options, 
+adjusting the `path/to/web-api-commander.jar` and `--inputFile` path for your environment accordingly:
 ```
-$ java -jar web-api-commander.jar --validateMetadata --inputFile <i>
+$ java -jar path/to/web-api-commander.jar --validateMetadata --inputFile '/src/main/resources/RESODataDictionary-1.7.edmx' 
 ```
-
-where `inputFile` is the path to your EDMX file. Errors will be logged 
-according to the `log4j.properties` file used at runtime. 
-
-## Getting results from a given `uri`
-
-OData offers additional options for requesting data from a WebAPI server 
-beyond just receiving the raw server response (shown in the next example).
-
-In this case, the appropriate action is: `--getEntities`, which can be 
-called as follows:
-
+XML or OData validation errors will be displayed if any issues were found. If successful, the following message 
+should appear: 
 ```
-$ java -jar web-api-commander.jar --getEntities --uri <u> --bearerToken <b> --outputFile <o>
-``` 
-
-Make sure that any `uri` containing spaces or special characters is 
-wrapped in 'single quotes'. 
-
-When using the `--useEdmEnabledClient` option, results will be verified 
-against Server metadata after being downloaded. If this option is chosen, 
-then `--serviceRoot` is required so that the Web API Commander can pull 
-the Server's metadata in addition to the results from the given `--uri`
-
-The `getEntitySet` action also supports the `--contentType` option, 
-which will change how results are written. Currently supported options 
-are: `JSON`, `JSON_NO_METADATA`, `JSON_FULL_METADATA`, and `XML`.
-
-Finally, there's an "experimental" auto-paging option which allows 
-all records to be pulled from the Server. In order to use this option,
-pass `--limit -1` when using `--getEntities`. In the near future,
-an auto-resume feature will be added so that if something happens 
-during transfer, the process will resume from the last record consumed.
- 
-
-## Getting raw results from a given `uri`
-
-If additional processing using the OData Olingo library is not needed, 
-raw requests may be issued against the server instead.
-
-The `--saveRawGetRequest` action writes the raw response from a GET 
-request to the given `--uri` from the Web API server directly to the 
-given `--outputFile`.
-
-```
-$ java -jar web-api-commander.jar --saveRawGetRequest --uri <u> --bearerToken <b> --outputFile <o>
+Checking Metadata for validity...
+Valid Metadata!
 ```
 
-Results are not checked against Server Metadata and are not written in 
-any specific OData format.
+## Saving Results from a Given `uri`
+The `--saveGetRequest` action makes a request to a `--uri` using a given  `--bearerToken`, and saves the response to the given `--outputFile`.
 
-Make sure that any `uri` containing spaces or special characters is 
-wrapped in 'single quotes'. 
+For example:
+```
+$ java -jar build/libs/web-api-commander.jar --saveGetRequest --uri 'https://api.server.com/OData/Property?$filter=ListPrice gt 100000&$top=100' --bearerToken abc123 --outputFile response.json
+```
+If the response is successful, it will be written to the specified file and the following will be displayed on the console:
+```
+JSON Data fetched from: https://api.server.com/OData/Property?$filter=ListPrice gt 100000&top=100"
+	with response code: 200
+JSON Response saved to: response.json
+```
+Otherwise, errors will be displayed showing what went wrong during the request.
 
-Note: this option is currently being rolled into `--getEntities` with 
-`--contentType RAW`. Documentation will be updated once the change has 
-been made.
-  
-
-## Converting metadata to Open API 3 format
-See documentation regarding running the [nodejs-based tools in odata-openapi/lib/README.md](odata-openapi/lib/README.md).
 
 ## Running RESOScript Files
-The Web API Commander is able to run RESO's XML-based scripting format, otherwise known as a RESOScript.
+The Web API Commander is able to run files written using RESO's XML-based scripting format, also known as a RESOScript.
 
 In order to run an RESOScript file, use a command similar to the following:
 
 ```
-$ java -jar out/web-api-commander.jar --runRESOScript --i /path/to/your/inputFile --useEdmEnabledClient
+$ java -jar out/web-api-commander.jar --runRESOScript --inputFile /path/to/your/inputFile
 ```
 
-Notice that the EDM Enabled client has been requested in the above command. This turns on strict OData checking, which 
-performs additional validation on query strings as well as schema validation on responses, among other things. 
-This feature is optional when using the `--runRESOScript` option, and may be omitted. The recommendation is to use it.
+A results directory will be created from the RESOScript name and timestamp when it was run, and output will be shown as the requests are made. 
 
-When executing the Web API Commander, a results directory will be created as a sibling
-to the RESOScript file being run, with the directory name being generated from the RESOScript filename
-and the current timestamp. 
+Results will be saved to the filenames specified in the given RESOScript, and error files will be created when there are exceptions, with an ".ERROR" extension appended to them. 
 
-Within this directory will be a file for each RESOScript request that was run,
-and those that generated errors will have ".ERROR" appended to them. Error files contain the request that 
-was made as well as the Java exception that was thrown, which most frequently comes from the underlying
-OLingo library and provides a sufficient amount of information to determine what occurred with the query.
+**RESOScript File Format**
+For examples of files using the RESOScript format, see:
+* [Data Dictionary 1.7 RESOScript Template](sample-data-dictionary.1.7.0.resoscript)
+* [Web API Core 1.0.2 RESOScript Template](sample-web-api-server.core.1.0.2.resoscript)
 
-For those wanting more information, a `log4j.properties` file may be created (as shown below), or you may 
-use the DEBUG build of the application located in `/build/libs/` identified by `-DEBUG` in the Commander jar's file name.
 
-RESOScript files contain zero or more Settings, Parameters, and Requests. For example:
-```xml
-<?xml version="1.0" encoding="utf-8" ?>
-   <OutputScript>
-     <ClientSettings>
-       <ServerName></ServerName>
-       <ServerId></ServerId>
-       <WebAPIURI></WebAPIURI>
-       <AuthorizationURI></AuthorizationURI>
-       <TokenURI></TokenURI>
-       <RedirectURI></RedirectURI>
-       <AuthenticationType></AuthenticationType>
-       <BearerToken></BearerToken>
-       <ClientIdentification></ClientIdentification>
-       <ClientSecret></ClientSecret>
-       <ClientScope></ClientScope>
-     </ClientSettings>
-     <Parameters>
-       <Parameter Name="YourEndpointUrl" Value="https://yourserver.com/api?$filter=..." />
-     </Parameters>
-     <Requests>
-       <Request OutputFile="yourEndpointUrlResponse.json"         Url="*Parameter_YourEndpointUrl*" />
-       <!-- ... additional requests -->    
-     </Requests>
-   </OutputScript>
+## Generating RESO Data Dictionary Acceptance Tests
+The RESO Commander can be used to generate Data Dictionary acceptance tests from the currently approved [Data Dictionary Spreadsheet](src/main/resources/RESODataDictionary-1.7.xlsx). 
+
+The Commander project's copy of the sheet needs to be updated with a copy of the [DD Google Sheet](https://docs.google.com/spreadsheets/d/1SZ0b6T4_lz6ti6qB2Je7NSz_9iNOaV_v9dbfhPwWgXA/edit?usp=sharing) prior to generating reference metadata.
+
 ```
-
-The XML DTD for this schema is as follows:
-
-```dtd
-<!DOCTYPE OutputScript [
-  <!ELEMENT OutputScript (RESOScriptVersion|ClientSettings|Parameters|Requests)*>
-  <!ELEMENT RESOScriptVersion (#PCDATA)>
-  <!ELEMENT ClientSettings (WebAPIURI|AuthenticationType|BearerToken|ClientIdentification|ClientSecret|TokenURI|ClientScope)*>
-  <!ELEMENT WebAPIURI (#PCDATA)>
-  <!ELEMENT AuthenticationType (#PCDATA)>
-  <!ELEMENT BearerToken (#PCDATA)>
-  <!ELEMENT ClientIdentification (#PCDATA)>
-  <!ELEMENT ClientSecret (#PCDATA)>
-  <!ELEMENT TokenURI (#PCDATA)>
-  <!ELEMENT ClientScope (#PCDATA)>
-  <!ELEMENT Parameters (Parameter)*>
-  <!ELEMENT Parameter (#PCDATA)>
-  <!ATTLIST Parameter
-    Name CDATA #REQUIRED
-    Value CDATA #REQUIRED>
-  <!ELEMENT Requests (Request)*>
-  <!ELEMENT Request (#PCDATA)>
-  <!ATTLIST Request
-    OutputFile CDATA #REQUIRED
-    RequestId CDATA #REQUIRED
-    Url CDATA #REQUIRED>
-  ]>
+$ java -jar path/to/web-api-commander.jar --generateDDAcceptanceTests
 ```
+New Cucumber BDD acceptance tests will be generated and placed in a timestamped directory relative to your current path.
 
-## Automated Web API Testing (beta)
+To update the current tests, copy the newly generated ones into the [Data Dictionary BDD `.features` directory](src/main/java/org/reso/certification/features/data-dictionary/v1-7-0), run the `./gradlew build` task, and if everything works as expected, commit the newly generated tests. 
 
-Currently in development is the ability for the Commander to be able to perform fully-automated Web API testing, 
-upon being provided a valid RESOScript file with parameters for the given server. 
-See [the generic Web API Core RESOScript template for more info](sample-web-api-server.core.1.0.2.resoscript).
+## Generating RESO Data Dictionary Metadata
+In addition to generating DD acceptance tests, the RESO Commander can generate reference metadata based on the current reference [Data Dictionary Spreadsheet](src/main/resources/RESODataDictionary-1.7.xlsx). 
 
-### Cucumber Feature Specifications
+```
+$ java -jar path/to/web-api-commander.jar --generateReferenceEDMX --inputFile=src/main/resources/RESODataDictionary-1.7.xlsx
+```
+In order to update the Commander's version of the reference metadata, update the local copy of the [DD Google Sheet](https://docs.google.com/spreadsheets/d/1SZ0b6T4_lz6ti6qB2Je7NSz_9iNOaV_v9dbfhPwWgXA/edit?usp=sharing) _prior to_ generating metadata, replace [the local copy](src/main/resources/RESODataDictionary-1.7.edmx), and try running automated acceptance tests with `./gradlew build`.
 
-[Cucumber](https://cucumber.io) is being used to describe acceptance criteria in a higher-level DSL
-rather than encapsulating all of the test logic code. Cucumber's DSL is called [Gherkin](https://cucumber.io/docs/gherkin/) 
-and essentially allows backing test code to be organized in a logical manner that makes sense to analysts as well as 
-programmers.
 
-Testing output during runtime has been designed to be easy to read and during each step, the relevant 
-output for the step will be displayed in the terminal or in an IDE if you have chosen to use the testing tool 
-there. This can often be useful if debugging tests as a developer can step through backing test code as it's running
-and inspect requests and responses in a controlled manner. 
+## Converting metadata to Open API 3 format
+See documentation regarding running the [nodejs-based tools in odata-openapi/lib/README.md](odata-openapi/lib/README.md).
 
-### Testing Environment
+---
 
-Under the hood, [Gradle](https://gradle.org/) is being used for automation. It works across multiple platforms 
-and is friendly with both Docker and Cucumber so that tests may be automated on CI/CD platforms such as Jenkins, 
-Circle CI, Travis, or similar, and emit standard system codes during regression testing. 
- 
-It also provides pleasing command line interaction, and plays well with Cucumber by supporting the 
-ability to run individual or multiple tests using tags.
+# RESO Certification
+[Java and the JDK](#java-and-the-jdk)
+[Cloning Commander Repository](#cloning-commander-repository)
+[Cucumber Feature Specifications](#cucumber-feature-specifications)
+[Testing Environment](#testing-environment) 
+[Gradle Wrapper](#gradle-wrapper)
+[Automated RESO Web API Core Testing](#automated-web-api-core-testing-in-development)
+[Automated RESO Data Dictionary Testing](#automated-data-dictionary-testing)
 
-### Web API Usage
 
-The Commander may be run in automated testing mode for a Web API 1.0.2 Server Certification using a terminal. 
-You do not need to use the Commander JAR file mentioned elsewhere in this step. 
-Instead, you will run the tests using Gradle for automation against a clean copy of the latest Commander code.
+## Java and the JDK
+To run the Commander as an _automated testing tool_, the Java JDK must be installed. The Commander has been tested with JDK 1.8 and 10 at this point. Those using JDK 11+, please [report issues](https://github.com/RESOStandards/web-api-commander/issues) if they arise.
 
-You will need to download the source code so you can run Gradle in the root of the directory. 
-This assumes that you also have Java 8 (1.8.0) installed, as mentioned elsewhere in this [`README`](#getting-started).
+To see whether you have the JDK installed, type the following using your local command line environment:
+```
+$ java -version
+```
+If you have a Java JDK installed, your output will look something like:
+```
+$ java -version
+openjdk version "1.8.0_275"
+OpenJDK Runtime Environment (build 1.8.0_275-8u275-b01-0ubuntu1~20.10-b01)
+OpenJDK 64-Bit Server VM (build 25.275-b01, mixed mode)
+```
+If you don't see something like this, you need to install the JDK:
+* [Open JDK is recommended](https://openjdk.java.net/install/index.html).
+* [Oracle's SE Development kit may also be used](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html), but there may be additional licensing terms to accept.
+
+## Cloning Commander Repository
+The Commander may be run in automated testing mode using a terminal. Automated testing assumes that you have a Java 1.8+ JDK installed, as mentioned elsewhere in this [`README`](#java-and-the-jdk).
 
 First, change into the directory you want to work in and clone the Commander repository. 
-You will need to have Git installed. 
-Chances are you already do, to check, open a command line and type `git` and if it's present, 
-it will print some info about the app. If not, [there are instructions here](https://git-scm.com/downloads).
+
+You will need to have Git installed. Chances are you already do, to check, open a command line and type `git` and if it's present, it will print some info about the app. If not, [there are installation instructions here](https://git-scm.com/downloads).
 
 ##### MacOS or Linux
 ```
@@ -351,22 +234,77 @@ $ git clone https://github.com/RESOStandards/web-api-commander.git
 C:\> git clone https://github.com/RESOStandards/web-api-commander.git
 ```
 
-This will clone the repository into a directory called web-api-commander relative to whatever directory you're currently in, 
-which also means you'll have a fresh copy of the latest code to execute. 
+This will clone the repository into a directory called web-api-commander relative to whatever directory you're currently in, which also means you'll have a fresh copy of the latest code to execute. 
 
 To refresh the code after you have downloaded it, issue the command `$ git pull` in the root of the directory that was just created. 
+
+## Cucumber Feature Specifications
+
+[Cucumber](https://cucumber.io) is being used to describe acceptance criteria in a higher-level DSL rather than encapsulating all of the test logic code. Cucumber's DSL is called [Gherkin](https://cucumber.io/docs/gherkin/) and essentially allows backing test code to be organized in a logical manner that makes sense to analysts as well as programmers.
+
+## Testing Environment
+
+Under the hood, [Gradle](https://gradle.org/) is being used for automation. It works across multiple platforms and is friendly with both Docker and Cucumber so that tests may be automated on CI/CD platforms such as Jenkins, Circle CI, Travis, or similar, and emit standard system codes during regression testing. 
+
+## Gradle Wrapper
+The [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) provides a convenient way to automatically download Gradle when running tests. 
+
+After you have cloned the repository, as shown in [a previous step](#cloning-commander-repository), change into the directory containing the source code from GitHub. Convenience methods have been provided for the various certification tasks. 
+
+## Gradle Tasks
+Once the Gradle Wrapper is set up, you should be able to run the `./gradlew tasks` command in from the root of the Commander source directory in a terminal window and see the list of available tasks. 
+```
+$ ./gradlew tasks
+
+> Task :tasks
+
+------------------------------------------------------------
+Tasks runnable from root project
+------------------------------------------------------------
+...
+```
+There are both _built-in tasks_ and _RESO tasks_.  
+The following section is what's of interest here:
+```
+RESO Certification tasks
+------------------------
+generateCertificationReport_DD_1_7 - Runs Data Dictionary 1.7 tests and creates a certification report
+  RESOScript Example:
+    ./gradlew generateCertificationReport_DD_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -Dminimal=true -Dstrict=true
+  Metadata File Example:
+    ./gradlew generateCertificationReport_DD_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dminimal=true -Dstrict=true
+  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.
+
+testDataDictionary_1_7 - Runs Data Dictionary 1.7 Automated Acceptance Tests and generates a "raw" report.
+  RESOScript Example:
+    ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dcucumber.filter.tags=""
+  Metadata File Example:
+    ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dcucumber.filter.tags=""
+  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.
+
+testDataDictionaryReferenceMetadata_1_7 - Runs Data Dictionary tests against reference metadata
+
+testWebApiServer_1_0_2_Core - Runs Web API Core 1.0.2 Automated Acceptance Tests.
+  Example: 
+    $ ./gradlew testWebApiServer_1_0_2_Core -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true
+```
  
-### Running Web API Tests with the Gradle Wrapper
-The [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) provides a convenient way to automatically install Gradle when running tests. 
+## Automated RESO Web API Core Testing (in-development)
+Automated Web API Core automated testing tools are currently in development. See [Issue 34](https://github.com/RESOStandards/web-api-commander/issues/34) for progress.
 
-After you have cloned the repository, as shown in the previous step, change into the directory containing 
-the source code from GitHub. Convenience methods have been provided for the various certification tasks. 
+To use the automated RESO testing tools, you must have a [JDK installed](#java-and-the-jdk).
 
-Prior to using the Commander for automated testing, you need to ensure your RESOScript has been created. 
+### Web API Core RESOScript Template
+To use the Commander for automated Web API Core testing, you need a RESOScript.
+
 For Web API 1.0.2 Server Core Certification, use [this resoscript](sample-web-api-server.core.1.0.2.resoscript) as a template. 
- 
 
-### Convenience Methods for Web API 1.0.2 Server Certification
+For more information regarding Parameters and Client Settings, see the [Web API Walkthrough](https://github.com/RESOStandards/web-api-commander/wiki/Walkthrough:-Automated-Web-API-Certification-Using-the-RESO-Commander#configuring-the-resoscript-file) (in-progress).
+
+### Web API Cucumber Acceptance Tests
+The Cucumber BDD acceptance tests for Web API 1.0.2 Core certification are [here](https://github.com/RESOStandards/web-api-commander/blob/issue-37-data-dictionary-testing/src/main/java/org/reso/certification/features/web-api/web-api-server.core.1.0.2.feature).  If you have any questions, please [send us an email](mailto:dev@reso.org).
+
+### Gradle Tasks for Web API 1.0.2 Server Certification
 While you may use tags to filter tests as you choose, explained in the next section, it's convenient
 to be able to run a predefined set of tests Web API Core Certification. 
 
@@ -386,12 +324,10 @@ $ ./gradlew testWebAPIServerCore_1_0_2 -DpathToRESOScript=/path/to/your.web-api-
 C:\path\to\web-api-commander> gradlew testWebAPIServerCore_1_0_2 -DpathToRESOScript=C:\path\to\your.web-api-server.core.1.0.2.resoscript -DshowResponses=true
 ```
 
-*Note: the first time you run these tasks, they will take some time as the environment must be configured and 
-code is being compiled from the contents of the source directory downloaded in the previous step. 
+*Note: the first time you run these tasks, they will take some time as the environment must be configured and code is being compiled from the contents of the source directory downloaded in the previous step. 
 
 #### Advanced feature: Tag Filtering 
-You may also filter by tags. These are the items in the Cucumber .feature files prefixed by an `@` symbol. Expressions 
-may also be used with tags. See the [Cucumber Documentation](https://cucumber.io/docs/cucumber/api/#tags) for more information. 
+You may also filter by tags. These are the items in the Cucumber .feature files prefixed by an `@` symbol. Expressions may also be used with tags. See the [Cucumber Documentation](https://cucumber.io/docs/cucumber/api/#tags) for more information. 
 
 ##### MacOS or Linux
 ```
@@ -406,20 +342,15 @@ C:\path\to\web-api-commander> gradlew.bat testWebAPIServerCore_1_0_2 -DpathToRES
 This would run only the tests marked as `@metadata` in the 
 [Web API Server 1.0.2 `.feature` file](./src/main/java/org/reso/certification/features/web-api/web-api-server.core.1.0.2.feature).
 
-
 There is still some "glue code" to back the [test descriptions 
 in `.feature` files](./src/main/java/org/reso/certification/features), but it is greatly optimized by the use 
-of [cucumber-jvm](https://github.com/cucumber/cucumber-jvm), which has support for the reuse of backing Java 
-code to cut down on copypasta test development.
+of [cucumber-jvm](https://github.com/cucumber/cucumber-jvm), which has support for the reuse of backing Java code to cut down on copypasta test development.
 
-The backing test code is done using [JUnit5](https://junit.org/junit5/). Normally, only those who are contributing 
-test code should need to know about the implementation details of how tests are run. 
+The backing test code is done using [JUnit5](https://junit.org/junit5/). Normally, only those who are contributing test code should need to know about the implementation details of how tests are run. 
 
 Libraries necessary for the Commander to run are included in the [`web-api-commander.jar`](https://github.com/RESOStandards/web-api-commander/blob/master/build/libs/web-api-commander.jar) file, aside from Gradle, which may either be installed on the local machine, or used within a Docker container (coming soon).
 
-*Note*: tests are currently tagged with their Web API version implicitly being 1.0.3, such as `@REQ-WA103-END3`, 
-but the tests currently being run on the server for Web API 1.0.2 is the backwards-compatible subset of 
-Web API 1.0.3 tests. 
+*Note*: tests are currently tagged with their Web API version implicitly being 1.0.3, such as `@REQ-WA103-END3`, but the tests currently being run on the server for Web API 1.0.2 is the backwards-compatible subset of Web API 1.0.3 tests. 
 
 ### Web API Program Output
 
@@ -489,31 +420,122 @@ Standard Resource Names requirement met!
 0m4.093s       
 ```
 
-This shows configuration parameters, requests, and responses in a lightweight-manner. 
+Detailed information will be added to a local `commander.log` file at runtime.
 
-Detailed information will be added to a local `./commander.log` file at runtime.
+---
+## Automated RESO Data Dictionary Testing
+The Commander provides automated Data Dictionary 1.7 acceptance testing for RESO Certification. The DD 1.7 testing specification is available [here](https://docs.google.com/document/d/15DFf9kDX_mlGCJVOch2fztl8W5h-yd18N0_03Sb4HwM/edit?usp=sharing).
 
-## Automated Data Dictionary Testing (In Development)
-Note that this feature is in development and not ready for use. Please contact josh@reso.org if you'd like to help
-with the development process. 
+* [Data Dictionary RESOScript Template](#data-dictionary-resoscript-template)
+* [Data Dictionary Acceptance Tests](#data-dictionary-acceptance-tests)
+* [Gradle Tasks for Data Dictionary Certification](#gradle-tasks-for-data-dictionary-certification)
+  * [Test Data Dictionary 1.7](#test-data-dictionary-1.7)
 
-----
+To use the RESO Commander for Data Dictionary testing, you must have the JDK installed and a local copy of the Commander repository. See [RESO Certification](#reso-certification) before proceeding.
 
-### Gradle Commands
+### Data Dictionary RESOScript Template
+To use the Commander for automated Data Dictionary testing, you need a RESOScript.
 
-The list of available gradle commands can be shown by typing the following in the console: 
+For Data Dictionary 1.7 Certification, use [this resoscript](sample-data-dictionary.1.7.0.resoscript) as a template. 
+
+### Data Dictionary Acceptance Tests
+RESO Data Dictionary Certification is driven off of the official Data Dictionary spreadsheet for each version of the dictionary, [currently DD 1.7](https://docs.google.com/spreadsheets/d/1SZ0b6T4_lz6ti6qB2Je7NSz_9iNOaV_v9dbfhPwWgXA/edit?usp=sharing). 
+
+Cucumber BDD acceptance tests are [automatically generated](#generating-reso-data-dictionary-acceptance-tests) from the [local copy of the approved spreadsheet](src/main/resources/RESODataDictionary-1.7.xlsx). 
+
+The generated Data Dictionary 1.7 Cucumber BDD tests are [located in this directory](https://github.com/RESOStandards/web-api-commander/tree/issue-37-data-dictionary-testing/src/main/java/org/reso/certification/features/data-dictionary/v1-7-0).  See the [property.feature file](src/main/java/org/reso/certification/features/data-dictionary/v1-7-0/property.feature), for example, for the RESO Property Resource acceptance tests.
+
+If you have any questions, please [send us an email](mailto:dev@reso.org).
+
+### Gradle Tasks for Data Dictionary Certification
+There are predefined tasks for automated RESO Data Dictionary Certification using the Commander. These can be displayed using [Gradle Tasks](#gradle-tasks) as well.
+
+* [Test Data Dictionary 1.7](#test-data-dictionary-1.7)
+* [Generate Data Dictionary 1.7 Certification Report](#generate-data-dictionary-1.7-certification-report)
+
+_Note: the first time you run these tasks, they will take some time as the environment must be configured and code is being compiled from the contents of the source directory downloaded in the previous step._
+
+#### Test Data Dictionary 1.7
+This task tests for Data Dictionary compliance and generates a raw report in a timestamped local directory.
+
+There are two ways to run automated testing to check for RESO compliant Web API metadata:
+* using a local metadata file
+* using a RESOScript file to fetch metadata from a given server
+
+While RESOScript files and the use of strict mode are required for RESO Certification. In both cases, metadata are validated and then processed for RESO compliance. 
+
+#### Data Dictionary Testing using Local Metadata
+The Commander allows for a local metadata file to be specified. Not only is this used for internal acceptance testing, but is useful for developers to troubleshoot metadata locally while working on compliance. 
+
+The Gradle task to validate local metadata can be run using the following command:
 
 ```
-$ gradle --help
+$ ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx
+```
+You may also pass a `-Dstrict=true` flag to see whether the given metadata file would pass Certification. 
+
+A raw report will be generated in a timestamped directory, and a `commander.log` will be generated during runtime. 
+
+#### Data Dictionary Testing using a Data Dictionary RESOScript
+During Certification, metadata are retrieved directly from an applicant's Web API server using either OAuth2 Bearer Tokens or Client Credentials. Either authentication option is currently available for RESO Certification, depending on configuration, and the applicant will provide working RESOScripts when they apply for certification.
+
+An example Data Dictionary RESOScript template can be found [here](sample-data-dictionary.1.7.0.resoscript).
+
+Once a RESOScript file has been created, it may be used with the following command:
+
+```
+$ ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true
+```
+You may also pass a `-Dstrict=true` flag to see whether the given metadata file would pass Certification. 
+
+A raw report will be generated in a timestamped directory, and a `commander.log` will be generated during runtime. 
+
+#### Generate Data Dictionary 1.7 Certification Report
+This task tests for Data Dictionary compliance and generates both a raw report and a RESO Certification report in a timestamped directory.
+
+Similar to the [Test Data Dictionary 1.7](#test-data-dictionary-1.7) task, the report generator can be run for both local metadata or used with a RESOScript. 
+
+For the purposes of Certification, a Certification Report MUST be generated using a RESOScript using strict mode. But it's useful to be able to produce certification reports with any local files as well.
+
+#### Certification Reports using Local Metadata
+A RESO Certification report can be generated for local metadata by using the following commmand:
+```
+$ ./gradlew generateCertificationReport_DD_1_7 -DpathToMetadata=src/main/resources/RESODataDictionary-1.7.edmx -Dminimal=true -Dstrict=true --continue
+```
+Note the use of the `--continue` argument. 
+
+You may remove the `-Dstrict=true` flag, but it will be required for RESO Certification. 
+
+A "pretty" Certification report will be generated in a timestamped directory in addition to the normal raw report. 
+
+#### Certification Reports using a Data Dictionary RESOScript
+A RESO Certification report can be generated using a RESOScript by using the following command: 
+```
+$ ./gradlew generateCertificationReport_DD_1_7 -DpathToRESOScript=/path/to/dd1.7.resoscript -Dminimal=true -Dstrict=true --continue
+```
+You may remove the `-Dstrict=true` flag, but it will be required for RESO Certification. 
+
+A "pretty" Certification report will be generated in a timestamped directory in addition to the normal raw report. 
+
+### Data Dictionary Testing Output
+To see examples of Data Dictionary testing output, you may use the `./gradlew testDataDictionaryReferenceMetadata_1_7` command to run the Data Dictionary acceptance tests on the RESO reference metadata. 
+
+There is additional documentation about how Data Dictionary testing works, including sample output, in the [RESO Data Dictionary 1.7 Testing Specification](https://docs.google.com/document/d/15DFf9kDX_mlGCJVOch2fztl8W5h-yd18N0_03Sb4HwM/edit#heading=h.rib4osorsdcx).
+
+## Advanced feature: Tag Filtering 
+You may filter by tags in any of the Web API or Data Dictionary tests. These are the items in the Cucumber .feature files prefixed by an `@` symbol. Expressions may also be used with tags. This README doen't cover how to use tags, but the Commander supports them. For more information, see the [Cucumber Documentation](https://cucumber.io/docs/cucumber/api/#tags).
+
+#### Examples
+
+**Run Web API Core Metadata Tests Only**
+```
+$ gradle testWebAPIServerCore_1_0_2 -DpathToRESOScript=/path/to/your.web-api-server.core.1.0.2.resoscript -Dcucumber.filter.tags="@metadata"
 ```
 
-These commands should not be necessary for the normal use of the Commander. There are a handful that are, however, 
-
-* `--continue                Continue task execution after a task failure.`
-* `-S, --full-stacktrace     Print out the full (very verbose) stacktrace for all exceptions.`
-* `-s, --stacktrace          Print out the stacktrace for all exceptions.`
-* `-t, --continuous          Enables continuous build. Gradle does not exit and will re-execute tasks when task file inputs change. [incubating]`
-
+** Run Data Dictionary Tests on IDX Fields Only**
+```
+$ ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/your/dd1.7.resoscript -DshowResponses=true -Dcucumber.filter.tags="@IDX"
+```
 
 ## Docker
 
@@ -544,9 +566,6 @@ You may also run the tests in a Docker container locally by issuing one of the f
 Docker must be running on your local machine.
 
 #### MacOS or Linux All-In-One Commands
-
-
-##### Core
 ```
 cd ~; \
 rm -rf commander-tmp/; \
@@ -562,12 +581,13 @@ which is also where you will end up after runtime.
 
 
 #### Windows All-In-One WIP
-
-##### Core
-
 ```
 cd C:\;mkdir commander-tmp;cd commander-tmp;git clone https://github.com/RESOStandards/web-api-commander.git;cd web-api-commander; docker run --rm -u gradle -v C:\current\path\web-api-commander:/home/gradle/project -v C:\path\to\your\resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_1_0_2_Core -DpathToRESOScript=/home/gradle/project/resoscripts/your.web-api-server.core.1.0.2.resoscript -DshowResponses=true
 ```
+
+---
+## Using the Commander as a Web API Client Library
+Java or Scala developers may also use the Commander as a client library, which uses the Apache Olingo library under the hood but adds things like OAuth2 support and data retrieval, validation, and serialization methods. To do so, include the [standalone Web API Commander Jar](build/libs/web-api-commander.jar) in your projects. Feel free to open issues or feature requests in the [Commander GitHub project](https://github.com/RESOStandards/web-api-commander/issues).
 
 ---
 ## Logging
@@ -580,11 +600,7 @@ Gradle may be debugged as well, and additional gradle commands such as turning o
 
 ---
 
-Please contact [josh@reso.org](mailto:josh@reso.org) with any questions, bug reports, or feature requests.
+## Support
+Please contact [Josh](mailto:josh@reso.org) with any questions, bug reports, or feature requests. Contributions to code or documentation are welcome. 
 
-## Coming Soon
-* Fully-automated Data Dictionary certification (in-progress)
-* Support for authentication options in addition to Bearer tokens (Client Credentials in beta, please email for more info).
-* Parallel fetch for replication
-* Job Scheduling
-* Excel export
+You may also [open a ticket](https://github.com/RESOStandards/web-api-commander/issues).

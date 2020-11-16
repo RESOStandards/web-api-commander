@@ -88,7 +88,10 @@ tasks.withType(JavaCompile) {
 // task for Web API Server 1.0.2 Core Testing
 task testWebApiServer_1_0_2_Core() {
   group = 'RESO Certification'
-  description = "Runs Web API Core 1.0.2 Automated Acceptance Tests."
+  description = 'Runs Web API Core 1.0.2 Automated Acceptance Tests.' +
+    '\n  Example: ' +
+    '\n    $ ./gradlew testWebApiServer_1_0_2_Core -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true\n'
+
   dependsOn jar
   doLast {
     javaexec {
@@ -114,12 +117,19 @@ task testWebApiServer_1_0_2_Core() {
 String pathToMetadata = null,
     pathToRESOScript = null,
     certFileName = null,
-    certOutputDir = null
+    certOutputDir = null,
+    certJsonPath = null
 
 // task for Data Dictionary 1.7
 task testDataDictionary_1_7() {
   group = 'RESO Certification'
-  description = 'Runs Data Dictionary 1.7 Automated Acceptance Tests.'
+  description = 'Runs Data Dictionary 1.7 Automated Acceptance Tests and generates a "raw" report.' +
+  '\n  RESOScript Example:' +
+  '\n    ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dcucumber.filter.tags=""' +
+  '\n  Metadata File Example:' +
+  '\n    ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dcucumber.filter.tags=""' +
+  '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
+
   dependsOn jar
   doLast {
     javaexec {
@@ -140,13 +150,14 @@ task testDataDictionary_1_7() {
 
       DateFormat df = new SimpleDateFormat("yyyyMMddHHMMssS")
       certOutputDir = 'DD1.7-results' + (certFileName != null ? '-' + certFileName : '') + '-' + df.format(new Date())
+      certJsonPath = certOutputDir + '/data-dictionary-1.7.json'
 
       args = [
           '--strict',
           '--plugin',
           'pretty',
           '--plugin',
-          'json:' + certOutputDir + '/data-dictionary-1.7.json',
+          'json:' + certJsonPath,
           '--plugin',
           'html:' + certOutputDir + '/data-dictionary-1.7.html',
           '--glue',
@@ -162,12 +173,17 @@ task testDataDictionary_1_7() {
 
 task generateCertificationReport_DD_1_7() {
   group = 'RESO Certification'
-  description = 'Generates reports from existing JSON test results.' +
-    '\n\nExample:' +
-    '\n./gradlew generateCertificationReport_DD_1_7 -DpathToJsonResults=/path/to/data-dictionary-1.7.json -Dminimal=true\n\n'
+  description = 'Runs Data Dictionary 1.7 tests and creates a certification report' +
+    '\n  RESOScript Example:' +
+    '\n    ./gradlew generateCertificationReport_DD_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -Dminimal=true -Dstrict=true' +
+    '\n  Metadata File Example:' +
+    '\n    ./gradlew generateCertificationReport_DD_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dminimal=true -Dstrict=true' +
+    '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
 
+  dependsOn testDataDictionary_1_7
   doLast {
     javaexec {
+      System.setProperty('pathToJsonResults', certJsonPath)
       System.setProperty('reportDescription', 'RESO Data Dictionary 1.7 Certification Report')
       systemProperties = System.getProperties()
       classpath = sourceSets.main.runtimeClasspath
@@ -178,12 +194,7 @@ task generateCertificationReport_DD_1_7() {
 
 task testDataDictionaryReferenceMetadata_1_7() {
   group = 'RESO Certification'
-  description = 'Runs Data Dictionary tests against reference metadata' +
-      '\n\nRESOScript Example:' +
-      '\n./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dcucumber.filter.tags=""' +
-      '\n\nMetadata File Example:' +
-      '\n./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dcucumber.filter.tags=""' +
-      '\n\nTo enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n\n'
+  description = 'Runs Data Dictionary tests against reference metadata\n'
 
   doLast {
     javaexec {
