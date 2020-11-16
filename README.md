@@ -1,34 +1,34 @@
 
 # RESO Web API Commander
 
-![CodeFactor](https://www.codefactor.io/repository/github/resostandards/web-api-commander/badge)](https://www.codefactor.io/repository/github/resostandards/web-api-commander)  ![Java CI with Gradle](https://github.com/RESOStandards/web-api-commander/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=master)
+[![CodeFactor](https://www.codefactor.io/repository/github/resostandards/web-api-commander/badge)](https://www.codefactor.io/repository/github/resostandards/web-api-commander)  ![Java CI with Gradle](https://github.com/RESOStandards/web-api-commander/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=master)
 
 The RESO Web API Commander is an OData client library and command-line client, as well as an automated RESO Certification testing tool.
 
 ## Getting Started
 To begin using the Commander, choose one of the following topics:
+* [Command-line Web API Tools](#command-line-web-api-tools)
+* [RESO Certification](#reso-certification)
+* [Commander as a Web API client library](#using-the-commander-as-a-web-api-client-library)
 
-[Command-line Web API Tools](#command-line-web-api-tools)
-[RESO Certification](#reso-certification)
-[Commander as a Web API client library](#using-the-commander-as-a-web-api-client-library)
 
 # Command-line Web API Tools
 **Introduction**
-[Java Requirements](#java-requirements)  
-[Display Help](#display-help)  
-[Authentication](#authentication)  
+* [Java Requirements](#java-requirements)  
+* [Display Help](#display-help)  
+* [Authentication](#authentication)  
 
 **Client Commands**
-[Getting Metadata](#getting-metadata)  
-[Validating Metadata stored in an EDMX file](#validating-metadata-stored-in-an-edmx-file)  
-[Saving Results from a Given `uri`](#saving-results-from-a-given-uri)
-[Running RESOScript Files](#running-resoscript-files)
+* [Getting Metadata](#getting-metadata)  
+* [Validating Metadata stored in an EDMX file](#validating-metadata-stored-in-an-edmx-file)  
+* [Saving Results from a Given `uri`](#saving-results-from-a-given-uri)
+* [Running RESOScript Files](#running-resoscript-files)
+
 
 **Additional Commands**
-[Generating RESO Data Dictionary Acceptance Tests](#generating-data-dictionary-acceptance-tests)
-[Generating RESO Reference Metadata](#generating-reso-reference-metadata)
-[Converting metadata to Open API 3 format](#converting-metadata-to-open-api-3-format)  
-
+* [Generating RESO Data Dictionary Acceptance Tests](#generating-reso-data-dictionary-acceptance-tests)
+* [Generating RESO Data Dictionary Reference Metadata](#generating-reso-data-dictionary-reference-metadata)
+* [Converting metadata to Open API 3 format](#converting-metadata-to-open-api-3-format)  
 
 ## Java Requirements
 Your operating system probably already has a Java Runtime Environment (JRE) installed. This is all you need to run the [Commander as a Web API Client](#using-the-commander-as-a-web-api-client). 
@@ -175,7 +175,7 @@ New Cucumber BDD acceptance tests will be generated and placed in a timestamped 
 
 To update the current tests, copy the newly generated ones into the [Data Dictionary BDD `.features` directory](src/main/java/org/reso/certification/features/data-dictionary/v1-7-0), run the `./gradlew build` task, and if everything works as expected, commit the newly generated tests. 
 
-## Generating RESO Data Dictionary Metadata
+## Generating RESO Data Dictionary Reference Metadata
 In addition to generating DD acceptance tests, the RESO Commander can generate reference metadata based on the current reference [Data Dictionary Spreadsheet](src/main/resources/RESODataDictionary-1.7.xlsx). 
 
 ```
@@ -190,13 +190,13 @@ See documentation regarding running the [nodejs-based tools in odata-openapi/lib
 ---
 
 # RESO Certification
-[Java and the JDK](#java-and-the-jdk)
-[Cloning Commander Repository](#cloning-commander-repository)
-[Cucumber Feature Specifications](#cucumber-feature-specifications)
-[Testing Environment](#testing-environment) 
-[Gradle Wrapper](#gradle-wrapper)
-[Automated RESO Web API Core Testing](#automated-web-api-core-testing-in-development)
-[Automated RESO Data Dictionary Testing](#automated-data-dictionary-testing)
+* [Java and the JDK](#java-and-the-jdk)
+* [Cloning Commander Repository](#cloning-commander-repository)
+* [Cucumber Feature Specifications](#cucumber-feature-specifications)
+* [Testing Environment](#testing-environment) 
+* [Gradle Wrapper](#gradle-wrapper)
+* [Automated RESO Web API Core Testing](#automated-reso-web-api-core-testing-in-development)
+* [Automated RESO Data Dictionary Testing](#automated-reso-data-dictionary-testing)
 
 
 ## Java and the JDK
@@ -429,7 +429,8 @@ The Commander provides automated Data Dictionary 1.7 acceptance testing for RESO
 * [Data Dictionary RESOScript Template](#data-dictionary-resoscript-template)
 * [Data Dictionary Acceptance Tests](#data-dictionary-acceptance-tests)
 * [Gradle Tasks for Data Dictionary Certification](#gradle-tasks-for-data-dictionary-certification)
-  * [Test Data Dictionary 1.7](#test-data-dictionary-1.7)
+  * [Test Data Dictionary](#test-data-dictionary)
+  * [Generate Data Dictionary Certification Report](#generate-data-dictionary-certification-report)
 
 To use the RESO Commander for Data Dictionary testing, you must have the JDK installed and a local copy of the Commander repository. See [RESO Certification](#reso-certification) before proceeding.
 
@@ -450,12 +451,12 @@ If you have any questions, please [send us an email](mailto:dev@reso.org).
 ### Gradle Tasks for Data Dictionary Certification
 There are predefined tasks for automated RESO Data Dictionary Certification using the Commander. These can be displayed using [Gradle Tasks](#gradle-tasks) as well.
 
-* [Test Data Dictionary 1.7](#test-data-dictionary-1.7)
-* [Generate Data Dictionary 1.7 Certification Report](#generate-data-dictionary-1.7-certification-report)
+* [Test Data Dictionary 1.7](#test-data-dictionary)
+* [Generate Data Dictionary 1.7 Certification Report](#generate-data-dictionary-certification-report)
 
 _Note: the first time you run these tasks, they will take some time as the environment must be configured and code is being compiled from the contents of the source directory downloaded in the previous step._
 
-#### Test Data Dictionary 1.7
+#### Test Data Dictionary
 This task tests for Data Dictionary compliance and generates a raw report in a timestamped local directory.
 
 There are two ways to run automated testing to check for RESO compliant Web API metadata:
@@ -464,7 +465,7 @@ There are two ways to run automated testing to check for RESO compliant Web API 
 
 While RESOScript files and the use of strict mode are required for RESO Certification. In both cases, metadata are validated and then processed for RESO compliance. 
 
-#### Data Dictionary Testing using Local Metadata
+##### Data Dictionary Testing using Local Metadata
 The Commander allows for a local metadata file to be specified. Not only is this used for internal acceptance testing, but is useful for developers to troubleshoot metadata locally while working on compliance. 
 
 The Gradle task to validate local metadata can be run using the following command:
@@ -476,7 +477,7 @@ You may also pass a `-Dstrict=true` flag to see whether the given metadata file 
 
 A raw report will be generated in a timestamped directory, and a `commander.log` will be generated during runtime. 
 
-#### Data Dictionary Testing using a Data Dictionary RESOScript
+##### Data Dictionary Testing using a Data Dictionary RESOScript
 During Certification, metadata are retrieved directly from an applicant's Web API server using either OAuth2 Bearer Tokens or Client Credentials. Either authentication option is currently available for RESO Certification, depending on configuration, and the applicant will provide working RESOScripts when they apply for certification.
 
 An example Data Dictionary RESOScript template can be found [here](sample-data-dictionary.1.7.0.resoscript).
@@ -490,14 +491,14 @@ You may also pass a `-Dstrict=true` flag to see whether the given metadata file 
 
 A raw report will be generated in a timestamped directory, and a `commander.log` will be generated during runtime. 
 
-#### Generate Data Dictionary 1.7 Certification Report
+#### Generate Data Dictionary Certification Report
 This task tests for Data Dictionary compliance and generates both a raw report and a RESO Certification report in a timestamped directory.
 
 Similar to the [Test Data Dictionary 1.7](#test-data-dictionary-1.7) task, the report generator can be run for both local metadata or used with a RESOScript. 
 
 For the purposes of Certification, a Certification Report MUST be generated using a RESOScript using strict mode. But it's useful to be able to produce certification reports with any local files as well.
 
-#### Certification Reports using Local Metadata
+##### Certification Reports using Local Metadata
 A RESO Certification report can be generated for local metadata by using the following commmand:
 ```
 $ ./gradlew generateCertificationReport_DD_1_7 -DpathToMetadata=src/main/resources/RESODataDictionary-1.7.edmx -Dminimal=true -Dstrict=true --continue
@@ -508,7 +509,7 @@ You may remove the `-Dstrict=true` flag, but it will be required for RESO Certif
 
 A "pretty" Certification report will be generated in a timestamped directory in addition to the normal raw report. 
 
-#### Certification Reports using a Data Dictionary RESOScript
+##### Certification Reports using a Data Dictionary RESOScript
 A RESO Certification report can be generated using a RESOScript by using the following command: 
 ```
 $ ./gradlew generateCertificationReport_DD_1_7 -DpathToRESOScript=/path/to/dd1.7.resoscript -Dminimal=true -Dstrict=true --continue
