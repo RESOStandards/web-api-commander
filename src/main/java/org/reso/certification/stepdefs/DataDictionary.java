@@ -306,7 +306,7 @@ public class DataDictionary {
 
     if (difference.size() > 0) {
       LOG.info("Found " + difference.size() + " Non-standard Enumeration"
-          + pluralize(difference.size()) + ": [" + Utils.wrapColumns(String.join(", ", difference) + "]", "\n\t"));
+          + pluralize(difference.size()) + ": " + Utils.wrapColumns("[" + String.join(", ", difference) + "]", "\n\t"));
     }
     return intersection.stream().map(members::get).collect(Collectors.toCollection(LinkedHashSet::new));
   }

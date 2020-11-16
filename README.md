@@ -326,32 +326,6 @@ C:\path\to\web-api-commander> gradlew testWebAPIServerCore_1_0_2 -DpathToRESOScr
 
 *Note: the first time you run these tasks, they will take some time as the environment must be configured and code is being compiled from the contents of the source directory downloaded in the previous step. 
 
-#### Advanced feature: Tag Filtering 
-You may also filter by tags. These are the items in the Cucumber .feature files prefixed by an `@` symbol. Expressions may also be used with tags. See the [Cucumber Documentation](https://cucumber.io/docs/cucumber/api/#tags) for more information. 
-
-##### MacOS or Linux
-```
-$ gradle testWebAPIServerCore_1_0_2 -DpathToRESOScript=/path/to/your.web-api-server.core.1.0.2.resoscript -Dcucumber.filter.tags="@metadata"
-```
-
-##### Windows
-```
-C:\path\to\web-api-commander> gradlew.bat testWebAPIServerCore_1_0_2 -DpathToRESOScript=C:\path\to\your.web-api-server.core.1.0.2.resoscript -Dcucumber.filter.tags="@metadata"
-```
-
-This would run only the tests marked as `@metadata` in the 
-[Web API Server 1.0.2 `.feature` file](./src/main/java/org/reso/certification/features/web-api/web-api-server.core.1.0.2.feature).
-
-There is still some "glue code" to back the [test descriptions 
-in `.feature` files](./src/main/java/org/reso/certification/features), but it is greatly optimized by the use 
-of [cucumber-jvm](https://github.com/cucumber/cucumber-jvm), which has support for the reuse of backing Java code to cut down on copypasta test development.
-
-The backing test code is done using [JUnit5](https://junit.org/junit5/). Normally, only those who are contributing test code should need to know about the implementation details of how tests are run. 
-
-Libraries necessary for the Commander to run are included in the [`web-api-commander.jar`](https://github.com/RESOStandards/web-api-commander/blob/master/build/libs/web-api-commander.jar) file, aside from Gradle, which may either be installed on the local machine, or used within a Docker container (coming soon).
-
-*Note*: tests are currently tagged with their Web API version implicitly being 1.0.3, such as `@REQ-WA103-END3`, but the tests currently being run on the server for Web API 1.0.2 is the backwards-compatible subset of Web API 1.0.3 tests. 
-
 ### Web API Program Output
 
 A sample of the runtime terminal output follows:
