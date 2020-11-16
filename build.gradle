@@ -89,8 +89,8 @@ tasks.withType(JavaCompile) {
 task testWebApiServer_1_0_2_Core() {
   group = 'RESO Certification'
   description = 'Runs Web API Core 1.0.2 Automated Acceptance Tests.' +
-    '\n  Example: ' +
-    '\n    $ ./gradlew testWebApiServer_1_0_2_Core -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true\n'
+      '\n  Example: ' +
+      '\n    $ ./gradlew testWebApiServer_1_0_2_Core -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true\n'
 
   dependsOn jar
   doLast {
@@ -115,20 +115,20 @@ task testWebApiServer_1_0_2_Core() {
 }
 
 String pathToMetadata = null,
-    pathToRESOScript = null,
-    certFileName = null,
-    certOutputDir = null,
-    certJsonPath = null
+       pathToRESOScript = null,
+       certFileName = null,
+       certOutputDir = null,
+       certJsonPath = null
 
 // task for Data Dictionary 1.7
 task testDataDictionary_1_7() {
   group = 'RESO Certification'
   description = 'Runs Data Dictionary 1.7 Automated Acceptance Tests and generates a "raw" report.' +
-  '\n  RESOScript Example:' +
-  '\n    ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dcucumber.filter.tags=""' +
-  '\n  Metadata File Example:' +
-  '\n    ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dcucumber.filter.tags=""' +
-  '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
+      '\n  RESOScript Example:' +
+      '\n    ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dcucumber.filter.tags=""' +
+      '\n  Metadata File Example:' +
+      '\n    ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dcucumber.filter.tags=""' +
+      '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
 
   dependsOn jar
   doLast {
@@ -174,11 +174,11 @@ task testDataDictionary_1_7() {
 task generateCertificationReport_DD_1_7() {
   group = 'RESO Certification'
   description = 'Runs Data Dictionary 1.7 tests and creates a certification report' +
-    '\n  RESOScript Example:' +
-    '\n    ./gradlew generateCertificationReport_DD_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -Dminimal=true -Dstrict=true' +
-    '\n  Metadata File Example:' +
-    '\n    ./gradlew generateCertificationReport_DD_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dminimal=true -Dstrict=true' +
-    '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
+      '\n  RESOScript Example:' +
+      '\n    ./gradlew generateCertificationReport_DD_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -Dminimal=true -Dstrict=true' +
+      '\n  Metadata File Example:' +
+      '\n    ./gradlew generateCertificationReport_DD_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dminimal=true -Dstrict=true' +
+      '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
 
   dependsOn testDataDictionary_1_7
   doLast {
