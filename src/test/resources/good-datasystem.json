@@ -7,6 +7,7 @@
       "DateTimeStamp": "2014-04-11T12:02:48.509401-04:00",
       "TransportVersion": "0.9",
       "DataDictionaryVersion": "1.3",
+      "ID": "RESO_MLS",
       "Resources": [
         {
           "Name": "Property",
@@ -45,8 +46,7 @@
           "TimeZoneOffset": -5,
           "Localizations": []
         }
-      ],
-      "ID": "RESO_MLS"
+      ]
     }
   ]
 }

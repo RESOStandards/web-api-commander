@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!--
+  >>> To be used as a template for Web API Server Core 1.0.2 Certification <<<
+
+  NOTES:
+    * Anything marked REQUIRED should be filled in.
+    * Anything not market REQUIRED shouldn't have to be changed.
+    * Some items are marked OPTIONAL.
+    * Any item that has a blank Url will be skipped (which will be printed in the results).
+
+    Contact josh@reso.org with further questions.
+ -->
+
+<!DOCTYPE OutputScript [
+    <!ELEMENT OutputScript (RESOScriptVersion|ClientSettings|Parameters|Requests)*>
+    <!ELEMENT RESOScriptVersion (#PCDATA)>
+    <!ELEMENT ClientSettings (WebAPIURI|AuthenticationType|BearerToken|ClientIdentification|ClientSecret|TokenURI|ClientScope)*>
+    <!ELEMENT WebAPIURI (#PCDATA)>
+    <!ELEMENT AuthenticationType (#PCDATA)>
+    <!ELEMENT BearerToken (#PCDATA)>
+    <!ELEMENT ClientIdentification (#PCDATA)>
+    <!ELEMENT ClientSecret (#PCDATA)>
+    <!ELEMENT TokenURI (#PCDATA)>
+    <!ELEMENT ClientScope (#PCDATA)>
+    <!ELEMENT Parameters (Parameter)*>
+    <!ELEMENT Parameter (#PCDATA)>
+    <!ATTLIST Parameter
+        Name CDATA #REQUIRED
+        Value CDATA #REQUIRED>
+    <!ELEMENT Requests (Request)*>
+    <!ELEMENT Request (#PCDATA)>
+    <!ATTLIST Request
+        OutputFile CDATA #REQUIRED
+        RequestId CDATA #REQUIRED
+        Url CDATA #REQUIRED>
+    ]>
+
+<OutputScript>
+
+  <!--
+  ############################################################
+    Metadata
+  ############################################################-->
+
+  <!-- The current version of this RESOScript -->
+  <RESOScriptVersion>3.1.0</RESOScriptVersion>
+
+
+  <!--
+  ############################################################
+    Client Settings
+    TODO: deprecate ClientSettings and move them to Parameters
+  ############################################################-->
+  <ClientSettings>
+    <!-- URLS -->
+    <WebAPIURI><!--REQUIRED: URI of your Web API Service Root goes here --></WebAPIURI>
+
+    <!-- Credentials -->
+
+    <!-- AuthenticationType
+
+        This is the OAuth2 grant_type.
+        Use "authorization_code" for BearerToken and "client_credentials" for Client Credentials.
+
+        See:
+        * https://www.oauth.com/oauth2-servers/access-tokens/authorization-code-request/
+        * https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/
+    -->
+
+    <!-- Grant Type: authorization_code -->
+    <AuthenticationType>authorization_code</AuthenticationType>
+    <BearerToken><!-- REQUIRED: Your BearerToken goes here if using Access Tokens --></BearerToken>
+
+    <!-- Grant Type: client_credentials -->
+    <AuthenticationType>client_credentials</AuthenticationType>
+    <ClientIdentification><!-- REQUIRED: Your client_id value if using Client Credentials--></ClientIdentification>
+    <ClientSecret><!-- REQUIRED: Your client_secret value if using Client Credentials--></ClientSecret>
+    <TokenURI><!-- REQUIRED: Your token endpoint URI--></TokenURI>
+    <ClientScope>
+
+      <!--OPTIONAL - your client scope. See: https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/ -->
+    </ClientScope>
+
+  </ClientSettings>
+
+
+  <!--
+  ############################################################
+    Parameters Section - add your testing variables here
+  ############################################################-->
+
+  <Parameters>
+
+    <!--
+    ############################################################
+          Service Configuration
+    ############################################################-->
+
+    <!-- REQUIRED: Core - The name of the resource being tested. Should not be a path. -->
+    <Parameter Name="EndpointResource" Value="REQUIRED: YOUR RESOURCE GOES HERE, FOR EXAMPLE, Property"/>
+
+    <!-- REQUIRED: Core - The DataSystems endpoint being tested
+        NOTE: the FULL DataSystems URL is required as it might not be relative to the Service Root.-->
+    <Parameter Name="EndpointDataSystem" Value="REQUIRED: YOUR DATA SYSTEMS ENDPOINT GOES HERE"/>
+
+    <!--
+    ############################################################
+      Required Fields and Values
+    ############################################################-->
+
+    <!-- Note: some of the required values already have sample values provided. See later sections for their values.-->
+
+    <!-- REQUIRED: Core - Substitute key name from your Resource here, either Key or KeyNumeric -->
+    <Parameter Name="KeyField" Value="ListingKey"/>
+
+    <!-- REQUIRED: Core - Provide a value for the Primary Key Field on your server, which must be the String version of the field.
+      You MAY still support the KeyNumeric version of the field for current clients, but RESO won't be testing for it.
+    -->
+    <Parameter Name="KeyValue" Value="12345"/>
+
+    <!-- REQUIRED: Core - Integer Field. Should be one of: Type="Edm.Int16", Type="Edm.Int32", or Type="Edm.Int64" -->
+    <Parameter Name="IntegerField" Value="BedroomsTotal"/>
+
+    <!-- REQUIRED: Edm.Decimal field -->
+    <Parameter Name="DecimalField" Value="ListPrice" />
+
+    <!-- REQUIRED: Core - Enumerated Field for Single-Value Testing -->
+    <Parameter Name="SingleValueLookupField" Value="PropertyType"/>
+    <Parameter Name="SingleLookupValue" Value="Residential"/>
+    <Parameter Name="SingleValueLookupNamespace" Value="PropertyEnums.PropertyType"/>
+
+    <!-- REQUIRED: Core - Enumerated Field for Multi-value testing -->
+    <Parameter Name="MultipleValueLookupField" Value="Appliances"/>
+    <Parameter Name="MultipleValueLookupNamespace" Value="PropertyEnums.Appliances"/>
+    <Parameter Name="MultipleLookupValue1" Value="Refrigerator"/>
+    <Parameter Name="MultipleLookupValue2" Value="Stacked"/>
+
+    <!-- REQUIRED: Core - Date Field for comparisons. Should be Type="Edm.Date" -->
+    <Parameter Name="DateField" Value="ListingContractDate"/>
+    <Parameter Name="TimestampField" Value="ModificationTimestamp"/>
+
+    <!--
+    ############################################################
+      Sample Field Values
+    ############################################################-->
+
+    <!-- Core: IntegerField Sample Values-->
+    <Parameter Name="IntegerValueLow" Value="3"/>
+    <Parameter Name="IntegerValueHigh" Value="10"/>
+    <Parameter Name="IntegerNotFound" Value="-1"/>
+
+    <!-- Core: DecimalField Sample Values -->
+    <Parameter Name="DecimalValueLow" Value="0.00"/>
+    <Parameter Name="DecimalValueHigh" Value="1234567.89"/>
+
+    <!-- Core: Integer Field for "not" testing -->
+    <Parameter Name="FilterNotField" Value="*Parameter_IntegerField*"/>
+    <Parameter Name="FilterNotValue" Value="-1"/>
+
+    <!-- Core: Date Fields for testing -->
+    <!-- TODO: randomly generate these values -->
+    <Parameter Name="DateTimeValue" Value="2019-12-31T23:55:55-09:00"/>
+    <Parameter Name="DateValue" Value="2019-12-31"/>
+
+    <!--
+    ############################################################
+      HTTP Code Testing
+    ############################################################-->
+
+    <!-- 200 Response OK: This should always work! No need to change it -->
+    <Parameter Name="200_OK" Value="*Parameter_EndpointResource*"/>
+
+    <!-- REQUIRED: 400 Bad Request - Adjust to something that produces a 400 response if this doesn't work -->
+    <Parameter Name="400BadRequest" Value="*Parameter_EndpointResource*?$filter=BadField eq 'SoBad'"/>
+
+    <!-- REQUIRED: 404 Not Found - You shouldn't need to change this -->
+    <Parameter Name="404NotFound" Value="ResourceNotFound"/>
+
+    <!--
+    ############################################################
+      Constants and Computed Values - Do Not Change
+    ############################################################-->
+
+    <!-- For Top, Skip, and Sort Testing -->
+    <Parameter Name="TopCount" Value="5"/>
+    <Parameter Name="SortCount" Value="20"/>
+
+    <!-- New Values for WS103 Testing -->
+    <Parameter Name="CastFieldType" Value="Edm.String"/>
+
+    <!-- Required resource lists for Standard Resource Names requirement -->
+    <Parameter Name="WebAPI102_RequiredResourceList" Value="Property,Member,Office,Media"/>
+
+    <!-- Allowed Resources - Update to 1.8 once it's approved -->
+    <Parameter Name="DD17_WellKnownResourceList"
+               Value="Property,Member,Office,Contacts,ContactListings,HistoryTransactional,InternetTracking,Media,OpenHouse,OUID,Prospecting,Queue,Rules,SavedSearch,Showing,Teams,TeamMembers,ContactListingNotes,OtherPhone,PropertyGreenVerification,PropertyPowerProduction,PropertyRooms,PropertyUnitTypes,SocialMedia"/>
+
+    <!-- Computed Has Value - uses SingleValueLookup field -->
+    <Parameter Name="FilterHasValue" Value="*Parameter_SingleValueLookupValue*"/>
+    <Parameter Name="FilterHasLookupNamespace" Value="*Parameter_SingleValueLookupNamespace*"/>
+    <Parameter Name="FilterHasLookupValue" Value="*Parameter_SingleLookupValue*"/>
+
+    <!-- Computed Enumeration Values - do not change -->
+    <Parameter Name="SingleValueLookupValue"
+               Value="*Parameter_SingleValueLookupNamespace*'*Parameter_SingleLookupValue*'"/>
+    <Parameter Name="FilterHasValueLookupValue"
+               Value="*Parameter_FilterHasLookupNamespace*'*Parameter_FilterHasLookupValue*'"/>
+    <Parameter Name="MultipleValueLookupValue1"
+               Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue1*'"/>
+    <Parameter Name="MultipleValueLookupValue2"
+               Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue2*'"/>
+
+    <!-- OPTIONAL: Useful for testing the OData Format Parameter - Value="?$format=application/xml" -->
+    <Parameter Name="OptionalMetadataFormatParameter" Value=""/>
+
+  </Parameters>
+
+  <!--
+  ############################################################
+    Requests Section - Queries used during testing,
+                       DO NOT CHANGE
+  ############################################################-->
+  <Requests>
+
+    <Request
+        RequestId="metadata-request"
+        OutputFile="metadata-metadata-request.xml"
+        Url="*ClientSettings_WebAPIURI*/$metadata*Parameter_OptionalMetadataFormatParameter*"
+    />
+
+    <Request
+        RequestId="service-document"
+        OutputFile="service-document.json"
+        Url="*ClientSettings_WebAPIURI*/"
+    />
+
+    <Request
+        RequestId="fetch-by-id"
+        OutputFile="fetch-by-id.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*('*Parameter_KeyValue*')?$select=*Parameter_KeyField*"
+    />
+
+    <Request
+        RequestId="select"
+        OutputFile="select.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$select=*Parameter_KeyField*,*Parameter_IntegerField*"
+    />
+
+    <Request
+        RequestId="top"
+        OutputFile="top.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*"
+    />
+
+    <Request
+        RequestId="skip"
+        OutputFile="skip.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?"
+    />
+
+    <Request
+        RequestId="orderby-timestamp-asc"
+        OutputFile="orderby-asc.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_KeyField*,*Parameter_IntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc"
+    />
+
+    <Request
+        RequestId="orderby-timestamp-desc"
+        OutputFile="orderby-desc.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_KeyField*,*Parameter_IntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc"
+    />
+
+    <Request
+        RequestId="orderby-timestamp-asc-filter-int-gt"
+        OutputFile="orderby-asc-filter.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_KeyField*,*Parameter_IntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc&amp;$filter=*Parameter_IntegerField* gt *Parameter_IntegerValueLow*"
+    />
+
+    <Request
+        RequestId="orderby-timestamp-desc-filter-int-gt"
+        OutputFile="orderby-desc-filter.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_KeyField*,*Parameter_IntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* desc&amp;$filter=*Parameter_IntegerField* gt *Parameter_IntegerValueLow*"
+    />
+
+    <Request
+        RequestId="filter-int-and"
+        OutputFile="filter-int-and.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* gt *Parameter_IntegerValueLow* and *Parameter_IntegerField* lt *Parameter_IntegerValueHigh*"
+    />
+
+    <Request
+        RequestId="filter-int-or"
+        OutputFile="filter-int-or.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* lt *Parameter_IntegerValueHigh* or *Parameter_IntegerField* gt *Parameter_IntegerValueLow*"
+    />
+
+    <Request
+        RequestId="filter-int-not"
+        OutputFile="filter-int-not.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_IntegerField*&amp;$filter=not (*Parameter_FilterNotField* le *Parameter_FilterNotValue*)"
+    />
+
+    <Request
+        RequestId="filter-int-eq"
+        OutputFile="filter-int-eq"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* eq *Parameter_IntegerValueLow*"
+    />
+
+    <Request
+        RequestId="filter-int-ne"
+        OutputFile="filter-int-ne"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ne *Parameter_IntegerValueLow*"
+    />
+
+    <Request
+        RequestId="filter-int-gt"
+        OutputFile="filter-int-gt"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* gt *Parameter_IntegerValueLow*"
+    />
+
+    <Request
+        RequestId="filter-int-ge"
+        OutputFile="filter-int-ge.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* ge *Parameter_IntegerValueLow*"
+    />
+
+    <Request
+        RequestId="filter-int-lt"
+        OutputFile="filter-int-lt.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* lt *Parameter_IntegerValueLow*"
+    />
+
+    <Request
+        RequestId="filter-int-le"
+        OutputFile="filter-int-le.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_IntegerField*&amp;$filter=*Parameter_IntegerField* le *Parameter_IntegerValueLow*"
+    />
+
+    <Request
+        RequestId="filter-decimal-eq"
+        OutputFile="filter-decimal-eq"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_DecimalField*&amp;$filter=*Parameter_DecimalField* eq *Parameter_DecimalValueLow*"
+    />
+
+    <Request
+        RequestId="filter-decimal-ne"
+        OutputFile="filter-decimal-ne"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_DecimalField*&amp;$filter=*Parameter_DecimalField* ne *Parameter_DecimalValueLow*"
+    />
+
+    <Request
+        RequestId="filter-decimal-gt"
+        OutputFile="filter-decimal-gt"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_DecimalField*&amp;$filter=*Parameter_DecimalField* gt *Parameter_DecimalValueLow*"
+    />
+
+    <Request
+        RequestId="filter-decimal-ge"
+        OutputFile="filter-decimal-ge.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_DecimalField*&amp;$filter=*Parameter_DecimalField* ge *Parameter_DecimalValueLow*"
+    />
+
+    <Request
+        RequestId="filter-decimal-lt"
+        OutputFile="filter-decimal-lt.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_DecimalField*&amp;$filter=*Parameter_DecimalField* lt *Parameter_DecimalValueHigh*"
+    />
+
+    <Request
+        RequestId="filter-decimal-le"
+        OutputFile="filter-decimal-le.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_DecimalField*&amp;$filter=*Parameter_DecimalField* le *Parameter_DecimalValueHigh*"
+    />
+
+    <Request
+        RequestId="filter-date-eq"
+        OutputFile="filter-date-eq.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_DateField*&amp;$filter=*Parameter_DateField* eq *Parameter_DateValue*"
+    />
+
+    <Request
+        RequestId="filter-date-ne"
+        OutputFile="filter-date-ne.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_DateField*&amp;$filter=*Parameter_DateField* ne *Parameter_DateValue*"
+    />
+
+    <Request
+        RequestId="filter-date-gt"
+        OutputFile="filter-date-gt.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_DateField*&amp;$filter=*Parameter_DateField* gt *Parameter_DateValue*"
+    />
+
+    <Request
+        RequestId="filter-date-ge"
+        OutputFile="filter-date-ge.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_DateField*&amp;$filter=*Parameter_DateField* ge *Parameter_DateValue*"
+    />
+
+    <Request
+        RequestId="filter-date-lt"
+        OutputFile="filter-date-le.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_DateField*&amp;$filter=*Parameter_DateField* lt *Parameter_DateValue*"
+    />
+
+    <Request
+        RequestId="filter-date-le"
+        OutputFile="filter-date-le.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_DateField*&amp;$filter=*Parameter_DateField* le *Parameter_DateValue*"
+    />
+
+    <Request
+        RequestId="filter-datetime-eq"
+        OutputFile="filter-datetime-eq.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* eq *Parameter_DateTimeValue*"
+    />
+
+    <Request
+        RequestId="filter-datetime-ne"
+        OutputFile="filter-datetime-ne.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* ne *Parameter_DateTimeValue*"
+    />
+
+    <Request
+        RequestId="filter-datetime-gt"
+        OutputFile="filter-datetime-gt.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* gt *Parameter_DateTimeValue*"
+    />
+
+    <Request
+        RequestId="filter-datetime-ge"
+        OutputFile="filter-datetime-ge.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* ge *Parameter_DateTimeValue*"
+    />
+
+    <Request
+        RequestId="filter-datetime-lt"
+        OutputFile="filter-datetime-lt.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* lt now()"
+    />
+
+    <Request
+        RequestId="filter-datetime-le"
+        OutputFile="filter-datetime-le.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_TimestampField*&amp;$filter=*Parameter_TimestampField* le now()"
+    />
+
+    <Request
+        RequestId="filter-enum-single-has"
+        OutputFile="filter-enum-single-has.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_SingleValueLookupField*&amp;$filter=*Parameter_SingleValueLookupField* has *Parameter_SingleValueLookupValue*"
+    />
+
+    <Request
+        RequestId="filter-enum-single-eq"
+        OutputFile="filter-enum-single-eq.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_SingleValueLookupField*&amp;$filter=*Parameter_SingleValueLookupField* eq *Parameter_SingleValueLookupValue*"
+    />
+
+    <Request
+        RequestId="filter-enum-single-ne"
+        OutputFile="filter-enum-single-ne.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_SingleValueLookupField*&amp;$filter=*Parameter_SingleValueLookupField* ne *Parameter_SingleValueLookupValue*"
+    />
+
+    <Request
+        RequestId="filter-enum-multi-has"
+        OutputFile="filter-enum-multi-has.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1*"
+    />
+
+    <Request
+        RequestId="filter-enum-multi-has-and"
+        OutputFile="filter-enum-multi-has-and.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue1* and *Parameter_MultipleValueLookupField* has *Parameter_MultipleValueLookupValue2*"
+    />
+
+    <Request
+        RequestId="filter-coll-enum-any"
+        OutputFile="filter-coll-enum-any.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField*/any(enum:enum eq *Parameter_MultipleValueLookupValue1*)"
+    />
+
+    <Request
+        RequestId="filter-coll-enum-all"
+        OutputFile="filter-coll-enum-all.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_TopCount*&amp;$select=*Parameter_KeyField*,*Parameter_MultipleValueLookupField*&amp;$filter=*Parameter_MultipleValueLookupField*/all(enum:enum eq *Parameter_MultipleValueLookupValue1*)"
+    />
+
+    <Request
+        RequestId="response-code-400"
+        OutputFile="response-code-400.json"
+        Url="ClientSettings_WebAPIURI*/*Parameter_400BadRequest*"
+    />
+
+    <Request
+        RequestId="response-code-404"
+        OutputFile="response-code-404.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_404NotFound*"
+    />
+
+  </Requests>
+</OutputScript>

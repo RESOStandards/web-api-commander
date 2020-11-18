@@ -1,3 +1,6 @@
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+
 plugins {
   // Apply the java plugin to add support for Java
   id 'java'
@@ -19,7 +22,8 @@ repositories {
 }
 
 dependencies {
-  compile 'com.google.guava:guava:29.0-jre'
+  compile 'com.google.guava:guava:28.2-jre'
+  compile 'com.google.inject:guice:4.0'
 
   compile 'commons-cli:commons-cli:1.4'
 
@@ -32,18 +36,27 @@ dependencies {
   compile 'org.apache.olingo:odata-commons-core:4.7.1'
   compile 'org.apache.olingo:odata-client-core:4.7.1'
 
-  compile 'io.rest-assured:rest-assured:4.3.1'
-  compile 'io.rest-assured:json-path:4.3.1'
-  compile 'io.rest-assured:json-schema-validator:4.3.1'
+  compile 'org.apache.poi:poi:3.9'
+  compile 'org.apache.poi:poi-ooxml:3.9'
 
-  compile 'io.cucumber:cucumber-java8:6.6.1'
-  compile 'io.cucumber:cucumber-junit:6.6.1'
 
-  compile 'net.masterthought:cucumber-reporting:5.3.1'
+  compile 'io.rest-assured:rest-assured:4.2.0'
+  compile 'io.rest-assured:json-path:4.2.0'
+  compile 'io.rest-assured:json-schema-validator:4.2.0'
 
-  compile 'com.networknt:json-schema-validator:1.0.43'
+  compile 'io.cucumber:cucumber-java8:5.4.0'
+  compile 'io.cucumber:cucumber-java:5.4.0'
+  compile 'io.cucumber:cucumber-junit:5.4.0'
+  compile 'io.cucumber:cucumber-guice:5.4.0'
+  compile 'io.cucumber:cucumber-core:5.4.0'
 
-  implementation 'org.mockito:mockito-core:3.5.10'
+  compile 'net.masterthought:cucumber-reporting:5.1.1'
+
+  compile 'com.networknt:json-schema-validator:1.0.35'
+  compile 'com.google.code.gson:gson:2.8.6'
+  compile 'org.apache.commons:commons-text:1.9'
+
+  implementation 'org.mockito:mockito-core:3.3.3'
 }
 
 configurations {
@@ -74,6 +87,11 @@ tasks.withType(JavaCompile) {
 
 // task for Web API Server 1.0.2 Core Testing
 task testWebApiServer_1_0_2_Core() {
+  group = 'RESO Certification'
+  description = 'Runs Web API Core 1.0.2 Automated Acceptance Tests.' +
+      '\n  Example: ' +
+      '\n    $ ./gradlew testWebApiServer_1_0_2_Core -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true\n'
+
   dependsOn jar
   doLast {
     javaexec {
@@ -96,13 +114,112 @@ task testWebApiServer_1_0_2_Core() {
   }
 }
 
-//used for internal Commander testing
-test {
-  dependsOn assemble, compileTestJava
+String pathToMetadata = null,
+       pathToRESOScript = null,
+       certFileName = null,
+       certOutputDir = null,
+       certJsonPath = null
+
+// task for Data Dictionary 1.7
+task testDataDictionary_1_7() {
+  group = 'RESO Certification'
+  description = 'Runs Data Dictionary 1.7 Automated Acceptance Tests and generates a "raw" report.' +
+      '\n  RESOScript Example:' +
+      '\n    ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dcucumber.filter.tags=""' +
+      '\n  Metadata File Example:' +
+      '\n    ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dcucumber.filter.tags=""' +
+      '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
+
+  dependsOn jar
+  doLast {
+    javaexec {
+      main = 'io.cucumber.core.cli.Main'
+      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      systemProperties = System.getProperties()
+
+      pathToMetadata = System.getProperty('pathToMetadata', null)
+      pathToRESOScript = System.getProperty('pathToRESOScript', null)
+
+      if (pathToMetadata != null) {
+        certFileName = pathToMetadata
+            .substring(Math.max(pathToMetadata.lastIndexOf(File.separator)+1, 0), pathToMetadata.lastIndexOf('.'))
+      } else if (pathToRESOScript != null) {
+        certFileName = pathToRESOScript
+            .substring(Math.max(pathToRESOScript.lastIndexOf(File.separator)+1, 0), pathToRESOScript.lastIndexOf('.'))
+      }
+
+      DateFormat df = new SimpleDateFormat("yyyyMMddHHMMssS")
+      certOutputDir = 'DD1.7-results' + (certFileName != null ? '-' + certFileName : '') + '-' + df.format(new Date())
+      certJsonPath = certOutputDir + '/data-dictionary-1.7.json'
+
+      args = [
+          '--strict',
+          '--plugin',
+          'pretty',
+          '--plugin',
+          'json:' + certJsonPath,
+          '--plugin',
+          'html:' + certOutputDir + '/data-dictionary-1.7.html',
+          '--glue',
+          'org.reso.certification.stepdefs#DataDictionary',
+          'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0',
+          '--tags',
+          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0
+              ? systemProperties.get('cucumber.filter.tags') : '')
+      ]
+    }
+  }
+}
+
+task generateCertificationReport_DD_1_7() {
+  group = 'RESO Certification'
+  description = 'Runs Data Dictionary 1.7 tests and creates a certification report' +
+      '\n  RESOScript Example:' +
+      '\n    ./gradlew generateCertificationReport_DD_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -Dminimal=true -Dstrict=true' +
+      '\n  Metadata File Example:' +
+      '\n    ./gradlew generateCertificationReport_DD_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dminimal=true -Dstrict=true' +
+      '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
+
+  dependsOn testDataDictionary_1_7
+  doLast {
+    javaexec {
+      System.setProperty('pathToJsonResults', certJsonPath)
+      System.setProperty('reportDescription', 'RESO Data Dictionary 1.7 Certification Report')
+      systemProperties = System.getProperties()
+      classpath = sourceSets.main.runtimeClasspath
+      main = 'org.reso.certification.reporting.CertificationReportGenerator'
+    }
+  }
+}
+
+task testDataDictionaryReferenceMetadata_1_7() {
+  group = 'RESO Certification'
+  description = 'Runs Data Dictionary tests against reference metadata\n'
+
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
+      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      System.setProperty('pathToMetadata', 'src/main/resources/RESODataDictionary-1.7.edmx')
       systemProperties = System.getProperties()
+      args = [
+          '--strict',
+          '--plugin',
+          'pretty',
+          '--glue',
+          'org.reso.certification.stepdefs#DataDictionary',
+          'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
+      ]
+    }
+  }
+}
+
+//used for internal Commander Web API acceptance testing
+test {
+  dependsOn assemble, compileTestJava, testDataDictionaryReferenceMetadata_1_7
+  doLast {
+    javaexec {
+      main = "io.cucumber.core.cli.Main"
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       args = ['--strict',
               '--plugin',

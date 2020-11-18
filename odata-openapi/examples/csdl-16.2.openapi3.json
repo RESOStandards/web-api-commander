@@ -1,0 +1,12 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "OData CSDL document",
+        "description": "",
+        "version": ""
+    },
+    "paths": {},
+    "components": {
+        "schemas": {}
+    }
+}

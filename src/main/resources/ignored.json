@@ -1,0 +1,5 @@
+[
+  {
+    "lookup": "RoadFrontageType", "value": "CountyRoad", "ignored": ["CountryRoad"]
+  }
+]

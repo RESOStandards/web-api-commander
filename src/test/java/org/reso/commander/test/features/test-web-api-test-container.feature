@@ -8,15 +8,14 @@ Feature: Web API Container Tests
   # Metadata Validation
   ####################################
   Scenario: Test Container is Initialized using Token-Based Authentication
-    When sample metadata from "good-edmx-and-edm.xml" are loaded into the test container
-    And Settings are present in the test container
+    Given Settings are present in the test container
     And an auth token is provided in "ClientSettings_BearerToken"
     Then the Commander is created using auth token client mode
     And the auth token has a value of "testTokenValue"
     But the Commander is not created using client credentials mode
 
   Scenario: Metadata validation returns true for known-good metadata
-    When sample metadata from "good-edmx-and-edm.xml" are loaded into the test container
+    When sample metadata from "RESODataDictionary-1.7.edmx" are loaded into the test container
     Then metadata are valid
 
   Scenario: Metadata validation returns false for known-bad metadata

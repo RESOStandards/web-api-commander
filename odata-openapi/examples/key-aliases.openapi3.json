@@ -1,0 +1,445 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "Service for namespace key.aliases",
+        "description": "This service is located at [https://localhost/service-root/](https://localhost/service-root/)\n\n## Entity Data Model\n![ER Diagram](https://yuml.me/diagram/class/[Category{bg:lightslategray}],[Category]++-[EntityInfo],[EntityInfo],[Categories%20{bg:lawngreen}]++-*>[Category])\n\n### Legend\n![Legend](https://yuml.me/diagram/plain;dir:TB;scale:60/class/[External.Type{bg:whitesmoke}],[ComplexType],[EntityType{bg:lightslategray}],[EntitySet/Singleton/Operation{bg:lawngreen}])",
+        "version": ""
+    },
+    "servers": [
+        {
+            "url": "https://localhost/service-root"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Categories"
+        }
+    ],
+    "paths": {
+        "/Categories": {
+            "get": {
+                "summary": "Get entities from Categories",
+                "tags": [
+                    "Categories"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/top"
+                    },
+                    {
+                        "$ref": "#/components/parameters/skip"
+                    },
+                    {
+                        "$ref": "#/components/parameters/search"
+                    },
+                    {
+                        "name": "filter",
+                        "description": "Filter items by property values, see [Filtering](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter)",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/count"
+                    },
+                    {
+                        "name": "orderby",
+                        "description": "Order items by property values, see [Sorting](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionorderby)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "Info/ID",
+                                    "Info/ID desc",
+                                    "Info/Created",
+                                    "Info/Created desc",
+                                    "Name",
+                                    "Name desc"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "select",
+                        "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "Info",
+                                    "Name"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retrieved entities",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Collection of Category",
+                                    "properties": {
+                                        "@count": {
+                                            "$ref": "#/components/schemas/count"
+                                        },
+                                        "value": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/key.aliases.Category"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Add new entity to Categories",
+                "tags": [
+                    "Categories"
+                ],
+                "requestBody": {
+                    "description": "New entity",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/key.aliases.Category-create"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/key.aliases.Category"
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            }
+        },
+        "/Categories({EntityInfoID})": {
+            "parameters": [
+                {
+                    "description": "ID within EntityInfo",
+                    "in": "path",
+                    "name": "EntityInfoID",
+                    "required": true,
+                    "schema": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            ],
+            "get": {
+                "summary": "Get entity from Categories by key",
+                "tags": [
+                    "Categories"
+                ],
+                "parameters": [
+                    {
+                        "name": "select",
+                        "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "Info",
+                                    "Name"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retrieved entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/key.aliases.Category"
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Update entity in Categories",
+                "tags": [
+                    "Categories"
+                ],
+                "requestBody": {
+                    "description": "New property values",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/key.aliases.Category-update"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Success"
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete entity from Categories",
+                "tags": [
+                    "Categories"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success"
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "key.aliases.Category": {
+                "title": "Category",
+                "type": "object",
+                "properties": {
+                    "Info": {
+                        "$ref": "#/components/schemas/key.aliases.EntityInfo"
+                    },
+                    "Name": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                }
+            },
+            "key.aliases.Category-create": {
+                "title": "Category (for create)",
+                "type": "object",
+                "properties": {
+                    "Info": {
+                        "$ref": "#/components/schemas/key.aliases.EntityInfo-create"
+                    },
+                    "Name": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                }
+            },
+            "key.aliases.Category-update": {
+                "title": "Category (for update)",
+                "type": "object",
+                "properties": {
+                    "Info": {
+                        "$ref": "#/components/schemas/key.aliases.EntityInfo-update"
+                    },
+                    "Name": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                }
+            },
+            "key.aliases.EntityInfo": {
+                "title": "EntityInfo",
+                "type": "object",
+                "properties": {
+                    "ID": {
+                        "type": "integer",
+                        "format": "int32",
+                        "title": "ID within EntityInfo"
+                    },
+                    "Created": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2017-04-13T15:51:04Z",
+                        "nullable": true
+                    }
+                }
+            },
+            "key.aliases.EntityInfo-create": {
+                "title": "EntityInfo (for create)",
+                "type": "object",
+                "properties": {
+                    "ID": {
+                        "type": "integer",
+                        "format": "int32",
+                        "title": "ID within EntityInfo"
+                    },
+                    "Created": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2017-04-13T15:51:04Z",
+                        "nullable": true
+                    }
+                }
+            },
+            "key.aliases.EntityInfo-update": {
+                "title": "EntityInfo (for update)",
+                "type": "object",
+                "properties": {
+                    "ID": {
+                        "type": "integer",
+                        "format": "int32",
+                        "title": "ID within EntityInfo"
+                    },
+                    "Created": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2017-04-13T15:51:04Z",
+                        "nullable": true
+                    }
+                }
+            },
+            "count": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "string"
+                    }
+                ],
+                "description": "The number of entities in the collection. Available when using the [$count](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptioncount) query option."
+            },
+            "error": {
+                "type": "object",
+                "required": [
+                    "error"
+                ],
+                "properties": {
+                    "error": {
+                        "type": "object",
+                        "required": [
+                            "code",
+                            "message"
+                        ],
+                        "properties": {
+                            "code": {
+                                "type": "string"
+                            },
+                            "message": {
+                                "type": "string"
+                            },
+                            "target": {
+                                "type": "string"
+                            },
+                            "details": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "code",
+                                        "message"
+                                    ],
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "target": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "innererror": {
+                                "type": "object",
+                                "description": "The structure of this object is service-specific"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "parameters": {
+            "top": {
+                "name": "top",
+                "in": "query",
+                "description": "Show only the first n items, see [Paging - Top](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptiontop)",
+                "schema": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "example": 50
+            },
+            "skip": {
+                "name": "skip",
+                "in": "query",
+                "description": "Skip the first n items, see [Paging - Skip](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionskip)",
+                "schema": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            },
+            "count": {
+                "name": "count",
+                "in": "query",
+                "description": "Include count of items, see [Count](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptioncount)",
+                "schema": {
+                    "type": "boolean"
+                }
+            },
+            "search": {
+                "name": "search",
+                "in": "query",
+                "description": "Search items by search phrases, see [Searching](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionsearch)",
+                "schema": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses": {
+            "error": {
+                "description": "Error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/error"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
