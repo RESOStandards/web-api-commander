@@ -15,7 +15,6 @@
     </extension>
     <method v="2">
       <option name="Make" enabled="true" />
-      <option name="Gradle.BeforeRunTask" enabled="true" tasks="testDataDictionaryReferenceMetadata_1_7" externalProjectPath="$PROJECT_DIR$" vmOptions="" scriptParameters="" />
     </method>
   </configuration>
 </component>

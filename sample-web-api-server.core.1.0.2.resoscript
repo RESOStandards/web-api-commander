@@ -225,7 +225,7 @@
 
     <Request
         RequestId="metadata-request"
-        OutputFile="metadata-metadata-request.xml"
+        OutputFile="metadata-request.xml"
         Url="*ClientSettings_WebAPIURI*/$metadata*Parameter_OptionalMetadataFormatParameter*"
     />
 

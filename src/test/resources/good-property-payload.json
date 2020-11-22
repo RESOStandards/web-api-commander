@@ -2,11 +2,13 @@
   "@odata.context": "https://test.reso.org",
   "value": [
     {
-      "ListingKeyNumeric": 1,
+      "ListingKey": "abc123",
       "BedroomsTotal": 5,
       "StreetName": "Main",
       "ModificationTimestamp": "2020-04-02T02:02:02.02Z",
-      "ListingContractDate": "2020-04-02"
+      "ListingContractDate": "2020-04-02",
+      "StandardStatus": "ActiveUnderContract",
+      "AccessibilityFeatures": ["AccessibleApproachWithRamp", "AccessibleEntrance", "Visitable"]
     }
   ]
 }

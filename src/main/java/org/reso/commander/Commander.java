@@ -78,6 +78,7 @@ public class Commander {
   private static String serviceRoot;
   private static Edm edm;
   private static XMLMetadata xmlMetadata;
+  private Integer lastResponseCode = null;
 
   private Commander() {
     //private constructor, should not be used. Use Builder instead.
@@ -575,7 +576,7 @@ public class Commander {
     return isOAuthClient;
   }
 
-  public Optional<InputStream> fetchJsonData(String requestUri) {
+  public Optional<InputStream> fetchJsonData(String requestUri)  {
     ODataRawResponse oDataRawResponse = null;
     try {
       if (requestUri != null && requestUri.length() > 0) {
@@ -614,22 +615,15 @@ public class Commander {
     try {
       Optional<InputStream> response = fetchJsonData(requestUri);
       if (response.isPresent()) {
-        FileUtils.copyInputStreamToFile(response.get(), new File(outputFilePath));
+        FileUtils.copyInputStreamToFile(response.get(), new File(outputFilePath
+            + (getLastResponseCode() == HttpStatus.SC_OK ? EMPTY_STRING : ERROR_EXTENSION)));
         LOG.info("JSON Response saved to: " + outputFilePath);
       }
     } catch (Exception ex) {
-      File outputFile = new File(outputFilePath + ERROR_EXTENSION);
-      try {
-        FileUtils.copyInputStreamToFile(new ByteArrayInputStream(ex.toString().getBytes()), outputFile);
-      } catch (IOException ioException) {
-        ioException.printStackTrace();
-      }
       ex.printStackTrace();
     }
     return getLastResponseCode();
   }
-
-  private Integer lastResponseCode = null;
 
   /**
    * Gets HTTP response code from most recent Commander request

@@ -167,6 +167,7 @@ public final class WebAPITestContainer implements TestContainer {
     responseCode.set(null);
     responseData.set(null);
     initialResponseData.set(null);
+    isDataSystemValid.set(false);
     rawRequest.set(null);
     oDataClientErrorException.set(null);
     oDataServerErrorException.set(null);
@@ -743,6 +744,7 @@ public final class WebAPITestContainer implements TestContainer {
   }
 
   public WebAPITestContainer validateDataSystem() {
+    isDataSystemValid.set(false);
     if (getResponseData() != null) {
       try {
         JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4);

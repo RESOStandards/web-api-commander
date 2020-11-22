@@ -828,6 +828,7 @@ public final class TestUtils {
           EQ = "eq",
           GREATER_THAN = "gt",
           GREATER_THAN_OR_EQUAL = "ge",
+          HAS = "has",
           LESS_THAN = "lt",
           LESS_THAN_OR_EQUAL = "le",
           CONTAINS = "contains",

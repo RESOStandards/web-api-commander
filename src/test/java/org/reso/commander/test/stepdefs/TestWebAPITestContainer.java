@@ -2,6 +2,8 @@ package org.reso.commander.test.stepdefs;
 
 import io.cucumber.java8.En;
 import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.TestUtils;
 import org.reso.models.Settings;
@@ -15,7 +17,8 @@ import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.*;
 
 public class TestWebAPITestContainer implements En {
-  AtomicReference<WebAPITestContainer> testContainer = new AtomicReference<>();
+  private static final AtomicReference<WebAPITestContainer> testContainer = new AtomicReference<>();
+  private static final Logger LOG = LogManager.getLogger(TestWebAPITestContainer.class);
 
   public TestWebAPITestContainer() {
 
@@ -24,15 +27,20 @@ public class TestWebAPITestContainer implements En {
      */
     Given("^a Web API test container was created using the RESOScript \"([^\"]*)\"$", (String fileName) -> {
       try {
-        //get settings from mock RESOScript file
-        URL resource = getClass().getClassLoader().getResource(fileName);
-        assertNotNull(getDefaultErrorMessage("was unable to find the given RESOScript:", fileName), resource);
+        //reuse the existing test container if it already exists
+        if (testContainer.get() != null && testContainer.get().getIsInitialized()) {
+          testContainer.get().resetState();
+        } else {
+          //get settings from mock RESOScript file
+          URL resource = getClass().getClassLoader().getResource(fileName);
+          assertNotNull(getDefaultErrorMessage("was unable to find the given RESOScript:", fileName), resource);
 
-        setTestContainer(new WebAPITestContainer());
-        getTestContainer().setSettings(Settings.loadFromRESOScript(new File(resource.getFile())));
-        assertNotNull(getDefaultErrorMessage("could not load mock RESOScript: " + resource.getFile()), getTestContainer().getSettings());
-
-        getTestContainer().initialize();
+          setTestContainer(new WebAPITestContainer());
+          getTestContainer().setSettings(Settings.loadFromRESOScript(new File(resource.getFile())));
+          assertNotNull(getDefaultErrorMessage("could not load mock RESOScript: " + resource.getFile()), getTestContainer().getSettings());
+          getTestContainer().initialize();
+          LOG.info("Test container initialized!");
+        }
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -45,13 +53,12 @@ public class TestWebAPITestContainer implements En {
         String xmlMetadataString = loadResourceAsString(resourceName);
         assertNotNull(getDefaultErrorMessage("could not load resourceName:", resourceName), xmlMetadataString);
         getTestContainer().setResponseCode(HttpStatus.SC_OK);
-
         getTestContainer().setXMLResponseData(xmlMetadataString);
+        LOG.info("XML Metadata loaded from " + resourceName);
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
     });
-
 
     /*
      * Auth settings validation
@@ -96,15 +103,19 @@ public class TestWebAPITestContainer implements En {
           getTestContainer().hasValidMetadata());
     });
 
-
     /*
-     * DataSystem validation
+     * Data loading step
      */
     When("^sample JSON data from \"([^\"]*)\" are loaded into the test container$", (String resourceName) -> {
       getTestContainer().setResponseCode(HttpStatus.SC_OK);
       getTestContainer().setResponseData(loadResourceAsString(resourceName));
+      System.out.println("JSON Data loaded from: " + resourceName);
     });
 
+
+    /*
+     * DataSystem validation
+     */
     Then("^schema validation passes for the sample DataSystem data$", () ->
       assertTrue(getDefaultErrorMessage("expected DataSystem to pass validation, but it failed!"),
         getTestContainer().validateDataSystem().getIsValidDataSystem()));
@@ -112,7 +123,6 @@ public class TestWebAPITestContainer implements En {
     Then("^schema validation fails for the sample DataSystem data$", () ->
       assertFalse(getDefaultErrorMessage("expected DataSystem to fail validation, but it passed!"),
         getTestContainer().validateDataSystem().getIsValidDataSystem()));
-
 
     /*
      * Integer Response Testing
