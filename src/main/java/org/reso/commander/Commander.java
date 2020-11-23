@@ -13,6 +13,7 @@ import org.apache.olingo.client.api.communication.request.retrieve.EdmMetadataRe
 import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.XMLMetadataRequest;
 import org.apache.olingo.client.api.communication.response.ODataRawResponse;
+import org.apache.olingo.client.api.communication.response.ODataResponse;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.client.api.serialization.ODataSerializerException;
@@ -33,6 +34,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 import java.io.*;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -467,6 +469,37 @@ public class Commander {
   }
 
   /**
+   * Prepares a raw OData request from the current configuration.
+   * @return an ODataRawRequest for the current Commander instance.
+   */
+  public ODataRawRequest prepareODataRawMetadataRequest() {
+    try {
+      ODataRawRequest request = getClient().getRetrieveRequestFactory().getRawRequest(new URI(getServiceRoot() + "/$metadata"));
+      request.addCustomHeader(HttpHeaders.CONTENT_TYPE, null);
+      request.addCustomHeader(HttpHeaders.ACCEPT, null);
+      return request;
+    } catch (URISyntaxException uriSyntaxException) {
+      LOG.error(getDefaultErrorMessage("Invalid Service Root URI:", getServiceRoot(), "\n" + uriSyntaxException.getMessage()));
+    }
+    return null;
+  }
+
+  public ODataRawRequest prepareODataRawMetadataRequest(String requestUri) {
+    try {
+      if (!getPathToMetadata().isPresent()) {
+
+      }
+      ODataRawRequest request = getClient().getRetrieveRequestFactory().getRawRequest(new URI( requestUri));
+      request.addCustomHeader(HttpHeaders.CONTENT_TYPE, null);
+      request.addCustomHeader(HttpHeaders.ACCEPT, null);
+      return request;
+    } catch (URISyntaxException uriSyntaxException) {
+      LOG.error(getDefaultErrorMessage("Invalid Service Root URI:", getServiceRoot(), "\n" + uriSyntaxException.getMessage()));
+    }
+    return null;
+  }
+
+  /**
    * Reads Edm from XMLMetadata in the given path.
    *
    * @param pathToXmlMetadata the path to the XML metadata.
@@ -633,17 +666,19 @@ public class Commander {
     return lastResponseCode;
   }
 
+  /**
+   * Retrieves XML metadata from the Commander's current service root.
+   * @return the response from the XML Metadata request as a string.
+   */
   public String fetchXMLMetadata() {
     String xmlMetadataResponseData = null;
     try {
+      assertNotNull(getDefaultErrorMessage("Service root was null!"), getServiceRoot());
+
       final String requestUri = getServiceRoot() + "/$metadata";
 
-      assertNotNull(getDefaultErrorMessage("Metadata request URI was null!"), requestUri);
-
-      ODataRawRequest request = getClient().getRetrieveRequestFactory().getRawRequest(URI.create(requestUri));
-      request.setFormat(ContentType.APPLICATION_XML.toContentTypeString());
-
-      ODataRawResponse response = request.execute();
+      //ODataRawRequest request = getClient().getRetrieveRequestFactory().getRawRequest(URI.create(requestUri));
+      ODataResponse response = prepareXMLMetadataRequest().execute();
       lastResponseCode = response.getStatusCode();
 
       if (getLastResponseCode() != HttpStatus.SC_OK) {
@@ -658,6 +693,31 @@ public class Commander {
       LOG.error(ex.toString());
     }
     return xmlMetadataResponseData;
+  }
+
+  public Optional<URI> getPathToMetadata() {
+    return getPathToMetadata(getServiceRoot());
+  }
+
+  public Optional<URI> getPathToMetadata(String requestUri) {
+    if (requestUri == null) {
+      LOG.error(getDefaultErrorMessage("service root is null!"));
+      System.exit(NOT_OK);
+    }
+
+    try {
+      String uri = requestUri;
+      if (!requestUri.contains("/$metadata")) {
+        uri += "/$metadata";
+      }
+
+      return Optional.of(new URI(uri));
+    } catch (Exception ex) {
+      LOG.error(getDefaultErrorMessage("could not create path to metadata.\n" + ex.toString()));
+      System.exit(NOT_OK);
+    }
+
+    return Optional.empty();
   }
 
   /**
@@ -767,11 +827,7 @@ public class Commander {
      * @return a Builder containing the given Web API service root
      */
     public Builder serviceRoot(String serviceRoot) {
-      if (serviceRoot != null) {
-        String uri = serviceRoot.endsWith("/") ? serviceRoot.substring(0, serviceRoot.length()-1) : serviceRoot;
-        uri = uri.replace("$metadata", EMPTY_STRING);
-        this.serviceRoot = uri;
-      }
+      this.serviceRoot = serviceRoot;
       return this;
     }
 

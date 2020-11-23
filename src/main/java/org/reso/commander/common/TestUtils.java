@@ -588,7 +588,7 @@ public final class TestUtils {
    * @throws EdmPrimitiveTypeException thrown if given value cannot be parsed.
    */
   public static Date parseDateFromEdmDateTimeOffsetString(String edmDateTimeOffsetString) throws EdmPrimitiveTypeException {
-    return EdmDateTimeOffset.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Date.class);
+    return EdmDate.getInstance().valueOfString(edmDateTimeOffsetString, true, null, null, null, null, Date.class);
   }
 
   /***
@@ -760,7 +760,7 @@ public final class TestUtils {
           container.getCommander().getServiceRoot());
 
       try {
-        assertNotNull(getDefaultErrorMessage("could not find valid XML Metadata for given service root:", serviceRoot),
+        assertNotNull(getDefaultErrorMessage("could not retrieve valid XML Metadata for given service root:", serviceRoot),
             container.fetchXMLMetadata());
 
       } catch (ODataClientErrorException cex) {

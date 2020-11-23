@@ -38,8 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
-import static org.reso.commander.Commander.AMPERSAND;
-import static org.reso.commander.Commander.EQUALS;
+import static org.reso.commander.Commander.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.HEADER_ODATA_VERSION;
 import static org.reso.commander.common.TestUtils.JSON_VALUE_PATH;
@@ -292,7 +291,11 @@ public final class WebAPITestContainer implements TestContainer {
         selectList.set(fragment.replace(ODATA_QUERY_PARAMS.SELECT, EMPTY_STRING).replace(EQUALS, EMPTY_STRING));
       }
     });
-    return new LinkedHashSet<>((Arrays.asList(selectList.get().split(FIELD_SEPARATOR))));
+    if (selectList.get() == null) {
+      return new ArrayList<>();
+    } else {
+      return new LinkedHashSet<>((Arrays.asList(selectList.get().split(FIELD_SEPARATOR))));
+    }
   }
 
   /**
@@ -354,21 +357,27 @@ public final class WebAPITestContainer implements TestContainer {
   public XMLMetadata fetchXMLMetadata() throws Exception {
     if (xmlMetadata.get() == null) {
       try {
-        String requestUri = Settings.resolveParameters(getSettings().getRequest(Request.WELL_KNOWN.METADATA_ENDPOINT), getSettings()).getUrl();
-        assertNotNull(getDefaultErrorMessage("Metadata request URI was null! Please check your RESOScript."), requestUri);
+        Request request = getSettings().getRequest(Request.WELL_KNOWN.METADATA_ENDPOINT);
+        setRequest(request);
+        assertNotNull(getDefaultErrorMessage("Metadata request was null! Please check your RESOScript."), request);
 
-        ODataRawRequest request = getCommander().getClient().getRetrieveRequestFactory().getRawRequest(URI.create(requestUri));
-        request.setFormat(ContentType.APPLICATION_XML.toContentTypeString());
+        if (getCommander().getPathToMetadata(request.getUrl()).isPresent()) {
+          LOG.info("Requesting XML Metadata from: " + getCommander().getPathToMetadata(request.getUrl()).get().toString());
+          ODataRawRequest oDataRawRequest = getCommander()
+              .prepareODataRawMetadataRequest(getCommander().getPathToMetadata(request.getUrl()).get().toString());
+          ODataRawResponse response = oDataRawRequest.execute();
+          responseCode.set(response.getStatusCode());
+          setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, response));
 
-        LOG.info("Requesting XML Metadata from service root at: " + getServiceRoot());
-        ODataRawResponse response = request.execute();
-        responseCode.set(response.getStatusCode());
-        setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, response));
-
-        xmlResponseData.set(TestUtils.convertInputStreamToString(response.getRawResponse()));
-        xmlMetadata.set(Commander.deserializeXMLMetadata(xmlResponseData.get(), getCommander().getClient()));
+          xmlResponseData.set(TestUtils.convertInputStreamToString(response.getRawResponse()));
+          xmlMetadata.set(Commander.deserializeXMLMetadata(xmlResponseData.get(), getCommander().getClient()));
+        } else {
+          LOG.error(getDefaultErrorMessage("could not create metadata URI from given requestUri:", request.getUrl()));
+          System.exit(NOT_OK);
+        }
       } catch (Exception ex) {
         processODataRequestException(ex);
+        System.exit(NOT_OK);
       } finally {
         haveMetadataBeenRequested.set(true);
       }
@@ -731,15 +740,22 @@ public final class WebAPITestContainer implements TestContainer {
   }
 
   public final WebAPITestContainer validateMetadata() {
-    assertNotNull(getDefaultErrorMessage("no XML response data found!"), getXMLResponseData());
-    validateXMLMetadataXML();
+    try {
+      if (!haveMetadataBeenRequested.get()) fetchXMLMetadata();
+      assertNotNull(getDefaultErrorMessage("no XML response data found!"), getXMLResponseData());
+      validateXMLMetadataXML();
 
-    setXMLMetadata(Commander.deserializeXMLMetadata(getXMLResponseData(), getCommander().getClient()));
-    validateXMLMetadata();
+      setXMLMetadata(Commander.deserializeXMLMetadata(getXMLResponseData(), getCommander().getClient()));
+      validateXMLMetadata();
 
-    setEdm(Commander.deserializeEdm(getXMLResponseData(), getCommander().getClient()));
-    validateEdm();
+      setEdm(Commander.deserializeEdm(getXMLResponseData(), getCommander().getClient()));
+      validateEdm();
 
+      return this;
+    } catch (Exception ex) {
+      LOG.error(getDefaultErrorMessage(ex.toString()));
+      System.exit(NOT_OK);
+    }
     return this;
   }
 

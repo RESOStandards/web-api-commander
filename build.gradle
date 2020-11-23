@@ -90,7 +90,9 @@ task testWebApiServer_1_0_2_Core() {
   group = 'RESO Certification'
   description = 'Runs Web API Core 1.0.2 Automated Acceptance Tests.' +
       '\n  Example: ' +
-      '\n    $ ./gradlew testWebApiServer_1_0_2_Core -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true\n'
+      '\n    $ ./gradlew testWebApiServer_1_0_2_Core -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true\n' +
+      '\n    Note: by default the Web API tests assume Collection(Edm.EnumType).' +
+      '\n      Pass -DuseCollections=false if using OData IsFlags.\n'
 
   dependsOn jar
   doLast {
@@ -98,6 +100,7 @@ task testWebApiServer_1_0_2_Core() {
       main = "io.cucumber.core.cli.Main"
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
+
       args = [
           '--strict',
           '--plugin',

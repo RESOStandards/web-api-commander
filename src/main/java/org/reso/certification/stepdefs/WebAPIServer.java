@@ -14,6 +14,7 @@ import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
+import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.Commander;
@@ -22,6 +23,8 @@ import org.reso.models.Request;
 import org.reso.models.Settings;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
@@ -33,6 +36,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 import static org.reso.certification.containers.WebAPITestContainer.*;
 import static org.reso.commander.Commander.*;
 import static org.reso.commander.common.ErrorMsg.getAssertResponseCodeErrorMessage;
@@ -42,15 +47,21 @@ import static org.reso.commander.common.TestUtils.*;
 import static org.reso.commander.common.TestUtils.Operators.*;
 
 /**
- * Contains the glue code for the Web API Server 1.0.2 Platinum Certification
+ * Contains the glue code for Web API Core 1.0.2 Certification as well as previous Platinum tests,
+ * which will converted to standalone endorsements, where applicable.
  */
-public class WebAPIServer implements En {
+class WebAPIServer implements En {
   private static final Logger LOG = LogManager.getLogger(WebAPIServer.class);
-  private static final String SHOW_RESPONSES = "showResponses";
-
+  private static final String
+      SHOW_RESPONSES_PARAM = "showResponses",
+      USE_COLLECTIONS_PARAM = "useCollections";
 
   //extract any params here
-  private static final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES));
+  private static final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES_PARAM));
+  // boolean used for indicating whether Web API tests are using collections of enums or not
+  // defaults to useCollections=true since IsFlags is being deprecated
+  private static final boolean useCollections = Boolean.parseBoolean(System.getProperty(USE_COLLECTIONS_PARAM, "true"));
+
 
   /*
    * Used to store a static instance of the WebAPITestContainer class
@@ -93,7 +104,7 @@ public class WebAPIServer implements En {
     });
 
     /*
-     * fetch-by-id
+     * fetch-by-key
      */
     And("^the provided \"([^\"]*)\" is returned in \"([^\"]*)\"$", (String parameterUniqueIdValue, String parameterUniqueId) -> {
       try {
@@ -113,9 +124,10 @@ public class WebAPIServer implements En {
         LOG.info("Resolved value is: " + resolvedValue);
 
         if (resolvedValue.getClass().isInstance(Integer.class)) {
-          assertEquals("ERROR: the given Integer value is not equal to the value found on the server!", Integer.parseInt(expectedValueAsString), resolvedValue);
+          assertEquals(getDefaultErrorMessage("the given Integer value is not equal to the value found on the server!"),
+              Integer.parseInt(expectedValueAsString), resolvedValue);
         } else {
-          assertEquals("ERROR: the given String value is not equal to the value found on the server!", expectedValueAsString, resolvedValue.toString());
+          assertEquals(getDefaultErrorMessage("the given String value is not equal to the value found on the server!"), expectedValueAsString, resolvedValue.toString());
         }
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
@@ -133,8 +145,8 @@ public class WebAPIServer implements En {
         df.setMaximumFractionDigits(1);
         double fill;
 
-        assertNotNull("ERROR: no fields found within the given $select list. Check request Id: " + getTestContainer().getRequest().getRequestId() + " in your .resoscript file!",
-            getTestContainer().getSelectList());
+        assertNotNull(getDefaultErrorMessage("no fields found within the given $select list. Check request Id:",
+                getTestContainer().getRequest().getRequestId(), "in your .resoscript file!"), getTestContainer().getSelectList());
 
         LOG.info(QueryOption.SELECT + " list is: " + getTestContainer().getSelectList());
 
@@ -159,7 +171,7 @@ public class WebAPIServer implements En {
         } else {
           LOG.info("Percent Fill: 0% - no fields with data found!");
         }
-        assertTrue("ERROR: no fields with data could be found from the given $select list!", numFieldsWithData.get() > 0);
+        assertTrue(getDefaultErrorMessage("no fields with data could be found from the given $select list!"), numFieldsWithData.get() > 0);
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -178,7 +190,7 @@ public class WebAPIServer implements En {
         int topCount = Integer.parseInt(Settings.resolveParametersString(parameterTopCount, getTestContainer().getSettings()));
         LOG.info("Number of values returned: " + numResults.get() + ", top count is: " + topCount);
 
-        assertTrue("ERROR: results count must be greater than zero and less than " + parameterTopCount + "!",
+        assertTrue(getDefaultErrorMessage("results count must be greater than zero and less than", parameterTopCount + "!"),
             numResults.get() > 0 && numResults.get() <= topCount);
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
@@ -216,16 +228,14 @@ public class WebAPIServer implements En {
         List<POJONode> l2 = from(getTestContainer().getResponseData()).getJsonObject(JSON_VALUE_PATH);
 
         int combinedCount = l1.size() + l2.size();
-        Set<POJONode> combined = new LinkedHashSet<>(l1);
+        Set<POJONode> intersection = new LinkedHashSet<>(l1);
 
-        new POJONode(l1);
         if (showResponses) LOG.info("Response Page 1: " + l1);
 
-        combined.addAll(l2);
-        new POJONode(l2);
+        intersection.addAll(l2);
         if (showResponses) LOG.info("Response Page 2: " + l2);
-
-        assertEquals("ERROR: repeated data found, expected unique data on each page!", combinedCount, combined.size());
+        LOG.info("Expected unique count:" + combinedCount + ", found unique count: " + intersection.size());
+        assertEquals(getDefaultErrorMessage("repeated data found, expected unique data on each page!"), combinedCount, intersection.size());
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -238,12 +248,23 @@ public class WebAPIServer implements En {
     /*
      * GET request by requirementId (see generic.resoscript)
      */
-    When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", this::prepareAndExecuteRawGetRequest);
+    When("^a GET request is made to the resolved Url in \"([^\"]*)\"$", (final String requestId) -> {
+      final Set<String> collectionRequestIds = new HashSet<>(Arrays.asList("filter-coll-enum-any", "filter-coll-enum-all"));
+      final Set<String> isFlagsRequestIds = new HashSet<>(Arrays.asList("filter-enum-multi-has", "filter-enum-multi-has-and"));
+
+      if (useCollections) {
+        assumeFalse("Using Collection(Edm.EnumType). Skipping Test: " + requestId, isFlagsRequestIds.contains(requestId));
+      } else {
+        assumeFalse("Using IsFlags=\"true\". Skipping Test: " + requestId, collectionRequestIds.contains(requestId));
+      }
+      prepareAndExecuteRawGetRequest(requestId);
+    });
 
     /*
      * Assert response code
      */
     Then("^the server responds with a status code of (\\d+)$", (Integer assertedResponseCode) -> {
+      assertNotNull(getDefaultErrorMessage("request was null! \nCheck RESOScript to make sure requestId exists."), getTestContainer().getRequest());
       try {
         LOG.info("Asserted Response Code: " + assertedResponseCode + ", Server Response Code: " + getTestContainer().getResponseCode());
 
@@ -285,7 +306,7 @@ public class WebAPIServer implements En {
     And("^the XML Metadata response is valid XML$", () -> {
       assertNotNull(getDefaultErrorMessage("no XML Response data were found!"), getTestContainer().getXMLResponseData());
       getTestContainer().validateXMLMetadataXML();
-      assertTrue("ERROR: invalid XML response!", getTestContainer().getIsValidXMLMetadataXML());
+      assertTrue(getDefaultErrorMessage("invalid XML response!"), getTestContainer().getIsValidXMLMetadataXML());
     });
 
     /*
@@ -307,7 +328,8 @@ public class WebAPIServer implements En {
 
         if (versionsMatch) {
           LOG.info("Asserted Response Code: " + assertedHttpResponseCode + ", Response code: " + getTestContainer().getResponseCode());
-          assertTrue("ERROR: asserted response code (" + assertedHttpResponseCode + ") does not match the one returned from the server (" + getTestContainer().getResponseCode() + ") !", responseCodesMatch);
+          assertTrue(getDefaultErrorMessage("asserted response code (" + assertedHttpResponseCode + ")",
+              "does not match the one returned from the server (" + getTestContainer().getResponseCode() + ")!"), responseCodesMatch);
         } else {
           LOG.info("Test skipped! Only applies when the asserted version matches the reported server version.");
         }
@@ -323,9 +345,9 @@ public class WebAPIServer implements En {
      */
     And("^the response has results$", () -> {
       try {
-        assertTrue("ERROR: no results were found in the '" + JSON_VALUE_PATH + "' path of the JSON response!",
+        assertTrue(getDefaultErrorMessage("no results were found in the '" + JSON_VALUE_PATH + "' path of the JSON response!"),
             from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, Map.class).size() > 0);
-        LOG.info("Results count is: " + from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, Map.class).get(0).size());
+        LOG.info("Results count is: " + from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, Map.class).size());
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -338,7 +360,7 @@ public class WebAPIServer implements En {
       try {
         String value = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
         boolean isPresent = from(getTestContainer().getResponseData()).get() != null;
-        assertTrue("ERROR: singleton results not found for '" + value + "'!", isPresent);
+        assertTrue(getDefaultErrorMessage("singleton results not found for '" + value + "'!"), isPresent);
         LOG.info("Data are present and response value is: " + value);
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
@@ -353,7 +375,7 @@ public class WebAPIServer implements En {
         int count = from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).size(),
             limit = Integer.parseInt(Settings.resolveParametersString(limitField, getTestContainer().getSettings()));
         LOG.info("Results count is: " + count + ", Limit is: " + limit);
-        assertTrue("ERROR: number of results exceeds that specified in '" + limitField + "'!", count <= limit);
+        assertTrue(getDefaultErrorMessage("number of results exceeds that specified in '" + limitField + "'!"), count <= limit);
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -665,7 +687,7 @@ public class WebAPIServer implements En {
       try {
         entityContainer.set(TestUtils.findDefaultEntityContainer(getTestContainer().getEdm(), getTestContainer().getXMLMetadata()));
 
-        assertNotNull("ERROR: server metadata does not contain the given resource name: " + resourceName,
+        assertNotNull(getDefaultErrorMessage("server metadata does not contain the given resource name:", resourceName),
             entityContainer.get().getEntitySet(resourceName));
 
         LOG.info("Found EntityContainer for the given resource: '" + resourceName + "'");
@@ -680,13 +702,16 @@ public class WebAPIServer implements En {
      * all of the fields in the given parameterSelectList.
      */
     And("^resource metadata for \"([^\"]*)\" contains the fields in the given select list$", (String parameterResourceName) -> {
+      assertTrue(getDefaultErrorMessage("no $select list found for requestId:", getTestContainer().getRequest().getRequestId()),
+          getTestContainer().getSelectList().size() > 0);
+
       try {
         LOG.info("Searching metadata for fields in given select list: " + getTestContainer().getSelectList().toString());
         getTestContainer().getSelectList().forEach(fieldName -> {
           //need to skip the expand field when looking through the metadata
-          if (getTestContainer().getExpandField() == null || !fieldName.contentEquals(getTestContainer().getExpandField())) {
+          if (getTestContainer().getExpandField() != null && !fieldName.contentEquals(getTestContainer().getExpandField())) {
             try {
-              assertNotNull("ERROR: Field name '" + fieldName + "' is not present in server metadata!",
+              assertNotNull(getDefaultErrorMessage("Field name '" + fieldName + "' is not present in server metadata!"),
                   getTestContainer().getCsdlProperty(parameterResourceName, fieldName));
               LOG.info("Found: '" + fieldName.trim() + "'");
             } catch (Exception ex) {
@@ -697,6 +722,7 @@ public class WebAPIServer implements En {
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
+
     });
 
     /*
@@ -705,8 +731,8 @@ public class WebAPIServer implements En {
      */
     When("^the metadata contains a valid service document$", () -> {
       try {
-        assertNotNull("ERROR: could not find default entity container for given service root: " +
-            getTestContainer().getServiceRoot(), getTestContainer().getEdm().getEntityContainer());
+        assertNotNull(getDefaultErrorMessage("could not find default entity container for given service root:",
+            getTestContainer().getServiceRoot()), getTestContainer().getEdm().getEntityContainer());
         LOG.info("Found Default Entity Container: '" + getTestContainer().getEdm().getEntityContainer().getNamespace() + "'");
       } catch (ODataClientErrorException cex) {
         getTestContainer().setResponseCode(cex.getStatusLine().getStatusCode());
@@ -726,14 +752,18 @@ public class WebAPIServer implements En {
           getTestContainer().getCommander().getServiceRoot());
 
       try {
-        assertNotNull(getDefaultErrorMessage("could not find valid XML Metadata for given service root:", serviceRoot),
-            getTestContainer().getXMLMetadata());
-
+        if (getTestContainer().fetchXMLMetadata() == null) {
+          //force exit rather than allowing the tests to finish
+          LOG.error(getDefaultErrorMessage("could not retrieve valid XML Metadata for given service root:", serviceRoot));
+          System.exit(NOT_OK);
+        }
       } catch (ODataClientErrorException cex) {
         getTestContainer().setResponseCode(cex.getStatusLine().getStatusCode());
-        fail(getDefaultErrorMessage(cex));
+        LOG.error(getDefaultErrorMessage(cex));
+        System.exit(NOT_OK);
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex));
+        LOG.error(getDefaultErrorMessage(ex));
+        System.exit(NOT_OK);
       }
     });
 
@@ -746,7 +776,7 @@ public class WebAPIServer implements En {
       List<CsdlNavigationProperty> navigationProperties
           = TestUtils.findNavigationPropertiesForEntityTypeName(getTestContainer().getEdm(), getTestContainer().getXMLMetadata(), resourceName);
 
-      assertTrue("ERROR: no navigation properties found for the given '" + resourceName + "' resource!",
+      assertTrue(getDefaultErrorMessage("no navigation properties found for the given '" + resourceName + "' resource!"),
           navigationProperties.size() > 0);
 
       LOG.info("Found the following Navigation Properties:");
@@ -762,7 +792,7 @@ public class WebAPIServer implements En {
      */
     And("^data and type information exist in the results and within the given \"([^\"]*)\"$", (String parameterExpandField) -> {
       String expandField = Settings.resolveParametersString(parameterExpandField, getTestContainer().getSettings());
-      assertFalse("ERROR: no expand field found for " + parameterExpandField, expandField.isEmpty());
+      assertFalse(getDefaultErrorMessage("no expand field found for", parameterExpandField), expandField.isEmpty());
 
       ClientEntitySet results = getTestContainer().getCommander().getClient().getRetrieveRequestFactory()
           .getEntitySetRequest(getTestContainer().getRequestUri()).execute().getBody();
@@ -778,13 +808,13 @@ public class WebAPIServer implements En {
             // There may be nothing to expand, empty or null is a valid result
             if (clientProperty.hasNullValue()) return;
 
-            assertNotNull("ERROR: data type could not be found for " + clientProperty.getName() + "! "
-                + "\nCheck the NavigationProperty for your $expand field.", clientProperty.getValue().getTypeName());
+            assertNotNull(getDefaultErrorMessage("data type could not be found for", clientProperty.getName() + "!",
+                "\nCheck the NavigationProperty for your $expand field."), clientProperty.getValue().getTypeName());
 
             LOG.info("\tExpanded Field Name: " + expandField);
             clientProperty.getValue().asComplex().forEach(expandedClientProperty -> {
-              assertNotNull("ERROR: field name cannot be null!", expandedClientProperty.getName());
-              assertNotNull("ERROR: data type could not be found for: " + expandedClientProperty.getName(),
+              assertNotNull(getDefaultErrorMessage("field name cannot be null!"), expandedClientProperty.getName());
+              assertNotNull(getDefaultErrorMessage("data type could not be found for:", expandedClientProperty.getName()),
                   expandedClientProperty.getValue().getTypeName());
 
               if (expandedClientProperty.getValue().asPrimitive().toValue() != null) {
@@ -835,7 +865,8 @@ public class WebAPIServer implements En {
         }
       });
 
-      assertTrue("ERROR: could not find one of the following Standard Resource Names in the default entity container: " + requiredResourceString.replace(FIELD_SEPARATOR, PRETTY_FIELD_SEPARATOR),
+      assertTrue(getDefaultErrorMessage("could not find one of the following Standard Resource Names in the default entity container:",
+          requiredResourceString.replace(FIELD_SEPARATOR, PRETTY_FIELD_SEPARATOR)),
           found.get());
 
       LOG.info("Standard Resource Names requirement met!");
@@ -853,7 +884,8 @@ public class WebAPIServer implements En {
       LOG.info("Resource Name: " + resourceName);
       LOG.info("Allowed Resources: " + allowedResourceString.replace(FIELD_SEPARATOR, PRETTY_FIELD_SEPARATOR));
 
-      assertTrue("ERROR: the given resource name '" + resourceName + "' does not exist in the known resources within '" + parameterResourceList + "'. ",
+      assertTrue(getDefaultErrorMessage("the given resource name", "'" + resourceName + "'",
+          "does not exist in the known resources within", "'" + parameterResourceList + "'. "),
           allowedResources.contains(resourceName));
     });
 
@@ -861,7 +893,7 @@ public class WebAPIServer implements En {
     When("^a GET request is made to the resolved Url in \"([^\"]*)\" using the OData Client$", (String requestId) -> {
       Request request = getTestContainer().getSettings().getRequest(requestId);
       String uriString = Settings.resolveParameters(request, getTestContainer().getSettings()).getUrl();
-      assertTrue("ERROR: the resolved Url in '" + requestId + "' was invalid!", uriString != null && uriString.length() > 0);
+      assertTrue(getDefaultErrorMessage("the resolved Url in", "'" + requestId + "'", "was invalid!"), uriString != null && uriString.length() > 0);
 
       LOG.info("Request Id: " + requestId);
       try {
@@ -899,8 +931,8 @@ public class WebAPIServer implements En {
     });
 
     And("^the OData client response has client entity set data$", () -> {
-      assertNotNull("ERROR: no entity collection returned in response!", getTestContainer().getClientEntitySet());
-      assertTrue("ERROR: no results returned!", getTestContainer().getClientEntitySet().getCount() > 0);
+      assertNotNull(getDefaultErrorMessage("no entity collection returned in response!"), getTestContainer().getClientEntitySet());
+      assertTrue(getDefaultErrorMessage("no results returned!"), getTestContainer().getClientEntitySet().getCount() > 0);
 
       if (showResponses) {
         getTestContainer().getClientEntitySet().getEntities().forEach(entity -> {
@@ -915,16 +947,16 @@ public class WebAPIServer implements En {
      * TODO: add additional items for additional subsequent OData versions, as released
      */
     And("^the server has an OData-Version header value of \"([^\"]*)\" or \"([^\"]*)\"$", (String val1, String val2) -> {
-      assertNotNull("ERROR: must enter a first value", val1);
-      assertNotNull("ERROR: must enter a second value", val2);
+      assertNotNull(getDefaultErrorMessage("must enter a first value"), val1);
+      assertNotNull(getDefaultErrorMessage("must enter a second value"), val2);
 
-      assertNotNull("ERROR: must specify an 'OData-Version' in the response header!"
-              + "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Toc453752225",
+      assertNotNull(getDefaultErrorMessage("must specify an 'OData-Version' in the response header!"
+              + "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Toc453752225\n"),
           getTestContainer().getServerODataHeaderVersion());
 
       LOG.info("Reported OData-Version header value: '" + getTestContainer().getServerODataHeaderVersion() + "'");
 
-      assertTrue("ERROR: the 'OData-Version' response header must either be '" + val1 + "' or '" + val2 + "' (without quotes).",
+      assertTrue(getDefaultErrorMessage("the 'OData-Version' response header must either be", "'" + val1 + "'", "or", "'" + val2 + "'", "(without quotes)."),
           getTestContainer().getServerODataHeaderVersion().contentEquals(val1)
               || getTestContainer().getServerODataHeaderVersion().contentEquals(val2));
     });
@@ -938,9 +970,38 @@ public class WebAPIServer implements En {
         getTestContainer().getXMLMetadata();
         getTestContainer().validateMetadata();
       }
-      assertTrue(getDefaultErrorMessage("Valid metadata could not be retrieved from the server! Please check the log for more information."),
-          getTestContainer().hasValidMetadata());
 
+      if (!getTestContainer().hasValidMetadata()) {
+        LOG.error(getDefaultErrorMessage("Valid metadata could not be retrieved from the server! Please check the log for more information."));
+        System.exit(NOT_OK);
+      }
+    });
+
+    /*
+     * Skips tests when not Collection of Enumeration data type
+     */
+    And("^field \"([^\"]*)\" in \"([^\"]*)\" has Collection of Enumeration data type$", (String fieldName, String resourceName) -> {
+      assertNotNull(getDefaultErrorMessage("fieldName was null!"), fieldName);
+      assertNotNull(getDefaultErrorMessage("resourceName was null!"), resourceName);
+
+      assumeTrue("Skipping Test: using IsFlags enumerations.", useCollections);
+
+      final String
+          resolvedFieldName = Settings.resolveParametersString(fieldName, getTestContainer().getSettings()),
+          resolvedResourceName = Settings.resolveParametersString(resourceName, getTestContainer().getSettings());
+
+      assertNotNull(getDefaultErrorMessage("resolved field name for parameter", "'" + fieldName + "'", "was null!"), resolvedFieldName);
+      assertNotNull(getDefaultErrorMessage("resolved resource name for parameter", "'" + resourceName + "'", "was null!"), resolvedResourceName);
+
+      CsdlProperty csdlProperty = getTestContainer().getCsdlProperty(resolvedResourceName, resolvedFieldName);
+
+      assertNotNull(getDefaultErrorMessage("could not find metadata item for", "'" + resolvedResourceName + "'", "and", "'" + resolvedFieldName + "'!"),
+          csdlProperty);
+
+      assertTrue(getDefaultErrorMessage("Field:", "'" + resolvedFieldName + "'",
+          "does not have type OData Collection(Edm.EnumType)!"), csdlProperty.isCollection());
+
+      LOG.info("Field '" + resolvedFieldName + "' has OData type Collection(Edm.EnumType)");
     });
   }
 
@@ -956,19 +1017,30 @@ public class WebAPIServer implements En {
       //reset local state each time a get request is run
       getTestContainer().resetState();
 
-      assertNotNull("ERROR: request Id cannot be null!", requestId);
+      assertNotNull(getDefaultErrorMessage("request Id cannot be null!"), requestId);
+
+      Request request = getTestContainer().getSettings().getRequest(requestId);
+
+      if (request == null) {
+        throw new Exception(getDefaultErrorMessage("request for requestId:", requestId, "was null!"));
+      }
+
       getTestContainer().setRequest(getTestContainer().getSettings().getRequest(requestId));
       LOG.info("Request ID: " + requestId);
 
+      URI requestUri = prepareURI(getTestContainer().getRequest().getUrl());
+
       //prepare request URI
-      getTestContainer().setRequestUri(Commander.prepareURI(Settings.resolveParameters(
-          getTestContainer().getSettings().getRequest(requestId), getTestContainer().getSettings()).getUrl()));
+      getTestContainer().setRequestUri(requestUri);
       LOG.info("Request URI: " + getTestContainer().getRequestUri().toString());
 
       //execute request
       getTestContainer().executePreparedRawGetRequest();
+    } catch (MalformedURLException urlException) {
+      LOG.info("Malformed URL was thrown in " + this.getClass() + ": " + urlException.toString()
+          + "\nSkipping Request!");
     } catch (Exception ex) {
-      LOG.info("Exception was thrown in " + this.getClass() + ": " + ex.toString());
+      LOG.info("Exception was thrown in " + this.getClass() + "!\n" + ex.toString());
     }
   }
 
@@ -983,35 +1055,38 @@ public class WebAPIServer implements En {
     Given("^a RESOScript file was provided$", () -> {
       if (getTestContainer().getPathToRESOScript() == null) {
         getTestContainer().setPathToRESOScript(System.getProperty("pathToRESOScript"));
+        LOG.info("Using RESOScript: " + getTestContainer().getPathToRESOScript());
       }
-      assertNotNull("ERROR: pathToRESOScript must be present in command arguments, see README", getTestContainer().getPathToRESOScript());
-      LOG.info("Using RESOScript: " + getTestContainer().getPathToRESOScript());
+      assertNotNull(getDefaultErrorMessage("pathToRESOScript must be present in command arguments, see README"), getTestContainer().getPathToRESOScript());
     });
 
     And("^Client Settings and Parameters were read from the file$", () -> {
       if (getTestContainer().getSettings() == null) {
         getTestContainer().setSettings(Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript"))));
+        LOG.info("RESOScript loaded successfully!");
       }
-      assertNotNull("ERROR: Settings could not be loaded.", getTestContainer().getSettings());
-      LOG.info("RESOScript loaded successfully!");
+      assertNotNull(getDefaultErrorMessage("Settings could not be loaded."), getTestContainer().getSettings());
     });
 
-    Given("^a test container was successfully created from the given RESOScript$", ()
-        -> getTestContainer().initialize());
+    Given("^a test container was successfully created from the given RESOScript$", () -> {
+      if (!getTestContainer().getIsInitialized()) {
+        getTestContainer().initialize();
+        if (getTestContainer().getCommander().isAuthTokenClient()) {
+          LOG.info("Authentication Type: authorization_code");
+        } else if (getTestContainer().getCommander().isOAuth2Client()) {
+          LOG.info("Authentication Type: client_credentials");
+        }
+      }
+    });
 
     /*
      * Ensures that the client either uses Authorization Codes or Client Credentials
      */
     And("^the test container uses an authorization_code or client_credentials for authentication$", () -> {
       assertNotNull(getTestContainer().getCommander());
-      assertTrue("ERROR: Commander must either have a valid Authorization Code or Client Credentials configuration.",
-          getTestContainer().getCommander().isAuthTokenClient() || (getTestContainer().getCommander().isOAuth2Client() && getTestContainer().getCommander().hasValidAuthConfig()));
-
-      if (getTestContainer().getCommander().isAuthTokenClient()) {
-        LOG.info("Authentication Type: authorization_code");
-      } else if (getTestContainer().getCommander().isOAuth2Client()) {
-        LOG.info("Authentication Type: client_credentials");
-      }
+      assertTrue(getDefaultErrorMessage("Commander must either have a valid Authorization Code or Client Credentials configuration."),
+          getTestContainer().getCommander().isAuthTokenClient()
+              || (getTestContainer().getCommander().isOAuth2Client() && getTestContainer().getCommander().hasValidAuthConfig()));
     });
   }
 }

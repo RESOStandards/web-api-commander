@@ -176,7 +176,7 @@ Resolved URL: https://api.reso.org/OData/$metadata
 ===========================
 Request: #2
 ===========================
-Request Id: fetch-by-id
+Request Id: fetch-by-key
 Resolved URL: https://api.reso.org/OData/Property('12345')?$select=ListingKey
 
 ...
@@ -233,7 +233,7 @@ See documentation regarding running the [nodejs-based tools in odata-openapi/lib
 * [Cucumber Feature Specifications](#cucumber-feature-specifications)
 * [Testing Environment](#testing-environment) 
 * [Gradle Wrapper](#gradle-wrapper)
-* [Automated RESO Web API Core Testing](#automated-reso-web-api-core-testing-in-development)
+* [Automated RESO Web API Core Testing](#automated-reso-web-api-core-testing)
 * [Automated RESO Data Dictionary Testing](#automated-reso-data-dictionary-testing)
 
 
@@ -325,9 +325,12 @@ testDataDictionaryReferenceMetadata_1_7 - Runs Data Dictionary tests against ref
 testWebApiServer_1_0_2_Core - Runs Web API Core 1.0.2 Automated Acceptance Tests.
   Example: 
     $ ./gradlew testWebApiServer_1_0_2_Core -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true
+
+    Note: by default the Web API tests assume Collection(Edm.EnumType).
+      Pass -DuseCollections=false if using OData IsFlags.
 ```
  
-## Automated RESO Web API Core Testing (in-development)
+## Automated RESO Web API Core Testing
 Automated Web API Core automated testing tools are currently in development. See [Issue 34](https://github.com/RESOStandards/web-api-commander/issues/34) for progress.
 
 To use the automated RESO testing tools, you must have a [JDK installed](#java-and-the-jdk).
@@ -352,14 +355,17 @@ These tasks will also produce reports in the local `build` directory, named acco
 
 This will run the Core tests against the Web API 1.0.2 Server provided as `WebAPIURI` in your `web-api-server.core.1.0.2.resoscript` file.
 
+**Note**: by default, the Commander uses `Collection(Edm.EnumType)` for multiple enumerations testing. 
+Pass `-DuseCollections=false` if you are using `IsFlags="true"` instead.
+
 ##### MacOS or Linux
 ```
-$ ./gradlew testWebAPIServerCore_1_0_2 -DpathToRESOScript=/path/to/your.web-api-server.core.1.0.2.resoscript -DshowResponses=true
+$ ./gradlew testWebApiServer_1_0_2_Core -DpathToRESOScript=/path/to/your.web-api-server.core.1.0.2.resoscript -DshowResponses=true
 ```
 
 ##### Windows
 ```
-C:\path\to\web-api-commander> gradlew testWebAPIServerCore_1_0_2 -DpathToRESOScript=C:\path\to\your.web-api-server.core.1.0.2.resoscript -DshowResponses=true
+C:\path\to\web-api-commander> gradlew testWebApiServer_1_0_2_Core -DpathToRESOScript=C:\path\to\your.web-api-server.core.1.0.2.resoscript -DshowResponses=true
 ```
 
 *Note: the first time you run these tasks, they will take some time as the environment must be configured and code is being compiled from the contents of the source directory downloaded in the previous step. 
@@ -371,7 +377,7 @@ A sample of the runtime terminal output follows:
 ```gherkin
 > Task :testWebApiServer_1_0_2_Core
 
-@REQ-WA103-END3 @2.4.1 @metadata
+@metadata-request @2.4.1
 Scenario: REQ-WA103-END3 - Request and Validate Server Metadata                                            
 
 Using RESOScript: ./web-api-server.core.1.0.2.resoscript

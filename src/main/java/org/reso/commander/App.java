@@ -201,9 +201,7 @@ public class App {
 
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.SAVE_GET_REQUEST)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.SAVE_GET_REQUEST);
-
           commander.saveGetRequest(uri, outputFile);
-
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)) {
           try {
             DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new BDDProcessor());
@@ -339,10 +337,14 @@ public class App {
   private static String generateTotalsReport(int totalRequestCount, int numSucceeded, int numFailed, int numSkipped, int numIncomplete) {
     StringBuilder reportBuilder = new StringBuilder();
     reportBuilder.append("\n\tTotal:            ").append(String.format("%1$4s", totalRequestCount));
-    reportBuilder.append("\n\tSucceeded:        ").append(String.format("%1$4s", numSucceeded)).append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numSucceeded) / totalRequestCount) + "%)" : "");
-    reportBuilder.append("\n\tFailed:           ").append(String.format("%1$4s", numFailed)).append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numFailed) / totalRequestCount) + "%)" : "");
-    reportBuilder.append("\n\tSkipped:          ").append(String.format("%1$4s", numSkipped)).append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numSkipped) / totalRequestCount) + "%)" : "");
-    reportBuilder.append("\n\tIncomplete:       ").append(String.format("%1$4s", numIncomplete)).append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numIncomplete) / totalRequestCount) + "%)" : "");
+    reportBuilder.append("\n\tSucceeded:        ").append(String.format("%1$4s", numSucceeded))
+        .append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numSucceeded) / totalRequestCount) + "%)" : "");
+    reportBuilder.append("\n\tFailed:           ").append(String.format("%1$4s", numFailed))
+        .append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numFailed) / totalRequestCount) + "%)" : "");
+    reportBuilder.append("\n\tSkipped:          ").append(String.format("%1$4s", numSkipped))
+        .append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numSkipped) / totalRequestCount) + "%)" : "");
+    reportBuilder.append("\n\tIncomplete:       ").append(String.format("%1$4s", numIncomplete))
+        .append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numIncomplete) / totalRequestCount) + "%)" : "");
     return reportBuilder.toString();
   }
 

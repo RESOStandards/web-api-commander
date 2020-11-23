@@ -5,6 +5,7 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reso.certification.containers.WebAPITestContainer;
+import org.reso.commander.Commander;
 import org.reso.commander.common.TestUtils;
 import org.reso.models.Settings;
 
@@ -55,6 +56,7 @@ public class TestWebAPITestContainer implements En {
         getTestContainer().setResponseCode(HttpStatus.SC_OK);
         getTestContainer().setXMLResponseData(xmlMetadataString);
         LOG.info("XML Metadata loaded from " + resourceName);
+        getTestContainer().setXMLMetadata(Commander.deserializeXMLMetadata(xmlMetadataString, getTestContainer().getCommander().getClient()));
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }

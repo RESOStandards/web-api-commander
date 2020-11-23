@@ -30,10 +30,10 @@ Feature: Web API Server 1.0.2 Core Certification
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
 
-  @fetch-by-id @2.4.1
-  Scenario: fetch-by-id - fetch by Key Field
+  @fetch-by-key @2.4.1
+  Scenario: fetch-by-key - fetch by Key Field
     Given valid metadata have been retrieved
-    When a GET request is made to the resolved Url in "fetch-by-id"
+    When a GET request is made to the resolved Url in "fetch-by-key"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
@@ -82,10 +82,10 @@ Feature: Web API Server 1.0.2 Core Certification
     And data are present for fields contained within the given select list
     And data in the "Parameter_Key" fields are different in the second request than in the first
 
-  @orderby-asc @2.4.4
-  Scenario: orderby-asc - Query Support: $orderby asc no filter
+  @orderby-timestamp-asc @2.4.4
+  Scenario: orderby-timestamp-asc - Query Support: $orderby ascending
     Given valid metadata have been retrieved
-    When a GET request is made to the resolved Url in "orderby-asc"
+    When a GET request is made to the resolved Url in "orderby-timestamp-asc"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
@@ -94,10 +94,10 @@ Feature: Web API Server 1.0.2 Core Certification
     And data are present for fields contained within the given select list
     And DateTimeOffset data in "Parameter_TimestampField" is sorted in "asc" order
 
-  @orderby-desc @2.4.4
-  Scenario: orderby-desc - Query Support: $orderby desc no filter
+  @orderby-timestamp-desc @2.4.4
+  Scenario: orderby-timestamp-desc - Query Support: $orderby timestamp descending
     Given valid metadata have been retrieved
-    When a GET request is made to the resolved Url in "orderby-desc"
+    When a GET request is made to the resolved Url in "orderby-timestamp-desc"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
@@ -106,10 +106,10 @@ Feature: Web API Server 1.0.2 Core Certification
     And data are present for fields contained within the given select list
     And DateTimeOffset data in "Parameter_TimestampField" is sorted in "desc" order
 
-  @orderby-asc-filter @2.4.4
-  Scenario: orderby-asc-filter - Query Support: $orderby asc filtered
+  @orderby-timestamp-asc-filter-int-gt @2.4.4
+  Scenario: orderby-timestamp-asc-filter-int-gt - Query Support: $orderby timestamp asc 
     Given valid metadata have been retrieved
-    When a GET request is made to the resolved Url in "orderby-asc-filter"
+    When a GET request is made to the resolved Url in "orderby-timestamp-asc-filter-int-gt"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
@@ -118,10 +118,10 @@ Feature: Web API Server 1.0.2 Core Certification
     And data are present for fields contained within the given select list
     And DateTimeOffset data in "Parameter_TimestampField" is sorted in "asc" order
 
-  @orderby-desc-filter @2.4.4
-  Scenario: orderby-desc-filter - Query Support: $orderby desc filtered
+  @orderby-timestamp-desc-filter-int-gt @2.4.4
+  Scenario: orderby-timestamp-desc-filter-int-gt - Query Support: $orderby desc filtered
     Given valid metadata have been retrieved
-    When a GET request is made to the resolved Url in "orderby-desc-filter"
+    When a GET request is made to the resolved Url in "orderby-timestamp-desc-filter-int-gt"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
@@ -238,30 +238,27 @@ Feature: Web API Server 1.0.2 Core Certification
     And data are present for fields contained within the given select list
     And Integer data in "Parameter_IntegerField" "le" "Parameter_IntegerValueLow"
 
-  #TODO
-  @filter-enum-eq @2.4.4
-  Scenario: filter-enum-eq - Query Support: Single EnumType, eq
+  @filter-enum-single-eq @2.4.4
+  Scenario: filter-enum-single-eq - Query Support: Single Edm.EnumType, eq
     Given valid metadata have been retrieved
-    When a GET request is made to the resolved Url in "filter-enum-eq"
+    When a GET request is made to the resolved Url in "filter-enum-single-eq"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
     And Single Valued Enumeration Data in "Parameter_SingleValueLookupField" "eq" "Parameter_SingleLookupValue"
 
-  #TODO
   @filter-enum-ne @2.4.4
-  Scenario: filter-enum-ne - Query Support: Single EnumType, ne
+  Scenario: filter-enum-single-ne - Query Support: Single Edm.EnumType, ne
     Given valid metadata have been retrieved
-    When a GET request is made to the resolved Url in "REQ-WA103-QO13"
+    When a GET request is made to the resolved Url in "filter-enum-single-ne"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
 
-  #TODO
   @filter-date-eq @2.4.4
-  Scenario: filter-date-eq - TimestampField eq 'yyyy-mm-dd' date value
+  Scenario: filter-date-eq - DateField eq 'yyyy-mm-dd' date value
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "filter-date-eq"
     Then the server responds with a status code of 200
@@ -270,11 +267,10 @@ Feature: Web API Server 1.0.2 Core Certification
     And the response has results
     And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
     And data are present for fields contained within the given select list
-    And Date data in "Parameter_TimestampField" "eq" "Parameter_DateValue"
+    And Date data in "Parameter_DateField" "eq" "Parameter_DateValue"
 
-  #TODO
   @filter-date-ne @2.4.4
-  Scenario: filter-date-ne - TimestampField ne 'yyyy-mm-dd' date value
+  Scenario: filter-date-ne - DateField ne 'yyyy-mm-dd' date value
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "filter-date-ne"
     Then the server responds with a status code of 200
@@ -283,10 +279,10 @@ Feature: Web API Server 1.0.2 Core Certification
     And the response has results
     And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
     And data are present for fields contained within the given select list
-    And Date data in "Parameter_TimestampField" "ne" "Parameter_DateValue"
+    And Date data in "Parameter_DateField" "ne" "Parameter_DateValue"
 
   @filter-date-gt @2.4.4
-  Scenario: filter-date-gt - TimestampField gt 'yyyy-mm-dd' date value
+  Scenario: filter-date-gt - DateField gt 'yyyy-mm-dd' date value
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "filter-date-gt"
     Then the server responds with a status code of 200
@@ -295,11 +291,10 @@ Feature: Web API Server 1.0.2 Core Certification
     And the response has results
     And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
     And data are present for fields contained within the given select list
-    And Date data in "Parameter_TimestampField" "gt" "Parameter_DateValue"
+    And Date data in "Parameter_DateField" "gt" "Parameter_DateValue"
 
-  #TODO
   @filter-date-ge @2.4.4
-  Scenario: filter-date-ge - TimestampField ge 'yyyy-mm-dd' date value
+  Scenario: filter-date-ge - DateField ge 'yyyy-mm-dd' date value
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "filter-date-ge"
     Then the server responds with a status code of 200
@@ -308,11 +303,10 @@ Feature: Web API Server 1.0.2 Core Certification
     And the response has results
     And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
     And data are present for fields contained within the given select list
-    And Date data in "Parameter_TimestampField" "ge" "Parameter_DateValue"
+    And Date data in "Parameter_DateField" "ge" "Parameter_DateValue"
 
-  #TODO
   @filter-date-lt @2.4.4
-  Scenario: filter-date-gt - TimestampField lt 'yyyy-mm-dd' date value
+  Scenario: filter-date-gt - DateField lt 'yyyy-mm-dd' date value
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "filter-date-lt"
     Then the server responds with a status code of 200
@@ -321,11 +315,10 @@ Feature: Web API Server 1.0.2 Core Certification
     And the response has results
     And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
     And data are present for fields contained within the given select list
-    And Date data in "Parameter_TimestampField" "lt" "Parameter_DateValue"
+    And Date data in "Parameter_DateField" "lt" "Parameter_DateValue"
 
-  #TODO
   @filter-date-le @2.4.4
-  Scenario: filter-date-le - TimestampField le 'yyyy-mm-dd' date value
+  Scenario: filter-date-le - DateField le 'yyyy-mm-dd' date value
     Given valid metadata have been retrieved
     When a GET request is made to the resolved Url in "filter-date-le"
     Then the server responds with a status code of 200
@@ -334,9 +327,8 @@ Feature: Web API Server 1.0.2 Core Certification
     And the response has results
     And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
     And data are present for fields contained within the given select list
-    And Date data in "Parameter_TimestampField" "le" "Parameter_DateValue"
+    And Date data in "Parameter_DateField" "le" "Parameter_DateValue"
 
-  #TODO
   @filter-datetime-gt @2.4.4
   Scenario: filter-datetime-lt - TimestampField gt DateTimeOffset
     Given valid metadata have been retrieved
@@ -349,11 +341,10 @@ Feature: Web API Server 1.0.2 Core Certification
     And data are present for fields contained within the given select list
     And DateTimeOffset data in "Parameter_TimestampField" "gt" "Parameter_DateTimeValue"
 
-  #TODO
   @filter-datetime-ge @2.4.4
   Scenario: filter-datetime-gt - TimestampField ge DateTimeOffset
     Given valid metadata have been retrieved
-    When a GET request is made to the resolved Url in "filter-datetime-le"
+    When a GET request is made to the resolved Url in "filter-datetime-ge"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
@@ -374,7 +365,6 @@ Feature: Web API Server 1.0.2 Core Certification
     And data are present for fields contained within the given select list
     And DateTimeOffset data in "Parameter_TimestampField" "lt" now()
 
-  #TODO
   @filter-datetime-le @2.4.4
   Scenario: filter-datetime-le - TimestampField le DateTimeOffset
     Given valid metadata have been retrieved
@@ -387,7 +377,6 @@ Feature: Web API Server 1.0.2 Core Certification
     And data are present for fields contained within the given select list
     And DateTimeOffset data in "Parameter_TimestampField" "le" now()
 
-  #TODO
   @filter-datetime-ne @2.4.4
   Scenario: filter-datetime-ne - TimestampField le DateTimeOffset
     Given valid metadata have been retrieved
@@ -400,27 +389,31 @@ Feature: Web API Server 1.0.2 Core Certification
     And data are present for fields contained within the given select list
     And DateTimeOffset data in "Parameter_TimestampField" "ne" now()
 
-  #TODO
-  @filter-enum-coll-any @2.4.9
-  Scenario: filter-enum-coll-any - Collections for Multi-Enumerations: any()
+  @filter-coll-enum-any @2.4.9
+  Scenario: filter-coll-enum-any - Collections for Multi-Enumerations: any()
     Given valid metadata have been retrieved
-    And "filter-enum-coll-any" is present in the RESOScript requests
-    When a GET request is made to the resolved Url in "filter-enum-coll-any"
+    And field "Parameter_MultipleValueLookupField" in "Parameter_EndpointResource" has Collection of Enumeration data type
+    When a GET request is made to the resolved Url in "filter-coll-enum-any"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
+    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And data are present for fields contained within the given select list
+    And Multiple Valued Enumeration Data in "Parameter_MultipleValueLookupField" has "Parameter_MultipleLookupValue1"
 
-
-  #TODO
-  @filter-enum-coll-all @2.4.9
-  Scenario: filter-enum-coll-all - Collections of Multi-Enumerations: all()
+  @filter-coll-enum-all @2.4.9
+  Scenario: filter-coll-enum-all - Collections of Multi-Enumerations: all()
     Given valid metadata have been retrieved
-    When a GET request is made to the resolved Url in "filter-enum-coll-all"
+    And field "Parameter_MultipleValueLookupField" in "Parameter_EndpointResource" has Collection of Enumeration data type
+    When a GET request is made to the resolved Url in "filter-coll-enum-all"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
     And the response is valid JSON
     And the response has results
+    And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
+    And data are present for fields contained within the given select list
+    And Multiple Valued Enumeration Data in "Parameter_MultipleValueLookupField" has "Parameter_MultipleLookupValue1"
 
   @filter-enum-single-has @2.4.9
   Scenario: filter-enum-single-has - Support Single Value Lookups
