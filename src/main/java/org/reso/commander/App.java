@@ -1,26 +1,23 @@
 package org.reso.commander;
 
-//import io.cucumber.core.cli.Main;
-
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.olingo.client.api.domain.ClientEntitySet;
-import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
+import org.reso.certification.codegen.BDDProcessor;
+import org.reso.certification.codegen.DataDictionaryCodeGenerator;
+import org.reso.certification.codegen.EDMXProcessor;
 import org.reso.models.ClientSettings;
 import org.reso.models.Request;
 import org.reso.models.Settings;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
 import static org.reso.commander.Commander.*;
+import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
+import static org.reso.commander.common.Utils.getTimestamp;
 
 /**
  * Entry point of the RESO Web API Commander, which is a command line OData client that uses the Java Olingo
@@ -47,7 +44,7 @@ public class App {
   public static void main(String[] params) {
     // create the command line parser
     CommandLineParser parser = new org.apache.commons.cli.DefaultParser();
-    Edm metadata = null;
+    String metadata = null;
 
     //available Commander variables
     String serviceRoot = null, bearerToken = null, clientId = null, clientSecret = null,
@@ -72,8 +69,6 @@ public class App {
       outputFile = cmd.getOptionValue(APP_OPTIONS.OUTPUT_FILE, null);
       uri = cmd.getOptionValue(APP_OPTIONS.URI, null);
       ContentType contentType = Commander.getContentType(cmd.getOptionValue(APP_OPTIONS.CONTENT_TYPE, null));
-      pageLimit = Integer.parseInt(cmd.getOptionValue(APP_OPTIONS.PAGE_LIMIT, DEFAULT_PAGE_LIMIT.toString())); //pass -1 to get all pages
-      pageSize = Integer.parseInt(cmd.getOptionValue(APP_OPTIONS.PAGE_SIZE, DEFAULT_PAGE_SIZE.toString()));
 
       // using the edmEnabledClient requires the serviceRoot for schema validation, which is performed
       // against the payload each time the request is made when enabled.
@@ -83,49 +78,33 @@ public class App {
 
       //if we're running a batch, initialize variables from the settings file rather than from command line options
       Settings settings = null;
-      if (cmd.hasOption(APP_OPTIONS.ACTIONS.RUN_RESOSCRIPT)) {
 
+      LOG.debug("Service Root is:" + commanderBuilder.serviceRoot);
+
+      //If the RESOScript option was passed, then the correct commander instance should exist at this point
+      if (cmd.hasOption(APP_OPTIONS.ACTIONS.RUN_RESOSCRIPT)) {
         LOG.debug("Loading RESOScript: " + inputFilename);
         settings = Settings.loadFromRESOScript(new File(inputFilename));
         LOG.debug("RESOScript loaded successfully!");
 
-        serviceRoot = settings.getClientSettings().get(ClientSettings.SERVICE_ROOT);
-        LOG.debug("Service Root is:" + serviceRoot);
+        commanderBuilder.serviceRoot(settings.getClientSettings().get(ClientSettings.SERVICE_ROOT));
 
         //TODO: add base64 un-encode when applicable
-        bearerToken = settings.getClientSettings().get(ClientSettings.BEARER_TOKEN);
-        if (bearerToken != null && bearerToken.length() > 0) {
-          LOG.debug("Bearer token loaded... first 4 characters:" + bearerToken.substring(0, 4));
+        commanderBuilder.bearerToken(settings.getClientSettings().get(ClientSettings.BEARER_TOKEN));
+        if (commanderBuilder.bearerToken != null && commanderBuilder.bearerToken.length() > 0) {
+          LOG.debug("Bearer token loaded... first 4 characters:"
+              + commanderBuilder.bearerToken.substring(0, Math.max(commanderBuilder.bearerToken.length(), 4)));
         }
 
-        clientId = settings.getClientSettings().get(ClientSettings.CLIENT_IDENTIFICATION);
-        clientSecret = settings.getClientSettings().get(ClientSettings.CLIENT_SECRET);
-        tokenUri = settings.getClientSettings().get(ClientSettings.TOKEN_URI);
-        scope = settings.getClientSettings().get(ClientSettings.CLIENT_SCOPE);
+        commanderBuilder.clientId(settings.getClientSettings().get(ClientSettings.CLIENT_IDENTIFICATION));
+        commanderBuilder.clientSecret(settings.getClientSettings().get(ClientSettings.CLIENT_SECRET));
+        commanderBuilder.tokenUri(settings.getClientSettings().get(ClientSettings.TOKEN_URI));
+        commanderBuilder.scope(settings.getClientSettings().get(ClientSettings.CLIENT_SCOPE));
 
-        LOG.debug("Service root is: " + serviceRoot);
-      } else {
-        //otherwise, load from command line
-        serviceRoot = cmd.getOptionValue(APP_OPTIONS.SERVICE_ROOT, null);
-        bearerToken = cmd.getOptionValue(APP_OPTIONS.BEARER_TOKEN, null);
-        clientId = cmd.getOptionValue(ClientSettings.CLIENT_IDENTIFICATION, null);
-        clientSecret = cmd.getOptionValue(ClientSettings.CLIENT_SECRET, null);
-        tokenUri = cmd.getOptionValue(ClientSettings.TOKEN_URI, null);
-        scope = cmd.getOptionValue(ClientSettings.CLIENT_SCOPE, null);
-      }
 
-      //create Commander instance
-      commander = commanderBuilder
-          .clientId(clientId)
-          .clientSecret(clientSecret)
-          .tokenUri(tokenUri)
-          .scope(scope)
-          .serviceRoot(serviceRoot)
-          .bearerToken(bearerToken)
-          .build();
+        //create Commander instance
+        commander = commanderBuilder.build();
 
-      //If the RESOScript option was passed, then the correct commander instance should exist at this point
-      if (cmd.hasOption(APP_OPTIONS.ACTIONS.RUN_RESOSCRIPT)) {
         int numRequests = settings.getRequests().size();
 
         LOG.info(REPORT_DIVIDER);
@@ -194,62 +173,54 @@ public class App {
         LOG.info(REPORT_DIVIDER + "\n");
 
         System.exit(OK); //terminate the program after the batch completes
-      }
-
-      /* otherwise, not a batch request...
+      } else {
+        /* otherwise, not a batch request...
          proceed with the selected command-line option */
 
-      if (cmd.hasOption(APP_OPTIONS.ACTIONS.GET_METADATA)) {
-        APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GET_METADATA);
+        commanderBuilder.serviceRoot(cmd.getOptionValue(APP_OPTIONS.SERVICE_ROOT, null));
+        commanderBuilder.bearerToken(cmd.getOptionValue(APP_OPTIONS.BEARER_TOKEN, null));
+        commanderBuilder.clientId(cmd.getOptionValue(APP_OPTIONS.CLIENT_ID, null));
+        commanderBuilder.clientSecret(cmd.getOptionValue(APP_OPTIONS.CLIENT_SECRET, null));
+        commanderBuilder.tokenUri(cmd.getOptionValue(ClientSettings.TOKEN_URI, null));
+        commanderBuilder.scope(cmd.getOptionValue(ClientSettings.CLIENT_SCOPE, null));
+        commanderBuilder.useEdmEnabledClient(cmd.hasOption(APP_OPTIONS.USE_EDM_ENABLED_CLIENT));
 
-        //TODO: this isn't the metadata but the entity data model (edm), change to XML Metadata
-        metadata = commander.prepareEdmMetadataRequest().execute().getBody();
-        getMetadataReport(metadata);
+        //create Commander instance
+        commander = commanderBuilder.build();
 
-      } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.VALIDATE_METADATA)) {
-        APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.VALIDATE_METADATA);
+        if (cmd.hasOption(APP_OPTIONS.ACTIONS.GET_METADATA)) {
+          APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GET_METADATA);
+          commander.saveXmlMetadataResponseToFile(outputFile);
+        } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT)) {
+          APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT);
+          LOG.info(generateMetadataReport(deserializeEdmFromPath(inputFilename, commander.getClient()), inputFilename));
+        } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.VALIDATE_METADATA)) {
+          APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.VALIDATE_METADATA);
 
-        System.exit(validateMetadata(commander, inputFilename) ? OK : NOT_OK);
+          System.exit(validateMetadata(commander, inputFilename) ? OK : NOT_OK);
 
-      } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GET_ENTITIES)) {
-        APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GET_ENTITIES);
+        } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.SAVE_GET_REQUEST)) {
+          APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.SAVE_GET_REQUEST);
 
-        //function delegate to handle updating the status
-        AtomicInteger pageCount = new AtomicInteger(1); //1-based counting
-        final Function<ClientEntitySet, Void> resultsSerializer = clientEntitySet -> {
-          //TODO: very primitive progress meter, replace
-          System.out.print("|" + clientEntitySet.getEntities().size());
-          commander.serializeEntitySet(clientEntitySet, "page" + pageCount.getAndIncrement() + "-" + outputFile, contentType);
-          return null;
-        };
+          commander.saveGetRequest(uri, outputFile);
 
-        /**
-         * Gets a ClientEntitySet from the given uri. If the useEdmEnabledClient option was passed,
-         * then serviceRoot is required, and results fetched from uri are validated against the server's
-         * published metadata.
-         *status
-         * Results are written to outputFileName.
-         */
-        try {
-          commander.getPagedEntitySet(uri, pageLimit, pageSize, resultsSerializer);
-        } catch (Exception ex) {
-          System.exit(NOT_OK);
-          LOG.error(ex.toString());
+        } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)) {
+          try {
+            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new BDDProcessor());
+            generator.processWorksheets();
+          } catch (Exception ex) {
+            LOG.error(getDefaultErrorMessage(ex));
+          }
+        } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_EDMX)) {
+          try {
+            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new EDMXProcessor());
+            generator.processWorksheets();
+          } catch (Exception ex) {
+            LOG.error(getDefaultErrorMessage(ex));
+          }
+        } else {
+          printHelp(APP_OPTIONS.getOptions());
         }
-
-      } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.SAVE_RAW_GET_REQUEST)) {
-        APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.SAVE_RAW_GET_REQUEST);
-
-        commander.saveGetRequest(uri, outputFile);
-
-      } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.CONVERT_EDMX_TO_OPEN_API)) {
-        APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.CONVERT_EDMX_TO_OPEN_API);
-
-        //converts metadata in input source file to output file
-        commander.convertEDMXToSwagger(inputFilename);
-
-      } else {
-        printHelp(APP_OPTIONS.getOptions());
       }
     } catch (ParseException exp) {
       LOG.error("\nERROR: Parse Exception, Commander cannot continue! " + exp.getMessage());
@@ -327,17 +298,6 @@ public class App {
   }
 
   /**
-   * Gets a formatted date string for the given date.
-   *
-   * @param date the date to format
-   * @return date string in yyyyMMddHHMMssS format
-   */
-  private static String getTimestamp(Date date) {
-    DateFormat df = new SimpleDateFormat("yyyyMMddHHMMssS");
-    return df.format(date);
-  }
-
-  /**
    * Helps with various app options used by the main application when processing input from the command line.
    */
   private static class APP_OPTIONS {
@@ -345,11 +305,11 @@ public class App {
     //parameter names
     static String SERVICE_ROOT = "serviceRoot";
     static String BEARER_TOKEN = "bearerToken";
+    static String CLIENT_ID = "clientId";
+    static String CLIENT_SECRET = "clientSecret";
     static String INPUT_FILE = "inputFile";
     static String OUTPUT_FILE = "outputFile";
     static String URI = "uri";
-    static String PAGE_LIMIT = "pageLimit";
-    static String PAGE_SIZE = "pageSize";
     static String ENTITY_NAME = "entityName";
     static String USE_EDM_ENABLED_CLIENT = "useEdmEnabledClient";
     static String CONTENT_TYPE = "contentType";
@@ -371,17 +331,22 @@ public class App {
       if (action.matches(ACTIONS.RUN_RESOSCRIPT)) {
         validationResponse = validateOptions(cmd, INPUT_FILE);
       } else if (action.matches(ACTIONS.GET_METADATA)) {
-        validationResponse = validateOptions(cmd, SERVICE_ROOT, BEARER_TOKEN, OUTPUT_FILE);
+        if (cmd.hasOption(CLIENT_ID) || cmd.hasOption(CLIENT_SECRET)) {
+          validationResponse = validateOptions(cmd, SERVICE_ROOT, CLIENT_ID, CLIENT_SECRET, OUTPUT_FILE);
+        } else {
+          validationResponse = validateOptions(cmd, SERVICE_ROOT, BEARER_TOKEN, OUTPUT_FILE);
+        }
+      } else if (action.matches(ACTIONS.GENERATE_METADATA_REPORT)) {
+        validationResponse = validateOptions(cmd, INPUT_FILE);
       } else if (action.matches(ACTIONS.VALIDATE_METADATA)) {
         validationResponse = validateOptions(cmd, INPUT_FILE);
-      } else if (action.matches(ACTIONS.GET_ENTITIES)) {
-        validationResponse = validateOptions(cmd, BEARER_TOKEN, URI, OUTPUT_FILE);
-      } else if (action.matches(ACTIONS.SAVE_RAW_GET_REQUEST)) {
-        validationResponse = validateOptions(cmd, BEARER_TOKEN, URI, OUTPUT_FILE);
-      } else if (action.matches(ACTIONS.CONVERT_EDMX_TO_OPEN_API)) {
-        validationResponse = validateOptions(cmd, INPUT_FILE);
+      } else if (action.matches(ACTIONS.SAVE_GET_REQUEST)) {
+        if (cmd.hasOption(CLIENT_ID) || cmd.hasOption(CLIENT_SECRET)) {
+          validationResponse = validateOptions(cmd, CLIENT_ID, CLIENT_SECRET, URI, OUTPUT_FILE);
+        } else {
+          validationResponse = validateOptions(cmd, BEARER_TOKEN, URI, OUTPUT_FILE);
+        }
       }
-
       if (validationResponse != null) {
         printErrorMsgAndExit("ERROR: the following options are required when using " + action
             + "\n" + validationResponse + "\n\n");
@@ -424,6 +389,15 @@ public class App {
           .desc("Bearer token to be used with the request.")
           .build();
 
+      Option clientIdOption = Option.builder()
+          .argName("d").longOpt(CLIENT_ID).hasArg()
+          .desc("Client Id to be used with the request.")
+          .build();
+
+      Option clientSecretOption = Option.builder()
+          .argName("s").longOpt(CLIENT_SECRET).hasArg()
+          .build();
+
       Option inputFileOption = Option.builder()
           .argName("i").longOpt(INPUT_FILE).hasArg()
           .desc("Path to input file.")
@@ -437,16 +411,6 @@ public class App {
       Option uriOption = Option.builder()
           .argName("u").longOpt(URI).hasArg()
           .desc("URI for raw request. Use 'single quotes' to enclose.")
-          .build();
-
-      Option pageLimit = Option.builder()
-          .argName("l").longOpt(PAGE_LIMIT).hasArg()
-          .desc("The number of pages to fetch, or -1 to fetch all.")
-          .build();
-
-      Option pageSize = Option.builder()
-          .argName("s").longOpt(PAGE_SIZE).hasArg()
-          .desc("The number of pages to fetch, or -1 to fetch all.")
           .build();
 
       Option entityName = Option.builder()
@@ -471,29 +435,28 @@ public class App {
 
       OptionGroup actions = new OptionGroup()
           .addOption(Option.builder().argName("r").longOpt(ACTIONS.RUN_RESOSCRIPT)
-              .desc("Runs commands in RESOScript file given as <inputFile>.").build())
+            .desc("Runs commands in RESOScript file given as <inputFile>.").build())
+          .addOption(Option.builder().argName("t").longOpt(ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)
+            .desc("Generates acceptance tests in the current directory.").build())
+          .addOption(Option.builder().argName("r").longOpt(ACTIONS.GENERATE_REFERENCE_EDMX)
+            .desc("Generates reference metadata in EDMX format.").build())
           .addOption(Option.builder().argName("m").longOpt(ACTIONS.GET_METADATA)
-              .desc("Fetches metadata from <serviceRoot> using <bearerToken> and saves results in <outputFile>.").build())
-          .addOption(Option.builder().argName("g").longOpt(ACTIONS.GET_ENTITIES)
-              .desc("Executes GET on <uri> using the given <bearerToken> and optional <serviceRoot> when " +
-                  "--useEdmEnabledClient is specified. Optionally takes a --pageLimit parameter, default " + PAGE_LIMIT + " , which will fetch that number " +
-                  "of pages. Pass --pageLimit -1 to fetch all pages. " +
-                  "Also takes a --pageSize parameter, default " + PAGE_SIZE + ", which lets you specify the page size.").build())
+            .desc("Fetches metadata from <serviceRoot> using <bearerToken> and saves results in <outputFile>.").build())
+          .addOption(Option.builder().argName("g").longOpt(ACTIONS.GENERATE_METADATA_REPORT)
+              .desc("Generates metadata report from given <inputFile>.").build())
           .addOption(Option.builder().argName("v").longOpt(ACTIONS.VALIDATE_METADATA)
               .desc("Validates previously-fetched metadata in the <inputFile> path.").build())
-          .addOption(Option.builder().argName("w").longOpt(ACTIONS.SAVE_RAW_GET_REQUEST)
-              .desc("Performs GET from <requestURI> using the given <bearerToken> and saves output to <outputFile>.").build())
-          .addOption(Option.builder().argName("c").longOpt(ACTIONS.CONVERT_EDMX_TO_OPEN_API)
-              .desc("Converts EDMX in <inputFile> to Open API, saving it in <inputFile>.swagger.json").build());
+          .addOption(Option.builder().argName("s").longOpt(ACTIONS.SAVE_GET_REQUEST)
+              .desc("Performs GET from <requestURI> using the given <bearerToken> and saves output to <outputFile>.").build());
 
       return new Options()
           .addOption(helpOption)
           .addOption(hostNameOption)
           .addOption(bearerTokenOption)
+          .addOption(clientIdOption)
+          .addOption(clientSecretOption)
           .addOption(inputFileOption)
           .addOption(outputFileOption)
-          .addOption(pageLimit)
-          .addOption(pageSize)
           .addOption(entityName)
           .addOption(useEdmEnabledClient)
           .addOption(uriOption)
@@ -503,12 +466,13 @@ public class App {
 
     static class ACTIONS {
       //actions
-      static String RUN_RESOSCRIPT = "runRESOScript";
-      static String GET_METADATA = "getMetadata";
-      static String VALIDATE_METADATA = "validateMetadata";
-      static String GET_ENTITIES = "getEntities";
-      static String SAVE_RAW_GET_REQUEST = "saveRawGetRequest";
-      static String CONVERT_EDMX_TO_OPEN_API = "convertEDMXtoOpenAPI";
+      public static final String GENERATE_DD_ACCEPTANCE_TESTS = "generateDDAcceptanceTests";
+      public static final String GENERATE_REFERENCE_EDMX = "generateReferenceEDMX";
+      public static final String RUN_RESOSCRIPT = "runRESOScript";
+      public static final String GET_METADATA = "getMetadata";
+      public static final String VALIDATE_METADATA = "validateMetadata";
+      public static final String SAVE_GET_REQUEST = "saveGetRequest";
+      public static final String GENERATE_METADATA_REPORT = "generateMetadataReport";
     }
   }
 }

@@ -1,0 +1,1452 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "Service for namespace org.example.odata.salesservice",
+        "description": "This service is located at [https://localhost/service-root/](https://localhost/service-root/)\n\n## Entity Data Model\n![ER Diagram](https://yuml.me/diagram/class/[Category{bg:lightslategray}],[Category]-*>[Product],[Currency{bg:lightslategray}],[Customer{bg:lightslategray}],[Customer]-*>[Sales],[Product{bg:lightslategray}],[Product]-0..1>[Category],[Product]-*>[Sales],[Sales{bg:lightslategray}],[Sales]->[Customer],[Sales]->[Time],[Sales]->[Product],[Sales]->[SalesOrganization],[Sales]->[Currency],[SalesOrganization{bg:lightslategray}],[SalesOrganization]-0..1>[SalesOrganization],[Time{bg:lightslategray}],[Currencies%20{bg:lawngreen}]++-*>[Currency],[Sales%20{bg:lawngreen}]++-*>[Sales])\n\n### Legend\n![Legend](https://yuml.me/diagram/plain;dir:TB;scale:60/class/[External.Type{bg:whitesmoke}],[ComplexType],[EntityType{bg:lightslategray}],[EntitySet/Singleton/Operation{bg:lawngreen}])",
+        "version": ""
+    },
+    "servers": [
+        {
+            "url": "https://localhost/service-root"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Sales"
+        },
+        {
+            "name": "Currencies"
+        }
+    ],
+    "paths": {
+        "/Sales": {
+            "get": {
+                "summary": "Get entities from Sales",
+                "tags": [
+                    "Sales"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/top"
+                    },
+                    {
+                        "$ref": "#/components/parameters/skip"
+                    },
+                    {
+                        "$ref": "#/components/parameters/search"
+                    },
+                    {
+                        "name": "$filter",
+                        "description": "Filter items by property values, see [Filtering](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter)",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/count"
+                    },
+                    {
+                        "name": "$orderby",
+                        "description": "Order items by property values, see [Sorting](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionorderby)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "ID",
+                                    "ID desc",
+                                    "Amount",
+                                    "Amount desc"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "$select",
+                        "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "ID",
+                                    "Amount"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "$expand",
+                        "description": "Expand related entities, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "*",
+                                    "Customer",
+                                    "Time",
+                                    "Product",
+                                    "SalesOrganization",
+                                    "Currency"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retrieved entities",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Collection of Sales",
+                                    "properties": {
+                                        "@odata.count": {
+                                            "$ref": "#/components/schemas/count"
+                                        },
+                                        "value": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/org.example.odata.salesservice.Sales"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Add new entity to Sales",
+                "tags": [
+                    "Sales"
+                ],
+                "requestBody": {
+                    "description": "New entity",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/org.example.odata.salesservice.Sales-create"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/org.example.odata.salesservice.Sales"
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            }
+        },
+        "/Sales('{ID}')": {
+            "parameters": [
+                {
+                    "description": "key: ID",
+                    "in": "path",
+                    "name": "ID",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "get": {
+                "summary": "Get entity from Sales by key",
+                "tags": [
+                    "Sales"
+                ],
+                "parameters": [
+                    {
+                        "name": "$select",
+                        "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "ID",
+                                    "Amount"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "$expand",
+                        "description": "Expand related entities, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "*",
+                                    "Customer",
+                                    "Time",
+                                    "Product",
+                                    "SalesOrganization",
+                                    "Currency"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retrieved entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/org.example.odata.salesservice.Sales"
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Update entity in Sales",
+                "tags": [
+                    "Sales"
+                ],
+                "requestBody": {
+                    "description": "New property values",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/org.example.odata.salesservice.Sales-update"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Success"
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete entity from Sales",
+                "tags": [
+                    "Sales"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success"
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            }
+        },
+        "/Sales('{ID}')/Customer": {
+            "parameters": [
+                {
+                    "description": "key: ID",
+                    "in": "path",
+                    "name": "ID",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "get": {
+                "summary": "Get related Customer",
+                "tags": [
+                    "Sales"
+                ],
+                "parameters": [
+                    {
+                        "name": "$select",
+                        "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "ID",
+                                    "Name",
+                                    "Country"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "$expand",
+                        "description": "Expand related entities, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "*",
+                                    "Sales"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retrieved entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/org.example.odata.salesservice.Customer"
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            }
+        },
+        "/Sales('{ID}')/Time": {
+            "parameters": [
+                {
+                    "description": "key: ID",
+                    "in": "path",
+                    "name": "ID",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "get": {
+                "summary": "Get related Time",
+                "tags": [
+                    "Sales"
+                ],
+                "parameters": [
+                    {
+                        "name": "$select",
+                        "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "Date",
+                                    "Month",
+                                    "Quarter",
+                                    "Year"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retrieved entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/org.example.odata.salesservice.Time"
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            }
+        },
+        "/Sales('{ID}')/Product": {
+            "parameters": [
+                {
+                    "description": "key: ID",
+                    "in": "path",
+                    "name": "ID",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "get": {
+                "summary": "Get related Product",
+                "tags": [
+                    "Sales"
+                ],
+                "parameters": [
+                    {
+                        "name": "$select",
+                        "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "ID",
+                                    "Name",
+                                    "Color",
+                                    "TaxRate"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "$expand",
+                        "description": "Expand related entities, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "*",
+                                    "Category",
+                                    "Sales"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retrieved entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/org.example.odata.salesservice.Product"
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            }
+        },
+        "/Sales('{ID}')/SalesOrganization": {
+            "parameters": [
+                {
+                    "description": "key: ID",
+                    "in": "path",
+                    "name": "ID",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "get": {
+                "summary": "Get related SalesOrganization",
+                "tags": [
+                    "Sales"
+                ],
+                "parameters": [
+                    {
+                        "name": "$select",
+                        "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "ID",
+                                    "Name"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "$expand",
+                        "description": "Expand related entities, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "*",
+                                    "Superordinate"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retrieved entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/org.example.odata.salesservice.SalesOrganization"
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            }
+        },
+        "/Sales('{ID}')/Currency": {
+            "parameters": [
+                {
+                    "description": "key: ID",
+                    "in": "path",
+                    "name": "ID",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "get": {
+                "summary": "Get related Currency",
+                "tags": [
+                    "Sales"
+                ],
+                "parameters": [
+                    {
+                        "name": "$select",
+                        "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "Code",
+                                    "Name"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retrieved entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/org.example.odata.salesservice.Currency"
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            }
+        },
+        "/Currencies": {
+            "get": {
+                "summary": "Get entities from Currencies",
+                "tags": [
+                    "Currencies"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/top"
+                    },
+                    {
+                        "$ref": "#/components/parameters/skip"
+                    },
+                    {
+                        "$ref": "#/components/parameters/search"
+                    },
+                    {
+                        "name": "$filter",
+                        "description": "Filter items by property values, see [Filtering](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter)",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/count"
+                    },
+                    {
+                        "name": "$orderby",
+                        "description": "Order items by property values, see [Sorting](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionorderby)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "Code",
+                                    "Code desc",
+                                    "Name",
+                                    "Name desc"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "$select",
+                        "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "Code",
+                                    "Name"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retrieved entities",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Collection of Currency",
+                                    "properties": {
+                                        "@odata.count": {
+                                            "$ref": "#/components/schemas/count"
+                                        },
+                                        "value": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/org.example.odata.salesservice.Currency"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Add new entity to Currencies",
+                "tags": [
+                    "Currencies"
+                ],
+                "requestBody": {
+                    "description": "New entity",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/org.example.odata.salesservice.Currency-create"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/org.example.odata.salesservice.Currency"
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            }
+        },
+        "/Currencies('{Code}')": {
+            "parameters": [
+                {
+                    "description": "key: Code",
+                    "in": "path",
+                    "name": "Code",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "get": {
+                "summary": "Get entity from Currencies by key",
+                "tags": [
+                    "Currencies"
+                ],
+                "parameters": [
+                    {
+                        "name": "$select",
+                        "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "Code",
+                                    "Name"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retrieved entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/org.example.odata.salesservice.Currency"
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Update entity in Currencies",
+                "tags": [
+                    "Currencies"
+                ],
+                "requestBody": {
+                    "description": "New property values",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/org.example.odata.salesservice.Currency-update"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Success"
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete entity from Currencies",
+                "tags": [
+                    "Currencies"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success"
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            }
+        },
+        "/$batch": {
+            "post": {
+                "summary": "Send a group of requests",
+                "description": "Group multiple requests into a single request payload, see [Batch Requests](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_BatchRequests).\n\n*Please note that \"Try it out\" is not supported for this request.*",
+                "tags": [
+                    "Batch Requests"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "description": "Batch request",
+                    "content": {
+                        "multipart/mixed;boundary=request-separator": {
+                            "schema": {
+                                "type": "string"
+                            },
+                            "example": "--request-separator\nContent-Type: application/http\nContent-Transfer-Encoding: binary\n\nGET Sales HTTP/1.1\nAccept: application/json\n\n\n--request-separator--"
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Batch response",
+                        "content": {
+                            "multipart/mixed": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "--response-separator\nContent-Type: application/http\n\nHTTP/1.1 200 OK\nContent-Type: application/json\n\n{...}\n--response-separator--"
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/error"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "org.example.odata.salesservice.Category": {
+                "title": "Category",
+                "type": "object",
+                "properties": {
+                    "ID": {
+                        "type": "string"
+                    },
+                    "Products": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/org.example.odata.salesservice.Product"
+                        }
+                    },
+                    "Products@odata.count": {
+                        "$ref": "#/components/schemas/count"
+                    },
+                    "Name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "org.example.odata.salesservice.Category-create": {
+                "title": "Category (for create)",
+                "type": "object",
+                "properties": {
+                    "ID": {
+                        "type": "string"
+                    },
+                    "Products": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/org.example.odata.salesservice.Product-create"
+                        }
+                    },
+                    "Name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "ID"
+                ]
+            },
+            "org.example.odata.salesservice.Category-update": {
+                "title": "Category (for update)",
+                "type": "object",
+                "properties": {
+                    "Name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "org.example.odata.salesservice.Currency": {
+                "title": "Currency",
+                "type": "object",
+                "properties": {
+                    "Code": {
+                        "type": "string"
+                    },
+                    "Name": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                }
+            },
+            "org.example.odata.salesservice.Currency-create": {
+                "title": "Currency (for create)",
+                "type": "object",
+                "properties": {
+                    "Code": {
+                        "type": "string"
+                    },
+                    "Name": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "Code"
+                ]
+            },
+            "org.example.odata.salesservice.Currency-update": {
+                "title": "Currency (for update)",
+                "type": "object",
+                "properties": {
+                    "Name": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                }
+            },
+            "org.example.odata.salesservice.Customer": {
+                "title": "Customer",
+                "type": "object",
+                "properties": {
+                    "ID": {
+                        "type": "string"
+                    },
+                    "Sales": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/org.example.odata.salesservice.Sales"
+                        }
+                    },
+                    "Sales@odata.count": {
+                        "$ref": "#/components/schemas/count"
+                    },
+                    "Name": {
+                        "type": "string"
+                    },
+                    "Country": {
+                        "type": "string"
+                    }
+                }
+            },
+            "org.example.odata.salesservice.Customer-create": {
+                "title": "Customer (for create)",
+                "type": "object",
+                "properties": {
+                    "ID": {
+                        "type": "string"
+                    },
+                    "Sales": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/org.example.odata.salesservice.Sales-create"
+                        }
+                    },
+                    "Name": {
+                        "type": "string"
+                    },
+                    "Country": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "ID"
+                ]
+            },
+            "org.example.odata.salesservice.Customer-update": {
+                "title": "Customer (for update)",
+                "type": "object",
+                "properties": {
+                    "Name": {
+                        "type": "string"
+                    },
+                    "Country": {
+                        "type": "string"
+                    }
+                }
+            },
+            "org.example.odata.salesservice.Product": {
+                "title": "Product",
+                "type": "object",
+                "properties": {
+                    "ID": {
+                        "type": "string"
+                    },
+                    "Category": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/org.example.odata.salesservice.Category"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "Sales": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/org.example.odata.salesservice.Sales"
+                        }
+                    },
+                    "Sales@odata.count": {
+                        "$ref": "#/components/schemas/count"
+                    },
+                    "Name": {
+                        "type": "string"
+                    },
+                    "Color": {
+                        "type": "string"
+                    },
+                    "TaxRate": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ],
+                        "format": "decimal",
+                        "example": 0
+                    }
+                }
+            },
+            "org.example.odata.salesservice.Product-create": {
+                "title": "Product (for create)",
+                "type": "object",
+                "properties": {
+                    "ID": {
+                        "type": "string"
+                    },
+                    "Category": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/org.example.odata.salesservice.Category-create"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "Sales": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/org.example.odata.salesservice.Sales-create"
+                        }
+                    },
+                    "Name": {
+                        "type": "string"
+                    },
+                    "Color": {
+                        "type": "string"
+                    },
+                    "TaxRate": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ],
+                        "format": "decimal",
+                        "example": 0
+                    }
+                },
+                "required": [
+                    "ID"
+                ]
+            },
+            "org.example.odata.salesservice.Product-update": {
+                "title": "Product (for update)",
+                "type": "object",
+                "properties": {
+                    "Name": {
+                        "type": "string"
+                    },
+                    "Color": {
+                        "type": "string"
+                    },
+                    "TaxRate": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ],
+                        "format": "decimal",
+                        "example": 0
+                    }
+                }
+            },
+            "org.example.odata.salesservice.Sales": {
+                "title": "Sales",
+                "type": "object",
+                "properties": {
+                    "ID": {
+                        "type": "string"
+                    },
+                    "Customer": {
+                        "$ref": "#/components/schemas/org.example.odata.salesservice.Customer"
+                    },
+                    "Time": {
+                        "$ref": "#/components/schemas/org.example.odata.salesservice.Time"
+                    },
+                    "Product": {
+                        "$ref": "#/components/schemas/org.example.odata.salesservice.Product"
+                    },
+                    "SalesOrganization": {
+                        "$ref": "#/components/schemas/org.example.odata.salesservice.SalesOrganization"
+                    },
+                    "Currency": {
+                        "$ref": "#/components/schemas/org.example.odata.salesservice.Currency"
+                    },
+                    "Amount": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ],
+                        "format": "decimal",
+                        "example": 0,
+                        "nullable": true
+                    }
+                }
+            },
+            "org.example.odata.salesservice.Sales-create": {
+                "title": "Sales (for create)",
+                "type": "object",
+                "properties": {
+                    "ID": {
+                        "type": "string"
+                    },
+                    "Customer": {
+                        "$ref": "#/components/schemas/org.example.odata.salesservice.Customer-create"
+                    },
+                    "Time": {
+                        "$ref": "#/components/schemas/org.example.odata.salesservice.Time-create"
+                    },
+                    "Product": {
+                        "$ref": "#/components/schemas/org.example.odata.salesservice.Product-create"
+                    },
+                    "SalesOrganization": {
+                        "$ref": "#/components/schemas/org.example.odata.salesservice.SalesOrganization-create"
+                    },
+                    "Currency": {
+                        "$ref": "#/components/schemas/org.example.odata.salesservice.Currency-create"
+                    },
+                    "Amount": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ],
+                        "format": "decimal",
+                        "example": 0,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "ID"
+                ]
+            },
+            "org.example.odata.salesservice.Sales-update": {
+                "title": "Sales (for update)",
+                "type": "object",
+                "properties": {
+                    "Amount": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ],
+                        "format": "decimal",
+                        "example": 0,
+                        "nullable": true
+                    }
+                }
+            },
+            "org.example.odata.salesservice.SalesOrganization": {
+                "title": "SalesOrganization",
+                "type": "object",
+                "properties": {
+                    "ID": {
+                        "type": "string"
+                    },
+                    "Superordinate": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/org.example.odata.salesservice.SalesOrganization"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "Name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "org.example.odata.salesservice.SalesOrganization-create": {
+                "title": "SalesOrganization (for create)",
+                "type": "object",
+                "properties": {
+                    "ID": {
+                        "type": "string"
+                    },
+                    "Superordinate": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/org.example.odata.salesservice.SalesOrganization-create"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "Name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "ID"
+                ]
+            },
+            "org.example.odata.salesservice.SalesOrganization-update": {
+                "title": "SalesOrganization (for update)",
+                "type": "object",
+                "properties": {
+                    "Name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "org.example.odata.salesservice.Time": {
+                "title": "Time",
+                "type": "object",
+                "properties": {
+                    "Date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2017-04-13",
+                        "nullable": true
+                    },
+                    "Month": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "Quarter": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "Year": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                }
+            },
+            "org.example.odata.salesservice.Time-create": {
+                "title": "Time (for create)",
+                "type": "object",
+                "properties": {
+                    "Date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2017-04-13",
+                        "nullable": true
+                    },
+                    "Month": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "Quarter": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "Year": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "Date"
+                ]
+            },
+            "org.example.odata.salesservice.Time-update": {
+                "title": "Time (for update)",
+                "type": "object",
+                "properties": {
+                    "Month": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "Quarter": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "Year": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                }
+            },
+            "count": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "string"
+                    }
+                ],
+                "description": "The number of entities in the collection. Available when using the [$count](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptioncount) query option."
+            },
+            "error": {
+                "type": "object",
+                "required": [
+                    "error"
+                ],
+                "properties": {
+                    "error": {
+                        "type": "object",
+                        "required": [
+                            "code",
+                            "message"
+                        ],
+                        "properties": {
+                            "code": {
+                                "type": "string"
+                            },
+                            "message": {
+                                "type": "string"
+                            },
+                            "target": {
+                                "type": "string"
+                            },
+                            "details": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "code",
+                                        "message"
+                                    ],
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "target": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "innererror": {
+                                "type": "object",
+                                "description": "The structure of this object is service-specific"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "parameters": {
+            "top": {
+                "name": "$top",
+                "in": "query",
+                "description": "Show only the first n items, see [Paging - Top](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptiontop)",
+                "schema": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "example": 50
+            },
+            "skip": {
+                "name": "$skip",
+                "in": "query",
+                "description": "Skip the first n items, see [Paging - Skip](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionskip)",
+                "schema": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            },
+            "count": {
+                "name": "$count",
+                "in": "query",
+                "description": "Include count of items, see [Count](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptioncount)",
+                "schema": {
+                    "type": "boolean"
+                }
+            },
+            "search": {
+                "name": "$search",
+                "in": "query",
+                "description": "Search items by search phrases, see [Searching](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionsearch)",
+                "schema": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses": {
+            "error": {
+                "description": "Error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/error"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!--
+  >>> To be used as a template for Data Dictionary Certification <<<
+
+  NOTES:
+    * Anything marked REQUIRED should be filled in.
+    * Anything not market REQUIRED shouldn't have to be changed.
+    * Some items are marked OPTIONAL.
+    * Any item that has a blank Url will be skipped (which will be printed in the results).
+
+    Contact josh@reso.org with further questions.
+ -->
+
+<!DOCTYPE OutputScript [
+  <!ELEMENT OutputScript (RESOScriptVersion|ClientSettings|Parameters|Requests)*>
+  <!ELEMENT RESOScriptVersion (#PCDATA)>
+  <!ELEMENT ClientSettings (WebAPIURI|AuthenticationType|BearerToken|ClientIdentification|ClientSecret|TokenURI|ClientScope)*>
+  <!ELEMENT WebAPIURI (#PCDATA)>
+  <!ELEMENT AuthenticationType (#PCDATA)>
+  <!ELEMENT BearerToken (#PCDATA)>
+  <!ELEMENT ClientIdentification (#PCDATA)>
+  <!ELEMENT ClientSecret (#PCDATA)>
+  <!ELEMENT TokenURI (#PCDATA)>
+  <!ELEMENT ClientScope (#PCDATA)>
+  <!ELEMENT Parameters (Parameter)*>
+  <!ELEMENT Parameter (#PCDATA)>
+  <!ATTLIST Parameter
+    Name CDATA #REQUIRED
+    Value CDATA #REQUIRED>
+  <!ELEMENT Requests (Request)*>
+  <!ELEMENT Request (#PCDATA)>
+  <!ATTLIST Request
+    OutputFile CDATA #REQUIRED
+    RequestId CDATA #REQUIRED
+    Url CDATA #REQUIRED>
+  ]>
+
+<OutputScript>
+
+  <!--
+  ############################################################
+    Metadata
+  ############################################################-->
+
+  <!-- The current version of this RESOScript -->
+  <RESOScriptVersion>3.0.0</RESOScriptVersion>
+
+
+  <!--
+  ############################################################
+    Client Settings
+    TODO: deprecate ClientSettings and move them to Parameters
+  ############################################################-->
+  <ClientSettings>
+    <!-- URLS -->
+    <WebAPIURI><!--REQUIRED: URI of your Web API Service Root goes here --></WebAPIURI>
+
+    <!-- Credentials -->
+
+    <!--
+        AuthenticationType - This is the OAuth2 grant_type.
+          * Use "authorization_code" for BearerToken and fill in your bearer token
+          * Use "client_credentials" for Client Credentials and fill in your client credentials
+
+        See:
+        * https://www.oauth.com/oauth2-servers/access-tokens/authorization-code-request/
+        * https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/
+    -->
+
+    <!-- Grant Type: authorization_code -->
+    <AuthenticationType>authorization_code</AuthenticationType>
+    <BearerToken><!-- REQUIRED: Your BearerToken goes here if using Access Tokens --></BearerToken>
+
+    <!-- Grant Type: client_credentials -->
+    <AuthenticationType>client_credentials</AuthenticationType>
+    <ClientIdentification><!-- REQUIRED: Your client_id value if using Client Credentials--></ClientIdentification>
+    <ClientSecret><!-- REQUIRED: Your client_secret value if using Client Credentials--></ClientSecret>
+    <TokenURI><!-- REQUIRED: Your token endpoint URI--></TokenURI>
+    <ClientScope>
+      <!--OPTIONAL - your client scope. See: https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/ -->
+    </ClientScope>
+
+  </ClientSettings>
+
+
+  <!--
+  ############################################################
+    Parameters Section - add your testing variables here
+  ############################################################-->
+
+  <Parameters>
+    <!-- OPTIONAL: Useful for testing the OData Format Parameter - Value="?$format=application/xml" -->
+    <Parameter Name="OptionalMetadataFormatParameter" Value="" />
+  </Parameters>
+
+  <!--
+  ############################################################
+    Requests Section - Queries used during testing,
+                       DO NOT CHANGE
+  ############################################################-->
+  <Requests>
+
+    <Request
+      RequestId="REQ-WA103-END3"
+      OutputFile="REQ-WA103-END3.metadata.xml"
+      Url="*ClientSettings_WebAPIURI*/$metadata*Parameter_OptionalMetadataFormatParameter*"
+    />
+
+  </Requests>
+</OutputScript>

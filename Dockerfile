@@ -1,4 +1,4 @@
-FROM gradle:jdk8 AS builder
+FROM gradle:6.2.1-jdk8 AS builder
 
 WORKDIR /home/gradle/project
 
