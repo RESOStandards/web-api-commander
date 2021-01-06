@@ -271,58 +271,6 @@ public class Commander {
   }
 
   /**
-   * Static version of the metadata validator that can work with a given client
-   *
-   * @param metadata the XML Metadata to validate
-   * @param client   the OData client to use for validation
-   * @return true if the given XML metadata is valid, false otherwise
-   */
-  public static boolean validateMetadata(XMLMetadata metadata, ODataClient client) {
-    try {
-      // call the probably-useless metadata validator. can't hurt though
-      // SEE: https://github.com/apache/olingo-odata4/blob/master/lib/client-core/src/main/java/org/apache/olingo/client/core/serialization/ODataMetadataValidationImpl.java#L77-L116
-      client.metadataValidation().validateMetadata(metadata);
-
-      // also check whether metadata contains a valid service document in OData v4 format
-      return client.metadataValidation().isServiceDocument(metadata)
-          && client.metadataValidation().isV4Metadata(metadata);
-    } catch (NullPointerException nex) {
-      LOG.error(getDefaultErrorMessage("Metadata validation Failed! See error messages and commander.log for further information."));
-    } catch (Exception ex) {
-      LOG.error(getDefaultErrorMessage("Metadata validation Failed! General error occurred when validating metadata.\n" + ex.getMessage()));
-      if (ex.getCause() != null) {
-        LOG.error("Caused by: " + ex.getCause().getMessage());
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Static version of the metadata validator that can work with a given client
-   *
-   * @param edm    the Edm to validate
-   * @param client the OData client to use for validation
-   * @return true if the given XML metadata is valid, false otherwise
-   */
-  public static boolean validateMetadata(Edm edm, ODataClient client) {
-    try {
-      // call the probably-useless metadata validator. can't hurt though
-      // SEE: https://github.com/apache/olingo-odata4/blob/master/lib/client-core/src/main/java/org/apache/olingo/client/core/serialization/ODataMetadataValidationImpl.java#L77-L116
-      client.metadataValidation().validateMetadata(edm);
-      //if Edm metadata are invalid, the previous line will throw an exception and this line won't be reached.
-      return true;
-    } catch (NullPointerException nex) {
-      LOG.error(getDefaultErrorMessage("Metadata validation Failed! See error messages and commander.log for further information."));
-    } catch (Exception ex) {
-      LOG.error(getDefaultErrorMessage("Metadata validation Failed! General error occurred when validating metadata.\n" + ex.getMessage()));
-      if (ex.getCause() != null) {
-        LOG.error("Caused by: " + ex.getCause().getMessage());
-      }
-    }
-    return false;
-  }
-
-  /**
    * OData client getter
    *
    * @return the OData client for the current Commander instance
@@ -415,6 +363,58 @@ public class Commander {
       LOG.error(getDefaultErrorMessage("Invalid Service Root URI:", getServiceRoot(), "\n" + uriSyntaxException.getMessage()));
     }
     return null;
+  }
+
+  /**
+   * Static version of the metadata validator that can work with a given client
+   *
+   * @param metadata the XML Metadata to validate
+   * @param client   the OData client to use for validation
+   * @return true if the given XML metadata is valid, false otherwise
+   */
+  public static boolean validateMetadata(XMLMetadata metadata, ODataClient client) {
+    try {
+      // call the probably-useless metadata validator. can't hurt though
+      // SEE: https://github.com/apache/olingo-odata4/blob/master/lib/client-core/src/main/java/org/apache/olingo/client/core/serialization/ODataMetadataValidationImpl.java#L77-L116
+      client.metadataValidation().validateMetadata(metadata);
+
+      // also check whether metadata contains a valid service document in OData v4 format
+      return client.metadataValidation().isServiceDocument(metadata)
+          && client.metadataValidation().isV4Metadata(metadata);
+    } catch (NullPointerException nex) {
+      LOG.error(getDefaultErrorMessage("Metadata validation Failed! See error messages and commander.log for further information."));
+    } catch (Exception ex) {
+      LOG.error(getDefaultErrorMessage("Metadata validation Failed! General error occurred when validating metadata.\n" + ex.getMessage()));
+      if (ex.getCause() != null) {
+        LOG.error("Caused by: " + ex.getCause().getMessage());
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Static version of the metadata validator that can work with a given client
+   *
+   * @param edm    the Edm to validate
+   * @param client the OData client to use for validation
+   * @return true if the given XML metadata is valid, false otherwise
+   */
+  public static boolean validateMetadata(Edm edm, ODataClient client) {
+    try {
+      // call the probably-useless metadata validator. can't hurt though
+      // SEE: https://github.com/apache/olingo-odata4/blob/master/lib/client-core/src/main/java/org/apache/olingo/client/core/serialization/ODataMetadataValidationImpl.java#L77-L116
+      client.metadataValidation().validateMetadata(edm);
+      //if Edm metadata are invalid, the previous line will throw an exception and this line won't be reached.
+      return true;
+    } catch (NullPointerException nex) {
+      LOG.error(getDefaultErrorMessage("Metadata validation Failed! See error messages and commander.log for further information."));
+    } catch (Exception ex) {
+      LOG.error(getDefaultErrorMessage("Metadata validation Failed! General error occurred when validating metadata.\n" + ex.getMessage()));
+      if (ex.getCause() != null) {
+        LOG.error("Caused by: " + ex.getCause().getMessage());
+      }
+    }
+    return false;
   }
 
   /**
