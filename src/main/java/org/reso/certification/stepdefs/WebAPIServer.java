@@ -571,6 +571,34 @@ class WebAPIServer implements En {
       }
     });
 
+    And("^Multiple Valued Enumeration Data in \"([^\"]*)\" is empty OR has \"([^\"]*)\"$", (String parameterFieldName, String parameterAssertedValue) -> {
+      try {
+        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
+        AtomicReference<String> fieldValue = new AtomicReference<>();
+        AtomicReference<String> assertedValue = new AtomicReference<>();
+
+        AtomicBoolean result = new AtomicBoolean(true);
+
+        assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
+        LOG.info("Asserted value is: " + assertedValue.get());
+
+        from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, ObjectNode.class).forEach(item -> {
+          fieldValue.set(item.get(fieldName).toString());
+          if (item.get(fieldName).isArray()) {
+            Set<String> values = new LinkedHashSet<>();
+            item.get(fieldName).elements().forEachRemaining(element -> values.add(element.asText()));
+            result.set(result.get() && (values.size() == 0 || values.stream().allMatch(value -> value.contentEquals(assertedValue.get()))));
+            LOG.info("Assert True: " + fieldValue.get() + " equals [] or contains only " + assertedValue.get() + " ==> " + result.get());
+            assertTrue(result.get());
+          } else {
+            fail(getDefaultErrorMessage(fieldName, "MUST contain an array of values but found:", item.get(fieldName).toString()));
+          }
+        });
+      } catch (Exception ex) {
+        fail(getDefaultErrorMessage(ex));
+      }
+    });
+
     /*
      * Date comparison ordering (asc, desc).
      */
@@ -1002,6 +1030,7 @@ class WebAPIServer implements En {
 
       LOG.info("Field '" + resolvedFieldName + "' has OData type Collection(Edm.EnumType)");
     });
+
   }
 
   static WebAPITestContainer getTestContainer() {
