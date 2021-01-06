@@ -63,7 +63,7 @@ public class Settings {
    * @return a copy of the request with the URL resolved.
    */
   public static Request resolveParameters(Request request, Settings settings) {
-    return new Request(resolveParametersString(request.getUrl(), settings), request.getOutputFile(), request.getRequestId());
+    return new Request(resolveParametersString(request.getRequestUrl(), settings), request.getOutputFile(), request.getRequestId());
   }
 
   /**

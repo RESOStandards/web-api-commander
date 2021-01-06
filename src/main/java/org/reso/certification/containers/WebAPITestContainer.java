@@ -26,10 +26,7 @@ import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.commander.Commander;
 import org.reso.commander.common.DataDictionaryMetadata;
 import org.reso.commander.common.TestUtils;
-import org.reso.models.ClientSettings;
-import org.reso.models.Parameters;
-import org.reso.models.Request;
-import org.reso.models.Settings;
+import org.reso.models.*;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -361,23 +358,25 @@ public final class WebAPITestContainer implements TestContainer {
         setRequest(request);
         assertNotNull(getDefaultErrorMessage("Metadata request was null! Please check your RESOScript."), request);
 
-        if (getCommander().getPathToMetadata(request.getUrl()).isPresent()) {
-          LOG.info("Requesting XML Metadata from: " + getCommander().getPathToMetadata(request.getUrl()).get().toString());
-          ODataRawRequest oDataRawRequest = getCommander()
-              .prepareODataRawMetadataRequest(getCommander().getPathToMetadata(request.getUrl()).get().toString());
-          ODataRawResponse response = oDataRawRequest.execute();
-          responseCode.set(response.getStatusCode());
-          setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, response));
+        URI pathToMetadata = getCommander().getPathToMetadata(request.getRequestUrl());
+        if (pathToMetadata != null) {
+          LOG.info("Requesting XML Metadata from: " + pathToMetadata.toString());
+          ODataTransportWrapper wrapper = getCommander().executeODataGetRequest(pathToMetadata.toString());
+          setODataRawResponse(wrapper.getODataRawResponse());
+          responseCode.set(wrapper.getHttpResponseCode());
 
-          xmlResponseData.set(TestUtils.convertInputStreamToString(response.getRawResponse()));
+          if (wrapper.getException() != null) {
+            processODataRequestException(wrapper.getException());
+            System.exit(NOT_OK);
+          }
+
+          setServerODataHeaderVersion(wrapper.getServerVersion());
+          xmlResponseData.set(wrapper.getResponseData());
           xmlMetadata.set(Commander.deserializeXMLMetadata(xmlResponseData.get(), getCommander().getClient()));
         } else {
-          LOG.error(getDefaultErrorMessage("could not create metadata URI from given requestUri:", request.getUrl()));
+          LOG.error(getDefaultErrorMessage("could not create metadata URI from given requestUri:", request.getRequestUrl()));
           System.exit(NOT_OK);
         }
-      } catch (Exception ex) {
-        processODataRequestException(ex);
-        System.exit(NOT_OK);
       } finally {
         haveMetadataBeenRequested.set(true);
       }

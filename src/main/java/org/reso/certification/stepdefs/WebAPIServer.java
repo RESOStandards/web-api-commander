@@ -214,7 +214,7 @@ class WebAPIServer implements En {
 
         //TODO: convert to OData filter factory
         getTestContainer().setRequestUri(Commander.prepareURI(
-            Settings.resolveParameters(getTestContainer().getSettings().getRequest(requestId), getTestContainer().getSettings()).getUrl()
+            Settings.resolveParameters(getTestContainer().getSettings().getRequest(requestId), getTestContainer().getSettings()).getRequestUrl()
                 + AMPERSAND + ODATA_QUERY_PARAMS.SKIP + EQUALS + skipCount));
         getTestContainer().executePreparedRawGetRequest();
       } catch (Exception ex) {
@@ -268,28 +268,27 @@ class WebAPIServer implements En {
       try {
         LOG.info("Asserted Response Code: " + assertedResponseCode + ", Server Response Code: " + getTestContainer().getResponseCode());
 
+        if (getTestContainer().getODataClientErrorException() != null) {
+          if (getTestContainer().getODataClientErrorException().getODataError().getMessage() != null) {
+            LOG.error(getDefaultErrorMessage("Request failed with the following message:",
+                getTestContainer().getODataClientErrorException().getODataError().getMessage()));
+          } else if (getTestContainer().getODataClientErrorException().getMessage() != null) {
+            LOG.error(getDefaultErrorMessage("Request failed with the following message:",
+                getTestContainer().getODataClientErrorException().getMessage()));
+          }
+        }
+
+        if (getTestContainer().getODataServerErrorException() != null) {
+          LOG.error(getDefaultErrorMessage("Request failed with the following message:",
+              getTestContainer().getODataServerErrorException().toString()));
+
+          if (getTestContainer().getODataServerErrorException().toString().contains(String.valueOf(HttpStatus.SC_INTERNAL_SERVER_ERROR))) {
+            getTestContainer().setResponseCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+          }
+        }
+
         //TODO: clean up logic
         if (getTestContainer().getResponseCode() != null && assertedResponseCode.intValue() != getTestContainer().getResponseCode().intValue()) {
-          if (getTestContainer().getODataClientErrorException() != null) {
-
-            if (getTestContainer().getODataClientErrorException().getODataError().getMessage() != null) {
-              LOG.error(getDefaultErrorMessage("Request failed with the following message:",
-                  getTestContainer().getODataClientErrorException().getODataError().getMessage()));
-            } else if (getTestContainer().getODataClientErrorException().getMessage() != null) {
-              LOG.error(getDefaultErrorMessage("Request failed with the following message:",
-                  getTestContainer().getODataClientErrorException().getMessage()));
-            }
-
-          } else if (getTestContainer().getODataServerErrorException() != null) {
-            LOG.error(getDefaultErrorMessage("Request failed with the following message:",
-                getTestContainer().getODataServerErrorException().toString()));
-
-            if (getTestContainer().getODataServerErrorException().toString().contains(String.valueOf(HttpStatus.SC_INTERNAL_SERVER_ERROR))) {
-              getTestContainer().setResponseCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-            }
-          }
-
-          //fail for all inner conditions
           fail(getAssertResponseCodeErrorMessage(assertedResponseCode, getTestContainer().getResponseCode()));
         }
 
@@ -892,7 +891,7 @@ class WebAPIServer implements En {
 
     When("^a GET request is made to the resolved Url in \"([^\"]*)\" using the OData Client$", (String requestId) -> {
       Request request = getTestContainer().getSettings().getRequest(requestId);
-      String uriString = Settings.resolveParameters(request, getTestContainer().getSettings()).getUrl();
+      String uriString = Settings.resolveParameters(request, getTestContainer().getSettings()).getRequestUrl();
       assertTrue(getDefaultErrorMessage("the resolved Url in", "'" + requestId + "'", "was invalid!"), uriString != null && uriString.length() > 0);
 
       LOG.info("Request Id: " + requestId);
@@ -1028,7 +1027,7 @@ class WebAPIServer implements En {
       getTestContainer().setRequest(getTestContainer().getSettings().getRequest(requestId));
       LOG.info("Request ID: " + requestId);
 
-      URI requestUri = prepareURI(getTestContainer().getRequest().getUrl());
+      URI requestUri = prepareURI(getTestContainer().getRequest().getRequestUrl());
 
       //prepare request URI
       getTestContainer().setRequestUri(requestUri);

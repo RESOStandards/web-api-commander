@@ -12,30 +12,22 @@ import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class Request {
   private String requestId;
   private String outputFile;
-  private String url;
-
-  private Request request;
-  private Status status;
-  private Date startDate, endDate;
-  private Integer httpResponseCode;
-  private Exception failedRequestException;
-
+  private String requestUrl;
 
   /**
    * Public constructor requires both outputFile and url. Remaining Request properties
    * may be set individually after Request has been instantiated.
-   *
-   * @param outputFile
-   * @param url
+   * @param requestUrl the url for the request
+   * @param outputFile the outputFile to save request to
+   * @param requestId the id of the request
    */
-  public Request(String url, String outputFile, String requestId) {
-    setUrl(url);
+  public Request(String requestUrl, String outputFile, String requestId) {
+    setRequestUrl(requestUrl);
     setOutputFile(outputFile);
     setRequestId(requestId);
   }
@@ -56,7 +48,7 @@ public class Request {
    * Loads the requests from the given File as an Observable List of Requests
    *
    * @param file the file containing the requests
-   * @return an Observable list of requests, or an exception is thrown
+   * @return a list of requests that were parsed from the given file
    */
   public static List<Request> loadFromRESOScript(File file) {
     final String REQUESTS_KEY = "Requests";
@@ -92,81 +84,7 @@ public class Request {
     return requests;
   }
 
-  /**
-   * Gets the status of the given request
-   *
-   * @return the status of the request
-   */
-  public Status getStatus() {
-    return status;
-  }
 
-  /**
-   * Sets the status for the give request
-   *
-   * @param status the status to set
-   * @return the current instance of the request
-   */
-  public Request setStatus(Status status) {
-    this.status = status;
-    return this;
-  }
-
-  /**
-   * Starts request timer
-   *
-   * @return the current request
-   */
-  public Request startTimer() {
-    startDate = new Date();
-    return this;
-  }
-
-  /**
-   * Stops request timer
-   *
-   * @return the current request
-   */
-  public Request stopTimer() {
-    endDate = new Date();
-    return this;
-  }
-
-  /**
-   * Gets the elapsed time the request took to run
-   *
-   * @return the elapsed time of the request in milliseconds
-   */
-  public long getElapsedTimeMillis() {
-    return endDate != null && startDate != null ? endDate.getTime() - startDate.getTime() : 0L;
-  }
-
-  /**
-   * Sets the exception for a given request
-   *
-   * @param failedRequestException the exception that was thrown when the request was executed
-   */
-  public void setFailedRequestException(Exception failedRequestException) {
-    this.failedRequestException = failedRequestException;
-  }
-
-  /**
-   * HTTP Response code getter
-   *
-   * @return an Integer representing the response code
-   */
-  public Integer getHttpResponseCode() {
-    return httpResponseCode;
-  }
-
-  /**
-   * HTTP Response code setter
-   *
-   * @param httpResponseCode an Integer representing the HTTP Response code
-   */
-  public void setHttpResponseCode(Integer httpResponseCode) {
-    this.httpResponseCode = httpResponseCode;
-  }
 
   /**
    * Gets the given request by Id, if present.
@@ -209,24 +127,17 @@ public class Request {
    *
    * @return the URL for the request, or null
    */
-  public String getUrl() {
-    return url;
+  public String getRequestUrl() {
+    return requestUrl;
   }
 
   /**
    * URL setter
    *
-   * @param url the URL for the request, or null
+   * @param requestUrl the URL for the request, or null
    */
-  private void setUrl(String url) {
-    this.url = url;
-  }
-
-  /**
-   * An enumeration of request status options
-   */
-  public enum Status {
-    STARTED, SUCCEEDED, FAILED, SKIPPED
+  private void setRequestUrl(String requestUrl) {
+    this.requestUrl = requestUrl;
   }
 
   /**

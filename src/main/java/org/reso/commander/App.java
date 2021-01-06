@@ -8,6 +8,7 @@ import org.reso.certification.codegen.BDDProcessor;
 import org.reso.certification.codegen.DataDictionaryCodeGenerator;
 import org.reso.certification.codegen.EDMXProcessor;
 import org.reso.models.ClientSettings;
+import org.reso.models.ODataTransportWrapper;
 import org.reso.models.Request;
 import org.reso.models.Settings;
 
@@ -129,6 +130,7 @@ public class App {
         Integer responseCode = null;
 
         String outputFilePath;
+        ODataTransportWrapper wrapper = null;
 
         for (int i = 0; i < numRequests; i++) {
           try {
@@ -143,7 +145,7 @@ public class App {
               LOG.info("Request Id: " + request.getRequestId());
             }
 
-            resolvedUrl = Settings.resolveParameters(request, settings).getUrl();
+            resolvedUrl = Settings.resolveParameters(request, settings).getRequestUrl();
             LOG.info("Resolved URL: " + resolvedUrl);
 
             //only run tests if they have URLs that resolve
@@ -153,10 +155,15 @@ public class App {
               LOG.info("Output File: " + outputFilePath);
 
               //get the response code from the request
-              responseCode = commander.saveGetRequest(resolvedUrl, outputFilePath);
-              request.setHttpResponseCode(responseCode);
-              LOG.info("Response Code: " + responseCode);
+              wrapper = commander.saveGetRequest(resolvedUrl, outputFilePath);
 
+              if (wrapper.getException() != null) {
+                LOG.error(getDefaultErrorMessage(wrapper.getException()));
+              }
+
+              if (wrapper.getHttpResponseCode() != null) {
+                LOG.info("Response Code: " + wrapper.getHttpResponseCode());
+              }
             } else {
               LOG.info("Request " + request.getRequestId() + " has an empty URL. Skipping...");
             }
@@ -190,7 +197,10 @@ public class App {
 
         if (cmd.hasOption(APP_OPTIONS.ACTIONS.GET_METADATA)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GET_METADATA);
-          commander.saveXmlMetadataResponseToFile(outputFile);
+          if (commander.getServiceRoot() != null) {
+            final String requestUri = commander.getServiceRoot() + METADATA_PATH;
+            commander.saveGetRequest(requestUri, outputFile);
+          }
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT);
           LOG.info(generateMetadataReport(deserializeEdmFromPath(inputFilename, commander.getClient()), inputFilename));
@@ -248,7 +258,7 @@ public class App {
                 LOG.info("Request Id: " + request.getRequestId());
               }
 
-              resolvedUrl = Settings.resolveParameters(request, settings).getUrl();
+              resolvedUrl = Settings.resolveParameters(request, settings).getRequestUrl();
               LOG.info("Resolved URL: " + resolvedUrl);
 
               //only run tests if they have URLs that resolve
