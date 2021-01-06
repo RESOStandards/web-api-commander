@@ -1,5 +1,7 @@
 package org.reso.models;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.reso.commander.Commander;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -15,7 +17,10 @@ import java.io.FileInputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
+
 public class ClientSettings {
+  private static final Logger LOG = LogManager.getLogger(ClientSettings.class);
 
   public static final String
       SERVER_ID = "ServerId",
@@ -79,7 +84,7 @@ public class ClientSettings {
     } catch (Exception e) {
       //this only needs to be shown once
       //showMessageDialog(appFrame, "Cannot read configuration file.");
-      e.printStackTrace();
+      LOG.error(getDefaultErrorMessage(e.getMessage()));
       System.exit(Commander.NOT_OK);
     }
 

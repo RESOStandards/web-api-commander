@@ -1,4 +1,4 @@
-Feature: Commander Platinum Web API Test Container Tests
+Feature: Web API Container Tests
 
   Background:
     Given a Web API test container was created using the RESOScript "mock.web-api-server.core.1.0.2.resoscript"
@@ -15,7 +15,7 @@ Feature: Commander Platinum Web API Test Container Tests
     But the Commander is not created using client credentials mode
 
   Scenario: Metadata validation returns true for known-good metadata
-    When sample metadata from "good-edmx-and-edm.xml" are loaded into the test container
+    When sample metadata from "RESODataDictionary-1.7.edmx" are loaded into the test container
     Then metadata are valid
 
   Scenario: Metadata validation returns false for known-bad metadata

@@ -4,8 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.reso.commander.common.Utils;
-import org.reso.models.ReferenceStandardLookup;
 import org.reso.models.ReferenceStandardField;
+import org.reso.models.ReferenceStandardLookup;
 import org.reso.models.ReferenceStandardRelationship;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
@@ -280,7 +280,10 @@ public class EDMXProcessor extends WorksheetProcessor {
       getEnumerations().get(lookupStandardName).forEach(referenceStandardLookup -> {
         content
             .append("        ").append(EDMXTemplates.buildComments(referenceStandardLookup))
-            .append("        <Member Name=\"").append(referenceStandardLookup.getLookupValue()).append("\"/>\n");
+            .append("        <Member Name=\"").append(referenceStandardLookup.getLookupValue()).append("\">\n")
+            .append("          <Annotation Term=\"RESO.OData.Metadata.StandardName\" ")
+            .append("String=\"").append(sanitizeXml(referenceStandardLookup.getLookupDisplayName())).append("\" />\n")
+            .append("        </Member>\n");
       });
 
       content.append("      </EnumType>\n");
@@ -293,6 +296,14 @@ public class EDMXProcessor extends WorksheetProcessor {
         .append("      </EnumType>\n");
     }
     return content.toString();
+  }
+
+  private static String sanitizeXml(String input) {
+    return input.replace("&", "&amp;")
+        .replace(">", "&gt;")
+        .replace("<", "&lt;")
+        .replace("'", "&apos;")
+        .replace("\"", "&quot;");
   }
 
   /*
@@ -313,7 +324,10 @@ public class EDMXProcessor extends WorksheetProcessor {
       getEnumerations().get(lookupStandardName).forEach(referenceStandardLookup -> {
         content
           .append("        ").append(EDMXTemplates.buildComments(referenceStandardLookup))
-          .append("        <Member Name=\"").append(referenceStandardLookup.getLookupValue()).append("\"/>\n");
+          .append("        <Member Name=\"").append(referenceStandardLookup.getLookupValue()).append("\">\n")
+          .append("          <Annotation Term=\"RESO.OData.Metadata.StandardName\" ")
+          .append("String=\"").append(sanitizeXml(referenceStandardLookup.getLookupDisplayName())).append("\" />\n")
+          .append("        </Member>\n");
       });
 
       content.append("      </EnumType>\n");

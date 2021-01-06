@@ -8,15 +8,11 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
-import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.communication.request.retrieve.EdmMetadataRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.XMLMetadataRequest;
-import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
-import org.apache.olingo.client.api.serialization.ODataSerializerException;
-import org.apache.olingo.client.api.uri.QueryOption;
 import org.apache.olingo.client.core.ODataClientFactory;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -24,6 +20,8 @@ import org.reso.auth.OAuth2HttpClientFactory;
 import org.reso.auth.TokenHttpClientFactory;
 import org.reso.commander.common.TestUtils;
 import org.reso.models.MetadataReport;
+import org.reso.models.ODataTransportWrapper;
+import org.reso.models.Request;
 import org.xml.sax.*;
 
 import javax.xml.XMLConstants;
@@ -33,15 +31,14 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 import java.io.*;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertNotNull;
 import static org.reso.certification.containers.WebAPITestContainer.EMPTY_STRING;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
@@ -52,6 +49,7 @@ import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 public class Commander {
   public static final int OK = 0;
   public static final int NOT_OK = 1;
+
   //TODO: find the corresponding query params constant for this
   public static final String AMPERSAND = "&";
   //TODO: find the corresponding query params constant for this
@@ -64,6 +62,7 @@ public class Commander {
   public static final String EDMX_EXTENSION = ".xml";
   private static final Logger LOG = LogManager.getLogger(Commander.class);
   private static final String EDM_4_0_3_XSD = "edm.4.0.errata03.xsd", EDMX_4_0_3_XSD = "edmx.4.0.errata03.xsd";
+  public static final String METADATA_PATH = "/$metadata";
 
   private static String bearerToken;
   private static String clientId;
@@ -78,6 +77,7 @@ public class Commander {
   private static String serviceRoot;
   private static Edm edm;
   private static XMLMetadata xmlMetadata;
+  private Integer lastResponseCode = null;
 
   private Commander() {
     //private constructor, should not be used. Use Builder instead.
@@ -178,71 +178,6 @@ public class Commander {
   }
 
   /**
-   * Creates a URI with a skip parameter
-   *
-   * @param requestUri the URI to add the $skip parameter to
-   * @param pageSize   the page size of the page to get
-   * @param skip       the number of pages to skip
-   * @return a URI with the skip parameter added
-   */
-  private static URI buildSkipUri(String requestUri, Integer pageSize, Integer skip) {
-    try {
-      URIBuilder uriBuilder;
-      URI preparedUri = prepareURI(requestUri);
-
-      if (requestUri != null && requestUri.length() > 0 && preparedUri != null) {
-        uriBuilder = new URIBuilder(preparedUri);
-
-        if (skip != null && skip > 0)
-          uriBuilder.setParameter("$" + QueryOption.SKIP.toString(), skip.toString());
-
-        uriBuilder.setParameter("$" + QueryOption.TOP.toString(),
-            pageSize == null || pageSize == 0 ? DEFAULT_PAGE_SIZE.toString() : pageSize.toString());
-
-        uriBuilder.setCharset(StandardCharsets.UTF_8);
-        URI uri = uriBuilder.build();
-        LOG.info("URI created: " + uri.toString());
-
-        return uri;
-      }
-    } catch (Exception ex) {
-      LOG.error("ERROR: " + ex.toString());
-    }
-    return null;
-  }
-
-//  /**
-//   * Creates a URI with a skip parameter
-//   *
-//   * @param requestUri the URI to add the $skip parameter to
-//   * @param pageSize   the page size of the page to get
-//   * @param skip       the number of pages to skip
-//   * @return a URI with the skip parameter added or null if a one could not be prepared.
-//   */
-//  private static String buildSkipUriString(String requestUri, Integer pageSize, Integer skip) {
-//    try {
-//      if (requestUri != null && requestUri.length() > 0) {
-//        URI preparedUri = prepareURI(requestUri);
-//        if (preparedUri != null) {
-//          String preparedUriString = preparedUri.toString();
-//
-//          preparedUriString += "?$top="
-//              + (pageSize == null || pageSize == 0 ? DEFAULT_PAGE_SIZE.toString() : pageSize.toString());
-//
-//          if (skip != null && skip > 0) preparedUriString += "&$skip=" + skip.toString();
-//
-//          LOG.debug("URI created: " + preparedUriString);
-//
-//          return preparedUriString;
-//        }
-//      }
-//    } catch (Exception ex) {
-//      LOG.error("ERROR: " + ex.toString());
-//    }
-//    return null;
-//  }
-
-  /**
    * Metadata Pretty Printer
    *
    * @param metadata any metadata in Edm format
@@ -336,58 +271,6 @@ public class Commander {
   }
 
   /**
-   * Static version of the metadata validator that can work with a given client
-   *
-   * @param metadata the XML Metadata to validate
-   * @param client   the OData client to use for validation
-   * @return true if the given XML metadata is valid, false otherwise
-   */
-  public static boolean validateMetadata(XMLMetadata metadata, ODataClient client) {
-    try {
-      // call the probably-useless metadata validator. can't hurt though
-      // SEE: https://github.com/apache/olingo-odata4/blob/master/lib/client-core/src/main/java/org/apache/olingo/client/core/serialization/ODataMetadataValidationImpl.java#L77-L116
-      client.metadataValidation().validateMetadata(metadata);
-
-      // also check whether metadata contains a valid service document in OData v4 format
-      return client.metadataValidation().isServiceDocument(metadata)
-          && client.metadataValidation().isV4Metadata(metadata);
-    } catch (NullPointerException nex) {
-      LOG.error(getDefaultErrorMessage("Metadata validation Failed! See error messages and commander.log for further information."));
-    } catch (Exception ex) {
-      LOG.error(getDefaultErrorMessage("Metadata validation Failed! General error occurred when validating metadata.\n" + ex.getMessage()));
-      if (ex.getCause() != null) {
-        LOG.error("Caused by: " + ex.getCause().getMessage());
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Static version of the metadata validator that can work with a given client
-   *
-   * @param edm    the Edm to validate
-   * @param client the OData client to use for validation
-   * @return true if the given XML metadata is valid, false otherwise
-   */
-  public static boolean validateMetadata(Edm edm, ODataClient client) {
-    try {
-      // call the probably-useless metadata validator. can't hurt though
-      // SEE: https://github.com/apache/olingo-odata4/blob/master/lib/client-core/src/main/java/org/apache/olingo/client/core/serialization/ODataMetadataValidationImpl.java#L77-L116
-      client.metadataValidation().validateMetadata(edm);
-      //if Edm metadata are invalid, the previous line will throw an exception and this line won't be reached.
-      return true;
-    } catch (NullPointerException nex) {
-      LOG.error(getDefaultErrorMessage("Metadata validation Failed! See error messages and commander.log for further information."));
-    } catch (Exception ex) {
-      LOG.error(getDefaultErrorMessage("Metadata validation Failed! General error occurred when validating metadata.\n" + ex.getMessage()));
-      if (ex.getCause() != null) {
-        LOG.error("Caused by: " + ex.getCause().getMessage());
-      }
-    }
-    return false;
-  }
-
-  /**
    * OData client getter
    *
    * @return the OData client for the current Commander instance
@@ -466,29 +349,72 @@ public class Commander {
   }
 
   /**
-   * Reads Edm from XMLMetadata in the given path.
-   *
-   * @param pathToXmlMetadata the path to the XML metadata.
-   * @return an Edm object containing XML Metadata to read.
+   * Prepares an OData raw request with the given requestUri
+   * @param requestUri the URI to use for the request
+   * @return an ODataRawRequest for the given URI or null if one couldn't be created
    */
-  public Edm readEdm(String pathToXmlMetadata) {
+  public ODataRawRequest prepareODataRawMetadataRequest(String requestUri) {
     try {
-      return client.getReader().readMetadata(new FileInputStream(pathToXmlMetadata));
-    } catch (FileNotFoundException fex) {
-      LOG.error(fex.toString());
+      ODataRawRequest request = getClient().getRetrieveRequestFactory().getRawRequest(new URI(requestUri));
+      request.setAccept(ContentType.APPLICATION_XML.toContentTypeString());
+      request.setContentType(ContentType.APPLICATION_XML.toContentTypeString());
+      return request;
+    } catch (URISyntaxException uriSyntaxException) {
+      LOG.error(getDefaultErrorMessage("Invalid Service Root URI:", getServiceRoot(), "\n" + uriSyntaxException.getMessage()));
     }
     return null;
   }
 
   /**
-   * Saves the given Edm model to the given outputFileName.
+   * Static version of the metadata validator that can work with a given client
    *
-   * @param metadata       the metadata to save.
-   * @param outputFileName the file name to output the metadata to.
+   * @param metadata the XML Metadata to validate
+   * @param client   the OData client to use for validation
+   * @return true if the given XML metadata is valid, false otherwise
    */
-  public void saveMetadata(Edm metadata, String outputFileName) throws IOException, ODataSerializerException {
-    FileWriter writer = new FileWriter(outputFileName);
-    client.getSerializer(ContentType.APPLICATION_XML).write(writer, metadata);
+  public static boolean validateMetadata(XMLMetadata metadata, ODataClient client) {
+    try {
+      // call the probably-useless metadata validator. can't hurt though
+      // SEE: https://github.com/apache/olingo-odata4/blob/master/lib/client-core/src/main/java/org/apache/olingo/client/core/serialization/ODataMetadataValidationImpl.java#L77-L116
+      client.metadataValidation().validateMetadata(metadata);
+
+      // also check whether metadata contains a valid service document in OData v4 format
+      return client.metadataValidation().isServiceDocument(metadata)
+          && client.metadataValidation().isV4Metadata(metadata);
+    } catch (NullPointerException nex) {
+      LOG.error(getDefaultErrorMessage("Metadata validation Failed! See error messages and commander.log for further information."));
+    } catch (Exception ex) {
+      LOG.error(getDefaultErrorMessage("Metadata validation Failed! General error occurred when validating metadata.\n" + ex.getMessage()));
+      if (ex.getCause() != null) {
+        LOG.error("Caused by: " + ex.getCause().getMessage());
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Static version of the metadata validator that can work with a given client
+   *
+   * @param edm    the Edm to validate
+   * @param client the OData client to use for validation
+   * @return true if the given XML metadata is valid, false otherwise
+   */
+  public static boolean validateMetadata(Edm edm, ODataClient client) {
+    try {
+      // call the probably-useless metadata validator. can't hurt though
+      // SEE: https://github.com/apache/olingo-odata4/blob/master/lib/client-core/src/main/java/org/apache/olingo/client/core/serialization/ODataMetadataValidationImpl.java#L77-L116
+      client.metadataValidation().validateMetadata(edm);
+      //if Edm metadata are invalid, the previous line will throw an exception and this line won't be reached.
+      return true;
+    } catch (NullPointerException nex) {
+      LOG.error(getDefaultErrorMessage("Metadata validation Failed! See error messages and commander.log for further information."));
+    } catch (Exception ex) {
+      LOG.error(getDefaultErrorMessage("Metadata validation Failed! General error occurred when validating metadata.\n" + ex.getMessage()));
+      if (ex.getCause() != null) {
+        LOG.error("Caused by: " + ex.getCause().getMessage());
+      }
+    }
+    return false;
   }
 
   /**
@@ -575,33 +501,6 @@ public class Commander {
     return isOAuthClient;
   }
 
-  public Optional<InputStream> fetchJsonData(String requestUri) {
-    ODataRawResponse oDataRawResponse = null;
-    try {
-      if (requestUri != null && requestUri.length() > 0) {
-        LOG.debug("Request URI: " + requestUri);
-
-        ODataRawRequest request = getClient().getRetrieveRequestFactory().getRawRequest(prepareURI(requestUri));
-
-        oDataRawResponse = request.execute();
-        lastResponseCode = oDataRawResponse.getStatusCode();
-        LOG.info("JSON Data fetched from: " + requestUri + "\n\twith response code: " + getLastResponseCode());
-        return Optional.ofNullable(oDataRawResponse.getRawResponse());
-      } else {
-        LOG.info("Empty Request Uri... Skipping!");
-      }
-    } catch (ODataClientErrorException oex) {
-      String errMsg = "Request URI: " + requestUri + "\n\nERROR:" + oex.toString();
-      lastResponseCode = oex.getStatusLine().getStatusCode();
-      try {
-        return Optional.of(new ByteArrayInputStream(errMsg.getBytes()));
-      } finally {
-        LOG.error("Exception occurred in saveRawGetRequest. " + oex.getMessage());
-      }
-    }
-    return Optional.empty();
-  }
-
   /**
    * Executes a get request on URI and saves raw response to outputFilePath.
    * Intended to be used mostly for testing.
@@ -609,93 +508,92 @@ public class Commander {
    * @param requestUri     the URI to make the request against
    * @param outputFilePath the outputFilePath to write the response to
    */
-  public Integer saveGetRequest(String requestUri, String outputFilePath) {
+  public ODataTransportWrapper saveGetRequest(String requestUri, String outputFilePath) {
     final String ERROR_EXTENSION = ".ERROR";
+
+    final ODataTransportWrapper wrapper = executeODataGetRequest(requestUri);
     try {
-      Optional<InputStream> response = fetchJsonData(requestUri);
-      if (response.isPresent()) {
-        FileUtils.copyInputStreamToFile(response.get(), new File(outputFilePath));
-        LOG.info("JSON Response saved to: " + outputFilePath);
+      if (wrapper.getResponseData() != null) {
+        FileUtils.copyInputStreamToFile(new ByteArrayInputStream(wrapper.getResponseData().getBytes()),
+            new File(outputFilePath));
+        LOG.info("Response saved to: " + outputFilePath);
+      }
+
+      if (wrapper.getException() != null) {
+        String errMsg = getDefaultErrorMessage("request failed!") +
+            "\nURI: " + requestUri +
+            "\nException: " + wrapper.getException();
+
+        FileUtils.copyInputStreamToFile(new ByteArrayInputStream(errMsg.getBytes()),
+            new File(outputFilePath + ERROR_EXTENSION));
       }
     } catch (Exception ex) {
-      File outputFile = new File(outputFilePath + ERROR_EXTENSION);
-      try {
-        FileUtils.copyInputStreamToFile(new ByteArrayInputStream(ex.toString().getBytes()), outputFile);
-      } catch (IOException ioException) {
-        ioException.printStackTrace();
-      }
-      ex.printStackTrace();
+      LOG.error(getDefaultErrorMessage(ex));
     }
-    return getLastResponseCode();
+    return wrapper;
   }
-
-  private Integer lastResponseCode = null;
 
   /**
-   * Gets HTTP response code from most recent Commander request
-   * @return the HTTP response code of the last request, or null
+   * Constructs a metadata path if not present already
+   * @param requestUri string URI to build the path with
+   * @return a URI with the metadata path included
    */
-  public Integer getLastResponseCode() {
-    return lastResponseCode;
+  public URI getPathToMetadata(String requestUri) {
+    if (requestUri == null) {
+      LOG.error(getDefaultErrorMessage("service root is null!"));
+      System.exit(NOT_OK);
+    }
+
+    try {
+      String uri = requestUri;
+      if (!requestUri.contains(METADATA_PATH)) {
+        uri += METADATA_PATH;
+      }
+      return new URI(uri);
+    } catch (Exception ex) {
+      LOG.error(getDefaultErrorMessage("could not create path to metadata.\n" + ex.toString()));
+      System.exit(NOT_OK);
+    }
+
+    return null;
   }
 
-  public String fetchXMLMetadata() {
-    String xmlMetadataResponseData = null;
+  /**
+   * Executes an OData GET Request w ith the current Commander instance
+   * @param wrapper the OData transport wrapper to use for the request
+   * @return and OData transport wrapper with the response, or exception if one was thrown
+   */
+  public ODataTransportWrapper executeODataGetRequest(ODataTransportWrapper wrapper) {
     try {
-      final String requestUri = getServiceRoot() + "/$metadata";
-
-      assertNotNull(getDefaultErrorMessage("Metadata request URI was null!"), requestUri);
-
-      ODataRawRequest request = getClient().getRetrieveRequestFactory().getRawRequest(URI.create(requestUri));
-      request.setFormat(ContentType.APPLICATION_XML.toContentTypeString());
-
-      ODataRawResponse response = request.execute();
-      lastResponseCode = response.getStatusCode();
-
-      if (getLastResponseCode() != HttpStatus.SC_OK) {
-        LOG.error(getDefaultErrorMessage("Request failed! \nuri:" + requestUri + "\nresponse code: " + getLastResponseCode()));
+      if (wrapper.getRequestUri().contains(METADATA_PATH)) {
+        wrapper.setODataRawRequest(prepareODataRawMetadataRequest(wrapper.getRequestUri()));
       } else {
-        xmlMetadataResponseData = TestUtils.convertInputStreamToString(response.getRawResponse());
-        if (xmlMetadataResponseData != null) {
-          LOG.info("Metadata request successful! " + xmlMetadataResponseData.getBytes().length + " bytes transferred.");
-        }
+        wrapper.setODataRawRequest(getClient().getRetrieveRequestFactory().getRawRequest(URI.create(wrapper.getRequestUri())));
+        wrapper.getODataRawRequest().setFormat(ContentType.JSON.toContentTypeString());
       }
+
+      wrapper.startTimer();
+      wrapper.setODataRawResponse(wrapper.getODataRawRequest().execute());
+
+      if (wrapper.getHttpResponseCode() == HttpStatus.SC_OK) {
+        LOG.info("Request succeeded..." + wrapper.getResponseData().getBytes().length + " bytes received.");
+      }
+
     } catch (Exception ex) {
-      LOG.error(ex.toString());
+      getDefaultErrorMessage(ex.toString());
+      wrapper.setException(ex);
+    } finally {
+      wrapper.stopTimer();
     }
-    return xmlMetadataResponseData;
+    return wrapper;
   }
 
-  /**
-   * Executes a raw OData request in the current commander instance without trying to interpret the results
-   *
-   * @param requestUri the URI to make the request to
-   * @return a string containing the serialized response, or null
-   */
-  public String executeRawRequest(String requestUri) {
-    String data = null;
-    if (requestUri != null) {
-      try {
-        ODataRawRequest request = getClient().getRetrieveRequestFactory().getRawRequest(URI.create(requestUri));
-        ODataRawResponse response = request.execute();
-        lastResponseCode = response.getStatusCode();
-        data = TestUtils.convertInputStreamToString(response.getRawResponse());
-      } catch (Exception ex) {
-        LOG.error(ex);
-      }
-    }
-    return data;
+  public ODataTransportWrapper executeODataGetRequest(Request request) {
+    return executeODataGetRequest(new ODataTransportWrapper(request));
   }
 
-  public void saveXmlMetadataResponseToFile(String outputFileName) {
-    String xmlResponse = fetchXMLMetadata();
-    assert(xmlResponse != null) : "XML Metadata request returned no data!";
-
-    try {
-      FileUtils.copyInputStreamToFile(new ByteArrayInputStream(xmlResponse.getBytes()), new File(outputFileName));
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+  public ODataTransportWrapper executeODataGetRequest(String requestUri) {
+    return executeODataGetRequest(new ODataTransportWrapper(requestUri));
   }
 
   /**
@@ -773,11 +671,7 @@ public class Commander {
      * @return a Builder containing the given Web API service root
      */
     public Builder serviceRoot(String serviceRoot) {
-      if (serviceRoot != null) {
-        String uri = serviceRoot.endsWith("/") ? serviceRoot.substring(0, serviceRoot.length()-1) : serviceRoot;
-        uri = uri.replace("$metadata", EMPTY_STRING);
-        this.serviceRoot = uri;
-      }
+      this.serviceRoot = serviceRoot;
       return this;
     }
 

@@ -102,9 +102,9 @@
   <Requests>
 
     <Request
-      RequestId="REQ-WA103-END3"
-      OutputFile="REQ-WA103-END3.metadata.xml"
-      Url="*ClientSettings_WebAPIURI*/$metadata*Parameter_OptionalMetadataFormatParameter*"
+        RequestId="metadata-request"
+        OutputFile="metadata-metadata-request.xml"
+        Url="*ClientSettings_WebAPIURI*/$metadata*Parameter_OptionalMetadataFormatParameter*"
     />
 
   </Requests>

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * The settings class contains all the settings a server can have, which currently means the following:
@@ -45,7 +46,9 @@ public class Settings {
     try {
       settings.setClientSettings(ClientSettings.loadFromRESOScript(file));
       settings.setParameters(Parameters.loadFromRESOScript(file));
-      settings.setRequests(Request.loadFromRESOScript(file));
+      settings.setRequests(
+          Request.loadFromRESOScript(file).stream().map(request -> resolveParameters(request, settings))
+          .collect(Collectors.toCollection(ArrayList::new)));
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -60,7 +63,7 @@ public class Settings {
    * @return a copy of the request with the URL resolved.
    */
   public static Request resolveParameters(Request request, Settings settings) {
-    return new Request(resolveParametersString(request.getUrl(), settings), request.getOutputFile(), request.getRequestId());
+    return new Request(resolveParametersString(request.getRequestUrl(), settings), request.getOutputFile(), request.getRequestId());
   }
 
   /**

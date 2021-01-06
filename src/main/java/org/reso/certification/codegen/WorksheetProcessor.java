@@ -74,6 +74,10 @@ public abstract class WorksheetProcessor {
         wellKnownStandardEnumerationHeaderMap.put(cell.getStringCellValue(), cell.getColumnIndex()));
   }
 
+  public List<ReferenceStandardRelationship> getStandardRelationships() {
+    return this.referenceStandardRelationships;
+  }
+
   public static Integer getIntegerValue(Integer index, Row row, Integer defaultValue) {
     if (index == null || !(index >= 0)) return defaultValue;
     Integer value;
@@ -84,10 +88,6 @@ public abstract class WorksheetProcessor {
       value = defaultValue;
     }
     return value;
-  }
-
-  public List<ReferenceStandardRelationship> getStandardRelationships() {
-    return this.referenceStandardRelationships;
   }
 
   public static Integer getIntegerValue(Integer index, Row row) {

@@ -1,12 +1,15 @@
 {
-  "@odata.context": "https://test.reso.org",
+  "@odata.context": "https://test.reso.org/Property?$filter=ListingKey eq 'abc123'",
   "value": [
     {
-      "ListingKeyNumeric": null,
+      "ListingKey": "abc123",
       "BedroomsTotal": null,
-      "StreetName": null,
+      "ListPrice": null,
+      "StreetName":  null,
       "ModificationTimestamp": null,
-      "ListingContractDate": null
+      "ListingContractDate": null,
+      "StandardStatus": null,
+      "AccessibilityFeatures": []
     }
   ]
 }

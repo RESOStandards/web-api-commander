@@ -133,7 +133,8 @@ public class BDDProcessor extends WorksheetProcessor {
 
       if (field.getSynonyms().size() > 0) {
         template += "    And the following synonyms for \"" + field.getStandardName() + "\" MUST NOT exist in the metadata\n" +
-            field.getSynonyms().stream().map(synonym -> padLeft("| " + synonym + " |\n", EXAMPLES_PADDING_AMOUNT)).collect(Collectors.joining());
+            field.getSynonyms().stream()
+                .map(synonym -> padLeft("| " + synonym + " |\n", EXAMPLES_PADDING_AMOUNT)).collect(Collectors.joining());
       }
       return template;
     }
@@ -225,56 +226,23 @@ public class BDDProcessor extends WorksheetProcessor {
 
     public static String buildStringListMultiTest(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
-
-      final String enumMarkup = buildStandardEnumerationMarkup(field.getLookupStandardName());
-
-      String template =
+      return
           "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + field.getStandardName() + "\" MUST be \"Multiple Enumeration\" data type\n" +
               generateSynonymsMarkup(field);
-
-      if (enumMarkup.length() > 0) {
-        if (field.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
-          template +=
-              "    And \"" + field.getStandardName() + "\" MUST contain at least one of the following standard lookups\n" + enumMarkup +
-              "    And \"" + field.getStandardName() + "\" MUST contain only standard enumerations\n";
-        } else {
-          template +=
-              "    And \"" + field.getStandardName() + "\" MAY contain any of the following standard lookups\n" + enumMarkup +
-              "    But \"" + field.getStandardName() + "\" MUST NOT contain any similar lookups\n";
-        }
-      }
-
-      return template;
     }
 
     public static String buildStringListSingleTest(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
 
-      final String enumMarkup = buildStandardEnumerationMarkup(field.getLookupStandardName());
-
-      String template =
+      return
           "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
               "    Then \"" + field.getStandardName() + "\" MUST be \"Single Enumeration\" data type\n" +
               generateSynonymsMarkup(field);
-
-      if (enumMarkup.length() > 0) {
-        if (field.getLookupStatus().contentEquals(LOCKED_WITH_ENUMERATIONS_KEY)) {
-          template +=
-              "    And \"" + field.getStandardName() + "\" MUST contain at least one of the following standard lookups\n" + enumMarkup +
-              "    And \"" + field.getStandardName() + "\" MUST contain only standard enumerations\n";
-        } else {
-          template +=
-              "    And \"" + field.getStandardName() + "\" MAY contain any of the following standard lookups\n" + enumMarkup +
-              "    But \"" + field.getStandardName() + "\" MUST NOT contain any similar lookups\n";
-        }
-      }
-
-      return template;
     }
 
     public static String buildStringTest(ReferenceStandardField field) {

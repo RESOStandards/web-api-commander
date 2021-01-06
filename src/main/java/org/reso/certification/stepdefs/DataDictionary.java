@@ -369,12 +369,13 @@ public class DataDictionary {
         break;
       case TypeMappings.DataDictionaryTypes.SINGLE_ENUM:
         if (foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING)) {
-          LOG.error(wrapColumns(getDefaultErrorMessage("String types are not allowed for enumerated fields at the current time.", "\nSee RCP-031 for further information:",
-              "https://members.reso.org/pages/viewpage.action?pageId=67962918#RCP-WEBAPI-031DataDictionaryRepresentationintheWebAPI-DataTypeMappings.1")));
+          LOG.error(wrapColumns(getDefaultErrorMessage("String types are not allowed for enumerated fields at the current time.", "\nSee RCP-031 for further information: "))
+              + "https://reso.atlassian.net/wiki/spaces/RESOWebAPIRCP/pages/2275149854/RCP+-+WEBAPI-031+Data+Dictionary+Representation+in+the+Web+API#RCP-WEBAPI-031DataDictionaryRepresentationintheWebAPI-DataTypeMappings.1");
         }
 
-        assertFalse(wrapColumns(getDefaultErrorMessage("Enumerated data type MUST declare a unique nominal type.",
-            "Found primitive type of", foundTypeName, "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565")),
+        assertFalse(getDefaultErrorMessage("Enumerated data types MUST declare a unique nominal (lookup) type.",
+            "\nFound primitive type of", foundTypeName)
+            + "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565",
             isPrimitiveType);
 
         //check for enum type by FQDN in the Edm cached in the container
@@ -395,8 +396,8 @@ public class DataDictionary {
         break;
       case TypeMappings.DataDictionaryTypes.MULTI_ENUM:
         if (foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING)) {
-          LOG.error(wrapColumns(getDefaultErrorMessage("String types are not allowed for enumerated fields at the current time.", "\nSee RCP-031 for further information:",
-              "https://members.reso.org/pages/viewpage.action?pageId=67962918#RCP-WEBAPI-031DataDictionaryRepresentationintheWebAPI-DataTypeMappings.1")));
+          LOG.error(wrapColumns(getDefaultErrorMessage("String types are not allowed for enumerated fields at the current time.", "\nSee RCP-031 for further information: ",
+              "https://reso.atlassian.net/wiki/spaces/RESOWebAPIRCP/pages/2275149854/RCP+-+WEBAPI-031+Data+Dictionary+Representation+in+the+Web+API#RCP-WEBAPI-031DataDictionaryRepresentationintheWebAPI-DataTypeMappings.1")));
         }
 
         assertFalse(wrapColumns(getDefaultErrorMessage("Enumerated data type MUST declare a unique nominal type.",
@@ -408,9 +409,9 @@ public class DataDictionary {
         enumType = container.getEdm().getEnumType(new FullQualifiedName(foundTypeName));
 
         isIntegerType =
-               enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT16)
-            || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT32)
-            || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT64);
+            enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT16)
+                || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT32)
+                || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT64);
 
         assertTrue(wrapColumns(getDefaultErrorMessage("Enumerated Types MUST use an underlying type of",
             TypeMappings.ODataTypes.INT16, "OR", TypeMappings.ODataTypes.INT32,  "OR", TypeMappings.ODataTypes.INT64)),
@@ -485,8 +486,8 @@ public class DataDictionary {
     Set<String> foundMembers = new LinkedHashSet<>(container.getEdm().getEnumType(fqn).getMemberNames());
     Set<String> standardMembers = getReferenceMetadata().getSchema(REFERENCE_ENUMS_NAMESPACE).getEnumType(fieldName)
         .getMembers().stream()
-            .map(CsdlEnumMember::getName)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+        .map(CsdlEnumMember::getName)
+        .collect(Collectors.toCollection(LinkedHashSet::new));
 
     assertTrue("\n" + getDefaultErrorMessage("Lookups for field", fieldName, "MUST only contain Standard Enumerations!",
         "\nFound the following non-standard enumerations:", Utils.wrapColumns("[" + String.join(", ", Sets.difference(foundMembers, standardMembers)) + "]")) + "\n",

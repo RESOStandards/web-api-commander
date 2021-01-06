@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Singleton;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -25,10 +26,7 @@ import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.commander.Commander;
 import org.reso.commander.common.DataDictionaryMetadata;
 import org.reso.commander.common.TestUtils;
-import org.reso.models.ClientSettings;
-import org.reso.models.Parameters;
-import org.reso.models.Request;
-import org.reso.models.Settings;
+import org.reso.models.*;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -37,8 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
-import static org.reso.commander.Commander.AMPERSAND;
-import static org.reso.commander.Commander.EQUALS;
+import static org.reso.commander.Commander.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.HEADER_ODATA_VERSION;
 import static org.reso.commander.common.TestUtils.JSON_VALUE_PATH;
@@ -166,6 +163,7 @@ public final class WebAPITestContainer implements TestContainer {
     responseCode.set(null);
     responseData.set(null);
     initialResponseData.set(null);
+    isDataSystemValid.set(false);
     rawRequest.set(null);
     oDataClientErrorException.set(null);
     oDataServerErrorException.set(null);
@@ -290,7 +288,11 @@ public final class WebAPITestContainer implements TestContainer {
         selectList.set(fragment.replace(ODATA_QUERY_PARAMS.SELECT, EMPTY_STRING).replace(EQUALS, EMPTY_STRING));
       }
     });
-    return new LinkedHashSet<>((Arrays.asList(selectList.get().split(FIELD_SEPARATOR))));
+    if (selectList.get() == null) {
+      return new ArrayList<>();
+    } else {
+      return new LinkedHashSet<>((Arrays.asList(selectList.get().split(FIELD_SEPARATOR))));
+    }
   }
 
   /**
@@ -352,21 +354,29 @@ public final class WebAPITestContainer implements TestContainer {
   public XMLMetadata fetchXMLMetadata() throws Exception {
     if (xmlMetadata.get() == null) {
       try {
-        String requestUri = Settings.resolveParameters(getSettings().getRequest(Request.WELL_KNOWN.METADATA_ENDPOINT), getSettings()).getUrl();
-        assertNotNull(getDefaultErrorMessage("Metadata request URI was null! Please check your RESOScript."), requestUri);
+        Request request = getSettings().getRequest(Request.WELL_KNOWN.METADATA_ENDPOINT);
+        setRequest(request);
+        assertNotNull(getDefaultErrorMessage("Metadata request was null! Please check your RESOScript."), request);
 
-        ODataRawRequest request = getCommander().getClient().getRetrieveRequestFactory().getRawRequest(URI.create(requestUri));
-        request.setFormat(ContentType.APPLICATION_XML.toContentTypeString());
+        URI pathToMetadata = getCommander().getPathToMetadata(request.getRequestUrl());
+        if (pathToMetadata != null) {
+          LOG.info("Requesting XML Metadata from: " + pathToMetadata.toString());
+          ODataTransportWrapper wrapper = getCommander().executeODataGetRequest(pathToMetadata.toString());
+          setODataRawResponse(wrapper.getODataRawResponse());
+          responseCode.set(wrapper.getHttpResponseCode());
 
-        LOG.info("Requesting XML Metadata from service root at: " + getServiceRoot());
-        ODataRawResponse response = request.execute();
-        responseCode.set(response.getStatusCode());
-        setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, response));
+          if (wrapper.getException() != null) {
+            processODataRequestException(wrapper.getException());
+            System.exit(NOT_OK);
+          }
 
-        xmlResponseData.set(TestUtils.convertInputStreamToString(response.getRawResponse()));
-        xmlMetadata.set(Commander.deserializeXMLMetadata(xmlResponseData.get(), getCommander().getClient()));
-      } catch (Exception ex) {
-        processODataRequestException(ex);
+          setServerODataHeaderVersion(wrapper.getServerVersion());
+          xmlResponseData.set(wrapper.getResponseData());
+          xmlMetadata.set(Commander.deserializeXMLMetadata(xmlResponseData.get(), getCommander().getClient()));
+        } else {
+          LOG.error(getDefaultErrorMessage("could not create metadata URI from given requestUri:", request.getRequestUrl()));
+          System.exit(NOT_OK);
+        }
       } finally {
         haveMetadataBeenRequested.set(true);
       }
@@ -729,22 +739,30 @@ public final class WebAPITestContainer implements TestContainer {
   }
 
   public final WebAPITestContainer validateMetadata() {
-    assertNotNull(getDefaultErrorMessage("no XML response data found!"), getXMLResponseData());
-    validateXMLMetadataXML();
+    try {
+      if (!haveMetadataBeenRequested.get()) fetchXMLMetadata();
+      assertNotNull(getDefaultErrorMessage("no XML response data found!"), getXMLResponseData());
+      validateXMLMetadataXML();
 
-    setXMLMetadata(Commander.deserializeXMLMetadata(getXMLResponseData(), getCommander().getClient()));
-    validateXMLMetadata();
+      setXMLMetadata(Commander.deserializeXMLMetadata(getXMLResponseData(), getCommander().getClient()));
+      validateXMLMetadata();
 
-    setEdm(Commander.deserializeEdm(getXMLResponseData(), getCommander().getClient()));
-    validateEdm();
+      setEdm(Commander.deserializeEdm(getXMLResponseData(), getCommander().getClient()));
+      validateEdm();
 
+      return this;
+    } catch (Exception ex) {
+      LOG.error(getDefaultErrorMessage(ex.toString()));
+      System.exit(NOT_OK);
+    }
     return this;
   }
 
   public WebAPITestContainer validateDataSystem() {
+    isDataSystemValid.set(false);
     if (getResponseData() != null) {
       try {
-        JsonSchemaFactory factory = JsonSchemaFactory.getInstance();
+        JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4);
         InputStream is = Thread.currentThread().getContextClassLoader()
             .getResourceAsStream(DATA_SYSTEM_JSON_4_SCHEMA);
         JsonSchema schema = factory.getSchema(is);

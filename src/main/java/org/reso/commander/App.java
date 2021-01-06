@@ -8,6 +8,7 @@ import org.reso.certification.codegen.BDDProcessor;
 import org.reso.certification.codegen.DataDictionaryCodeGenerator;
 import org.reso.certification.codegen.EDMXProcessor;
 import org.reso.models.ClientSettings;
+import org.reso.models.ODataTransportWrapper;
 import org.reso.models.Request;
 import org.reso.models.Settings;
 
@@ -129,6 +130,7 @@ public class App {
         Integer responseCode = null;
 
         String outputFilePath;
+        ODataTransportWrapper wrapper = null;
 
         for (int i = 0; i < numRequests; i++) {
           try {
@@ -143,7 +145,7 @@ public class App {
               LOG.info("Request Id: " + request.getRequestId());
             }
 
-            resolvedUrl = Settings.resolveParameters(request, settings).getUrl();
+            resolvedUrl = Settings.resolveParameters(request, settings).getRequestUrl();
             LOG.info("Resolved URL: " + resolvedUrl);
 
             //only run tests if they have URLs that resolve
@@ -153,10 +155,15 @@ public class App {
               LOG.info("Output File: " + outputFilePath);
 
               //get the response code from the request
-              responseCode = commander.saveGetRequest(resolvedUrl, outputFilePath);
-              request.setHttpResponseCode(responseCode);
-              LOG.info("Response Code: " + responseCode);
+              wrapper = commander.saveGetRequest(resolvedUrl, outputFilePath);
 
+              if (wrapper.getException() != null) {
+                LOG.error(getDefaultErrorMessage(wrapper.getException()));
+              }
+
+              if (wrapper.getHttpResponseCode() != null) {
+                LOG.info("Response Code: " + wrapper.getHttpResponseCode());
+              }
             } else {
               LOG.info("Request " + request.getRequestId() + " has an empty URL. Skipping...");
             }
@@ -190,7 +197,10 @@ public class App {
 
         if (cmd.hasOption(APP_OPTIONS.ACTIONS.GET_METADATA)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GET_METADATA);
-          commander.saveXmlMetadataResponseToFile(outputFile);
+          if (commander.getServiceRoot() != null) {
+            final String requestUri = commander.getServiceRoot() + METADATA_PATH;
+            commander.saveGetRequest(requestUri, outputFile);
+          }
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT);
           LOG.info(generateMetadataReport(deserializeEdmFromPath(inputFilename, commander.getClient()), inputFilename));
@@ -201,9 +211,7 @@ public class App {
 
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.SAVE_GET_REQUEST)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.SAVE_GET_REQUEST);
-
           commander.saveGetRequest(uri, outputFile);
-
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)) {
           try {
             DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new BDDProcessor());
@@ -218,6 +226,55 @@ public class App {
           } catch (Exception ex) {
             LOG.error(getDefaultErrorMessage(ex));
           }
+        } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_QUERIES)) {
+          APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_QUERIES);
+
+          LOG.debug("Loading RESOScript: " + inputFilename);
+          settings = Settings.loadFromRESOScript(new File(inputFilename));
+          LOG.debug("RESOScript loaded successfully!");
+
+          int numRequests = settings.getRequests().size();
+
+          LOG.info(REPORT_DIVIDER);
+          LOG.info("Web API Commander Starting... Press <ctrl+c> at any time to exit.");
+          LOG.info(REPORT_DIVIDER);
+
+          LOG.info("Displaying " + numRequests + " Request(s)");
+          LOG.info("RESOScript: " + inputFilename);
+          LOG.info(REPORT_DIVIDER + "\n\n");
+
+          String resolvedUrl = null;
+          Request request = null;
+          for (int i = 0; i < numRequests; i++) {
+            try {
+              request = settings.getRequestsAsList().get(i);
+
+              //TODO: create dynamic JUnit (or similar) test runner
+              LOG.info(REPORT_DIVIDER_SMALL);
+              LOG.info("Request: #" + (i + 1));
+              LOG.info(REPORT_DIVIDER_SMALL);
+
+              if (request.getRequestId() != null && request.getRequestId().length() > 0) {
+                LOG.info("Request Id: " + request.getRequestId());
+              }
+
+              resolvedUrl = Settings.resolveParameters(request, settings).getRequestUrl();
+              LOG.info("Resolved URL: " + resolvedUrl);
+
+              //only run tests if they have URLs that resolve
+              if (!(resolvedUrl != null && resolvedUrl.length() > 0 && request.getOutputFile() != null && request.getOutputFile().length() > 0)) {
+                LOG.info("Request " + request.getRequestId() + " has an empty URL. Skipping...");
+              }
+            } catch (Exception ex) {
+              LOG.error("Exception thrown in RUN_RESOSCRIPT Action. Exception is: \n" + ex.toString());
+              LOG.error("Stack trace:");
+              Arrays.stream(ex.getStackTrace()).forEach(stackTraceElement -> LOG.error(stackTraceElement.toString()));
+            }
+            LOG.info("\n  ");
+          }
+
+          System.exit(OK); //terminate the program after the batch completes
+
         } else {
           printHelp(APP_OPTIONS.getOptions());
         }
@@ -290,10 +347,14 @@ public class App {
   private static String generateTotalsReport(int totalRequestCount, int numSucceeded, int numFailed, int numSkipped, int numIncomplete) {
     StringBuilder reportBuilder = new StringBuilder();
     reportBuilder.append("\n\tTotal:            ").append(String.format("%1$4s", totalRequestCount));
-    reportBuilder.append("\n\tSucceeded:        ").append(String.format("%1$4s", numSucceeded)).append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numSucceeded) / totalRequestCount) + "%)" : "");
-    reportBuilder.append("\n\tFailed:           ").append(String.format("%1$4s", numFailed)).append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numFailed) / totalRequestCount) + "%)" : "");
-    reportBuilder.append("\n\tSkipped:          ").append(String.format("%1$4s", numSkipped)).append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numSkipped) / totalRequestCount) + "%)" : "");
-    reportBuilder.append("\n\tIncomplete:       ").append(String.format("%1$4s", numIncomplete)).append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numIncomplete) / totalRequestCount) + "%)" : "");
+    reportBuilder.append("\n\tSucceeded:        ").append(String.format("%1$4s", numSucceeded))
+        .append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numSucceeded) / totalRequestCount) + "%)" : "");
+    reportBuilder.append("\n\tFailed:           ").append(String.format("%1$4s", numFailed))
+        .append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numFailed) / totalRequestCount) + "%)" : "");
+    reportBuilder.append("\n\tSkipped:          ").append(String.format("%1$4s", numSkipped))
+        .append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numSkipped) / totalRequestCount) + "%)" : "");
+    reportBuilder.append("\n\tIncomplete:       ").append(String.format("%1$4s", numIncomplete))
+        .append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numIncomplete) / totalRequestCount) + "%)" : "");
     return reportBuilder.toString();
   }
 
@@ -346,7 +407,10 @@ public class App {
         } else {
           validationResponse = validateOptions(cmd, BEARER_TOKEN, URI, OUTPUT_FILE);
         }
+      } else if (action.matches(ACTIONS.GENERATE_QUERIES)) {
+        validationResponse = validateOptions(cmd, INPUT_FILE);
       }
+
       if (validationResponse != null) {
         printErrorMsgAndExit("ERROR: the following options are required when using " + action
             + "\n" + validationResponse + "\n\n");
@@ -435,19 +499,21 @@ public class App {
 
       OptionGroup actions = new OptionGroup()
           .addOption(Option.builder().argName("r").longOpt(ACTIONS.RUN_RESOSCRIPT)
-            .desc("Runs commands in RESOScript file given as <inputFile>.").build())
+              .desc("Runs commands in RESOScript file given as <inputFile>.").build())
           .addOption(Option.builder().argName("t").longOpt(ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)
-            .desc("Generates acceptance tests in the current directory.").build())
+              .desc("Generates acceptance tests in the current directory.").build())
           .addOption(Option.builder().argName("r").longOpt(ACTIONS.GENERATE_REFERENCE_EDMX)
-            .desc("Generates reference metadata in EDMX format.").build())
+              .desc("Generates reference metadata in EDMX format.").build())
           .addOption(Option.builder().argName("m").longOpt(ACTIONS.GET_METADATA)
-            .desc("Fetches metadata from <serviceRoot> using <bearerToken> and saves results in <outputFile>.").build())
+              .desc("Fetches metadata from <serviceRoot> using <bearerToken> and saves results in <outputFile>.").build())
           .addOption(Option.builder().argName("g").longOpt(ACTIONS.GENERATE_METADATA_REPORT)
               .desc("Generates metadata report from given <inputFile>.").build())
           .addOption(Option.builder().argName("v").longOpt(ACTIONS.VALIDATE_METADATA)
               .desc("Validates previously-fetched metadata in the <inputFile> path.").build())
           .addOption(Option.builder().argName("s").longOpt(ACTIONS.SAVE_GET_REQUEST)
-              .desc("Performs GET from <requestURI> using the given <bearerToken> and saves output to <outputFile>.").build());
+              .desc("Performs GET from <requestURI> using the given <bearerToken> and saves output to <outputFile>.").build())
+          .addOption(Option.builder().argName("q").longOpt(ACTIONS.GENERATE_QUERIES)
+              .desc("Resolves queries in a given RESOScript <inputFile> and displays them in standard out.").build());
 
       return new Options()
           .addOption(helpOption)
@@ -468,6 +534,7 @@ public class App {
       //actions
       public static final String GENERATE_DD_ACCEPTANCE_TESTS = "generateDDAcceptanceTests";
       public static final String GENERATE_REFERENCE_EDMX = "generateReferenceEDMX";
+      static String GENERATE_QUERIES = "generateQueries";
       public static final String RUN_RESOSCRIPT = "runRESOScript";
       public static final String GET_METADATA = "getMetadata";
       public static final String VALIDATE_METADATA = "validateMetadata";
