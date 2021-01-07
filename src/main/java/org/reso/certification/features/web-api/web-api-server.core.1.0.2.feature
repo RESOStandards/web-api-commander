@@ -413,7 +413,7 @@ Feature: Web API Server 1.0.2 Core Certification
     And the response has results
     And resource metadata for "Parameter_EndpointResource" contains the fields in the given select list
     And data are present for fields contained within the given select list
-    And Multiple Valued Enumeration Data in "Parameter_MultipleValueLookupField" has "Parameter_MultipleLookupValue1"
+    And Multiple Valued Enumeration Data in "Parameter_MultipleValueLookupField" is empty OR has "Parameter_MultipleLookupValue1"
 
   @filter-enum-single-has @2.4.9
   Scenario: filter-enum-single-has - Support Single Value Lookups
