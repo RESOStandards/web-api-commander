@@ -273,6 +273,37 @@ public class TestWebAPITestContainer implements En {
       }
     });
 
+    Then("^collection values only contain \"([^\"]*)\" or the empty list is \"([^\"]*)\"$", (String value, String expectedResult) -> {
+//      final boolean expected = Boolean.parseBoolean(expectedResult),
+//          result = TestUtils.compareCollectionPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, expected);
+//      expected ? assertTrue(result) : false ;
+    });
+
+    Then("^collection values in the \"([^\"]*)\" field contain only \"([^\"]*)\" or the empty list is \"([^\"]*)\"$",
+        (String fieldName, String assertedValue, String expectedResult) -> {
+
+      final boolean expected = Boolean.parseBoolean(expectedResult),
+          result = TestUtils.compareCollectionPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, "all", assertedValue);
+
+      if (expected) {
+        assertTrue(result);
+      } else {
+        assertFalse(result);
+      }
+    });
+
+    Then("^collection results in the \"([^\"]*)\" field contain \"([^\"]*)\" is \"([^\"]*)\"$",
+        (String fieldName, String assertedValue, String expectedResult) -> {
+
+      final boolean expected = Boolean.parseBoolean(expectedResult),
+          result = TestUtils.compareCollectionPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, "any", assertedValue);
+
+      if (expected) {
+        assertTrue(result);
+      } else {
+        assertFalse(result);
+      }
+    });
   }
 
   /**

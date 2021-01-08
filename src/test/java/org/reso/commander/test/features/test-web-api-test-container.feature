@@ -1728,3 +1728,22 @@ Feature: Web API Container Tests
   Scenario: Date day test 'le' is true when null data are compared to null value
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
     Then "day" comparisons of Date field "ListingContractDate" "le" null return "true"
+
+  #######################################
+  # Lookup Tests
+  #######################################
+  Scenario: Multi-valued collections filtered by all() pass when they contain exactly the given values or the empty list
+    When sample JSON data from "good-property-payload-all-collection.json" are loaded into the test container
+    Then collection values in the "AccessibilityFeatures" field contain only "Visitable" or the empty list is "true"
+
+  Scenario: Multi-valued collections filtered by all() fail when they don't contain exactly the given value or the empty list
+    When sample JSON data from "bad-property-payload-all-collection.json" are loaded into the test container
+    Then collection values in the "AccessibilityFeatures" field contain only "Visitable" or the empty list is "false"
+
+  Scenario: Multi-valued collections filtered by any() pass when they contain the given value
+    When sample JSON data from "good-property-payload-any-collection.json" are loaded into the test container
+    Then collection results in the "AccessibilityFeatures" field contain "Visitable" is "true"
+
+  Scenario: Multi-valued collections filtered by any() fail when they don't contain the given value
+    When sample JSON data from "bad-property-payload-any-collection.json" are loaded into the test container
+    Then collection results in the "AccessibilityFeatures" field contain "Visitable" is "false"
