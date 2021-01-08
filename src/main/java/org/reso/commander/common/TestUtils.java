@@ -1,6 +1,7 @@
 package org.reso.commander.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.Header;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -256,6 +257,43 @@ public final class TestUtils {
     });
     return result.get();
   }
+
+  /**
+   * Compares each item in the string (JSON) payload with the given field name to the asserted value using op.
+   *
+   * @param payload       JSON payload to compare
+   * @param fieldName     collection-based fieldName to compare against
+   * @param op            collection-based operator (any or all)
+   * @param assertedValue asserted value
+   * @return true if values in the payload match the assertion, false otherwise.
+   */
+  public static boolean compareCollectionPayloadToAssertedValue(String payload, String fieldName, String op, String assertedValue) {
+    AtomicBoolean result = new AtomicBoolean(true);
+    final String ANY = "any", ALL = "all";
+
+    //iterate over the items apply the given collection op
+    from(payload).getList(JSON_VALUE_PATH, ObjectNode.class).forEach(item -> {
+      if (op.contentEquals(ANY)) {
+        result.set(result.get() && testAnyOperator(item, fieldName, assertedValue));
+      } else if (op.contentEquals(ALL)) {
+        result.set(result.get() && testAllOperator(item, fieldName, assertedValue));
+      }
+    });
+    return result.get();
+  }
+
+  public static boolean testAnyOperator(ObjectNode item, String fieldName, String assertedValue) {
+    List<String> values = new ArrayList<>();
+    item.get(fieldName).elements().forEachRemaining(element -> values.add(element.asText()));
+    return values.stream().anyMatch(value -> value.contentEquals(assertedValue));
+  }
+
+  public static boolean testAllOperator(ObjectNode item, String fieldName, String assertedValue) {
+    List<String> values = new ArrayList<>();
+    item.get(fieldName).elements().forEachRemaining(element -> values.add(element.asText()));
+    return values.stream().allMatch(value -> value.contentEquals(assertedValue));
+  }
+
 
   /**
    * Returns true if each item in the list is true

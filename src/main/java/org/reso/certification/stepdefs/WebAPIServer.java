@@ -537,7 +537,7 @@ class WebAPIServer implements En {
             result.set(!fieldValue.get().contentEquals(assertedValue.get()));
           }
 
-          LOG.info("Assert True: " + fieldValue.get() + op + assertedValue.get() + " ==> " + result.get());
+          LOG.info("Assert True: " + fieldValue.get() + " " + op + " " + assertedValue.get() + " ==> " + result.get());
           assertTrue(result.get());
         });
       } catch (Exception ex) {
@@ -546,25 +546,33 @@ class WebAPIServer implements En {
     });
 
     /*
-     * Multi-valued enumerations testing.
-     * TODO: turn array into JSON array and parse values from there
+     * Multi-valued enumerations
      */
     And("^Multiple Valued Enumeration Data in \"([^\"]*)\" has \"([^\"]*)\"$", (String parameterFieldName, String parameterAssertedValue) -> {
       try {
         String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
         AtomicReference<String> fieldValue = new AtomicReference<>();
         AtomicReference<String> assertedValue = new AtomicReference<>();
-
-        AtomicBoolean result = new AtomicBoolean(false);
+        AtomicBoolean result = new AtomicBoolean(true);
 
         assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
         LOG.info("Asserted value is: " + assertedValue.get());
 
         from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, ObjectNode.class).forEach(item -> {
           fieldValue.set(item.get(fieldName).toString());
-          result.set(fieldValue.get().contains(assertedValue.get()));
-          LOG.info("Assert True: " + fieldValue.get() + " has " + assertedValue.get() + " ==> " + result.get());
-          assertTrue(result.get());
+          if (useCollections) {
+            if (item.get(fieldName).isArray()) {
+              result.set(result.get() && TestUtils.testAnyOperator(item, fieldName, assertedValue.get()));
+              LOG.info("Assert True: " + fieldValue.get() + " contains " + assertedValue.get() + " ==> " + result.get());
+              assertTrue(result.get());
+            } else {
+              fail(getDefaultErrorMessage(fieldName, "MUST contain an array of values but found:", item.get(fieldName).toString()));
+            }
+          } else {
+            result.set(fieldValue.get().contains(assertedValue.get()));
+            LOG.info("Assert True: " + fieldValue.get() + " has " + assertedValue.get() + " ==> " + result.get());
+            assertTrue(result.get());
+          }
         });
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
@@ -585,9 +593,7 @@ class WebAPIServer implements En {
         from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, ObjectNode.class).forEach(item -> {
           fieldValue.set(item.get(fieldName).toString());
           if (item.get(fieldName).isArray()) {
-            Set<String> values = new LinkedHashSet<>();
-            item.get(fieldName).elements().forEachRemaining(element -> values.add(element.asText()));
-            result.set(result.get() && (values.size() == 0 || values.stream().allMatch(value -> value.contentEquals(assertedValue.get()))));
+            result.set(result.get() && testAllOperator(item, fieldName, assertedValue.get()));
             LOG.info("Assert True: " + fieldValue.get() + " equals [] or contains only " + assertedValue.get() + " ==> " + result.get());
             assertTrue(result.get());
           } else {
