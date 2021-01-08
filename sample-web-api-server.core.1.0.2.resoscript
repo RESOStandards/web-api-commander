@@ -181,9 +181,6 @@
     <Parameter Name="TopCount" Value="5"/>
     <Parameter Name="SortCount" Value="20"/>
 
-    <!-- New Values for WS103 Testing -->
-    <Parameter Name="CastFieldType" Value="Edm.String"/>
-
     <!-- Required resource lists for Standard Resource Names requirement -->
     <Parameter Name="WebAPI102_RequiredResourceList" Value="Property,Member,Office,Media"/>
 

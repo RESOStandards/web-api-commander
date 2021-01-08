@@ -369,62 +369,67 @@ public class DataDictionary {
         break;
       case TypeMappings.DataDictionaryTypes.SINGLE_ENUM:
         if (foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING)) {
-          LOG.error(wrapColumns(getDefaultErrorMessage("String types are not allowed for enumerated fields at the current time.", "\nSee RCP-031 for further information: "))
-              + "https://reso.atlassian.net/wiki/spaces/RESOWebAPIRCP/pages/2275149854/RCP+-+WEBAPI-031+Data+Dictionary+Representation+in+the+Web+API#RCP-WEBAPI-031DataDictionaryRepresentationintheWebAPI-DataTypeMappings.1");
-        }
+          LOG.info("Found data type of Edm.String for field: " + fieldName);
+        } else {
+          assertFalse(getDefaultErrorMessage("Enumerated data types MUST declare a unique nominal (lookup) type.",
+              "\nFound primitive type of", foundTypeName)
+                  + "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565",
+              isPrimitiveType);
 
-        assertFalse(getDefaultErrorMessage("Enumerated data types MUST declare a unique nominal (lookup) type.",
-            "\nFound primitive type of", foundTypeName)
-            + "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565",
-            isPrimitiveType);
+          //check for enum type by FQDN in the Edm cached in the container
+          enumType = container.getEdm().getEnumType(new FullQualifiedName(foundTypeName));
 
-        //check for enum type by FQDN in the Edm cached in the container
-        enumType = container.getEdm().getEnumType(new FullQualifiedName(foundTypeName));
+          isIntegerType = enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT16)
+              || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT32)
+              || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT64);
 
-        isIntegerType = enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT16)
-            || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT32)
-            || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT64);
+          assertTrue(wrapColumns(getDefaultErrorMessage("Enumerated Types MUST use an underlying type of",
+              TypeMappings.ODataTypes.INT16, "OR", TypeMappings.ODataTypes.INT32,  "OR", TypeMappings.ODataTypes.INT64)), isIntegerType);
 
-        assertTrue(wrapColumns(getDefaultErrorMessage("Enumerated Types MUST use an underlying type of",
-            TypeMappings.ODataTypes.INT16, "OR", TypeMappings.ODataTypes.INT32,  "OR", TypeMappings.ODataTypes.INT64)), isIntegerType);
+          assertNotNull(wrapColumns(getDefaultErrorMessage(
+              "could not find a definition for", foundTypeName, "in the Entity Data Model!")), enumType);
 
-        assertNotNull(wrapColumns(getDefaultErrorMessage(
-            "could not find a definition for", foundTypeName, "in the Entity Data Model!")), enumType);
-
-        assertFalse(wrapColumns(getDefaultErrorMessage("IsFlags=\"true\" but MUST be false for single-valued enumerations!")),
-            enumType.isFlags());
-        break;
-      case TypeMappings.DataDictionaryTypes.MULTI_ENUM:
-        if (foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING)) {
-          LOG.error(wrapColumns(getDefaultErrorMessage("String types are not allowed for enumerated fields at the current time.", "\nSee RCP-031 for further information: ",
-              "https://reso.atlassian.net/wiki/spaces/RESOWebAPIRCP/pages/2275149854/RCP+-+WEBAPI-031+Data+Dictionary+Representation+in+the+Web+API#RCP-WEBAPI-031DataDictionaryRepresentationintheWebAPI-DataTypeMappings.1")));
-        }
-
-        assertFalse(wrapColumns(getDefaultErrorMessage("Enumerated data type MUST declare a unique nominal type.",
-            "Found primitive type of", foundTypeName,
-            "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565")),
-            isPrimitiveType);
-
-        //check for enum type by FQDN in the Edm cached in the container
-        enumType = container.getEdm().getEnumType(new FullQualifiedName(foundTypeName));
-
-        isIntegerType =
-            enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT16)
-                || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT32)
-                || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT64);
-
-        assertTrue(wrapColumns(getDefaultErrorMessage("Enumerated Types MUST use an underlying type of",
-            TypeMappings.ODataTypes.INT16, "OR", TypeMappings.ODataTypes.INT32,  "OR", TypeMappings.ODataTypes.INT64)),
-            isIntegerType);
-
-        assertNotNull(wrapColumns(getDefaultErrorMessage(
-            "could not find a definition for", foundTypeName, "in the Entity Data Model!")), enumType);
-
-        boolean isCollection = container.getFieldMap().get(currentResourceName.get()).get(fieldName).isCollection();
-        if (!isCollection) {
-          assertTrue(wrapColumns(getDefaultErrorMessage("Multi-Enumerations MUST have IsFlags=\"true\"")),
+          assertFalse(wrapColumns(getDefaultErrorMessage("IsFlags=\"true\" but MUST be false for single-valued enumerations!")),
               enumType.isFlags());
         }
+
+        break;
+      case TypeMappings.DataDictionaryTypes.MULTI_ENUM:
+        final boolean isCollection = container.getFieldMap().get(currentResourceName.get()).get(fieldName).isCollection();
+
+        if (foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING)) {
+          if (!isCollection) {
+            fail(getDefaultErrorMessage("Multiple enumerations MUST use Collection(Edm.String)! Found Edm.String."));
+          } else {
+            LOG.info("Found data type of Collection(Edm.String) for field: " + fieldName);
+          }
+        } else {
+          assertFalse(wrapColumns(getDefaultErrorMessage("Enumerated data type MUST declare a unique nominal type.",
+              "Found primitive type of", foundTypeName,
+              "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565")),
+              isPrimitiveType);
+
+          //check for enum type by FQDN in the Edm cached in the container
+          enumType = container.getEdm().getEnumType(new FullQualifiedName(foundTypeName));
+
+          final String underlyingTypeName = enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString();
+          isIntegerType = TypeMappings.ODataTypes.INT16.contentEquals(underlyingTypeName)
+                  || TypeMappings.ODataTypes.INT32.contentEquals(underlyingTypeName)
+                  || TypeMappings.ODataTypes.INT64.contentEquals(underlyingTypeName);
+
+          assertTrue(wrapColumns(getDefaultErrorMessage("Enumerated Types MUST use an underlying type of",
+              TypeMappings.ODataTypes.INT16, "OR", TypeMappings.ODataTypes.INT32,  "OR", TypeMappings.ODataTypes.INT64)),
+              isIntegerType);
+
+          assertNotNull(wrapColumns(getDefaultErrorMessage(
+              "could not find a definition for", foundTypeName, "in the Entity Data Model!")), enumType);
+
+          if (!isCollection) {
+            assertTrue(wrapColumns(getDefaultErrorMessage("Multi-Enumerations MUST have IsFlags=\"true\"")),
+                enumType.isFlags());
+          }
+        }
+
         break;
       case TypeMappings.DataDictionaryTypes.TIMESTAMP:
         assertTrue(wrapColumns(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.DATETIME_OFFSET, "but found", foundTypeName)),
