@@ -866,6 +866,7 @@ public final class TestUtils {
     public static final class ODataTypes {
       public static final String
           STRING = "Edm.String",
+          STRING_COLLECTION = "Collection(Edm.String)",
           DATE = "Edm.Date",
           DECIMAL = "Edm.Decimal",
           DOUBLE = "Edm.Double",
