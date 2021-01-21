@@ -39,7 +39,7 @@ public class CertificationReportGenerator {
 
     if (USE_MINIMAL_REPORT) {
       LOG.info("Using minimal report format...");
-      Utils.createFile(outputDirectoryName, PATH_TO_JSON_RESULTS, filterJSONResults());
+      Utils.createFile(PATH_TO_JSON_RESULTS, filterJSONResults());
     }
 //    jsonFiles.add(USE_MINIMAL_REPORT ? filterJSONResults() : PATH_TO_JSON_RESULTS);
 

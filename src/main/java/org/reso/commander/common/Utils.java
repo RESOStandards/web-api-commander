@@ -60,6 +60,28 @@ public class Utils {
     return outputFile;
   }
 
+  /**
+   * Creates a file in the given directory with the given content
+   * @param content the content to write to the file
+   */
+  public static File createFile(String outputPath, String content) {
+    if (outputPath == null) return null;
+    File outputFile = new File(outputPath);
+    try {
+      FileWriter writer;
+
+      if (!outputFile.exists()) {
+        if (!outputFile.mkdirs()) throw new Exception("ERROR: could not create directory: " + outputFile);
+      }
+      writer = new FileWriter(outputFile);
+      writer.write(new String(content.getBytes(StandardCharsets.UTF_8)));
+      writer.flush();
+    } catch (Exception ex) {
+      LOG.error("Filename: " + outputPath + ". Could not create file: " + ex);
+    }
+    return outputFile;
+  }
+
   public static String pluralize(int lengthAttribute) {
     return lengthAttribute != 1 ? "s" : "";
   }
