@@ -85,6 +85,12 @@ tasks.withType(JavaCompile) {
   options.deprecation = true
 }
 
+String pathToMetadata = null,
+       pathToRESOScript = null,
+       certFileName = null,
+       certOutputDir = null,
+       certJsonPath = null
+
 // task for Web API Server 1.0.2 Core Testing
 task testWebApiServer_1_0_2_Core() {
   group = 'RESO Certification'
@@ -132,24 +138,26 @@ task _jenkins_testWebApiServer_1_0_2_Core() {
       main = "io.cucumber.core.cli.Main"
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
+      certJsonPath = 'build/web-api-server.core.1.0.2.json'
 
       args = [
           '--strict',
           '--plugin',
-          'json:build/web-api-server.core.1.0.2.json',
+          'json:' + certJsonPath,
           '--glue',
           'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
           'src/main/java/org/reso/certification/features/web-api'
       ]
     }
+
+    javaexec {
+      System.setProperty('pathToJsonResults', certJsonPath)
+      systemProperties = System.getProperties()
+      classpath = sourceSets.main.runtimeClasspath
+      main = 'org.reso.certification.reporting.CertificationReportGenerator'
+    }
   }
 }
-
-String pathToMetadata = null,
-       pathToRESOScript = null,
-       certFileName = null,
-       certOutputDir = null,
-       certJsonPath = null
 
 // task for Data Dictionary 1.7
 task testDataDictionary_1_7() {
