@@ -117,6 +117,34 @@ task testWebApiServer_1_0_2_Core() {
   }
 }
 
+// task for Web API Server 1.0.2 Core Testing
+task _jenkins_testWebApiServer_1_0_2_Core() {
+  group = 'RESO Certification'
+  description = 'Runs Web API Core 1.0.2 Automated Acceptance Tests.' +
+      '\n  Example: ' +
+      '\n    $ ./gradlew testWebApiServer_1_0_2_Core -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true\n' +
+      '\n    Note: by default the Web API tests assume Collection(Edm.EnumType).' +
+      '\n      Pass -DuseCollections=false if using OData IsFlags.\n'
+
+  dependsOn jar
+  doLast {
+    javaexec {
+      main = "io.cucumber.core.cli.Main"
+      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      systemProperties = System.getProperties()
+
+      args = [
+          '--strict',
+          '--plugin',
+          'json:build/web-api-server.core.1.0.2.json',
+          '--glue',
+          'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
+          'src/main/java/org/reso/certification/features/web-api'
+      ]
+    }
+  }
+}
+
 String pathToMetadata = null,
        pathToRESOScript = null,
        certFileName = null,
