@@ -218,6 +218,13 @@ task _jenkins_testDataDictionary_1_7() {
               ? systemProperties.get('cucumber.filter.tags') : '')
       ]
     }
+    javaexec {
+      System.setProperty('pathToJsonResults', certJsonPath)
+      System.setProperty('reportDescription', 'RESO Data Dictionary 1.7 Certification Report')
+      systemProperties = System.getProperties()
+      classpath = sourceSets.main.runtimeClasspath
+      main = 'org.reso.certification.reporting.CertificationReportGenerator'
+    }
   }
 }
 
