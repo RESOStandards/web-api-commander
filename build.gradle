@@ -220,7 +220,7 @@ task _jenkins_testDataDictionary_1_7() {
     }
     javaexec {
       System.setProperty('pathToJsonResults', certJsonPath)
-      System.setProperty('reportDescription', 'RESO Data Dictionary 1.7 Certification Report')
+      //System.setProperty('reportDescription', 'RESO Data Dictionary 1.7 Certification Report')
       systemProperties = System.getProperties()
       classpath = sourceSets.main.runtimeClasspath
       main = 'org.reso.certification.reporting.CertificationReportGenerator'

@@ -4,8 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.masterthought.cucumber.Configuration;
-import net.masterthought.cucumber.ReportBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reso.commander.common.Utils;
@@ -15,8 +13,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.reso.commander.Commander.NOT_OK;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
@@ -24,7 +20,7 @@ import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 public class CertificationReportGenerator {
   private static final Logger LOG = LogManager.getLogger(CertificationReportGenerator.class);
   private static final String PATH_TO_JSON_RESULTS = System.getProperty("pathToJsonResults", null);
-  private static final String outputDirectoryName = PATH_TO_JSON_RESULTS.substring(0, PATH_TO_JSON_RESULTS.lastIndexOf(File.separator)); //"DD-1.7-report-" + Utils.getTimestamp();
+  private static final String outputDirectoryName = PATH_TO_JSON_RESULTS.substring(0, PATH_TO_JSON_RESULTS.lastIndexOf(File.separator));
   private static final boolean USE_MINIMAL_REPORT = Boolean.parseBoolean(System.getProperty("minimal", "false"));
   private static final String DEFAULT_REPORT_DESCRIPTION = "Certification Report";
   private static final String projectName = System.getProperty("reportDescription", DEFAULT_REPORT_DESCRIPTION);
@@ -38,19 +34,21 @@ public class CertificationReportGenerator {
       System.exit(NOT_OK);
     }
 
-    List<String> jsonFiles = new ArrayList<>();
-    Configuration configuration = new Configuration(new File(outputDirectoryName), projectName);
+//    List<String> jsonFiles = new ArrayList<>();
+//    Configuration configuration = new Configuration(new File(outputDirectoryName), projectName);
 
-    if (USE_MINIMAL_REPORT) LOG.info("Using minimal report format...");
+    if (USE_MINIMAL_REPORT) {
+      LOG.info("Using minimal report format...");
+      Utils.createFile(outputDirectoryName, PATH_TO_JSON_RESULTS, filterJSONResults());
+    }
+//    jsonFiles.add(USE_MINIMAL_REPORT ? filterJSONResults() : PATH_TO_JSON_RESULTS);
 
-    jsonFiles.add(USE_MINIMAL_REPORT ? filterJSONResults() : PATH_TO_JSON_RESULTS);
-
-    ReportBuilder reportBuilder = new ReportBuilder(jsonFiles, configuration);
-    reportBuilder.generateReports();
+//    ReportBuilder reportBuilder = new ReportBuilder(jsonFiles, configuration);
+//    reportBuilder.generateReports();
 
     //remove minimal report file
-    if (USE_MINIMAL_REPORT && jsonFiles.size() > 0 && jsonFiles.get(0).contains(MINIMAL_JSON_EXTENSION))
-      new File(jsonFiles.get(0)).deleteOnExit();
+//    if (USE_MINIMAL_REPORT && jsonFiles.size() > 0 && jsonFiles.get(0).contains(MINIMAL_JSON_EXTENSION))
+//      new File(jsonFiles.get(0)).deleteOnExit();
   }
 
   /**
