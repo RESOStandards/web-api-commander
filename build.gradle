@@ -203,7 +203,7 @@ task _jenkins_testDataDictionary_1_7() {
       }
 
       DateFormat df = new SimpleDateFormat("yyyyMMddHHMMssS")
-      certOutputDir = '/build'
+      certOutputDir = 'build'
       certJsonPath = certOutputDir + '/data-dictionary-1.7.json'
 
       args = [
