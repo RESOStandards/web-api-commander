@@ -148,14 +148,12 @@ task _jenkins_testWebApiServer_1_0_2_Core() {
       ]
     }
 
-    doLast {
-      javaexec {
-        System.setProperty('pathToJsonResults', certJsonPath)
-        systemProperties = System.getProperties()
-        classpath = sourceSets.main.runtimeClasspath
-        main = 'org.reso.certification.reporting.CertificationReportGenerator'
-      }
-    }
+    finalizedBy(javaexec {
+      System.setProperty('pathToJsonResults', certJsonPath)
+      systemProperties = System.getProperties()
+      classpath = sourceSets.main.runtimeClasspath
+      main = 'org.reso.certification.reporting.CertificationReportGenerator'
+    })
   }
 }
 
@@ -255,14 +253,12 @@ task _jenkins_testDataDictionary_1_7() {
       ]
     }
 
-    doLast {
-      javaexec {
-        System.setProperty('pathToJsonResults', certJsonPath)
-        systemProperties = System.getProperties()
-        classpath = sourceSets.main.runtimeClasspath
-        main = 'org.reso.certification.reporting.CertificationReportGenerator'
-      }
-    }
+    finalizedBy(javaexec {
+      System.setProperty('pathToJsonResults', certJsonPath)
+      systemProperties = System.getProperties()
+      classpath = sourceSets.main.runtimeClasspath
+      main = 'org.reso.certification.reporting.CertificationReportGenerator'
+    })
   }
 }
 
