@@ -23,7 +23,7 @@ repositories {
 
 dependencies {
   compile 'com.google.guava:guava:28.2-jre'
-  compile 'com.google.inject:guice:4.0'
+  compile 'com.google.inject:guice:4.2.3'
 
   compile 'commons-cli:commons-cli:1.4'
 
@@ -32,13 +32,12 @@ dependencies {
   compile 'org.apache.logging.log4j:log4j-1.2-api:2.13.0'
   compile 'org.apache.logging.log4j:log4j-core:2.13.0'
 
-  compile 'org.apache.olingo:odata-client-api:4.7.1'
-  compile 'org.apache.olingo:odata-commons-core:4.7.1'
-  compile 'org.apache.olingo:odata-client-core:4.7.1'
+  compile 'org.apache.olingo:odata-client-api:4.8.0'
+  compile 'org.apache.olingo:odata-commons-core:4.8.0'
+  compile 'org.apache.olingo:odata-client-core:4.8.0'
 
   compile 'org.apache.poi:poi:3.9'
   compile 'org.apache.poi:poi-ooxml:3.9'
-
 
   compile 'io.rest-assured:rest-assured:4.2.0'
   compile 'io.rest-assured:json-path:4.2.0'
@@ -56,7 +55,6 @@ dependencies {
   compile 'com.google.code.gson:gson:2.8.6'
   compile 'org.apache.commons:commons-text:1.9'
 
-  implementation 'org.mockito:mockito-core:3.3.3'
 }
 
 configurations {
