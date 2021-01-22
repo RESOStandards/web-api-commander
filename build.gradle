@@ -131,13 +131,12 @@ task _jenkins_testWebApiServer_1_0_2_Core() {
       '\n      Pass -DuseCollections=false if using OData IsFlags.\n'
 
   dependsOn jar
+  certJsonPath = 'build/web-api-server.core.1.0.2.json'
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
-      certJsonPath = 'build/web-api-server.core.1.0.2.json'
-
       args = [
           '--strict',
           '--plugin',
@@ -148,12 +147,12 @@ task _jenkins_testWebApiServer_1_0_2_Core() {
       ]
     }
 
-    finalizedBy(javaexec {
+    javaexec {
       System.setProperty('pathToJsonResults', certJsonPath)
       systemProperties = System.getProperties()
       classpath = sourceSets.main.runtimeClasspath
       main = 'org.reso.certification.reporting.CertificationReportGenerator'
-    })
+    }
   }
 }
 
@@ -219,6 +218,9 @@ task _jenkins_testDataDictionary_1_7() {
       '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
 
   dependsOn jar
+
+  certJsonPath = 'build/data-dictionary-1.7.json'
+  
   doLast {
     javaexec {
       main = 'io.cucumber.core.cli.Main'
@@ -236,10 +238,6 @@ task _jenkins_testDataDictionary_1_7() {
             .substring(Math.max(pathToRESOScript.lastIndexOf(File.separator)+1, 0), pathToRESOScript.lastIndexOf('.'))
       }
 
-      DateFormat df = new SimpleDateFormat("yyyyMMddHHMMssS")
-      certOutputDir = 'build'
-      certJsonPath = certOutputDir + '/data-dictionary-1.7.json'
-
       args = [
           '--strict',
           '--plugin',
@@ -253,12 +251,12 @@ task _jenkins_testDataDictionary_1_7() {
       ]
     }
 
-    finalizedBy(javaexec {
+    javaexec {
       System.setProperty('pathToJsonResults', certJsonPath)
       systemProperties = System.getProperties()
       classpath = sourceSets.main.runtimeClasspath
       main = 'org.reso.certification.reporting.CertificationReportGenerator'
-    })
+    }
   }
 }
 
