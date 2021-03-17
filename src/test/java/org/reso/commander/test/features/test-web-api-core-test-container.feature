@@ -30,6 +30,16 @@ Feature: Web API Container Tests
     When sample JSON data from "bad-datasystem.json" are loaded into the test container
     Then schema validation fails for the sample DataSystem data
 
+  #######################################
+  # Query Operators
+  #######################################
+  Scenario: OData Count validation returns true when the payload has a count property
+    When sample JSON data from "good-property-payload-count.json" are loaded into the test container
+    Then OData count tests return "true"
+
+  Scenario: OData Count validation returns false when the payload does not have a count property
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then OData count tests return "false"
 
   #######################################
   # Integer Comparisons
@@ -166,6 +176,140 @@ Feature: Web API Container Tests
     When sample JSON data from "good-property-payload-null.json" are loaded into the test container
     Then Integer comparisons of "BedroomsTotal" "le" 5 return "false"
 
+  #######################################
+  # Decimal Comparisons
+  #######################################
+
+  # Decimal test 'eq'
+  Scenario: Decimal 'eq' tests succeed when valid response data are compared to a valid Double
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "eq" 100000.00 return "true"
+
+  Scenario: Decimal 'eq' tests fail when valid response data are compared to null
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "eq" null return "false"
+
+  Scenario: Decimal 'eq' tests succeed when null response data are compared to null
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "eq" null return "true"
+
+  Scenario: Decimal 'eq' tests fail when null response data are compared to a valid Integer
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "eq" 100000.00 return "false"
+
+
+  # Decimal test 'ne'
+  Scenario: Decimal 'ne' tests succeed when valid response data are compared to a valid Decimal
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "ne" 100000.00 return "true"
+
+  Scenario: Decimal 'ne' tests succeed when valid response data are compared to null
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "ne" null return "true"
+
+  Scenario: Decimal 'ne' tests succeed when null response data are compared to null
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "ne" null return "false"
+
+  Scenario: Decimal 'ne' tests fail when null response data are compared to a valid Decicmal
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "ne" 100000.00 return "true"
+
+
+  # Decimal test 'gt'
+  Scenario: Decimal test 'gt' is false when data are compared to an Decimal of greater value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "gt" 600000.00 return "false"
+
+  Scenario: Decimal test 'gt' is true when data are compared to an Decimal of lesser value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "gt" 400.00 return "true"
+
+  Scenario: Decimal test 'gt' is false when data are null and known value is null
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "gt" null return "false"
+
+  Scenario: Decimal test 'gt' is false when data are present and known value is null
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "gt" null return "false"
+
+  Scenario: Integer test 'gt' is false when data are null and known value is present
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "gt" 100000.01 return "false"
+
+
+  # Decimal test 'ge'
+  Scenario: Decimal 'ge' tests fail when valid response data are compared to a valid Decimal of a lesser value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "ge" 400.00 return "true"
+
+  Scenario: Decimal 'ge' tests succeed when valid response data are compared to a valid Decimal of an equal value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Integer comparisons of "ListPrice" "ge" 100000.00 return "true"
+
+  Scenario: Decimal 'ge' tests succeed when valid response data are compared to a valid Decimal of a greater value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "ge" 10.00 return "false"
+
+  Scenario: Decimal 'ge' tests succeed when valid response data are compared to null
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "ge" null return "false"
+
+  Scenario: Decimal 'ge' tests succeed when null response data are compared to null
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "ge" null return "true"
+
+  Scenario: Decimal 'ge' tests fail when null response data are compared to a valid Decimal
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "ge" 500.00 return "false"
+
+
+  # Decimal test 'lt'
+  Scenario: Decimal test 'lt' is true when data are compared to an Decimal of greater value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "lt" 100000.02 return "true"
+
+  Scenario: Decimal test 'lt' is false when data are compared to an Decimal of lesser value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "lt" 40.02 return "false"
+
+  Scenario: Decimal test 'lt' is false when data are null and known value is null
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "lt" null return "false"
+
+  Scenario: Decimal test 'lt' is false when data are present and known value is null
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "lt" null return "false"
+
+  Scenario: Decimal test 'lt' is false when data are null and known value is present
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "lt" 32.1 return "false"
+
+
+  # Decimal test 'le'
+  Scenario: Decimal 'le' tests fail when valid response data are compared to a valid Decimal of a greater value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "le" 100000.01 return "true"
+
+  Scenario: Decimal 'le' tests succeed when valid response data are compared to a valid Decimal of an equal value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "BedroomsTotal" "le" 100000.00 return "true"
+
+  Scenario: Decimal 'le' tests fail when valid response data are compared to a valid Decimal of a lesser value
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "le" 40.00 return "false"
+
+  Scenario: Decimal 'le' tests succeed when valid response data are compared to null
+    When sample JSON data from "good-property-payload.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "le" null return "false"
+
+  Scenario: Decimal 'le' tests succeed when null response data are compared to null
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "le" null return "true"
+
+  Scenario: Decimal 'le' tests fail when null response data are compared to a valid Decimal
+    When sample JSON data from "good-property-payload-null.json" are loaded into the test container
+    Then Decimal comparisons of "ListPrice" "le" 50.00 return "false"
 
   #######################################
   # String Comparisons

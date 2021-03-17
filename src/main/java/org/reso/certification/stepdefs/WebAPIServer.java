@@ -146,7 +146,7 @@ class WebAPIServer implements En {
         double fill;
 
         assertNotNull(getDefaultErrorMessage("no fields found within the given $select list. Check request Id:",
-                getTestContainer().getRequest().getRequestId(), "in your .resoscript file!"), getTestContainer().getSelectList());
+            getTestContainer().getRequest().getRequestId(), "in your .resoscript file!"), getTestContainer().getSelectList());
 
         LOG.info(QueryOption.SELECT + " list is: " + getTestContainer().getSelectList());
 
@@ -220,6 +220,20 @@ class WebAPIServer implements En {
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
+    });
+
+    /*
+     * count - $count=true
+     * SEE: https://stackoverflow.com/questions/30123094/how-to-get-only-odata-count-without-value/30154251#30154251 for
+     *      information about how this item is implemented.
+     *
+     *      Rather than returning an integer response, this implementation expects the @odata.count property to be
+     *      available when requested, and a $top=0 may be used to restrict the number of items returned as results.
+     */
+    And("^the \"([^\"]*)\" value is greater than or equal to the number of results$", (String field) -> {
+      assertTrue(getDefaultErrorMessage("the @odata.count value MUST be present",
+          "and contain a non-zero value greater than or equal to the number of results!"),
+          TestUtils.validateODataCount(getTestContainer().getResponseData()));
     });
 
     And("^data in the \"([^\"]*)\" fields are different in the second request than in the first$", (String parameterUniqueId) -> {
@@ -391,6 +405,18 @@ class WebAPIServer implements En {
 
         LOG.info("fieldName: " + fieldName + ", op: " + op + ", assertedValue: " + assertedValue);
         assertTrue(TestUtils.compareIntegerPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue));
+      } catch (Exception ex) {
+        fail(getDefaultErrorMessage(ex));
+      }
+    });
+
+    And("^Decimal data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
+      try {
+        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
+        Double assertedValue = Double.parseDouble(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
+
+        LOG.info("fieldName: " + fieldName + ", op: " + op + ", assertedValue: " + assertedValue);
+        assertTrue(TestUtils.compareDecimalPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue));
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }

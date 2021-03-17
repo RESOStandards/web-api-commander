@@ -252,6 +252,12 @@
     />
 
     <Request
+        RequestId="count"
+        OutputFile="count.json"
+        Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$count=true"
+    />
+
+    <Request
         RequestId="orderby-timestamp-asc"
         OutputFile="orderby-timestamp-asc.json"
         Url="*ClientSettings_WebAPIURI*/*Parameter_EndpointResource*?$top=*Parameter_SortCount*&amp;$select=*Parameter_KeyField*,*Parameter_IntegerField*,*Parameter_TimestampField*&amp;$orderby=*Parameter_TimestampField* asc"

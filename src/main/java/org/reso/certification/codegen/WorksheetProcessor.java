@@ -163,7 +163,7 @@ public abstract class WorksheetProcessor {
     try {
       referenceStandardRelationship = ReferenceStandardRelationship.Builder.build(
           row.getCell(TARGET_RESOURCE).getStringCellValue(),
-          row.getCell(TARGET_RESOURCE_KEY, Row.CREATE_NULL_AS_BLANK).getStringCellValue(),
+          row.getCell(TARGET_RESOURCE_KEY, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue(),
           row.getCell(TARGET_STANDARD_NAME).getStringCellValue(),
           ReferenceStandardRelationship.Cardinality.stream().filter(cardinality ->
               cardinality.getRelationshipType().contentEquals(
@@ -357,9 +357,9 @@ public abstract class WorksheetProcessor {
     Row currentRow;
     for(int rowIndex = FIRST_ROW_INDEX; rowIndex < worksheet.getPhysicalNumberOfRows(); rowIndex++) {
       currentRow = worksheet.getRow(rowIndex);
-      if (currentRow.getCell(TARGET_RESOURCE, Row.CREATE_NULL_AS_BLANK).getStringCellValue().length() > 0
-              && !currentRow.getCell(TARGET_RESOURCE_KEY, Row.CREATE_NULL_AS_BLANK).getStringCellValue().toLowerCase().contains("keynumeric")
-              && !currentRow.getCell(SOURCE_RESOURCE_KEY, Row.CREATE_NULL_AS_BLANK).getStringCellValue().toLowerCase().contains("keynumeric")) {
+      if (currentRow.getCell(TARGET_RESOURCE, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue().length() > 0
+              && !currentRow.getCell(TARGET_RESOURCE_KEY, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue().toLowerCase().contains("keynumeric")
+              && !currentRow.getCell(SOURCE_RESOURCE_KEY, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue().toLowerCase().contains("keynumeric")) {
         referenceStandardRelationships.add(deserializeStandardRelationshipRow(currentRow));
       }
     }

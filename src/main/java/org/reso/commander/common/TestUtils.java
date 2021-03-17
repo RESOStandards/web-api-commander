@@ -167,6 +167,23 @@ public final class TestUtils {
    * @param assertedValue asserted value
    * @return true if values in the payload match the assertion, false otherwise.
    */
+  public static boolean compareDecimalPayloadToAssertedValue(String payload, String fieldName, String op, Double assertedValue) {
+    AtomicBoolean result = new AtomicBoolean(false);
+    //iterate over the items and count the number of fields with data to determine whether there are data present
+    from(payload).getList(JSON_VALUE_PATH, HashMap.class).forEach(item ->
+        result.compareAndSet(result.get(), compare(Double.parseDouble(item.get(fieldName).toString()), op, assertedValue)));
+    return result.get();
+  }
+
+  /**
+   * Compares each item in the string (JSON) payload with the given field name to the asserted value using op.
+   *
+   * @param payload       JSON payload to compare
+   * @param fieldName     fieldName to compare against
+   * @param op            binary comparison operator
+   * @param assertedValue asserted value
+   * @return true if values in the payload match the assertion, false otherwise.
+   */
   public static boolean compareTimestampPayloadToAssertedValue(String payload, String fieldName, String op, String assertedValue) {
     AtomicBoolean result = new AtomicBoolean(false);
     //iterate over the items and count the number of fields with data to determine whether there are data present
@@ -852,6 +869,26 @@ public final class TestUtils {
           container.hasValidMetadata());
     } catch (Exception ex) {
       LOG.error(getDefaultErrorMessage(ex));
+    }
+  }
+
+  /**
+   * Validates that the given response data have a valid OData count
+   * @param responseData the data to check for a count against
+   * @return true if the there is a count present and it's greater than or equal to the number of results
+   */
+  public static boolean validateODataCount(String responseData) {
+    List<String> items = from(responseData).getList(JSON_VALUE_PATH);
+    Integer numResults = items != null ? items.size() : null;
+
+    String oDataCountString = from(responseData).getString("\"@odata.count\"");
+
+    if (oDataCountString != null) {
+      int oDataCount = Integer.parseInt(oDataCountString);
+      LOG.info("@odata.count was found and has a value of: " + oDataCount);
+      return numResults != null && numResults > 0 && oDataCount >= numResults;
+    } else {
+      return false;
     }
   }
 

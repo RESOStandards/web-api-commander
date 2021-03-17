@@ -36,8 +36,8 @@ dependencies {
   compile 'org.apache.olingo:odata-commons-core:4.8.0'
   compile 'org.apache.olingo:odata-client-core:4.8.0'
 
-  compile 'org.apache.poi:poi:3.9'
-  compile 'org.apache.poi:poi-ooxml:3.9'
+  compile 'org.apache.poi:poi:3.17'
+  compile 'org.apache.poi:poi-ooxml:3.17'
 
   compile 'io.rest-assured:rest-assured:4.2.0'
   compile 'io.rest-assured:json-path:4.2.0'
