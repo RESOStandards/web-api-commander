@@ -6,8 +6,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.reso.commander.common.DataDictionaryMetadata;
 
+import static org.reso.certification.codegen.WorksheetProcessor.REFERENCE_WORKSHEET;
 import static org.reso.certification.codegen.WorksheetProcessor.buildWellKnownStandardFieldHeaderMap;
-import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_WORKSHEET;
 
 public class DataDictionaryCodeGenerator {
   private static final Logger LOG = LogManager.getLogger(DataDictionaryCodeGenerator.class);

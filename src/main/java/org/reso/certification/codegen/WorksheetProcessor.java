@@ -2,15 +2,14 @@ package org.reso.certification.codegen;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.reso.commander.common.Utils;
-import org.reso.models.ReferenceStandardLookup;
 import org.reso.models.ReferenceStandardField;
+import org.reso.models.ReferenceStandardLookup;
 import org.reso.models.ReferenceStandardRelationship;
 
 import java.util.*;
@@ -21,10 +20,11 @@ import static org.junit.Assert.assertTrue;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.*;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_FIELD_HEADERS.COLLECTION;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_FIELD_HEADERS.STANDARD_NAME;
-import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_WORKSHEET;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public abstract class WorksheetProcessor {
+  //TODO: make this a dynamic property based on DD version
+  public static final String REFERENCE_WORKSHEET = "RESODataDictionary-1.7.xlsx";
 
   static final Map<String, String> resourceTemplates = new LinkedHashMap<>();
   static final Map<String, Set<ReferenceStandardLookup>> standardEnumerationsMap = new LinkedHashMap<>();
@@ -312,8 +312,7 @@ public abstract class WorksheetProcessor {
 
   public Workbook getReferenceWorkbook() {
     try {
-      return new XSSFWorkbook(OPCPackage.open(Objects.requireNonNull(
-          this.getClass().getClassLoader().getResource(getReferenceResource())).getFile()));
+      return new XSSFWorkbook(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(getReferenceResource())));
     } catch (Exception ex) {
       LOG.error(getDefaultErrorMessage(ex));
     }

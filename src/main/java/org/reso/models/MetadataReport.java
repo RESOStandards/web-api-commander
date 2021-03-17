@@ -2,9 +2,11 @@ package org.reso.models;
 
 import com.google.gson.*;
 import org.apache.olingo.commons.api.edm.*;
-import org.reso.commander.common.Utils;
 
 import java.lang.reflect.Type;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -235,7 +237,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
     JsonObject metadataReport = new JsonObject();
     metadataReport.addProperty(DESCRIPTION_KEY, DESCRIPTION);
     metadataReport.addProperty(VERSION_KEY, VERSION);
-    metadataReport.addProperty(GENERATED_ON_KEY, Utils.getTimestamp());
+    metadataReport.addProperty(GENERATED_ON_KEY, ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
     metadataReport.add(FIELDS_KEY, fields);
     metadataReport.add(LOOKUPS_KEY, lookups);
     return metadataReport;

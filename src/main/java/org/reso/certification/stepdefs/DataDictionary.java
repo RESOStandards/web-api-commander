@@ -47,8 +47,6 @@ public class DataDictionary {
   @Inject
   WebAPITestContainer container;
 
-  //TODO: make this a dynamic property based on DD version
-  public static final String REFERENCE_WORKSHEET = "RESODataDictionary-1.7.xlsx";
   public static final String REFERENCE_METADATA = "RESODataDictionary-1.7.edmx";
 
   //local variables

@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_WORKSHEET;
 import static org.reso.commander.common.DataDictionaryMetadata.v1_7.WELL_KNOWN_KEYS.*;
 import static org.reso.commander.common.Utils.wrapColumns;
 

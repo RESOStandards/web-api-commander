@@ -70,6 +70,7 @@ public class BDDProcessor extends WorksheetProcessor {
 
   @Override
   void generateOutput() {
+    LOG.info("Using reference worksheet: " + REFERENCE_WORKSHEET);
     LOG.info("Generating BDD .feature files for the following resources: " + resourceTemplates.keySet().toString());
     resourceTemplates.forEach((resourceName, content) -> {
       //put in local directory rather than relative to where the input file is
