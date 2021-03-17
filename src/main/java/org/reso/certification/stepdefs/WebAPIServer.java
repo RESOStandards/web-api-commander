@@ -373,7 +373,7 @@ class WebAPIServer implements En {
       try {
         String value = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
         boolean isPresent = from(getTestContainer().getResponseData()).get() != null;
-        assertTrue(getDefaultErrorMessage("singleton results not found for '" + value + "'!"), isPresent);
+        assertTrue(getDefaultErrorMessage("OData singleton results not found for '" + value + "'!"), isPresent);
         LOG.info("Data are present and response value is: " + value);
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
