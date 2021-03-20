@@ -301,7 +301,7 @@ public class App {
      *
      *    See Commander#validateMetadata for more info.
      */
-    LOG.info("Checking Metadata for validity...");
+    LOG.info("Validating XML Metadata in " + inputFilename + "...");
     try {
       if (commander.validateMetadata(inputFilename)) {
         LOG.info("Valid Metadata!");

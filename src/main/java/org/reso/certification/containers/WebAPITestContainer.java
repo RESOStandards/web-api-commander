@@ -49,7 +49,7 @@ public final class WebAPITestContainer implements TestContainer {
   public static final String EMPTY_STRING = "";
   public static final String SINGLE_SPACE = " ";
   public static final String DOLLAR_SIGN = "$";
-  public static final String DATA_SYSTEM_JSON_4_SCHEMA = "datasystem.schema.4.json";
+  public static final String DATA_SYSTEM_JSON_4_SCHEMA = "jsonschema/misc/datasystem.schema.4.json";
   public static final String PRETTY_FIELD_SEPARATOR = FIELD_SEPARATOR + SINGLE_SPACE;
   private static final Logger LOG = LogManager.getLogger(WebAPITestContainer.class);
 

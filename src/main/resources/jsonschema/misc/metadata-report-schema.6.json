@@ -1,0 +1,175 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "$ref": "#/definitions/MetadataReport",
+  "definitions": {
+    "MetadataReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "generatedOn": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Field"
+          }
+        },
+        "lookups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Lookup"
+          }
+        }
+      },
+      "required": [
+        "description",
+        "fields",
+        "generatedOn",
+        "lookups",
+        "version"
+      ],
+      "title": "MetadataReport"
+    },
+    "Field": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resourceName": {
+          "$ref": "#/definitions/ResourceName"
+        },
+        "fieldName": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "nullable": {
+          "type": "boolean"
+        },
+        "scale": {
+          "type": "integer"
+        },
+        "precision": {
+          "type": "integer"
+        },
+        "isCollection": {
+          "type": "boolean"
+        },
+        "unicode": {
+          "type": "boolean"
+        },
+        "annotations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Annotation"
+          }
+        },
+        "maxLength": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "annotations",
+        "fieldName",
+        "isCollection",
+        "nullable",
+        "resourceName",
+        "type",
+        "unicode"
+      ],
+      "title": "Field"
+    },
+    "Annotation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "type": "string",
+          "qt-uri-protocols": [
+            "https"
+          ],
+          "qt-uri-extensions": [
+            ".action",
+            ".com"
+          ]
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Annotation"
+    },
+    "Lookup": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lookupName": {
+          "type": "string"
+        },
+        "lookupValue": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/Type"
+        },
+        "annotations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Annotation"
+          }
+        }
+      },
+      "required": [
+        "lookupName",
+        "lookupValue",
+        "type"
+      ],
+      "title": "Lookup"
+    },
+    "ResourceName": {
+      "type": "string",
+      "enum": [
+        "Property",
+        "Member",
+        "Office",
+        "Contacts",
+        "Media",
+        "HistoryTransactional",
+        "ContactListings",
+        "InternetTracking",
+        "SavedSearch",
+        "OpenHouse",
+        "Prospecting",
+        "Queue",
+        "Rules",
+        "Teams",
+        "Showing",
+        "TeamMembers",
+        "OUID",
+        "ContactListingNotes",
+        "OtherPhone",
+        "PropertyGreenVerification",
+        "PropertyPowerProduction",
+        "PropertyRooms",
+        "PropertyUnitTypes",
+        "SocialMedia"
+      ],
+      "title": "ResourceName"
+    },
+    "Type": {
+      "type": "string",
+      "enum": [
+        "Edm.Int32"
+      ],
+      "title": "Type"
+    }
+  }
+}
