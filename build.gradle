@@ -163,7 +163,7 @@ task testDataDictionary_1_7() {
       '\n  RESOScript Example:' +
       '\n    ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dcucumber.filter.tags=""' +
       '\n  Metadata File Example:' +
-      '\n    ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dcucumber.filter.tags=""' +
+      '\n    ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml -Dcucumber.filter.tags=""' +
       '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
 
   dependsOn jar
@@ -214,7 +214,7 @@ task _jenkins_testDataDictionary_1_7() {
       '\n  RESOScript Example:' +
       '\n    ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dcucumber.filter.tags=""' +
       '\n  Metadata File Example:' +
-      '\n    ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dcucumber.filter.tags=""' +
+      '\n    ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml -Dcucumber.filter.tags=""' +
       '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
 
   dependsOn jar
@@ -266,7 +266,7 @@ task generateCertificationReport_DD_1_7() {
       '\n  RESOScript Example:' +
       '\n    ./gradlew generateCertificationReport_DD_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -Dminimal=true -Dstrict=true' +
       '\n  Metadata File Example:' +
-      '\n    ./gradlew generateCertificationReport_DD_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dminimal=true -Dstrict=true' +
+      '\n    ./gradlew generateCertificationReport_DD_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml -Dminimal=true -Dstrict=true' +
       '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
 
   dependsOn testDataDictionary_1_7
@@ -289,7 +289,7 @@ task testDataDictionaryReferenceMetadata_1_7() {
     javaexec {
       main = "io.cucumber.core.cli.Main"
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-      System.setProperty('pathToMetadata', 'src/main/resources/RESODataDictionary-1.7.edmx')
+      System.setProperty('pathToMetadata', 'src/main/resources/RESODataDictionary-1.7.xml')
       systemProperties = System.getProperties()
       args = [
           '--strict',

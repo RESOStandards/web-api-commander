@@ -8,6 +8,9 @@ import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class Utils {
@@ -104,4 +107,9 @@ public class Utils {
   public static String wrapColumns(String content, int columnWidth, String spaceReplacement) {
     return content.replaceAll(String.format("(.{1,%d})( +|$\\n?)|(.{1,%d})\n", columnWidth, columnWidth), spaceReplacement + "$1");
   }
+
+  public static String getIsoTimestamp() {
+    return ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
+  }
+
 }

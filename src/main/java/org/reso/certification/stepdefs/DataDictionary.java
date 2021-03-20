@@ -47,7 +47,7 @@ public class DataDictionary {
   @Inject
   WebAPITestContainer container;
 
-  public static final String REFERENCE_METADATA = "RESODataDictionary-1.7.edmx";
+  public static final String REFERENCE_METADATA = "RESODataDictionary-1.7.xml";
 
   //local variables
   private static final AtomicReference<String> currentResourceName = new AtomicReference<>();

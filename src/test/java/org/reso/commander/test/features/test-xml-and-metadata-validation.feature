@@ -8,7 +8,7 @@ Feature: Commander XML and Metadata Validation
   #  XML Validation Tests
   #######################################
   Scenario: XML Validation using OASIS reference XSDs
-    Given metadata were loaded from the sample resource "RESODataDictionary-1.7.edmx"
+    Given metadata were loaded from the sample resource "RESODataDictionary-1.7.xml"
     When XML validation is performed on the resource data
     Then XML validation succeeds
 
@@ -21,7 +21,7 @@ Feature: Commander XML and Metadata Validation
   #  XML Metadata Validation Tests
   #######################################
   Scenario: XML Metadata validation succeeds when XML Metadata are valid
-    Given metadata were loaded from the sample resource "RESODataDictionary-1.7.edmx"
+    Given metadata were loaded from the sample resource "RESODataDictionary-1.7.xml"
     When XML Metadata validation is performed on the resource data
     Then XML Metadata validation succeeds
 
@@ -34,7 +34,7 @@ Feature: Commander XML and Metadata Validation
   #  Edm Validation Tests
   #######################################
   Scenario: Edm validation succeeds when XML Metadata contain a valid Edm
-    Given metadata were loaded from the sample resource "RESODataDictionary-1.7.edmx"
+    Given metadata were loaded from the sample resource "RESODataDictionary-1.7.xml"
     When Edm validation is performed on the resource data
     Then Edm Metadata validation succeeds
 

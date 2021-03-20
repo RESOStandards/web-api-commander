@@ -15,7 +15,7 @@ Feature: Web API Container Tests
     But the Commander is not created using client credentials mode
 
   Scenario: Metadata validation returns true for known-good metadata
-    When sample metadata from "RESODataDictionary-1.7.edmx" are loaded into the test container
+    When sample metadata from "RESODataDictionary-1.7.xml" are loaded into the test container
     Then metadata are valid
 
   Scenario: Metadata validation returns false for known-bad metadata

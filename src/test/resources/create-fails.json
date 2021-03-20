@@ -1,0 +1,21 @@
+{
+  "BathroomsTotal" : -1,
+  "BedroomsTotal" : 3,
+  "City" : "29 Palms",
+  "CoolingYN" : "Sushi",
+  "CountyOrParish" :  "SanBernardino",
+  "HeatingYN" : true,
+  "ListAgentFirstName" : "Adam",
+  "ListAgentKeyNumeric" : 1234,
+  "ListAgentLastName" : "Smith",
+  "ListPrice" : 799950,
+  "PostalCode" : "12345",
+  "PropertySubType" : "SFR",
+  "PropertyType" : "Resi",
+  "PublicRemarks" : "Vestibulum Hic, te potest imaginari feature gatum praedium iactat omnis.",
+  "StandardStatus" : "A",
+  "StateOrProvince" : "CA",
+  "StreetName" : "Main",
+  "StreetNumber" : "123",
+  "StreetSuffix" : "ST"
+}
