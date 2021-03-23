@@ -6,11 +6,17 @@ import org.apache.logging.log4j.Logger;
 import org.reso.commander.common.Utils;
 import org.reso.models.ReferenceStandardField;
 
-//TODO: move to central lib
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static com.google.common.hash.Hashing.sha256;
 import static org.reso.certification.codegen.EDMXProcessor.EMPTY_STRING;
 import static org.reso.certification.containers.WebAPITestContainer.SINGLE_SPACE;
-
 import static org.reso.commander.common.DataDictionaryMetadata.v1_7.*;
+
+//TODO: move to central lib
 
 public class DDLProcessor extends WorksheetProcessor {
   private static final Logger LOG = LogManager.getLogger(DDLProcessor.class);
@@ -151,8 +157,117 @@ public class DDLProcessor extends WorksheetProcessor {
     });
 
     LOG.info(sanitizeSql(content.toString()));
+
+    //create the lookup resource so we can populate it with the enum definitions
+    LOG.info(sanitizeSql(buildCreateLookupStatement(useKeyNumeric)));
+
+    LOG.info(this::buildInsertLookupsStatement);
   }
 
+  private static String buildCreateLookupStatement(boolean useKeyNumeric) {
+      return
+          "\n\n/**\n" +
+          " This creates the Lookup resource, as described in RESO RCP-032, \n" +
+          " with an optional numeric key. \n\n" +
+          " SEE: https://reso.atlassian.net/wiki/spaces/RESOWebAPIRCP/pages/2275152879/RCP+-+WEBAPI-032+Lookup+and+RelatedLookup+Resources+for+Lookup+Metadata\n" +
+          "**/\n" +
+          "CREATE TABLE IF NOT EXISTS lookup ( \n" +
+          "  LookupKey VARCHAR(" + STRING_KEY_SIZE + ") NOT NULL, \n" +
+          "  LookupKeyNumeric BIGINT NOT NULL AUTO_INCREMENT, \n" +
+          "  LookupName VARCHAR(255) NOT NULL, \n" +
+          "  LookupValue VARCHAR(255) NOT NULL, \n" +
+          "  StandardLookupValue VARCHAR(255) DEFAULT NULL, \n" +
+          "  LegacyOdataValue VARCHAR(128) DEFAULT NULL, \n" +
+          "  ModificationTimestamp DATETIME DEFAULT CURRENT_TIMESTAMP, \n" +
+          "    PRIMARY KEY (LookupKey" + (useKeyNumeric ? "Numeric" : EMPTY_STRING) + ")\n" +
+          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+  }
+
+  /**
+   * INSERT INTO tbl_name (a,b,c)
+   *     VALUES(1,2,3), (4,5,6), (7,8,9);
+   * @return a string containing the insert statements for the current lookups in the Data Dictionary.
+   */
+  private String buildInsertLookupsStatement() {
+    //enumeration markup keyed by enumeration standard name
+    Map<String, String> markupMap = new LinkedHashMap<>();
+
+    StringBuilder content = new StringBuilder("\n\n")
+        .append("INSERT INTO lookup (LookupKey, LookupValue, StandardLookupValue, LegacyOdataValue) VALUES").append("\n");
+
+    standardFieldsMap.forEach((resourceName, standardFieldMap) -> {
+      standardFieldMap.forEach((standardName, referenceStandardField) -> {
+        String inserts = buildLookupValueInserts(referenceStandardField);
+        if (inserts.length() > 0) {
+          markupMap.putIfAbsent(referenceStandardField.getLookupStandardName(),
+              (markupMap.keySet().size() > 0 ? ", " : EMPTY_STRING) + PADDING + inserts);
+        }
+      });
+    });
+
+    markupMap.forEach((lookupStandardName, markup) -> content.append(markup));
+    return content.append(";").toString();
+  }
+
+  // "LookupKey, LookupName, LookupValue, StandardLookupValue, LegacyOdataValue"
+  private String buildLookupValueInserts(ReferenceStandardField standardField) {
+    StringBuilder content = new StringBuilder();
+
+    if (getEnumerations().get(standardField.getLookupStandardName()) != null) {
+      AtomicReference<String> fieldHash = new AtomicReference<>();
+
+      //iterate through each of the lookup values and generate their edm:EnumType content
+      getEnumerations().get(standardField.getLookupStandardName()).forEach(lookup -> {
+
+        // key is the sha256 of the following values
+        fieldHash.set(sha256()
+            .hashString(
+                standardField.getLookupStandardName()
+                    + lookup.getLookupDisplayName()
+                    + lookup.getLookupValue(), StandardCharsets.UTF_8)
+            .toString());
+
+        content
+            .append(content.length() > 0 ? ", " : EMPTY_STRING).append("\n")
+            .append(PADDING).append("(")
+            .append("\"").append(fieldHash.get()).append("\"")
+            .append(", ").append("\"").append(standardField.getLookupStandardName()).append("\"")
+            .append(", ").append("\"").append(lookup.getLookupDisplayName()).append("\"")
+            .append(", ").append("\"").append(lookup.getLookupDisplayName()).append("\"")
+            .append(", ").append("\"").append(lookup.getLookupValue()).append("\"")
+            .append(")");
+      });
+    }
+    return content.toString();
+  }
+
+
+
+//  private String buildNavigationPropertyMarkup(String resourceName) {
+//    StringBuilder content = new StringBuilder();
+//    List<ReferenceStandardRelationship> referenceStandardRelationships =
+//        this.getStandardRelationships().stream().filter(referenceStandardRelationship
+//            -> referenceStandardRelationship.getTargetResource().contentEquals(resourceName)).collect(Collectors.toList());
+//    for (ReferenceStandardRelationship referenceStandardRelationship : referenceStandardRelationships) {
+//      //LOG.info(referenceStandardRelationship);
+//
+//      if (referenceStandardRelationship.getTargetResourceKey() != null) {
+//        content.append("<NavigationProperty")
+//            .append(" Name=\"").append(referenceStandardRelationship.getTargetStandardName()).append("\"")
+//            .append(" Type=\"org.reso.metadata.").append(referenceStandardRelationship.getSourceResource()).append("\"")
+//            .append(" />");
+//      } else {
+//        content.append("<NavigationProperty")
+//            .append(" Name=\"").append(referenceStandardRelationship.getTargetStandardName()).append("\"")
+//            .append(" Type=\"Collection(org.reso.metadata.").append(referenceStandardRelationship.getSourceResource()).append(")\"")
+//            .append(" />");
+//      }
+//    }
+//
+//    return content.toString();
+//  }
+  
+  
   /**
    * Add treatments for any SQL replacements that need to be done here
    *
