@@ -193,7 +193,7 @@ public class DDLProcessor extends WorksheetProcessor {
     Map<String, String> markupMap = new LinkedHashMap<>();
 
     StringBuilder content = new StringBuilder("\n\n")
-        .append("INSERT INTO lookup (LookupKey, LookupValue, StandardLookupValue, LegacyOdataValue) VALUES").append("\n");
+        .append("INSERT INTO lookup (LookupKey, LookupName, LookupValue, StandardLookupValue, LegacyOdataValue) VALUES");
 
     standardFieldsMap.forEach((resourceName, standardFieldMap) -> {
       standardFieldMap.forEach((standardName, referenceStandardField) -> {
