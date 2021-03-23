@@ -30,7 +30,7 @@ public abstract class WorksheetProcessor {
   static final Map<String, Set<ReferenceStandardLookup>> standardEnumerationsMap = new LinkedHashMap<>();
   static final Map<String, Map<String, ReferenceStandardField>> standardFieldsMap = new LinkedHashMap<>(new LinkedHashMap<>());
   private static final Logger LOG = LogManager.getLogger(WorksheetProcessor.class);
-  String referenceResource = null;
+  String referenceDocument = null;
   StringBuffer markup;
   Sheet sheet;
   String startTimestamp;
@@ -230,7 +230,9 @@ public abstract class WorksheetProcessor {
 
   }
 
-  abstract void processResourceSheet(Sheet sheet);
+  void processResourceSheet(Sheet sheet) {
+    this.sheet = sheet;
+  }
 
   abstract void processNumber(ReferenceStandardField field);
 
@@ -303,11 +305,11 @@ public abstract class WorksheetProcessor {
   }
 
   public String getReferenceResource() {
-    return referenceResource;
+    return referenceDocument;
   }
 
   public void setReferenceResource(String referenceResource) {
-    this.referenceResource = referenceResource;
+    this.referenceDocument = referenceResource;
   }
 
   public Workbook getReferenceWorkbook() {

@@ -22,9 +22,8 @@ public class BDDProcessor extends WorksheetProcessor {
       LOCKED_WITH_ENUMERATIONS_KEY = "Locked with Enumerations";
   private static final int EXAMPLES_PADDING_AMOUNT = 6;
 
-  @Override
   public void processResourceSheet(Sheet sheet) {
-    this.sheet = sheet;
+    super.processResourceSheet(sheet);
     markup.append(BDDTemplates.buildHeaderInfo(sheet.getSheetName(), startTimestamp));
   }
 

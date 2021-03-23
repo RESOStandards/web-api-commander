@@ -23,9 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.reso.commander.common.DataDictionaryMetadata.v1_7.WELL_KNOWN_KEYS.*;
+import static org.reso.commander.common.DataDictionaryMetadata.v1_7.getKeyFieldForResource;
 import static org.reso.commander.common.Utils.wrapColumns;
 
+//TODO: switch to build an XML document rather than creating it as a string
 public class EDMXProcessor extends WorksheetProcessor {
   private static final Logger LOG = LogManager.getLogger(EDMXProcessor.class);
   final static String EMPTY_STRING = "";
@@ -43,7 +44,7 @@ public class EDMXProcessor extends WorksheetProcessor {
 
   @Override
   public void processResourceSheet(Sheet sheet) {
-    this.sheet = sheet;
+    super.processResourceSheet(sheet);
     openEntityTypeTag = "<EntityType Name=\"" + sheet.getSheetName() + "\">";
     closeEntityTypeTag = "</EntityType>";
   }
@@ -52,79 +53,7 @@ public class EDMXProcessor extends WorksheetProcessor {
   private String getKeyMarkup(String resourceName) {
     if (resourceName == null) return null;
 
-    String targetKeyName = null;
-    switch (resourceName) {
-      case PROPERTY:
-        targetKeyName = "ListingKey";
-        break;
-      case MEMBER:
-        targetKeyName = "MemberKey";
-        break;
-      case OFFICE:
-        targetKeyName = "OfficeKey";
-        break;
-      case CONTACTS:
-      case CONTACT_LISTING_NOTES:
-        targetKeyName = "ContactKey";
-        break;
-      case CONTACT_LISTINGS:
-        targetKeyName = "ContactListingsKey";
-        break;
-      case HISTORY_TRANSACTIONAL:
-        targetKeyName = "HistoryTransactionalKey";
-        break;
-      case INTERNET_TRACKING:
-        targetKeyName = "EventKey";
-        break;
-      case MEDIA:
-        targetKeyName = "MediaKey";
-        break;
-      case OPEN_HOUSE:
-        targetKeyName = "OpenHouseKey";
-        break;
-      case OUID:
-        targetKeyName = "OrganizationUniqueIdKey";
-        break;
-      case PROSPECTING:
-        targetKeyName = "ProspectingKey";
-        break;
-      case QUEUE:
-        targetKeyName = "QueueTransactionKey";
-        break;
-      case RULES:
-        targetKeyName = "RuleKey";
-        break;
-      case SAVED_SEARCH:
-        targetKeyName = "SavedSearchKey";
-        break;
-      case SHOWING:
-        targetKeyName = "ShowingKey";
-        break;
-      case TEAMS:
-        targetKeyName = "TeamKey";
-        break;
-      case TEAM_MEMBERS:
-        targetKeyName = "TeamMemberKey";
-        break;
-      case OTHER_PHONE:
-        targetKeyName = "OtherPhoneKey";
-        break;
-      case PROPERTY_GREEN_VERIFICATION:
-        targetKeyName = "GreenBuildingVerificationKey";
-        break;
-      case PROPERTY_POWER_PRODUCTION:
-        targetKeyName = "PowerProductionKey";
-        break;
-      case PROPERTY_ROOMS:
-        targetKeyName = "RoomKey";
-        break;
-      case PROPERTY_UNIT_TYPES:
-        targetKeyName = "UnitTypeKey";
-        break;
-      case SOCIAL_MEDIA:
-        targetKeyName = "SocialMediaKey";
-        break;
-    }
+    String targetKeyName = getKeyFieldForResource(resourceName);
 
     return targetKeyName != null ?
         "<Key>"
@@ -192,10 +121,10 @@ public class EDMXProcessor extends WorksheetProcessor {
   void generateOutput() {
     try {
       final String output =
-          openingDataServicesTag +
-              buildEntityTypeMarkup() +
-              buildEnumTypeMarkup() +
-              closingDataServicesTag;
+          openingDataServicesTag
+            + buildEntityTypeMarkup()
+            + buildEnumTypeMarkup()
+            + closingDataServicesTag;
 
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       dbf.setValidating(false);
@@ -513,7 +442,6 @@ public class EDMXProcessor extends WorksheetProcessor {
       //break every COLUMN_WIDTH characters only at word boundaries
       return (referenceStandardField.getWikiPageUrl() != null && referenceStandardField.getWikiPageUrl().length() > 0 ?
           " <!-- " + referenceStandardField.getWikiPageUrl() : "")
-          //wrapColumns(referenceStandardField.getDefinition().replaceAll("--", "-"), "   ")
           + " -->";
     }
 
