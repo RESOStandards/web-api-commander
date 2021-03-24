@@ -1,5 +1,6 @@
 package org.reso.certification.stepdefs;
 
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -11,7 +12,7 @@ public class WebAPIServerAddEdit {
   }
 
   @When("the server responds with one of the following status codes")
-  public void theServerRespondsWithOneOfTheFollowingStatusCodes() {
+  public void theServerRespondsWithOneOfTheFollowingStatusCodes(DataTable codes) {
   }
 
   @Then("the response header {string} is {string}")
@@ -47,7 +48,7 @@ public class WebAPIServerAddEdit {
   }
 
   @And("the response has header {string} with one of the following values")
-  public void theResponseHasHeaderWithOneOfTheFollowingValues(String arg0) {
+  public void theResponseHasHeaderWithOneOfTheFollowingValues(String keyName, DataTable arg0) {
   }
 
   @And("the JSON response contains the data in {string}")
@@ -75,7 +76,7 @@ public class WebAPIServerAddEdit {
   }
 
   @Then("the server responds with one of the following error codes")
-  public void theServerRespondsWithOneOfTheFollowingErrorCodes() {
+  public void theServerRespondsWithOneOfTheFollowingErrorCodes(DataTable codes) {
   }
 
   @And("the error response is in a valid format")
