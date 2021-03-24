@@ -114,7 +114,9 @@ task testWebApiServer_1_0_2_Core() {
           'html:build/web-api-server.core.1.0.2.html',
           '--glue',
           'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
-          'src/main/java/org/reso/certification/features/web-api'
+          'src/main/java/org/reso/certification/features/web-api',
+          '--tags',
+          '@core-endorsement'
       ]
     }
   }
@@ -250,6 +252,7 @@ task _jenkins_testDataDictionary_1_7() {
   doLast {
     certJsonPath = 'build/data-dictionary-1.7.jenkins.json'
     javaexec {
+
       main = 'io.cucumber.core.cli.Main'
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
@@ -312,7 +315,9 @@ task _jenkins_testWebApiServer_1_0_2_Core() {
           'json:' + certJsonPath,
           '--glue',
           'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
-          'src/main/java/org/reso/certification/features/web-api'
+          'src/main/java/org/reso/certification/features/web-api',
+          '--tags',
+          '@core-endorsement'
       ]
     }
 
