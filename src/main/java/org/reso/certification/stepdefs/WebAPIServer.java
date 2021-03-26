@@ -33,6 +33,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
@@ -45,6 +46,7 @@ import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.DateParts.FRACTIONAL;
 import static org.reso.commander.common.TestUtils.*;
 import static org.reso.commander.common.TestUtils.Operators.*;
+import static org.reso.models.Request.loadFromRESOScript;
 
 /**
  * Contains the glue code for Web API Core 1.0.2 Certification as well as previous Platinum tests,
@@ -1074,7 +1076,7 @@ class WebAPIServer implements En {
    */
   void prepareAndExecuteRawGetRequest(String requestId) {
     try {
-      //reset local state each time a get request is run
+      //reset local state each time a get request request is run
       getTestContainer().resetState();
 
       assertNotNull(getDefaultErrorMessage("request Id cannot be null!"), requestId);
@@ -1108,7 +1110,6 @@ class WebAPIServer implements En {
    * Contains background logic - make sure to update if the background changes
    */
   final void runBackground() {
-
     /*
      * Background
      */
@@ -1117,13 +1118,21 @@ class WebAPIServer implements En {
         getTestContainer().setPathToRESOScript(System.getProperty("pathToRESOScript"));
         LOG.info("Using RESOScript: " + getTestContainer().getPathToRESOScript());
       }
-      assertNotNull(getDefaultErrorMessage("pathToRESOScript must be present in command arguments, see README"), getTestContainer().getPathToRESOScript());
+      assertNotNull(getDefaultErrorMessage("pathToRESOScript must be present in command arguments, see README"),
+          getTestContainer().getPathToRESOScript());
     });
 
     And("^Client Settings and Parameters were read from the file$", () -> {
       if (getTestContainer().getSettings() == null) {
         getTestContainer().setSettings(Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript"))));
+
         LOG.info("RESOScript loaded successfully!");
+
+        //TODO: change this to allow passing of a given set of testing queries
+        //for now this assumes the requests will always be Web API Core Server test queries, but could be $expand, for instance
+        getTestContainer().getSettings().setRequests(loadFromRESOScript(new File(Objects.requireNonNull(
+            getClass().getClassLoader().getResource("reference-web-api-core-requests.xml")).getPath()))
+            .parallelStream().map(request -> Settings.resolveParameters(request, getTestContainer().getSettings())).collect(Collectors.toList()));
       }
       assertNotNull(getDefaultErrorMessage("Settings could not be loaded."), getTestContainer().getSettings());
     });

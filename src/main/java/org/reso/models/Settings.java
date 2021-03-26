@@ -147,7 +147,7 @@ public class Settings {
    *
    * @param requests a list of requests to create the request map from
    */
-  private void setRequests(List<Request> requests) {
+  public void setRequests(List<Request> requests) {
     this.requests = new LinkedHashMap<String, Request>();
     requests.forEach(request -> this.requests.put(request.getRequestId(), request));
   }
