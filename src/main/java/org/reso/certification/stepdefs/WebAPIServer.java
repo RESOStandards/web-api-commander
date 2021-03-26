@@ -70,6 +70,10 @@ class WebAPIServer implements En {
    */
   private static final AtomicReference<WebAPITestContainer> container = new AtomicReference<>(new WebAPITestContainer());
 
+  //TODO: change this to allow passing of a given set of testing queries
+  //for now this assumes the requests will always be Web API Core Server test queries, but could be $expand, for instance
+  private static final String WEB_API_CORE_REFERENCE_REQUESTS = "reference-web-api-core-requests.xml";
+
   /**
    * Entry point to the Web API Server tests
    */
@@ -1126,13 +1130,11 @@ class WebAPIServer implements En {
       if (getTestContainer().getSettings() == null) {
         getTestContainer().setSettings(Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript"))));
 
-        LOG.info("RESOScript loaded successfully!");
-
-        //TODO: change this to allow passing of a given set of testing queries
-        //for now this assumes the requests will always be Web API Core Server test queries, but could be $expand, for instance
         getTestContainer().getSettings().setRequests(loadFromRESOScript(new File(Objects.requireNonNull(
-            getClass().getClassLoader().getResource("reference-web-api-core-requests.xml")).getPath()))
+            getClass().getClassLoader().getResource(WEB_API_CORE_REFERENCE_REQUESTS)).getPath()))
             .parallelStream().map(request -> Settings.resolveParameters(request, getTestContainer().getSettings())).collect(Collectors.toList()));
+
+        LOG.info("Test configuration loaded successfully!");
       }
       assertNotNull(getDefaultErrorMessage("Settings could not be loaded."), getTestContainer().getSettings());
     });
