@@ -5,6 +5,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
 import io.cucumber.java.en.*;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.apache.http.HttpStatus;
@@ -43,6 +45,12 @@ import static org.reso.commander.common.Utils.wrapColumns;
 
 public class DataDictionary {
   private static final Logger LOG = LogManager.getLogger(DataDictionary.class);
+  private static Scenario scenario;
+
+  @Before
+  public void beforeStep(Scenario scenario) {
+    DataDictionary.scenario = scenario;
+  }
 
   @Inject
   WebAPITestContainer container;
@@ -76,12 +84,10 @@ public class DataDictionary {
   private final boolean isUsingRESOScript = pathToRESOScript != null;
   private final boolean isUsingMetadata = pathToMetadata != null;
 
-
   @Given("a RESOScript or Metadata file are provided")
   public void aRESOScriptOrMetadataFileAreProvided() {
     if (pathToRESOScript == null && pathToMetadata == null) {
-      LOG.error(getDefaultErrorMessage("one of pathToRESOScript OR pathToMetadata MUST be present in command arguments, see README"));
-      System.exit(NOT_OK);
+      failAndExitWithErrorMessage("one of pathToRESOScript OR pathToMetadata MUST be present in command arguments, see README");
     }
   }
 
@@ -107,7 +113,10 @@ public class DataDictionary {
       if (container.getPathToRESOScript() == null) {
         container.setPathToRESOScript(System.getProperty("pathToRESOScript"));
       }
-      assertNotNull("ERROR: pathToRESOScript must be present in command arguments, see README", container.getPathToRESOScript());
+
+      if (container.getPathToRESOScript() == null) {
+        failAndExitWithErrorMessage("pathToRESOScript must be present in command arguments, see README.");
+      }
       LOG.debug("Using RESOScript: " + container.getPathToRESOScript());
     }
   }
@@ -117,7 +126,9 @@ public class DataDictionary {
     if (isUsingRESOScript) {
       if (container.getSettings() == null) {
         container.setSettings(Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript"))));
-        assertNotNull("ERROR: Settings could not be loaded.", container.getSettings());
+        if (container.getPathToRESOScript() == null) {
+          failAndExitWithErrorMessage("Settings could not be loaded!");
+        }
         LOG.info("RESOScript loaded successfully!");
       }
     }
@@ -126,10 +137,14 @@ public class DataDictionary {
   @And("the test container uses an Authorization Code or Client Credentials for authentication")
   public void theTestContainerUsesAnAuthorizationCodeOrClientCredentialsForAuthentication() {
     if (isUsingRESOScript) {
-      assertNotNull(container.getCommander());
-      assertTrue("ERROR: Commander must either have a valid Authorization Code or Client Credentials configuration.",
-          container.getCommander().isAuthTokenClient()
-              || (container.getCommander().isOAuth2Client() && container.getCommander().hasValidAuthConfig()));
+      if (container.getCommander() == null) {
+        failAndExitWithErrorMessage("Commander instance was null! Cannot continue.");
+      }
+
+      if (!(container.getCommander().isAuthTokenClient()
+          || (container.getCommander().isOAuth2Client() && container.getCommander().hasValidAuthConfig()))) {
+          failAndExitWithErrorMessage("Commander must either have a valid Authorization Code or Client Credentials configuration!");
+      }
     }
   }
 
@@ -139,8 +154,7 @@ public class DataDictionary {
     if (isUsingMetadata) {
       result = pathToMetadata != null && Files.exists(Paths.get(pathToMetadata));
       if (!result) {
-        LOG.error(getDefaultErrorMessage("Path to given metadata file does not exist: " + PATH_TO_METADATA_ARG + "=" + pathToMetadata));
-        System.exit(NOT_OK);
+        failAndExitWithErrorMessage("Path to given metadata file does not exist: " + PATH_TO_METADATA_ARG + "=" + pathToMetadata);
       }
     }
   }
@@ -168,7 +182,7 @@ public class DataDictionary {
         areMetadataValid = container.hasValidMetadata();
 
       } catch (IOException e) {
-        e.printStackTrace();
+        failAndExitWithErrorMessage(getDefaultErrorMessage(e));
       }
     }
   }
@@ -182,8 +196,7 @@ public class DataDictionary {
       TestUtils.assertXMLMetadataAreRequestedFromTheServer(container);
 
       if (container.getResponseCode() != HttpStatus.SC_OK) {
-        LOG.error(getDefaultErrorMessage("Could not retrieve metadata from", container.getServiceRoot() + "/$metadata"));
-        System.exit(NOT_OK);
+        failAndExitWithErrorMessage("Could not retrieve metadata from " + container.getServiceRoot() + "/$metadata");
       }
 
       //metadata validation tests
@@ -206,8 +219,7 @@ public class DataDictionary {
   public void existsInTheMetadata(String fieldName, String resourceName) {
 
     if (strictMode && !areMetadataValid) {
-      LOG.error(getDefaultErrorMessage("Metadata validation failed, but is required to pass when using strict mode!"));
-      System.exit(NOT_OK);
+      failAndExitWithErrorMessage("Metadata validation failed, but is required to pass when using strict mode!");
     }
 
     assertNotNull(getDefaultErrorMessage("field name cannot be null!"), fieldName);
@@ -234,8 +246,8 @@ public class DataDictionary {
   @Then("{string} MUST be {string} data type")
   public void mustBeDataType(String fieldName, String dataTypeName) {
     String foundTypeName = container.getFieldMap().get(currentResourceName.get()).get(fieldName).getType();
-    LOG.info("Field data type: " + foundTypeName);
     assertDataTypeMapping(fieldName, dataTypeName, foundTypeName);
+    LOG.info("Field data type: " + foundTypeName);
   }
 
   @And("{string} MAY contain any of the following standard lookups")
@@ -245,7 +257,7 @@ public class DataDictionary {
     foundStandardMembers.set(getFoundStandardMembers(foundMembers.get(), dataTable));
 
     if (foundStandardMembers.get().size() == 0) {
-      LOG.info("No RESO Standard Enumerations found for field: " + fieldName);
+      scenario.write("No RESO Standard Enumerations found for field: " + fieldName);
     }
   }
 
@@ -446,10 +458,10 @@ public class DataDictionary {
         ? container.getFieldMap(currentResourceName.get()).get(fieldName).getPrecision() : null;
 
     if (!Objects.equals(precision, suggestedPrecision)) {
-      LOG.warn("Precision for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Precision of " + suggestedPrecision
+      scenario.write("Precision for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Precision of " + suggestedPrecision
           + " but was " + precision);
     } else {
-      LOG.info("Precision for field " + fieldName +  " is equal to the RESO Suggested Max Scale of " + suggestedPrecision);
+      scenario.write("Precision for field " + fieldName +  " is equal to the RESO Suggested Max Scale of " + suggestedPrecision);
     }
   }
 
@@ -460,10 +472,10 @@ public class DataDictionary {
         ? container.getFieldMap(currentResourceName.get()).get(fieldName).getScale() : null;
 
     if (!Objects.equals(scale, suggestedMaxScale)) {
-      LOG.warn("Scale for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Scale of " + suggestedMaxScale
+      scenario.write("Scale for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Scale of " + suggestedMaxScale
           + " but was " + scale);
     } else {
-      LOG.info("Scale for field " + fieldName +  " is equal to the RESO Suggested Max Scale of " + suggestedMaxScale);
+      scenario.write("Scale for field " + fieldName +  " is equal to the RESO Suggested Max Scale of " + suggestedMaxScale);
     }
   }
 
@@ -474,10 +486,10 @@ public class DataDictionary {
         ? container.getFieldMap(currentResourceName.get()).get(fieldName).getMaxLength() : null;
 
     if (!Objects.equals(length, suggestedMaxLength)) {
-      LOG.warn("Length for field " + fieldName + " SHOULD be equal to the RESO Suggested Max Length of " + suggestedMaxLength
+      scenario.write("Length for field " + fieldName + " SHOULD be equal to the RESO Suggested Max Length of " + suggestedMaxLength
           + " but was " + length);
     } else {
-      LOG.info("Length for field " + fieldName +  " is equal to the RESO Suggested Max Length of " + length);
+      scenario.write("Length for field " + fieldName +  " is equal to the RESO Suggested Max Length of " + length);
     }
   }
 
@@ -582,5 +594,15 @@ public class DataDictionary {
   private boolean isFieldContainedInMetadata(String fieldName) {
     return container.getFieldMap().containsKey(currentResourceName.get())
         && container.getFieldMap().get(currentResourceName.get()).containsKey(fieldName);
+  }
+
+  private static void failAndExitWithErrorMessage(String msg) {
+    if (scenario != null) {
+      scenario.write(getDefaultErrorMessage(msg));
+    } else {
+      LOG.error(getDefaultErrorMessage(msg));
+    }
+    fail();
+    System.exit(NOT_OK);
   }
 }

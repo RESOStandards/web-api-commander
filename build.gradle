@@ -247,10 +247,11 @@ task _jenkins_testDataDictionary_1_7() {
       '\n    ./gradlew _jenkins_testDataDictionary_1_7() -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml -Dcucumber.filter.tags=""' +
       '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
 
-  dependsOn clean, jar
+  dependsOn jar
 
   doLast {
     certJsonPath = 'build/data-dictionary-1.7.jenkins.json'
+
     javaexec {
 
       main = 'io.cucumber.core.cli.Main'
@@ -301,7 +302,7 @@ task _jenkins_testWebApiServer_1_0_2_Core() {
       '\n    Note: by default the Web API tests assume Collection(Edm.EnumType).' +
       '\n      Pass -DuseCollections=false if using OData IsFlags=true.\n'
 
-  dependsOn clean, jar
+  dependsOn jar
 
   doLast {
     certJsonPath = 'build/web-api-server.core.1.0.2.jenkins.json'
@@ -322,7 +323,6 @@ task _jenkins_testWebApiServer_1_0_2_Core() {
     }
 
     javaexec {
-      certJsonPath = 'build/web-api-server.core.1.0.2.jenkins.json'
       System.setProperty('pathToJsonResults', certJsonPath)
       systemProperties = System.getProperties()
       classpath = sourceSets.main.runtimeClasspath
