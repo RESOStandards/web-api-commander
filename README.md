@@ -60,6 +60,8 @@ Doing so displays the following information:
 usage: java -jar web-api-commander
     --bearerToken <b>             Bearer token to be used with the
                                   request.
+    --clientId <d>                Client Id to be used with the request.
+    --clientSecret <s>
     --contentType <t>             Results format: JSON (default),
                                   JSON_NO_METADATA, JSON_FULL_METADATA,
                                   XML.
@@ -69,6 +71,13 @@ usage: java -jar web-api-commander
                                   current directory.
     --generateMetadataReport      Generates metadata report from given
                                   <inputFile>.
+    --generateQueries             Resolves queries in a given RESOScript
+                                  <inputFile> and displays them in
+                                  standard out.
+    --generateReferenceDDL        Generates reference DDL to create a
+                                  RESO-compliant SQL database. Pass
+                                  --useKeyNumeric to generate the DB using
+                                  numeric keys.
     --generateReferenceEDMX       Generates reference metadata in EDMX
                                   format.
     --getMetadata                 Fetches metadata from <serviceRoot>
@@ -85,8 +94,13 @@ usage: java -jar web-api-commander
     --serviceRoot <s>             Service root URL on the host.
     --uri <u>                     URI for raw request. Use 'single quotes'
                                   to enclose.
+    --useEdmEnabledClient         present if an EdmEnabledClient should be
+                                  used.
+    --useKeyNumeric               present if numeric keys are to be used
+                                  for database DDL generation.
     --validateMetadata            Validates previously-fetched metadata in
                                   the <inputFile> path.
+
 ```
 When using commands, if required arguments aren't provided, relevant feedback will be displayed in the terminal.
 
@@ -120,7 +134,7 @@ Commander repeatedly, fixing errors that are encountered along the way.
 To validate metadata that's already been downloaded, call Commander with the following options, 
 adjusting the `path/to/web-api-commander.jar` and `--inputFile` path for your environment accordingly:
 ```
-$ java -jar path/to/web-api-commander.jar --validateMetadata --inputFile '/src/main/resources/RESODataDictionary-1.7.edmx' 
+$ java -jar path/to/web-api-commander.jar --validateMetadata --inputFile '/src/main/resources/RESODataDictionary-1.7.xml' 
 ```
 XML or OData validation errors will be displayed if any issues were found. If successful, the following message 
 should appear: 
@@ -219,7 +233,42 @@ In addition to generating DD acceptance tests, the RESO Commander can generate r
 ```
 $ java -jar path/to/web-api-commander.jar --generateReferenceEDMX --inputFile=src/main/resources/RESODataDictionary-1.7.xlsx
 ```
-In order to update the Commander's version of the reference metadata, update the local copy of the [DD Google Sheet](https://docs.google.com/spreadsheets/d/1SZ0b6T4_lz6ti6qB2Je7NSz_9iNOaV_v9dbfhPwWgXA/edit?usp=sharing) _prior to_ generating metadata, replace [the local copy](src/main/resources/RESODataDictionary-1.7.edmx), and try running automated acceptance tests with `./gradlew build`.
+In order to update the Commander's version of the reference metadata, update the local copy of the [DD Google Sheet](https://docs.google.com/spreadsheets/d/1SZ0b6T4_lz6ti6qB2Je7NSz_9iNOaV_v9dbfhPwWgXA/edit?usp=sharing) _prior to_ generating metadata, replace [the local copy](src/main/resources/RESODataDictionary-1.7.xml), and try running automated acceptance tests with `./gradlew build`.
+
+## Generating RESO Data Dictionary 1.7 Reference DDL
+
+There is a command that can generate reference DDL for creating SQL databases using either key or key numeric values.
+
+### String Keys
+
+Issuing the following will print DDL in the console using String keys as the primary key:
+
+```
+$ java -jar path/to/web-api-commander.jar --generateReferenceDDL
+```
+
+This means that linked lookups will also use string keys since they'll be linked by a related table that uses string keys.
+
+There is a variable string key size in the DDLProcessor (currently 64 characters in length).
+
+Numeric keys are still present in this case, they're just not the primary key. 
+
+
+### Numeric Keys
+
+Issuing the following will print DDL in the console using Numeric keys as the primary key:
+
+```
+$ java -jar path/to/web-api-commander.jar --generateReferenceDDL --useKeyNumeric
+```
+
+In this case, `BIGINT` values will be used for all related lookup values. 
+
+### DDL TODO
+
+The following items need to be added to the DDL generator still:
+ - [ ] Foreign Key relationships.
+ - [ ] Creation of Lookup resource. 
 
 
 ## Converting metadata to Open API 3 format
@@ -310,14 +359,14 @@ generateCertificationReport_DD_1_7 - Runs Data Dictionary 1.7 tests and creates 
   RESOScript Example:
     ./gradlew generateCertificationReport_DD_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -Dminimal=true -Dstrict=true
   Metadata File Example:
-    ./gradlew generateCertificationReport_DD_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dminimal=true -Dstrict=true
+    ./gradlew generateCertificationReport_DD_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml -Dminimal=true -Dstrict=true
   To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.
 
 testDataDictionary_1_7 - Runs Data Dictionary 1.7 Automated Acceptance Tests and generates a "raw" report.
   RESOScript Example:
     ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dcucumber.filter.tags=""
   Metadata File Example:
-    ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx -Dcucumber.filter.tags=""
+    ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml -Dcucumber.filter.tags=""
   To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.
 
 testDataDictionaryReferenceMetadata_1_7 - Runs Data Dictionary tests against reference metadata
@@ -489,7 +538,7 @@ The Commander allows for a local metadata file to be specified. Not only is this
 The Gradle task to validate local metadata can be run using the following command:
 
 ```
-$ ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.edmx
+$ ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml
 ```
 You may also pass a `-Dstrict=true` flag to see whether the given metadata file would pass Certification. 
 
@@ -519,7 +568,7 @@ For the purposes of Certification, a Certification Report MUST be generated usin
 ##### Certification Reports using Local Metadata
 A RESO Certification report can be generated for local metadata by using the following commmand:
 ```
-$ ./gradlew generateCertificationReport_DD_1_7 -DpathToMetadata=src/main/resources/RESODataDictionary-1.7.edmx -Dminimal=true -Dstrict=true --continue
+$ ./gradlew generateCertificationReport_DD_1_7 -DpathToMetadata=src/main/resources/RESODataDictionary-1.7.xml -Dminimal=true -Dstrict=true --continue
 ```
 Note the use of the `--continue` argument. 
 

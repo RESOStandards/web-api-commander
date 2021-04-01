@@ -1,0 +1,162 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "title": "The Root Schema of the DataSystem resource",
+  "description": "The root schema comprises the entire JSON document. See: https://members.reso.org/pages/viewpage.action?pageId=17629564#Appendix4-DataSystemXMLSchema-sample4Figure4-ODataJSONencapsulatedinstanceoftheschemaforreference.",
+  "required": [
+    "value"
+  ],
+  "properties": {
+    "@odata.context": {
+      "type": "string",
+      "title": "The @odata.context Schema",
+      "description": "The location the resource was fetched from, for example: http://localhost:2099/DataSystem.svc/$metadata#DataSystem",
+      "default": ""
+    },
+    "value": {
+      "type": "array",
+      "title": "The Value Schema",
+      "description": "The OData container where the collection of items is returned.",
+      "default": [],
+      "items": {
+        "type": "object",
+        "title": "The Items Schema",
+        "description": "A list of DataSystem items. See: https://members.reso.org/display/API2/Appendix+4+-+DataSystem+XML+Schema",
+        "default": {},
+        "required": [
+          "ID",
+          "DateTimeStamp",
+          "Resources"
+        ],
+        "properties": {
+          "ID": {
+            "type": "string",
+            "title": "The Id Schema",
+            "description": "The unique key of the data system. This can be used in a query for the specific DataSystem being requiested. ie: http://odata.reso.org/RESO/OData/DataSystems(5) would return information about the DataSystem with the primary key of 5.",
+            "default": ""
+          },
+          "Name": {
+            "type": "string",
+            "title": "The Name Schema",
+            "description": "A unique identifier that describes the Name of the DataSystem.",
+            "default": ""
+          },
+          "ServiceURI": {
+            "type": "string",
+            "title": "The ServiceURI Schema",
+            "description": "This is to be considered the URI Stem of the DataSystem. For example, if a system were to support data from two separate systems named SYS1 and SYS2, they would be expected to have two separate DataSystem records which might have the following two different ServiceURI's: http://odata.reso.org/RESO/OData/SYS1 and http://odata.reso.org/RESO/OData/SYS2. This essentially defines two separate systems which can have different $metadata by appending the ServiceURI with the $metadata keyword. If a system is designed to only support a single DataSystem, then the ServiceURI should be the same as the URI Stem of the server.",
+            "default": ""
+          },
+          "DateTimeStamp": {
+            "type": "string",
+            "title": "The DateTimeStamp Schema",
+            "description": "The last modification date of the $metadata within the DataSystem.",
+            "default": ""
+          },
+          "TransportVersion": {
+            "type": "string",
+            "title": "The TransportVersion Schema",
+            "description": "This is expected to be the API Version of the RESO Web API that has been implemented and must be in the form: VersionMajor.VersionMinor.VersionRelease of the RESO Web API.",
+            "default": ""
+          },
+          "DataDictionaryVersion": {
+            "type": "string",
+            "title": "The DataDictionaryVersion Schema",
+            "description": "The Data Dictionary Version of the Data System. It is expected that all non-localized resources provided by this DataSystem adhere to this version of the Data dictionary. This version must be in the form: VersionMajor.VersoinMinor of the RESO Data Disctionary version that has been implemented by the Data System.",
+            "default": ""
+          },
+          "Resources": {
+            "type": "array",
+            "title": "The Resources Schema",
+            "description": "The list of Resources with the data fields as defined in the Data System Resources Collection table. All Resources that are custom and specific to the DataSystem are to be identified as a Localizations and not as Resources since Resources may only be those as defined in the RESO Data Dictionary.",
+            "default": [],
+            "items": {
+              "type": "object",
+              "title": "The Items Schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": {},
+              "required": [
+                "DateTimeStamp",
+                "TimeZoneOffset",
+                "Localizations"
+              ],
+              "properties": {
+                "Name": {
+                  "type": "string",
+                  "title": "The Name Schema",
+                  "description": "The unique name of the Resource within the DataSystem.",
+                  "default": ""
+                },
+                "ResourcePath": {
+                  "type": "string",
+                  "title": "The ResourcePath Schema",
+                  "description": "This is the ResourcePath that is to be appended after the ServiceURI of the DataSystem when getting data for that resource. This is generally expected to be the same as the Name of the Resource, but is allowed to be different for flexibility purposes. For example, if the ServiceURI is http://odata.reso.org/RESO/OData/SYS1, the following URI would be used to get data for the 'Property' resource: http://odata.reso.org/OData/SYS1/Property.",
+                  "default": ""
+                },
+                "Description": {
+                  "type": "string",
+                  "title": "The Description Schema",
+                  "description": "A description of the Resource expected to be a human readable explanation of what data is provided by the resource.",
+                  "default": ""
+                },
+                "DateTimeStamp": {
+                  "type": "string",
+                  "title": "The DateTimeStamp Schema",
+                  "description": "The last modification date of the $metadata within the Resource.",
+                  "default": ""
+                },
+                "TimeZoneOffset": {
+                  "type": "integer",
+                  "title": "The TimeZoneOffset Schema",
+                  "description": "The TimeZone Offset provided in standard TimeZone notation of GMT[+|-]X, where X is the number of hours in the offset.",
+                  "default": 0
+                },
+                "Localizations": {
+                  "type": "array",
+                  "title": "The Localizations Schema",
+                  "description": "An explanation about the purpose of this instance.",
+                  "default": [],
+                  "items": {
+                    "type": "object",
+                    "title": "The Items Schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": {},
+                    "required": [
+                      "DateTimeStamp"
+                    ],
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "title": "The Name Schema",
+                        "description": "The unique name of the Localization within the DataSystem.",
+                        "default": ""
+                      },
+                      "ResourcePath": {
+                        "type": "string",
+                        "title": "The ResourcePath Schema",
+                        "description": "This is the ResourcePath that is to be appended after the ServiceURI of the DataSystem when getting data for this localized resource. This is generally expected to be the same as the Name of the Localization, but is allowed to be different for flexibility purposes. For example, if the ServiceURI is http://odata.reso.org/RESO/OData/SYS1, the following URI would be used to get data for the 'Residential' localization: http://odata.reso.org/OData/SYS1/Residential.",
+                        "default": ""
+                      },
+                      "Description": {
+                        "type": "string",
+                        "title": "The Description Schema",
+                        "description": "A description of the Localization expected to be a human readable explanation of what data is provided by the resource.",
+                        "default": ""
+                      },
+                      "DateTimeStamp": {
+                        "type": "string",
+                        "title": "The DateTimeStamp Schema",
+                        "description": "The last modification date of the $metadata within the Localization.",
+                        "default": ""
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

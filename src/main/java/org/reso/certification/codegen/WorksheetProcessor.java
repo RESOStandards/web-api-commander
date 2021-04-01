@@ -2,15 +2,14 @@ package org.reso.certification.codegen;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.reso.commander.common.Utils;
-import org.reso.models.ReferenceStandardLookup;
 import org.reso.models.ReferenceStandardField;
+import org.reso.models.ReferenceStandardLookup;
 import org.reso.models.ReferenceStandardRelationship;
 
 import java.util.*;
@@ -21,16 +20,17 @@ import static org.junit.Assert.assertTrue;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.*;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_FIELD_HEADERS.COLLECTION;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_FIELD_HEADERS.STANDARD_NAME;
-import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_WORKSHEET;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public abstract class WorksheetProcessor {
+  //TODO: make this a dynamic property based on DD version
+  public static final String REFERENCE_WORKSHEET = "RESODataDictionary-1.7.xlsx";
 
   static final Map<String, String> resourceTemplates = new LinkedHashMap<>();
   static final Map<String, Set<ReferenceStandardLookup>> standardEnumerationsMap = new LinkedHashMap<>();
   static final Map<String, Map<String, ReferenceStandardField>> standardFieldsMap = new LinkedHashMap<>(new LinkedHashMap<>());
   private static final Logger LOG = LogManager.getLogger(WorksheetProcessor.class);
-  String referenceResource = null;
+  String referenceDocument = null;
   StringBuffer markup;
   Sheet sheet;
   String startTimestamp;
@@ -163,7 +163,7 @@ public abstract class WorksheetProcessor {
     try {
       referenceStandardRelationship = ReferenceStandardRelationship.Builder.build(
           row.getCell(TARGET_RESOURCE).getStringCellValue(),
-          row.getCell(TARGET_RESOURCE_KEY, Row.CREATE_NULL_AS_BLANK).getStringCellValue(),
+          row.getCell(TARGET_RESOURCE_KEY, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue(),
           row.getCell(TARGET_STANDARD_NAME).getStringCellValue(),
           ReferenceStandardRelationship.Cardinality.stream().filter(cardinality ->
               cardinality.getRelationshipType().contentEquals(
@@ -230,7 +230,9 @@ public abstract class WorksheetProcessor {
 
   }
 
-  abstract void processResourceSheet(Sheet sheet);
+  void processResourceSheet(Sheet sheet) {
+    this.sheet = sheet;
+  }
 
   abstract void processNumber(ReferenceStandardField field);
 
@@ -303,17 +305,16 @@ public abstract class WorksheetProcessor {
   }
 
   public String getReferenceResource() {
-    return referenceResource;
+    return referenceDocument;
   }
 
   public void setReferenceResource(String referenceResource) {
-    this.referenceResource = referenceResource;
+    this.referenceDocument = referenceResource;
   }
 
   public Workbook getReferenceWorkbook() {
     try {
-      return new XSSFWorkbook(OPCPackage.open(Objects.requireNonNull(
-          this.getClass().getClassLoader().getResource(getReferenceResource())).getFile()));
+      return new XSSFWorkbook(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(getReferenceResource())));
     } catch (Exception ex) {
       LOG.error(getDefaultErrorMessage(ex));
     }
@@ -357,9 +358,9 @@ public abstract class WorksheetProcessor {
     Row currentRow;
     for(int rowIndex = FIRST_ROW_INDEX; rowIndex < worksheet.getPhysicalNumberOfRows(); rowIndex++) {
       currentRow = worksheet.getRow(rowIndex);
-      if (currentRow.getCell(TARGET_RESOURCE, Row.CREATE_NULL_AS_BLANK).getStringCellValue().length() > 0
-              && !currentRow.getCell(TARGET_RESOURCE_KEY, Row.CREATE_NULL_AS_BLANK).getStringCellValue().toLowerCase().contains("keynumeric")
-              && !currentRow.getCell(SOURCE_RESOURCE_KEY, Row.CREATE_NULL_AS_BLANK).getStringCellValue().toLowerCase().contains("keynumeric")) {
+      if (currentRow.getCell(TARGET_RESOURCE, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue().length() > 0
+              && !currentRow.getCell(TARGET_RESOURCE_KEY, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue().toLowerCase().contains("keynumeric")
+              && !currentRow.getCell(SOURCE_RESOURCE_KEY, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue().toLowerCase().contains("keynumeric")) {
         referenceStandardRelationships.add(deserializeStandardRelationshipRow(currentRow));
       }
     }

@@ -1,0 +1,283 @@
+package org.reso.certification.codegen;
+
+import com.google.common.base.CaseFormat;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.reso.commander.common.Utils;
+import org.reso.models.ReferenceStandardField;
+
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static com.google.common.hash.Hashing.sha256;
+import static org.reso.certification.codegen.EDMXProcessor.EMPTY_STRING;
+import static org.reso.certification.containers.WebAPITestContainer.SINGLE_SPACE;
+import static org.reso.commander.common.DataDictionaryMetadata.v1_7.*;
+
+//TODO: move to central lib
+
+public class DDLProcessor extends WorksheetProcessor {
+  private static final Logger LOG = LogManager.getLogger(DDLProcessor.class);
+  private static final String PADDING = "  ";
+  private static final int STRING_KEY_SIZE = 64;
+
+  private final boolean useKeyNumeric;
+
+  public DDLProcessor() {
+    this.useKeyNumeric = false;
+  }
+
+  public DDLProcessor(boolean useKeyNumeric) {
+    this.useKeyNumeric = useKeyNumeric;
+  }
+
+  private String buildFieldMarkup(String fieldName, String typeMarkup) {
+    StringBuilder fieldMarkup = new StringBuilder();
+
+    if (markup.length() > 0) {
+      fieldMarkup.append(", ");
+    }
+
+    fieldMarkup.append("\n")
+      .append(PADDING)
+      .append(fieldName)
+      .append(SINGLE_SPACE)
+      .append(typeMarkup);
+
+    //if the current field is a key field then append NOT NULL depending on which key it is
+    if ((useKeyNumeric && isPrimaryKeyNumericField(sheet.getSheetName(), fieldName))) {
+      fieldMarkup.append(SINGLE_SPACE).append("NOT NULL AUTO_INCREMENT");
+    } else if (isPrimaryKeyField(sheet.getSheetName(), fieldName)) {
+      fieldMarkup.append(SINGLE_SPACE).append("NOT NULL");
+    } else if (!typeMarkup.contains("DEFAULT")) {
+      fieldMarkup.append(SINGLE_SPACE).append("DEFAULT NULL");
+    }
+
+    return fieldMarkup.toString();
+  }
+
+  private String buildPrimaryKeyMarkup(String resourceName) {
+    return "PRIMARY KEY (" +
+        (useKeyNumeric ? getKeyNumericFieldForResource(resourceName) : getKeyFieldForResource(resourceName)) + ")";
+  }
+
+  @Override
+  void processNumber(ReferenceStandardField field) {
+    String typeMarkup = "";
+
+    if (field.getSuggestedMaxPrecision() != null) {
+      //omitting the length and precision attributes as described here in order to maximize cross-platform compatibility.
+      //https://dev.mysql.com/doc/refman/8.0/en/floating-point-types.html#:~:text=A%20precision%20from%2024%20to,be%20after%20the%20decimal%20point
+      typeMarkup += "DOUBLE PRECISION";
+    } else {
+      if (Math.pow(2, field.getSuggestedMaxLength()) <= Math.pow(2, 16) - 1) {
+        //TINYINT
+        typeMarkup += "TINYINT";
+      } else if (Math.pow(2, field.getSuggestedMaxLength()) <= Math.pow(2, 32) - 1) {
+        typeMarkup += "INTEGER";
+      } else {
+        typeMarkup += "BIGINT";
+      }
+    }
+
+    markup.append(buildFieldMarkup(field.getStandardName(), typeMarkup));
+  }
+
+  @Override
+  void processStringListSingle(ReferenceStandardField field) {
+    String typeMarkup = useKeyNumeric ? "BIGINT" : "VARCHAR(" + STRING_KEY_SIZE + ")";
+    markup.append(buildFieldMarkup(field.getStandardName(), typeMarkup));
+  }
+
+  @Override
+  void processString(ReferenceStandardField field) {
+    String typeMarkup = !field.getStandardName().contains("Key") && field.getSuggestedMaxLength() > 80 ? "TEXT":
+        "VARCHAR" + (field.getSuggestedMaxLength() != null ? "(" + field.getSuggestedMaxLength() + ")" : EMPTY_STRING);
+    markup.append(buildFieldMarkup(field.getStandardName(), typeMarkup));
+  }
+
+  @Override
+  void processBoolean(ReferenceStandardField field) {
+    String typeMarkup = "TINYINT(1) DEFAULT FALSE";
+    markup.append(buildFieldMarkup(field.getStandardName(), typeMarkup));
+  }
+
+  @Override
+  void processStringListMulti(ReferenceStandardField field) {
+    String typeMarkup = useKeyNumeric ? "BIGINT" : "VARCHAR(" + STRING_KEY_SIZE + ")";
+    markup.append(buildFieldMarkup(field.getStandardName(), typeMarkup));
+  }
+
+  @Override
+  void processDate(ReferenceStandardField field) {
+    String typeMarkup = "DATE";
+    markup.append(buildFieldMarkup(field.getStandardName(), typeMarkup));
+  }
+
+  @Override
+  void processTimestamp(ReferenceStandardField field) {
+    String typeMarkup = "DATETIME";
+    markup.append(buildFieldMarkup(field.getStandardName(), typeMarkup));
+  }
+
+  @Override
+  void processCollection(ReferenceStandardField field) {
+    //NOTE: NOT IMPLEMENTED FOR DDL CREATION SCRIPTS
+    //A Collection is actually a list of known values from a joined resource
+    //this is handled by StandardResources
+  }
+
+  @Override
+  void generateOutput() {
+    StringBuilder content = new StringBuilder();
+
+    content
+      .append("/**\n")
+      .append(PADDING).append("RESO Data Dictionary 1.7 Database Generation (DDL) Script\n")
+      .append(PADDING).append("Autogenerated on: ").append(Utils.getIsoTimestamp()).append("\n")
+      .append(PADDING).append("This content is covered by RESO's EULA. SEE: https://www.reso.org/eula/\n")
+      .append(PADDING).append("For questions or comments, please contact dev@reso.org\n")
+      .append("**/\n\n");
+
+    content.append("CREATE DATABASE IF NOT EXISTS reso_data_dictionary_1_7;\n");
+    content.append("USE reso_data_dictionary_1_7;");
+
+    resourceTemplates.forEach((resourceName, templateContent) -> {
+      content
+          .append("\n\n")
+          .append("CREATE TABLE IF NOT EXISTS ")
+          //exception for ouid so it doesn't become o_u_i_d
+          .append(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, resourceName).replace("o_u_i_d", "ouid"))
+          .append(" ( ")
+          .append(templateContent).append(",\n")
+          .append(PADDING).append(PADDING).append(buildPrimaryKeyMarkup(resourceName)).append("\n")
+          .append(") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+    });
+
+    LOG.info(sanitizeSql(content.toString()));
+
+    //create the lookup resource so we can populate it with the enum definitions
+    LOG.info(sanitizeSql(buildCreateLookupStatement(useKeyNumeric)));
+
+    LOG.info(this::buildInsertLookupsStatement);
+  }
+
+  private static String buildCreateLookupStatement(boolean useKeyNumeric) {
+      return
+          "\n\n/**\n" +
+          " This creates the Lookup resource, as described in RESO RCP-032, \n" +
+          " with an optional numeric key. \n\n" +
+          " SEE: https://reso.atlassian.net/wiki/spaces/RESOWebAPIRCP/pages/2275152879/RCP+-+WEBAPI-032+Lookup+and+RelatedLookup+Resources+for+Lookup+Metadata\n" +
+          "**/\n" +
+          "CREATE TABLE IF NOT EXISTS lookup ( \n" +
+          "  LookupKey VARCHAR(" + STRING_KEY_SIZE + ") NOT NULL, \n" +
+          "  LookupKeyNumeric BIGINT NOT NULL AUTO_INCREMENT, \n" +
+          "  LookupName VARCHAR(255) NOT NULL, \n" +
+          "  LookupValue VARCHAR(255) NOT NULL, \n" +
+          "  StandardLookupValue VARCHAR(255) DEFAULT NULL, \n" +
+          "  LegacyOdataValue VARCHAR(128) DEFAULT NULL, \n" +
+          "  ModificationTimestamp DATETIME DEFAULT CURRENT_TIMESTAMP, \n" +
+          "    PRIMARY KEY (LookupKey" + (useKeyNumeric ? "Numeric" : EMPTY_STRING) + ")\n" +
+          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+  }
+
+  /**
+   * INSERT INTO tbl_name (a,b,c)
+   *     VALUES(1,2,3), (4,5,6), (7,8,9);
+   * @return a string containing the insert statements for the current lookups in the Data Dictionary.
+   */
+  private String buildInsertLookupsStatement() {
+    //enumeration markup keyed by enumeration standard name
+    Map<String, String> markupMap = new LinkedHashMap<>();
+
+    StringBuilder content = new StringBuilder("\n\n")
+        .append("INSERT INTO lookup (LookupKey, LookupName, LookupValue, StandardLookupValue, LegacyOdataValue) VALUES");
+
+    standardFieldsMap.forEach((resourceName, standardFieldMap) -> {
+      standardFieldMap.forEach((standardName, referenceStandardField) -> {
+        String inserts = buildLookupValueInserts(referenceStandardField);
+        if (inserts.length() > 0) {
+          markupMap.putIfAbsent(referenceStandardField.getLookupStandardName(),
+              (markupMap.keySet().size() > 0 ? ", " : EMPTY_STRING) + PADDING + inserts);
+        }
+      });
+    });
+
+    markupMap.forEach((lookupStandardName, markup) -> content.append(markup));
+    return content.append(";").toString();
+  }
+
+  // "LookupKey, LookupName, LookupValue, StandardLookupValue, LegacyOdataValue"
+  private String buildLookupValueInserts(ReferenceStandardField standardField) {
+    StringBuilder content = new StringBuilder();
+
+    if (getEnumerations().get(standardField.getLookupStandardName()) != null) {
+      AtomicReference<String> fieldHash = new AtomicReference<>();
+
+      //iterate through each of the lookup values and generate their edm:EnumType content
+      getEnumerations().get(standardField.getLookupStandardName()).forEach(lookup -> {
+
+        // key is the sha256 of the following values
+        fieldHash.set(sha256()
+            .hashString(
+                standardField.getLookupStandardName()
+                    + lookup.getLookupDisplayName()
+                    + lookup.getLookupValue(), StandardCharsets.UTF_8)
+            .toString());
+
+        content
+            .append(content.length() > 0 ? ", " : EMPTY_STRING).append("\n")
+            .append(PADDING).append("(")
+            .append("\"").append(fieldHash.get()).append("\"")
+            .append(", ").append("\"").append(standardField.getLookupStandardName()).append("\"")
+            .append(", ").append("\"").append(lookup.getLookupDisplayName()).append("\"")
+            .append(", ").append("\"").append(lookup.getLookupDisplayName()).append("\"")
+            .append(", ").append("\"").append(lookup.getLookupValue()).append("\"")
+            .append(")");
+      });
+    }
+    return content.toString();
+  }
+
+
+
+//  private String buildNavigationPropertyMarkup(String resourceName) {
+//    StringBuilder content = new StringBuilder();
+//    List<ReferenceStandardRelationship> referenceStandardRelationships =
+//        this.getStandardRelationships().stream().filter(referenceStandardRelationship
+//            -> referenceStandardRelationship.getTargetResource().contentEquals(resourceName)).collect(Collectors.toList());
+//    for (ReferenceStandardRelationship referenceStandardRelationship : referenceStandardRelationships) {
+//      //LOG.info(referenceStandardRelationship);
+//
+//      if (referenceStandardRelationship.getTargetResourceKey() != null) {
+//        content.append("<NavigationProperty")
+//            .append(" Name=\"").append(referenceStandardRelationship.getTargetStandardName()).append("\"")
+//            .append(" Type=\"org.reso.metadata.").append(referenceStandardRelationship.getSourceResource()).append("\"")
+//            .append(" />");
+//      } else {
+//        content.append("<NavigationProperty")
+//            .append(" Name=\"").append(referenceStandardRelationship.getTargetStandardName()).append("\"")
+//            .append(" Type=\"Collection(org.reso.metadata.").append(referenceStandardRelationship.getSourceResource()).append(")\"")
+//            .append(" />");
+//      }
+//    }
+//
+//    return content.toString();
+//  }
+  
+  
+  /**
+   * Add treatments for any SQL replacements that need to be done here
+   *
+   * For instance, 'Order' is used by the DD in the Media resource, but it's a SQL keyword.
+   * @param sql SQL statement to be sanitized
+   * @return sanitized SQL statement
+   */
+  private static String sanitizeSql(String sql) {
+    return sql
+        .replaceAll("\\bOrder\\b", "'Order'");
+  }
+
+}

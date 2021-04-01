@@ -33,6 +33,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
@@ -45,6 +46,7 @@ import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.DateParts.FRACTIONAL;
 import static org.reso.commander.common.TestUtils.*;
 import static org.reso.commander.common.TestUtils.Operators.*;
+import static org.reso.models.Request.loadFromRESOScript;
 
 /**
  * Contains the glue code for Web API Core 1.0.2 Certification as well as previous Platinum tests,
@@ -67,6 +69,10 @@ class WebAPIServer implements En {
    * Used to store a static instance of the WebAPITestContainer class
    */
   private static final AtomicReference<WebAPITestContainer> container = new AtomicReference<>(new WebAPITestContainer());
+
+  //TODO: change this to allow passing of a given set of testing queries
+  //for now this assumes the requests will always be Web API Core Server test queries, but could be $expand, for instance
+  private static final String WEB_API_CORE_REFERENCE_REQUESTS = "reference-web-api-core-requests.xml";
 
   /**
    * Entry point to the Web API Server tests
@@ -146,7 +152,7 @@ class WebAPIServer implements En {
         double fill;
 
         assertNotNull(getDefaultErrorMessage("no fields found within the given $select list. Check request Id:",
-                getTestContainer().getRequest().getRequestId(), "in your .resoscript file!"), getTestContainer().getSelectList());
+            getTestContainer().getRequest().getRequestId(), "in your .resoscript file!"), getTestContainer().getSelectList());
 
         LOG.info(QueryOption.SELECT + " list is: " + getTestContainer().getSelectList());
 
@@ -220,6 +226,20 @@ class WebAPIServer implements En {
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
+    });
+
+    /*
+     * count - $count=true
+     * SEE: https://stackoverflow.com/questions/30123094/how-to-get-only-odata-count-without-value/30154251#30154251 for
+     *      information about how this item is implemented.
+     *
+     *      Rather than returning an integer response, this implementation expects the @odata.count property to be
+     *      available when requested, and a $top=0 may be used to restrict the number of items returned as results.
+     */
+    And("^the \"([^\"]*)\" value is greater than or equal to the number of results$", (String field) -> {
+      assertTrue(getDefaultErrorMessage("the @odata.count value MUST be present",
+          "and contain a non-zero value greater than or equal to the number of results!"),
+          TestUtils.validateODataCount(getTestContainer().getResponseData()));
     });
 
     And("^data in the \"([^\"]*)\" fields are different in the second request than in the first$", (String parameterUniqueId) -> {
@@ -359,7 +379,7 @@ class WebAPIServer implements En {
       try {
         String value = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
         boolean isPresent = from(getTestContainer().getResponseData()).get() != null;
-        assertTrue(getDefaultErrorMessage("singleton results not found for '" + value + "'!"), isPresent);
+        assertTrue(getDefaultErrorMessage("OData singleton results not found for '" + value + "'!"), isPresent);
         LOG.info("Data are present and response value is: " + value);
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
@@ -391,6 +411,18 @@ class WebAPIServer implements En {
 
         LOG.info("fieldName: " + fieldName + ", op: " + op + ", assertedValue: " + assertedValue);
         assertTrue(TestUtils.compareIntegerPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue));
+      } catch (Exception ex) {
+        fail(getDefaultErrorMessage(ex));
+      }
+    });
+
+    And("^Decimal data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
+      try {
+        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
+        Double assertedValue = Double.parseDouble(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
+
+        LOG.info("fieldName: " + fieldName + ", op: " + op + ", assertedValue: " + assertedValue);
+        assertTrue(TestUtils.compareDecimalPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue));
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -1048,7 +1080,7 @@ class WebAPIServer implements En {
    */
   void prepareAndExecuteRawGetRequest(String requestId) {
     try {
-      //reset local state each time a get request is run
+      //reset local state each time a get request request is run
       getTestContainer().resetState();
 
       assertNotNull(getDefaultErrorMessage("request Id cannot be null!"), requestId);
@@ -1082,7 +1114,6 @@ class WebAPIServer implements En {
    * Contains background logic - make sure to update if the background changes
    */
   final void runBackground() {
-
     /*
      * Background
      */
@@ -1091,13 +1122,19 @@ class WebAPIServer implements En {
         getTestContainer().setPathToRESOScript(System.getProperty("pathToRESOScript"));
         LOG.info("Using RESOScript: " + getTestContainer().getPathToRESOScript());
       }
-      assertNotNull(getDefaultErrorMessage("pathToRESOScript must be present in command arguments, see README"), getTestContainer().getPathToRESOScript());
+      assertNotNull(getDefaultErrorMessage("pathToRESOScript must be present in command arguments, see README"),
+          getTestContainer().getPathToRESOScript());
     });
 
     And("^Client Settings and Parameters were read from the file$", () -> {
       if (getTestContainer().getSettings() == null) {
         getTestContainer().setSettings(Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript"))));
-        LOG.info("RESOScript loaded successfully!");
+
+        getTestContainer().getSettings().setRequests(loadFromRESOScript(new File(Objects.requireNonNull(
+            getClass().getClassLoader().getResource(WEB_API_CORE_REFERENCE_REQUESTS)).getPath()))
+            .parallelStream().map(request -> Settings.resolveParameters(request, getTestContainer().getSettings())).collect(Collectors.toList()));
+
+        LOG.info("Test configuration loaded successfully!");
       }
       assertNotNull(getDefaultErrorMessage("Settings could not be loaded."), getTestContainer().getSettings());
     });

@@ -6,8 +6,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.reso.commander.common.DataDictionaryMetadata;
 
+import static org.reso.certification.codegen.WorksheetProcessor.REFERENCE_WORKSHEET;
 import static org.reso.certification.codegen.WorksheetProcessor.buildWellKnownStandardFieldHeaderMap;
-import static org.reso.certification.stepdefs.DataDictionary.REFERENCE_WORKSHEET;
 
 public class DataDictionaryCodeGenerator {
   private static final Logger LOG = LogManager.getLogger(DataDictionaryCodeGenerator.class);
@@ -42,7 +42,6 @@ public class DataDictionaryCodeGenerator {
 
       processor.buildStandardRelationships(standardResourcesWorksheet);
 
-
       //workbook consists of many sheets, process only the ones that have the name of a well-known resource
       for (sheetIndex = ROW_HEADER_INDEX; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++) {
         currentWorksheet = workbook.getSheetAt(sheetIndex);
@@ -59,6 +58,7 @@ public class DataDictionaryCodeGenerator {
               processor.processResourceRow(currentWorksheet.getRow(rowIndex));
             }
           }
+
           processor.afterResourceSheetProcessed(currentWorksheet);
         }
       }

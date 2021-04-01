@@ -49,8 +49,19 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
    */
   private static final class FieldJson implements JsonSerializer<FieldJson> {
     static final String
-        RESOURCE_NAME_KEY = "resourceName", FIELD_NAME_KEY = "fieldName", TYPE_KEY = "type",
-        VALUE_KEY= "value", ANNOTATIONS_KEY = "annotations", FIELDS_KEY = "fields";
+        RESOURCE_NAME_KEY = "resourceName",
+        FIELD_NAME_KEY = "fieldName",
+        NULLABLE_KEY = "nullable",
+        MAX_LENGTH_KEY = "maxLength",
+        PRECISION_KEY = "precision",
+        SCALE_KEY = "scale",
+        IS_COLLECTION_KEY = "isCollection",
+        DEFAULT_VALUE_KEY = "defaultValue",
+        UNICODE_KEY = "unicode",
+        TYPE_KEY = "type",
+        VALUE_KEY= "value",
+        ANNOTATIONS_KEY = "annotations",
+        FIELDS_KEY = "fields";
 
     String resourceName;
     EdmElement edmElement;
@@ -96,11 +107,22 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
     @Override
     public JsonElement serialize(FieldJson src, Type typeOfSrc, JsonSerializationContext context) {
       JsonObject field = new JsonObject();
+
       field.addProperty(RESOURCE_NAME_KEY, src.resourceName);
       field.addProperty(FIELD_NAME_KEY, src.edmElement.getName());
       field.addProperty(TYPE_KEY, src.edmElement.getType().getFullQualifiedName().getFullQualifiedNameAsString());
+      field.addProperty(NULLABLE_KEY, ((EdmProperty) src.edmElement).isNullable());
+      field.addProperty(MAX_LENGTH_KEY, ((EdmProperty) src.edmElement).getMaxLength());
+      field.addProperty(SCALE_KEY, ((EdmProperty) src.edmElement).getScale());
+      field.addProperty(PRECISION_KEY, ((EdmProperty) src.edmElement).getPrecision());
+      field.addProperty(DEFAULT_VALUE_KEY, ((EdmProperty) src.edmElement).getDefaultValue());
+      field.addProperty(IS_COLLECTION_KEY, src.edmElement.isCollection());
+      field.addProperty(UNICODE_KEY, ((EdmProperty) src.edmElement).isUnicode());
 
-      List<EdmAnnotation> annotations = ((EdmProperty)edmElement).getAnnotations();
+      //TODO: report issue to Apache
+      // Can only get the annotation term using ((ClientCsdlAnnotation) ((EdmAnnotationImpl)edmAnnotation).annotatable).term
+      // which a private member and cannot be accessed
+      List<EdmAnnotation> annotations = ((EdmProperty)src.edmElement).getAnnotations();
       if (annotations != null && annotations.size() > 0) {
         JsonArray annotationsJsonArray = new JsonArray();
         annotations.forEach(edmAnnotation -> {
@@ -235,7 +257,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
     JsonObject metadataReport = new JsonObject();
     metadataReport.addProperty(DESCRIPTION_KEY, DESCRIPTION);
     metadataReport.addProperty(VERSION_KEY, VERSION);
-    metadataReport.addProperty(GENERATED_ON_KEY, Utils.getTimestamp());
+    metadataReport.addProperty(GENERATED_ON_KEY, Utils.getIsoTimestamp());
     metadataReport.add(FIELDS_KEY, fields);
     metadataReport.add(LOOKUPS_KEY, lookups);
     return metadataReport;

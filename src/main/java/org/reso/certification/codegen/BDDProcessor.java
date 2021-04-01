@@ -22,9 +22,8 @@ public class BDDProcessor extends WorksheetProcessor {
       LOCKED_WITH_ENUMERATIONS_KEY = "Locked with Enumerations";
   private static final int EXAMPLES_PADDING_AMOUNT = 6;
 
-  @Override
   public void processResourceSheet(Sheet sheet) {
-    this.sheet = sheet;
+    super.processResourceSheet(sheet);
     markup.append(BDDTemplates.buildHeaderInfo(sheet.getSheetName(), startTimestamp));
   }
 
@@ -70,6 +69,7 @@ public class BDDProcessor extends WorksheetProcessor {
 
   @Override
   void generateOutput() {
+    LOG.info("Using reference worksheet: " + REFERENCE_WORKSHEET);
     LOG.info("Generating BDD .feature files for the following resources: " + resourceTemplates.keySet().toString());
     resourceTemplates.forEach((resourceName, content) -> {
       //put in local directory rather than relative to where the input file is

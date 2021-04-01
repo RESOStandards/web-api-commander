@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="generateDDAcceptanceTests" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="1.8" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="MAIN_CLASS_NAME" value="org.reso.commander.App" />
+    <module name="web-api-commander.main" />
+    <option name="PROGRAM_PARAMETERS" value="--generateDDAcceptanceTests" />
+    <option name="WORKING_DIRECTORY" value="." />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

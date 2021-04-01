@@ -8,6 +8,9 @@ import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class Utils {
@@ -60,6 +63,28 @@ public class Utils {
     return outputFile;
   }
 
+  /**
+   * Creates a file in the given directory with the given content
+   * @param content the content to write to the file
+   */
+  public static File createFile(String outputPath, String content) {
+    if (outputPath == null) return null;
+    File outputFile = new File(outputPath);
+    try {
+      FileWriter writer;
+
+      if (!outputFile.exists()) {
+        if (!outputFile.mkdirs()) throw new Exception("ERROR: could not create directory: " + outputFile);
+      }
+      writer = new FileWriter(outputFile);
+      writer.write(new String(content.getBytes(StandardCharsets.UTF_8)));
+      writer.flush();
+    } catch (Exception ex) {
+      LOG.error("Filename: " + outputPath + ". Could not create file: " + ex);
+    }
+    return outputFile;
+  }
+
   public static String pluralize(int lengthAttribute) {
     return lengthAttribute != 1 ? "s" : "";
   }
@@ -82,4 +107,9 @@ public class Utils {
   public static String wrapColumns(String content, int columnWidth, String spaceReplacement) {
     return content.replaceAll(String.format("(.{1,%d})( +|$\\n?)|(.{1,%d})\n", columnWidth, columnWidth), spaceReplacement + "$1");
   }
+
+  public static String getIsoTimestamp() {
+    return ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
+  }
+
 }

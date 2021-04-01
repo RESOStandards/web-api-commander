@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.codegen.BDDProcessor;
+import org.reso.certification.codegen.DDLProcessor;
 import org.reso.certification.codegen.DataDictionaryCodeGenerator;
 import org.reso.certification.codegen.EDMXProcessor;
 import org.reso.models.ClientSettings;
@@ -51,7 +52,7 @@ public class App {
     String serviceRoot = null, bearerToken = null, clientId = null, clientSecret = null,
         authorizationUri = null, tokenUri = null, redirectUri = null, scope = null;
     String inputFilename, outputFile, uri;
-    boolean useEdmEnabledClient;
+    boolean useEdmEnabledClient = false, useKeyNumeric = false;
     int pageLimit, pageSize;
 
     //created with the commanderBuilder throughout the initialization body
@@ -66,6 +67,7 @@ public class App {
 
       // pre-load command line options for later use //
       useEdmEnabledClient = cmd.hasOption(APP_OPTIONS.USE_EDM_ENABLED_CLIENT);
+      useKeyNumeric = cmd.hasOption(APP_OPTIONS.USE_KEY_NUMERIC);
       inputFilename = cmd.getOptionValue(APP_OPTIONS.INPUT_FILE, null);
       outputFile = cmd.getOptionValue(APP_OPTIONS.OUTPUT_FILE, null);
       uri = cmd.getOptionValue(APP_OPTIONS.URI, null);
@@ -213,6 +215,7 @@ public class App {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.SAVE_GET_REQUEST);
           commander.saveGetRequest(uri, outputFile);
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)) {
+          APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS);
           try {
             DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new BDDProcessor());
             generator.processWorksheets();
@@ -220,8 +223,16 @@ public class App {
             LOG.error(getDefaultErrorMessage(ex));
           }
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_EDMX)) {
+          APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_EDMX);
           try {
             DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new EDMXProcessor());
+            generator.processWorksheets();
+          } catch (Exception ex) {
+            LOG.error(getDefaultErrorMessage(ex));
+          }
+        } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_DDL)) {
+          try {
+            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new DDLProcessor(useKeyNumeric));
             generator.processWorksheets();
           } catch (Exception ex) {
             LOG.error(getDefaultErrorMessage(ex));
@@ -301,7 +312,7 @@ public class App {
      *
      *    See Commander#validateMetadata for more info.
      */
-    LOG.info("Checking Metadata for validity...");
+    LOG.info("Validating XML Metadata in " + inputFilename + "...");
     try {
       if (commander.validateMetadata(inputFilename)) {
         LOG.info("Valid Metadata!");
@@ -345,17 +356,15 @@ public class App {
    * @return a string containing the report.
    */
   private static String generateTotalsReport(int totalRequestCount, int numSucceeded, int numFailed, int numSkipped, int numIncomplete) {
-    StringBuilder reportBuilder = new StringBuilder();
-    reportBuilder.append("\n\tTotal:            ").append(String.format("%1$4s", totalRequestCount));
-    reportBuilder.append("\n\tSucceeded:        ").append(String.format("%1$4s", numSucceeded))
-        .append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numSucceeded) / totalRequestCount) + "%)" : "");
-    reportBuilder.append("\n\tFailed:           ").append(String.format("%1$4s", numFailed))
-        .append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numFailed) / totalRequestCount) + "%)" : "");
-    reportBuilder.append("\n\tSkipped:          ").append(String.format("%1$4s", numSkipped))
-        .append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numSkipped) / totalRequestCount) + "%)" : "");
-    reportBuilder.append("\n\tIncomplete:       ").append(String.format("%1$4s", numIncomplete))
-        .append(totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numIncomplete) / totalRequestCount) + "%)" : "");
-    return reportBuilder.toString();
+    return "\n\tTotal:            " + String.format("%1$4s", totalRequestCount) +
+        "\n\tSucceeded:        " + String.format("%1$4s", numSucceeded) +
+        (totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numSucceeded) / totalRequestCount) + "%)" : "") +
+        "\n\tFailed:           " + String.format("%1$4s", numFailed) +
+        (totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numFailed) / totalRequestCount) + "%)" : "") +
+        "\n\tSkipped:          " + String.format("%1$4s", numSkipped) +
+        (totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numSkipped) / totalRequestCount) + "%)" : "") +
+        "\n\tIncomplete:       " + String.format("%1$4s", numIncomplete) +
+        (totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numIncomplete) / totalRequestCount) + "%)" : "");
   }
 
   /**
@@ -364,17 +373,18 @@ public class App {
   private static class APP_OPTIONS {
 
     //parameter names
-    static String SERVICE_ROOT = "serviceRoot";
-    static String BEARER_TOKEN = "bearerToken";
-    static String CLIENT_ID = "clientId";
-    static String CLIENT_SECRET = "clientSecret";
-    static String INPUT_FILE = "inputFile";
-    static String OUTPUT_FILE = "outputFile";
-    static String URI = "uri";
-    static String ENTITY_NAME = "entityName";
-    static String USE_EDM_ENABLED_CLIENT = "useEdmEnabledClient";
-    static String CONTENT_TYPE = "contentType";
-    static String HELP = "help";
+    static final  String SERVICE_ROOT = "serviceRoot";
+    static final  String BEARER_TOKEN = "bearerToken";
+    static final  String CLIENT_ID = "clientId";
+    static final  String CLIENT_SECRET = "clientSecret";
+    static final String INPUT_FILE = "inputFile";
+    static final String OUTPUT_FILE = "outputFile";
+    static final String URI = "uri";
+    static final String ENTITY_NAME = "entityName";
+    static final String USE_EDM_ENABLED_CLIENT = "useEdmEnabledClient";
+    static final String USE_KEY_NUMERIC = "useKeyNumeric";
+    static final String CONTENT_TYPE = "contentType";
+    static final String HELP = "help";
 
     /**
      * Validates options for the various actions exposed in App.
@@ -488,8 +498,13 @@ public class App {
           .build();
 
       Option useEdmEnabledClient = Option.builder()
-          .argName("e").longOpt(USE_EDM_ENABLED_CLIENT)
+          .argName("e").longOpt(USE_EDM_ENABLED_CLIENT).hasArg(false)
           .desc("present if an EdmEnabledClient should be used.")
+          .build();
+
+      Option useKeyNumeric = Option.builder()
+          .argName("k").longOpt(USE_KEY_NUMERIC).hasArg(false)
+          .desc("present if numeric keys are to be used for database DDL generation.")
           .build();
 
       Option helpOption = Option.builder()
@@ -504,6 +519,8 @@ public class App {
               .desc("Generates acceptance tests in the current directory.").build())
           .addOption(Option.builder().argName("r").longOpt(ACTIONS.GENERATE_REFERENCE_EDMX)
               .desc("Generates reference metadata in EDMX format.").build())
+          .addOption(Option.builder().argName("k").longOpt(ACTIONS.GENERATE_REFERENCE_DDL)
+              .desc("Generates reference DDL to create a RESO-compliant SQL database. Pass --useKeyNumeric to generate the DB using numeric keys.").build())
           .addOption(Option.builder().argName("m").longOpt(ACTIONS.GET_METADATA)
               .desc("Fetches metadata from <serviceRoot> using <bearerToken> and saves results in <outputFile>.").build())
           .addOption(Option.builder().argName("g").longOpt(ACTIONS.GENERATE_METADATA_REPORT)
@@ -525,6 +542,7 @@ public class App {
           .addOption(outputFileOption)
           .addOption(entityName)
           .addOption(useEdmEnabledClient)
+          .addOption(useKeyNumeric)
           .addOption(uriOption)
           .addOption(contentType)
           .addOptionGroup(actions);
@@ -534,7 +552,8 @@ public class App {
       //actions
       public static final String GENERATE_DD_ACCEPTANCE_TESTS = "generateDDAcceptanceTests";
       public static final String GENERATE_REFERENCE_EDMX = "generateReferenceEDMX";
-      static String GENERATE_QUERIES = "generateQueries";
+      public static final String GENERATE_REFERENCE_DDL = "generateReferenceDDL";
+      public static final String GENERATE_QUERIES = "generateQueries";
       public static final String RUN_RESOSCRIPT = "runRESOScript";
       public static final String GET_METADATA = "getMetadata";
       public static final String VALIDATE_METADATA = "validateMetadata";
