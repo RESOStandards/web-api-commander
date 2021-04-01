@@ -38,8 +38,8 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
-import static org.reso.commander.Commander.NOT_OK;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
+import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
 import static org.reso.commander.common.Utils.pluralize;
 import static org.reso.commander.common.Utils.wrapColumns;
 
@@ -87,7 +87,7 @@ public class DataDictionary {
   @Given("a RESOScript or Metadata file are provided")
   public void aRESOScriptOrMetadataFileAreProvided() {
     if (pathToRESOScript == null && pathToMetadata == null) {
-      failAndExitWithErrorMessage("one of pathToRESOScript OR pathToMetadata MUST be present in command arguments, see README");
+      failAndExitWithErrorMessage("one of pathToRESOScript OR pathToMetadata MUST be present in command arguments, see README", scenario);
     }
   }
 
@@ -115,7 +115,7 @@ public class DataDictionary {
       }
 
       if (container.getPathToRESOScript() == null) {
-        failAndExitWithErrorMessage("pathToRESOScript must be present in command arguments, see README.");
+        failAndExitWithErrorMessage("pathToRESOScript must be present in command arguments, see README.", scenario);
       }
       LOG.debug("Using RESOScript: " + container.getPathToRESOScript());
     }
@@ -127,7 +127,7 @@ public class DataDictionary {
       if (container.getSettings() == null) {
         container.setSettings(Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript"))));
         if (container.getPathToRESOScript() == null) {
-          failAndExitWithErrorMessage("Settings could not be loaded!");
+          failAndExitWithErrorMessage("Settings could not be loaded!", scenario);
         }
         LOG.info("RESOScript loaded successfully!");
       }
@@ -138,12 +138,12 @@ public class DataDictionary {
   public void theTestContainerUsesAnAuthorizationCodeOrClientCredentialsForAuthentication() {
     if (isUsingRESOScript) {
       if (container.getCommander() == null) {
-        failAndExitWithErrorMessage("Commander instance was null! Cannot continue.");
+        failAndExitWithErrorMessage("Commander instance was null! Cannot continue.", scenario);
       }
 
       if (!(container.getCommander().isAuthTokenClient()
           || (container.getCommander().isOAuth2Client() && container.getCommander().hasValidAuthConfig()))) {
-          failAndExitWithErrorMessage("Commander must either have a valid Authorization Code or Client Credentials configuration!");
+          failAndExitWithErrorMessage("Commander must either have a valid Authorization Code or Client Credentials configuration!", scenario);
       }
     }
   }
@@ -154,7 +154,7 @@ public class DataDictionary {
     if (isUsingMetadata) {
       result = pathToMetadata != null && Files.exists(Paths.get(pathToMetadata));
       if (!result) {
-        failAndExitWithErrorMessage("Path to given metadata file does not exist: " + PATH_TO_METADATA_ARG + "=" + pathToMetadata);
+        failAndExitWithErrorMessage("Path to given metadata file does not exist: " + PATH_TO_METADATA_ARG + "=" + pathToMetadata, scenario);
       }
     }
   }
@@ -165,24 +165,27 @@ public class DataDictionary {
       try {
         final String xmlMetadataString = new String(Files.readAllBytes(Paths.get(pathToMetadata)));
 
-        assertTrue("XML Metadata MUST be valid XML according to the OASIS XSDs!",
-            Commander.validateXML(xmlMetadataString));
+        if (!Commander.validateXML(xmlMetadataString)) {
+          failAndExitWithErrorMessage("XML Metadata MUST be valid XML according to the OASIS XSDs!", scenario);
+        }
         container.setXMLResponseData(xmlMetadataString);
-
         container.setXMLMetadata(Commander.deserializeXMLMetadata(xmlMetadataString, container.getCommander().getClient()));
-        assertTrue("XML Metadata MUST be valid OData XML Metadata!",
-            Commander.validateMetadata(container.getXMLMetadata(), container.getCommander().getClient()));
+
+        if (!Commander.validateMetadata(container.getXMLMetadata(), container.getCommander().getClient())) {
+          failAndExitWithErrorMessage("XML Metadata MUST be valid OData XML Metadata!", scenario);
+        }
 
         container.setEdm(Commander.deserializeEdm(xmlMetadataString, container.getCommander().getClient()));
-        assertTrue("Edm metadata MUST be valid!",
-            Commander.validateMetadata(container.getEdm(), container.getCommander().getClient()));
+        if (!Commander.validateMetadata(container.getEdm(), container.getCommander().getClient())) {
+          failAndExitWithErrorMessage("Edm metadata MUST be valid!", scenario);
+        }
 
         //if we have gotten to this point without exceptions, then metadata are valid
         container.validateMetadata();
         areMetadataValid = container.hasValidMetadata();
 
       } catch (IOException e) {
-        failAndExitWithErrorMessage(getDefaultErrorMessage(e));
+        failAndExitWithErrorMessage(getDefaultErrorMessage(e), scenario);
       }
     }
   }
@@ -193,10 +196,10 @@ public class DataDictionary {
 
     if (isUsingRESOScript && container.getShouldValidateMetadata()) {
       //request metadata from server using service root in RESOScript file
-      TestUtils.assertXMLMetadataAreRequestedFromTheServer(container);
+      TestUtils.assertXMLMetadataAreRequestedFromTheServer(container, scenario);
 
       if (container.getResponseCode() != HttpStatus.SC_OK) {
-        failAndExitWithErrorMessage("Could not retrieve metadata from " + container.getServiceRoot() + "/$metadata");
+        failAndExitWithErrorMessage("Could not retrieve metadata from " + container.getServiceRoot() + "/$metadata", scenario);
       }
 
       //metadata validation tests
@@ -219,7 +222,7 @@ public class DataDictionary {
   public void existsInTheMetadata(String fieldName, String resourceName) {
 
     if (strictMode && !areMetadataValid) {
-      failAndExitWithErrorMessage("Metadata validation failed, but is required to pass when using strict mode!");
+      failAndExitWithErrorMessage("Metadata validation failed, but is required to pass when using strict mode!", scenario);
     }
 
     assertNotNull(getDefaultErrorMessage("field name cannot be null!"), fieldName);
@@ -594,15 +597,5 @@ public class DataDictionary {
   private boolean isFieldContainedInMetadata(String fieldName) {
     return container.getFieldMap().containsKey(currentResourceName.get())
         && container.getFieldMap().get(currentResourceName.get()).containsKey(fieldName);
-  }
-
-  private static void failAndExitWithErrorMessage(String msg) {
-    if (scenario != null) {
-      scenario.write(getDefaultErrorMessage(msg));
-    } else {
-      LOG.error(getDefaultErrorMessage(msg));
-    }
-    fail();
-    System.exit(NOT_OK);
   }
 }

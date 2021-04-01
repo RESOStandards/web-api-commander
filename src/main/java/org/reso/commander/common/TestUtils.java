@@ -2,6 +2,7 @@ package org.reso.commander.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.cucumber.java.Scenario;
 import org.apache.http.Header;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,6 +41,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
+import static org.reso.commander.Commander.NOT_OK;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.DateParts.FRACTIONAL;
 
@@ -804,25 +806,29 @@ public final class TestUtils {
    * Asserts that XML Metadata are retrieved from the server
    * @param container the container to retrieve metadata with
    */
-  public static void assertXMLMetadataAreRequestedFromTheServer(WebAPITestContainer container) {
-    assertNotNull(container);
-    assertNotNull("Commander is null!", container.getCommander());
+  public static void assertXMLMetadataAreRequestedFromTheServer(WebAPITestContainer container, Scenario scenario) {
+    if (container == null || container.getCommander() == null) {
+      failAndExitWithErrorMessage("Cannot create Commander instance!", scenario);
+      return;
+    }
 
     if (!container.getHaveMetadataBeenRequested()) {
       final String serviceRoot = Settings.resolveParametersString(container.getServiceRoot(), container.getSettings());
-      assertEquals(getDefaultErrorMessage("given service root doesn't match the one configured in the Commander"),
-          serviceRoot,
-          container.getCommander().getServiceRoot());
+      if (!serviceRoot.contentEquals(container.getCommander().getServiceRoot())) {
+        failAndExitWithErrorMessage("given service root doesn't match the one configured in the Commander", scenario);
+        return;
+      }
 
       try {
-        assertNotNull(getDefaultErrorMessage("could not retrieve valid XML Metadata for given service root:", serviceRoot),
-            container.fetchXMLMetadata());
+        if (container.fetchXMLMetadata() == null) {
+          failAndExitWithErrorMessage("could not retrieve valid XML Metadata for given service root: " + serviceRoot, scenario);
+        }
 
       } catch (ODataClientErrorException cex) {
         container.setResponseCode(cex.getStatusLine().getStatusCode());
-        fail(getDefaultErrorMessage(cex));
+        failAndExitWithErrorMessage(cex.getMessage(), scenario);
       } catch (Exception ex) {
-        fail(getDefaultErrorMessage(ex));
+        failAndExitWithErrorMessage(ex.toString(), scenario);
       }
     }
   }
@@ -951,6 +957,13 @@ public final class TestUtils {
           BOOLEAN = "Edm.Boolean",
           DATETIME_OFFSET = "Edm.DateTimeOffset";
     }
+  }
+
+  public static void failAndExitWithErrorMessage(String msg, Scenario scenario) {
+    if (scenario != null) {
+      scenario.write(getDefaultErrorMessage(msg));
+    }
+    System.exit(NOT_OK);
   }
 }
 
