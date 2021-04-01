@@ -153,7 +153,7 @@ public class DDLProcessor extends WorksheetProcessor {
           .append(" ( ")
           .append(templateContent).append(",\n")
           .append(PADDING).append(PADDING).append(buildPrimaryKeyMarkup(resourceName)).append("\n")
-          .append(") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+          .append(") ENGINE=MyISAM DEFAULT CHARSET=utf8;");
     });
 
     LOG.info(sanitizeSql(content.toString()));
@@ -180,7 +180,7 @@ public class DDLProcessor extends WorksheetProcessor {
           "  LegacyOdataValue VARCHAR(128) DEFAULT NULL, \n" +
           "  ModificationTimestamp DATETIME DEFAULT CURRENT_TIMESTAMP, \n" +
           "    PRIMARY KEY (LookupKey" + (useKeyNumeric ? "Numeric" : EMPTY_STRING) + ")\n" +
-          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+          ") ENGINE=MyISAM DEFAULT CHARSET=utf8;";
   }
 
   /**
@@ -277,7 +277,7 @@ public class DDLProcessor extends WorksheetProcessor {
    */
   private static String sanitizeSql(String sql) {
     return sql
-        .replaceAll("\\bOrder\\b", "'Order'");
+        .replaceAll("\\bOrder\\b", "`Order`");
   }
 
 }
