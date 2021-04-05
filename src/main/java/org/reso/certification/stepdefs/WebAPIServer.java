@@ -656,9 +656,9 @@ class WebAPIServer implements En {
         from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           try {
             if (count.get() == 0) {
-              initialValue.set(TestUtils.parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+              initialValue.set(TestUtils.parseTimestampFromEdmDateTimeOffsetString((String)item.get(fieldName)));
             } else {
-              currentValue.set(TestUtils.parseTimestampFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
+              currentValue.set(TestUtils.parseTimestampFromEdmDateTimeOffsetString((String)item.get(fieldName)));
               if (orderBy.get().equals(ASC)) {
                 assertTrue(TestUtils.compare(initialValue.get(), LESS_THAN_OR_EQUAL, currentValue.get()));
               } else if (orderBy.get().equals(DESC)) {
