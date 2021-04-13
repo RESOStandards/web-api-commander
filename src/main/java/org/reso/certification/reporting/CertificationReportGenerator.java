@@ -28,7 +28,7 @@ public class CertificationReportGenerator {
   private static final boolean USE_MINIMAL_REPORT = Boolean.parseBoolean(System.getProperty("minimal", "false"));
   private static final String DEFAULT_REPORT_DESCRIPTION = "Certification Report";
   private static final String projectName = System.getProperty("reportDescription", DEFAULT_REPORT_DESCRIPTION);
-  private static final String MINIMAL_JSON_EXTENSION = ".minimal.json";
+  private static final String MINIMAL_JSON_EXTENSION = "minimal.json";
 
   public static void main(String[] args) {
 

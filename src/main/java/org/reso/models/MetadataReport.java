@@ -3,9 +3,12 @@ package org.reso.models;
 import com.google.gson.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.olingo.client.core.edm.xml.ClientCsdlAnnotation;
 import org.apache.olingo.commons.api.edm.*;
+import org.apache.olingo.commons.core.edm.EdmAnnotationImpl;
 import org.reso.commander.common.Utils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
@@ -63,7 +66,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
         IS_COLLECTION_KEY = "isCollection",
         DEFAULT_VALUE_KEY = "defaultValue",
         UNICODE_KEY = "unicode",
-        TYPE_KEY = "type",
+        TERM_KEY = "type",
         VALUE_KEY= "value",
         ANNOTATIONS_KEY = "annotations",
         FIELDS_KEY = "fields";
@@ -84,7 +87,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
         reportBuilder.append("\nField: ");
         reportBuilder.append(field.getAsJsonObject().get(FIELD_NAME_KEY));
         reportBuilder.append("\nType: ");
-        reportBuilder.append(field.getAsJsonObject().get(TYPE_KEY));
+        reportBuilder.append(field.getAsJsonObject().get(TERM_KEY));
 
         if (field.getAsJsonObject().get(ANNOTATIONS_KEY) != null) {
           JsonArray annotations = field.getAsJsonObject().get(ANNOTATIONS_KEY).getAsJsonArray();
@@ -92,9 +95,9 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
             reportBuilder.append("\n");
             reportBuilder.append("Annotations:");
             annotations.forEach(annotation -> {
-              if (annotation.getAsJsonObject().get(TYPE_KEY) != null) {
-                reportBuilder.append("\n\tType: ");
-                reportBuilder.append(annotation.getAsJsonObject().get(TYPE_KEY));
+              if (annotation.getAsJsonObject().get(TERM_KEY) != null) {
+                reportBuilder.append("\n\tTerm: ");
+                reportBuilder.append(annotation.getAsJsonObject().get(TERM_KEY));
               }
 
               if (annotation.getAsJsonObject().get(VALUE_KEY) != null) {
@@ -120,10 +123,10 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
       String typeName = null;
       try {
         typeName = src.edmElement.getType().getFullQualifiedName().getFullQualifiedNameAsString();
-        field.addProperty(TYPE_KEY, typeName);
+        field.addProperty(TERM_KEY, typeName);
       } catch (Exception ex) {
         LOG.error(getDefaultErrorMessage("Field Name:", src.edmElement.getName(), ex.toString()));
-        field.addProperty(TYPE_KEY, "UNDEFINED");
+        field.addProperty(TERM_KEY, "UNDEFINED");
       }
 
       field.addProperty(NULLABLE_KEY, ((EdmProperty) src.edmElement).isNullable());
@@ -143,7 +146,10 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
         annotations.forEach(edmAnnotation -> {
           JsonObject annotation = new JsonObject();
           if (edmAnnotation.getTerm() != null) {
-            annotation.addProperty(TYPE_KEY, edmAnnotation.getTerm().getFullQualifiedName().getFullQualifiedNameAsString());
+            annotation.addProperty(TERM_KEY, edmAnnotation.getTerm().getFullQualifiedName().getFullQualifiedNameAsString());
+          } else {
+            SneakyAnnotationReader sneakyAnnotationReader = new SneakyAnnotationReader(edmAnnotation);
+            annotation.addProperty(TERM_KEY, sneakyAnnotationReader.getTerm());
           }
 
           if (edmAnnotation.getExpression() != null) {
@@ -154,6 +160,36 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
         field.add(ANNOTATIONS_KEY, annotationsJsonArray);
       }
       return field;
+    }
+  }
+
+  static class SneakyAnnotationReader {
+    Class object;
+    Field field;
+    EdmAnnotationImpl edmAnnotationImpl;
+    ClientCsdlAnnotation clientCsdlAnnotation;
+
+    public SneakyAnnotationReader(EdmAnnotation edmAnnotation) {
+      try {
+        edmAnnotationImpl = ((EdmAnnotationImpl)edmAnnotation);
+
+        // create an object of the class named Class
+        object = edmAnnotationImpl.getClass();
+
+        // access the private variable
+        field = object.getDeclaredField("annotation");
+        // make private field accessible
+        field.setAccessible(true);
+
+        clientCsdlAnnotation = (ClientCsdlAnnotation) field.get(edmAnnotationImpl);
+
+      } catch (Exception ex) {
+        LOG.error(ex);
+      }
+    }
+
+    public String getTerm() {
+      return clientCsdlAnnotation.getTerm();
     }
   }
 
@@ -226,6 +262,9 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
           JsonObject annotation = new JsonObject();
           if (edmAnnotation.getTerm() != null) {
             annotation.addProperty(TYPE_KEY, edmAnnotation.getTerm().getFullQualifiedName().getFullQualifiedNameAsString());
+          } else {
+            SneakyAnnotationReader sneakyAnnotationReader = new SneakyAnnotationReader(edmAnnotation);
+            annotation.addProperty(FieldJson.TERM_KEY, sneakyAnnotationReader.getTerm());
           }
 
           if (edmAnnotation.getExpression() != null) {
