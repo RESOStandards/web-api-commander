@@ -66,7 +66,8 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
         IS_COLLECTION_KEY = "isCollection",
         DEFAULT_VALUE_KEY = "defaultValue",
         UNICODE_KEY = "unicode",
-        TERM_KEY = "type",
+        TYPE_KEY = "type",
+        TERM_KEY = "term",
         VALUE_KEY= "value",
         ANNOTATIONS_KEY = "annotations",
         FIELDS_KEY = "fields";
@@ -87,7 +88,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
         reportBuilder.append("\nField: ");
         reportBuilder.append(field.getAsJsonObject().get(FIELD_NAME_KEY));
         reportBuilder.append("\nType: ");
-        reportBuilder.append(field.getAsJsonObject().get(TERM_KEY));
+        reportBuilder.append(field.getAsJsonObject().get(TYPE_KEY));
 
         if (field.getAsJsonObject().get(ANNOTATIONS_KEY) != null) {
           JsonArray annotations = field.getAsJsonObject().get(ANNOTATIONS_KEY).getAsJsonArray();
@@ -123,10 +124,10 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
       String typeName = null;
       try {
         typeName = src.edmElement.getType().getFullQualifiedName().getFullQualifiedNameAsString();
-        field.addProperty(TERM_KEY, typeName);
+        field.addProperty(TYPE_KEY, typeName);
       } catch (Exception ex) {
         LOG.error(getDefaultErrorMessage("Field Name:", src.edmElement.getName(), ex.toString()));
-        field.addProperty(TERM_KEY, "UNDEFINED");
+        field.addProperty(TYPE_KEY, "UNDEFINED");
       }
 
       field.addProperty(NULLABLE_KEY, ((EdmProperty) src.edmElement).isNullable());
@@ -232,9 +233,9 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
             reportBuilder.append("\n");
             reportBuilder.append("Annotations:");
             annotations.forEach(annotation -> {
-              if (annotation.getAsJsonObject().get(TYPE_KEY) != null) {
-                reportBuilder.append("\n\tType: ");
-                reportBuilder.append(annotation.getAsJsonObject().get(TYPE_KEY));
+              if (annotation.getAsJsonObject().get(FieldJson.TERM_KEY) != null) {
+                reportBuilder.append("\n\tTerm: ");
+                reportBuilder.append(annotation.getAsJsonObject().get(FieldJson.TERM_KEY));
               }
 
               if (annotation.getAsJsonObject().get(VALUE_KEY) != null) {
@@ -261,7 +262,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
         src.edmEnumType.getMember(memberName).getAnnotations().forEach(edmAnnotation -> {
           JsonObject annotation = new JsonObject();
           if (edmAnnotation.getTerm() != null) {
-            annotation.addProperty(TYPE_KEY, edmAnnotation.getTerm().getFullQualifiedName().getFullQualifiedNameAsString());
+            annotation.addProperty(FieldJson.TERM_KEY, edmAnnotation.getTerm().getFullQualifiedName().getFullQualifiedNameAsString());
           } else {
             SneakyAnnotationReader sneakyAnnotationReader = new SneakyAnnotationReader(edmAnnotation);
             annotation.addProperty(FieldJson.TERM_KEY, sneakyAnnotationReader.getTerm());
