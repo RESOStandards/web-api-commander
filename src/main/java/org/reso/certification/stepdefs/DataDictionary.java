@@ -184,6 +184,9 @@ public class DataDictionary {
         container.validateMetadata();
         areMetadataValid = container.hasValidMetadata();
 
+        //create metadata report
+        Commander.generateMetadataReport(container.getEdm());
+
       } catch (IOException e) {
         failAndExitWithErrorMessage(getDefaultErrorMessage(e), scenario);
       }
@@ -215,6 +218,9 @@ public class DataDictionary {
 
       //if we have gotten to this point without exceptions, then metadata are valid
       areMetadataValid = container.hasValidMetadata();
+
+      //create metadata report
+      Commander.generateMetadataReport(container.getEdm());
     }
   }
 
@@ -260,7 +266,7 @@ public class DataDictionary {
     foundStandardMembers.set(getFoundStandardMembers(foundMembers.get(), dataTable));
 
     if (foundStandardMembers.get().size() == 0) {
-      scenario.write("No RESO Standard Enumerations found for field: " + fieldName);
+      scenario.log("No RESO Standard Enumerations found for field: " + fieldName);
     }
   }
 
@@ -461,10 +467,10 @@ public class DataDictionary {
         ? container.getFieldMap(currentResourceName.get()).get(fieldName).getPrecision() : null;
 
     if (!Objects.equals(precision, suggestedPrecision)) {
-      scenario.write("Precision for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Precision of " + suggestedPrecision
+      scenario.log("Precision for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Precision of " + suggestedPrecision
           + " but was " + precision);
     } else {
-      scenario.write("Precision for field " + fieldName +  " is equal to the RESO Suggested Max Scale of " + suggestedPrecision);
+      scenario.log("Precision for field " + fieldName +  " is equal to the RESO Suggested Max Scale of " + suggestedPrecision);
     }
   }
 
@@ -475,10 +481,10 @@ public class DataDictionary {
         ? container.getFieldMap(currentResourceName.get()).get(fieldName).getScale() : null;
 
     if (!Objects.equals(scale, suggestedMaxScale)) {
-      scenario.write("Scale for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Scale of " + suggestedMaxScale
+      scenario.log("Scale for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Scale of " + suggestedMaxScale
           + " but was " + scale);
     } else {
-      scenario.write("Scale for field " + fieldName +  " is equal to the RESO Suggested Max Scale of " + suggestedMaxScale);
+      scenario.log("Scale for field " + fieldName +  " is equal to the RESO Suggested Max Scale of " + suggestedMaxScale);
     }
   }
 
@@ -489,10 +495,10 @@ public class DataDictionary {
         ? container.getFieldMap(currentResourceName.get()).get(fieldName).getMaxLength() : null;
 
     if (!Objects.equals(length, suggestedMaxLength)) {
-      scenario.write("Length for field " + fieldName + " SHOULD be equal to the RESO Suggested Max Length of " + suggestedMaxLength
+      scenario.log("Length for field " + fieldName + " SHOULD be equal to the RESO Suggested Max Length of " + suggestedMaxLength
           + " but was " + length);
     } else {
-      scenario.write("Length for field " + fieldName +  " is equal to the RESO Suggested Max Length of " + length);
+      scenario.log("Length for field " + fieldName +  " is equal to the RESO Suggested Max Length of " + length);
     }
   }
 

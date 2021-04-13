@@ -961,7 +961,7 @@ public final class TestUtils {
 
   public static void failAndExitWithErrorMessage(String msg, Scenario scenario) {
     if (scenario != null) {
-      scenario.write(getDefaultErrorMessage(msg));
+      scenario.log(getDefaultErrorMessage(msg));
     }
     System.exit(NOT_OK);
   }

@@ -184,19 +184,29 @@ public class Commander {
    */
   public static String generateMetadataReport(Edm metadata, String fileName) {
     final String DEFAULT_FILENAME = "metadata-report.json";
-    MetadataReport report = new MetadataReport(metadata);
-    GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting();
-    gsonBuilder.registerTypeAdapter(MetadataReport.class, report);
 
     try {
-      FileUtils.copyInputStreamToFile(new ByteArrayInputStream(gsonBuilder.create().toJson(report).getBytes()),
-          new File(fileName != null ? fileName.replaceAll(".edmx|.xml", EMPTY_STRING)  + ".metadata-report.json"
-              : DEFAULT_FILENAME));
+      MetadataReport report = new MetadataReport(metadata);
+      GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting();
+      gsonBuilder.registerTypeAdapter(MetadataReport.class, report);
+
+      File targetReportFile;
+
+      if (fileName != null) {
+        targetReportFile = new File(fileName.replaceAll(".edmx|.xml", EMPTY_STRING)  + ".metadata-report.json");
+      } else {
+        //place unnamed files in the build directory
+        targetReportFile = new File("build", DEFAULT_FILENAME);
+      }
+
+      FileUtils.copyInputStreamToFile(new ByteArrayInputStream(gsonBuilder.create().toJson(report).getBytes()), targetReportFile);
+
+      return report.toString();
     } catch (Exception ex) {
       LOG.error(getDefaultErrorMessage(ex));
     }
 
-    return report.toString();
+    return null;
   }
 
   public static String generateMetadataReport(Edm metadata) {

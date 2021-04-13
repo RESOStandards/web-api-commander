@@ -10,7 +10,7 @@ plugins {
 }
 
 // Define the main class for the application
-mainClassName = 'org.reso.commander.Main'
+mainClassName = 'org.reso.commander.App'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
@@ -22,8 +22,8 @@ repositories {
 }
 
 dependencies {
-  compile 'com.google.guava:guava:28.2-jre'
-  compile 'com.google.inject:guice:4.2.3'
+  compile 'com.google.guava:guava:30.1.1-jre'
+  compile 'com.google.inject:guice:5.0.1'
   compile 'commons-cli:commons-cli:1.4'
 
   compile 'org.apache.logging.log4j:log4j-api:2.13.0'
@@ -35,22 +35,23 @@ dependencies {
   compile 'org.apache.olingo:odata-commons-core:4.8.0'
   compile 'org.apache.olingo:odata-client-core:4.8.0'
 
-  compile 'org.apache.poi:poi:3.17'
-  compile 'org.apache.poi:poi-ooxml:3.17'
+  compile 'org.apache.poi:poi:5.0.0'
+  compile 'org.apache.poi:poi-ooxml:5.0.0'
 
-  compile 'io.rest-assured:rest-assured:4.2.0'
-  compile 'io.rest-assured:json-path:4.2.0'
-  compile 'io.rest-assured:json-schema-validator:4.2.0'
+  compile 'io.rest-assured:rest-assured:4.3.3'
+  compile 'io.rest-assured:json-path:4.3.3'
+  compile 'io.rest-assured:json-schema-validator:4.3.3'
 
-  compile 'io.cucumber:cucumber-java8:5.4.0'
-  compile 'io.cucumber:cucumber-java:5.4.0'
-  compile 'io.cucumber:cucumber-junit:5.4.0'
-  compile 'io.cucumber:cucumber-guice:5.4.0'
-  compile 'io.cucumber:cucumber-core:5.4.0'
+  compile 'io.cucumber:cucumber-java8:6.10.2'
+  compile 'io.cucumber:cucumber-java:6.10.2'
+  compile 'io.cucumber:cucumber-junit:6.10.2'
+  compile 'io.cucumber:cucumber-guice:6.10.2'
+  compile 'io.cucumber:cucumber-core:6.10.2'
 
-  compile 'net.masterthought:cucumber-reporting:5.1.1'
+  compile 'net.masterthought:cucumber-reporting:5.5.2'
 
-  compile 'com.networknt:json-schema-validator:1.0.35'
+  //TODO: choose one schema validator between this and rest-assured
+  compile 'com.networknt:json-schema-validator:1.0.51'
   compile 'com.google.code.gson:gson:2.8.6'
   compile 'org.apache.commons:commons-text:1.9'
 
@@ -64,17 +65,18 @@ configurations {
 
 jar {
   manifest {
-    attributes(
-        'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
-        'Main-Class': 'org.reso.commander.App'
-    )
+    attributes "Main-Class": mainClassName
   }
 
-  // generate "fat jar" by default
   from {
     configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
   }
+  exclude 'META-INF/*.RSA'
+  exclude 'META-INF/*.SF'
+  exclude 'META-INF/*.DSA'
 }
+
+
 
 // don't suppress warnings or deprecation notices
 tasks.withType(JavaCompile) {
@@ -330,3 +332,4 @@ task _jenkins_testWebApiServer_1_0_2_Core() {
     }
   }
 }
+
