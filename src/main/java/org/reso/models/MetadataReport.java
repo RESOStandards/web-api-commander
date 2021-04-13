@@ -1,6 +1,8 @@
 package org.reso.models;
 
 import com.google.gson.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.olingo.commons.api.edm.*;
 import org.reso.commander.common.Utils;
 
@@ -9,8 +11,11 @@ import java.util.Date;
 import java.util.List;
 
 import static org.reso.commander.Commander.REPORT_DIVIDER;
+import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public class MetadataReport implements JsonSerializer<MetadataReport> {
+  private static final Logger LOG = LogManager.getLogger(MetadataReport.class);
+
   private Edm metadata;
 
   private MetadataReport() {
@@ -108,9 +113,19 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
     public JsonElement serialize(FieldJson src, Type typeOfSrc, JsonSerializationContext context) {
       JsonObject field = new JsonObject();
 
+
       field.addProperty(RESOURCE_NAME_KEY, src.resourceName);
       field.addProperty(FIELD_NAME_KEY, src.edmElement.getName());
-      field.addProperty(TYPE_KEY, src.edmElement.getType().getFullQualifiedName().getFullQualifiedNameAsString());
+
+      String typeName = null;
+      try {
+        typeName = src.edmElement.getType().getFullQualifiedName().getFullQualifiedNameAsString();
+        field.addProperty(TYPE_KEY, typeName);
+      } catch (Exception ex) {
+        LOG.error(getDefaultErrorMessage("Field Name:", src.edmElement.getName(), ex.toString()));
+        field.addProperty(TYPE_KEY, "UNDEFINED");
+      }
+
       field.addProperty(NULLABLE_KEY, ((EdmProperty) src.edmElement).isNullable());
       field.addProperty(MAX_LENGTH_KEY, ((EdmProperty) src.edmElement).getMaxLength());
       field.addProperty(SCALE_KEY, ((EdmProperty) src.edmElement).getScale());

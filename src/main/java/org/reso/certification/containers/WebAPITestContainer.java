@@ -20,7 +20,6 @@ import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.client.api.uri.QueryOption;
 import org.apache.olingo.commons.api.edm.Edm;
-import org.apache.olingo.commons.api.edm.provider.CsdlEnumType;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.commander.Commander;
@@ -100,7 +99,6 @@ public final class WebAPITestContainer implements TestContainer {
 
   //singleton variables
   private static final AtomicReference<Map<String, Map<String, CsdlProperty>>> fieldMap = new AtomicReference<>();
-  private static final AtomicReference<Map<String, Map<String, CsdlEnumType>>> enumMap = new AtomicReference<>();
 
   /**
    * Initializes the container with a singleton instance of the RESO Commander

@@ -184,6 +184,9 @@ public class DataDictionary {
         container.validateMetadata();
         areMetadataValid = container.hasValidMetadata();
 
+        //create metadata report
+        Commander.generateMetadataReport(container.getEdm(),  "dd-1.7");
+
       } catch (IOException e) {
         failAndExitWithErrorMessage(getDefaultErrorMessage(e), scenario);
       }
@@ -215,6 +218,9 @@ public class DataDictionary {
 
       //if we have gotten to this point without exceptions, then metadata are valid
       areMetadataValid = container.hasValidMetadata();
+
+      //create metadata report
+      Commander.generateMetadataReport(container.getEdm(),  "dd-1.7");
     }
   }
 
