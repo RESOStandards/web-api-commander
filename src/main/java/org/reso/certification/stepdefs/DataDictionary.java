@@ -70,8 +70,8 @@ public class DataDictionary {
   //named args
   private static final String SHOW_RESPONSES_ARG = "showResponses";
   private static final String USE_STRICT_MODE_ARG = "strict";
-  private static final String PATH_TO_METADATA_ARG = "pathToMetadata";
-  private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
+  protected static final String PATH_TO_METADATA_ARG = "pathToMetadata";
+  protected static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final String LOOKUP_VALUE = "lookupValue";
 
   //extract any params here
