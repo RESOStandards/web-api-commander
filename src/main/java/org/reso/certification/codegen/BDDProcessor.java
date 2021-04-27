@@ -122,7 +122,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return tags;
     }
 
-    private static String padLeft(String s, int n) {
+    public static String padLeft(String s, int n) {
       String[] padding = new String[n];
       Arrays.fill(padding, " ");
       return String.join("", padding) + s;
