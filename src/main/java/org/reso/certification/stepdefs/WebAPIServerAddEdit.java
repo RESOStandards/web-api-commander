@@ -95,4 +95,48 @@ public class WebAPIServerAddEdit {
   public void theRequestHeaderContains(String arg0, String arg1) {
 
   }
+
+  @And("the request header {string} {string} one of the following values")
+  public void theRequestHeaderOneOfTheFollowingValues(String arg0, String arg1) {
+  }
+
+  @And("the request header {string} {string} {string}")
+  public void theRequestHeader(String arg0, String arg1, String arg2) {
+  }
+
+  @And("the response header {string} {string} one of the following values")
+  public void theResponseHeaderOneOfTheFollowingValues(String arg0, String arg1) {
+  }
+
+  @And("the response header {string} {string} {string}")
+  public void theResponseHeader(String arg0, String arg1, String arg2) {
+  }
+
+  @And("the response header {string} {string}")
+  public void theResponseHeader(String arg0, String arg1) {
+  }
+
+  @And("the response header {string} {string} reference the resource being created")
+  public void theResponseHeaderReferenceTheResourceBeingCreated(String arg0, String arg1) {
+  }
+
+  @And("the JSON response {string} contain {string}")
+  public void theJSONResponseContain(String arg0, String arg1) {
+  }
+
+  @And("the JSON response value {string} {string}")
+  public void theJSONResponseValue(String arg0, String arg1) {
+  }
+
+  @And("the JSON response value {string} {string} {string}")
+  public void theJSONResponseValue(String arg0, String arg1, String arg2) {
+  }
+
+  @And("the JSON response {string} contain all JSON data in {string}")
+  public void theJSONResponseContainAllJSONDataIn(String arg0, String arg1) {
+  }
+
+  @When("a {string} request is made to the URL in response header {string}")
+  public void aRequestIsMadeToTheURLInResponseHeader(String arg0, String arg1) {
+  }
 }

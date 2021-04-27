@@ -77,7 +77,6 @@
         }
       },
       "required": [
-        "annotations",
         "fieldName",
         "isCollection",
         "nullable",
@@ -89,8 +88,11 @@
     },
     "Annotation": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
+        "term": {
+          "type": "string"
+        },
         "value": {
           "type": "string",
           "qt-uri-protocols": [
