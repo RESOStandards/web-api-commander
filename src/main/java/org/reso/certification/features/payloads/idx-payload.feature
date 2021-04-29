@@ -23,12 +23,12 @@ Feature: IDX Payload Endorsement (Web API)
   Scenario: Standard Resource Sampling - Request Data from Each Server Resource
     Given that metadata have been requested from the server
     And the metadata contains RESO Standard Resources
-    When 1000 records are sampled from each RESO Standard resource in the server metadata
+    When 10000 records are sampled from each RESO Standard resource in the server metadata
     Then each record MUST have the string version of the Primary Key and ModificationTimestamp field
     And the data MUST match what is advertised in the metadata
 
   @non-standard-resource-sampling @idx-payload-endorsement
   Scenario: Non Standard Resource Sampling - Request Data from Each Server Resource
     Given that metadata have been requested from the server
-    When 1000 records are sampled from each non standard resource in the server metadata
+    When 10000 records are sampled from each non standard resource in the server metadata
     Then the data MUST match what is advertised in the metadata
