@@ -113,9 +113,9 @@ public class ResourceInfoProcessor extends WorksheetProcessor {
           "public class " + definitionName + " extends ResourceInfo {\n" +
           "  private static ArrayList<FieldInfo> fieldList = null;\n" + "\n" +
           "  public " + definitionName + "() {" + "\n" +
-          "    this.tableName = " + buildDbTableName(resourceName) + ";\n" +
-          "    this.resourcesName = " + resourceName + ";\n" +
-          "    this.resourceName = " + resourceName + ";\n" +
+          "    this.tableName = \"" + buildDbTableName(resourceName) + "\";\n" +
+          "    this.resourcesName = \"" + resourceName + "\";\n" +
+          "    this.resourceName = \"" + resourceName + "\";\n" +
           "  }\n" + "\n" +
           "  public ArrayList<FieldInfo> getFieldList() {\n" +
           "    return " + definitionName + ".getStaticFieldList();\n" +
@@ -136,7 +136,7 @@ public class ResourceInfoProcessor extends WorksheetProcessor {
       return "\n" +
           "    fieldInfo = new FieldInfo(\"" + field.getStandardName() + "\", EdmPrimitiveTypeKind.Boolean.getFullQualifiedName());\n" +
           "    fieldInfo.addAnnotation(\"" + field.getDisplayName() + "\", \"" + ANNOTATION_TERM_DISPLAY_NAME + "\");\n" +
-          "    fieldInfo.addAnnotation(\"" + field.getDefinition() + "\", \"" + ANNOTATION_TERM_DESCRIPTION + "\");\n" +
+          "    fieldInfo.addAnnotation(\"" + field.getDefinition().replace('"','\'') + "\", \"" + ANNOTATION_TERM_DESCRIPTION + "\");\n" +
           "    fieldInfo.addAnnotation(\"" + field.getWikiPageUrl() + "\", \"" + ANNOTATION_TERM_URL + "\");\n" +
           "    list.add(fieldInfo);" +
           "\n";
@@ -148,7 +148,7 @@ public class ResourceInfoProcessor extends WorksheetProcessor {
       return "\n" +
           "    fieldInfo = new FieldInfo(\"" + field.getStandardName() + "\", EdmPrimitiveTypeKind.Date.getFullQualifiedName());\n" +
           "    fieldInfo.addAnnotation(\"" + field.getDisplayName() + "\", \"" + ANNOTATION_TERM_DISPLAY_NAME + "\");\n" +
-          "    fieldInfo.addAnnotation(\"" + field.getDefinition() + "\", \"" + ANNOTATION_TERM_DESCRIPTION + "\");\n" +
+          "    fieldInfo.addAnnotation(\"" + field.getDefinition().replace('"','\'') + "\", \"" + ANNOTATION_TERM_DESCRIPTION + "\");\n" +
           "    fieldInfo.addAnnotation(\"" + field.getWikiPageUrl() + "\", \"" + ANNOTATION_TERM_URL + "\");\n" +
           "    list.add(fieldInfo);" +
           "\n";
@@ -173,7 +173,7 @@ public class ResourceInfoProcessor extends WorksheetProcessor {
       return "\n" +
           "    fieldInfo = new FieldInfo(\"" + field.getStandardName() + "\", EdmPrimitiveTypeKind.Decimal.getFullQualifiedName());\n" +
           "    fieldInfo.addAnnotation(\"" + field.getDisplayName() + "\", \"" + ANNOTATION_TERM_DISPLAY_NAME + "\");\n" +
-          "    fieldInfo.addAnnotation(\"" + field.getDefinition() + "\", \"" + ANNOTATION_TERM_DESCRIPTION + "\");\n" +
+          "    fieldInfo.addAnnotation(\"" + field.getDefinition().replace('"','\'') + "\", \"" + ANNOTATION_TERM_DESCRIPTION + "\");\n" +
           "    fieldInfo.addAnnotation(\"" + field.getWikiPageUrl() + "\", \"" + ANNOTATION_TERM_URL + "\");\n" +
           "    list.add(fieldInfo);" +
           "\n";
@@ -191,7 +191,7 @@ public class ResourceInfoProcessor extends WorksheetProcessor {
       return "\n" +
           "    fieldInfo = new FieldInfo(\"" + field.getStandardName() + "\", EdmPrimitiveTypeKind.Int64.getFullQualifiedName());\n" +
           "    fieldInfo.addAnnotation(\"" + field.getDisplayName() + "\", \"" + ANNOTATION_TERM_DISPLAY_NAME + "\");\n" +
-          "    fieldInfo.addAnnotation(\"" + field.getDefinition() + "\", \"" + ANNOTATION_TERM_DESCRIPTION + "\");\n" +
+          "    fieldInfo.addAnnotation(\"" + field.getDefinition().replace('"','\'') + "\", \"" + ANNOTATION_TERM_DESCRIPTION + "\");\n" +
           "    fieldInfo.addAnnotation(\"" + field.getWikiPageUrl() + "\", \"" + ANNOTATION_TERM_URL + "\");\n" +
           "    list.add(fieldInfo);" +
           "\n";
@@ -220,7 +220,7 @@ public class ResourceInfoProcessor extends WorksheetProcessor {
       String content = "\n" +
           "    fieldInfo = new FieldInfo(\"" + field.getStandardName() + "\", EdmPrimitiveTypeKind.String.getFullQualifiedName());\n" +
           "    fieldInfo.addAnnotation(\"" + field.getDisplayName() + "\", \"" + ANNOTATION_TERM_DISPLAY_NAME + "\");\n" +
-          "    fieldInfo.addAnnotation(\"" + field.getDefinition() + "\", \"" + ANNOTATION_TERM_DESCRIPTION + "\");\n" +
+          "    fieldInfo.addAnnotation(\"" + field.getDefinition().replace('"','\'') + "\", \"" + ANNOTATION_TERM_DESCRIPTION + "\");\n" +
           "    fieldInfo.addAnnotation(\"" + field.getWikiPageUrl() + "\", \"" + ANNOTATION_TERM_URL + "\");\n";
 
       if (field.getSuggestedMaxLength() != null) {
@@ -238,9 +238,9 @@ public class ResourceInfoProcessor extends WorksheetProcessor {
       if (field == null) return EMPTY_STRING;
 
       return "\n" +
-          "    fieldInfo = new FieldInfo(\"" + field.getStandardName() + "\", EdmPrimitiveTypeKind.DateTime.getFullQualifiedName());\n" +
+          "    fieldInfo = new FieldInfo(\"" + field.getStandardName() + "\", EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName());\n" +
           "    fieldInfo.addAnnotation(\"" + field.getDisplayName() + "\", \"" + ANNOTATION_TERM_DISPLAY_NAME + "\");\n" +
-          "    fieldInfo.addAnnotation(\"" + field.getDefinition() + "\", \"" + ANNOTATION_TERM_DESCRIPTION + "\");\n" +
+          "    fieldInfo.addAnnotation(\"" + field.getDefinition().replace('"','\'') + "\", \"" + ANNOTATION_TERM_DESCRIPTION + "\");\n" +
           "    fieldInfo.addAnnotation(\"" + field.getWikiPageUrl() + "\", \"" + ANNOTATION_TERM_URL + "\");\n" +
           "    list.add(fieldInfo);" +
           "\n";
