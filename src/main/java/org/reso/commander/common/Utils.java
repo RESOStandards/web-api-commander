@@ -112,4 +112,8 @@ public class Utils {
     return ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
   }
 
+  public static String getIsoTimestamp(ZonedDateTime fromDate) {
+    return ZonedDateTime.from(fromDate.toInstant()).format(DateTimeFormatter.ISO_INSTANT);
+  }
+
 }
