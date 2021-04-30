@@ -12,11 +12,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.data.ResWrap;
 import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmKeyPropertyRef;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.DataDictionaryMetadata;
+import org.reso.commander.common.Utils;
 import org.reso.models.ODataTransportWrapper;
 import org.reso.models.PayloadSample;
 import org.reso.models.Settings;
@@ -45,10 +47,12 @@ public class IDXPayload {
   private final static AtomicBoolean hasStandardResources = new AtomicBoolean(false);
   private final static AtomicReference<Set<String>> standardResources = new AtomicReference<>(new LinkedHashSet<>());
   private final static AtomicReference<Set<String>> nonStandardResources = new AtomicReference<>(new LinkedHashSet<>());
-
   private final static AtomicReference<WebAPITestContainer> container = new AtomicReference<>();
 
-  private final static AtomicReference<Map<String, List<String>>> requests = new AtomicReference<>();
+  @Inject
+  public IDXPayload(WebAPITestContainer c) {
+    container.set(c);
+  }
 
   @Before
   public void beforeStep(Scenario scenario) {
@@ -63,11 +67,6 @@ public class IDXPayload {
       container.get().setSettings(Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript"))));
       container.get().initialize();
     }
-  }
-
-  @Inject
-  public IDXPayload(WebAPITestContainer c) {
-    container.set(c);
   }
 
   @Given("that metadata have been requested from the server")
@@ -100,7 +99,7 @@ public class IDXPayload {
     }
   }
 
-  public static String hashValues(String ...values) {
+  public static String hashValues(String... values) {
     return sha256().hashString(String.join(SEPARATOR_CHARACTER, values), StandardCharsets.UTF_8).toString();
   }
 
@@ -120,29 +119,34 @@ public class IDXPayload {
           6) generate reports
       */
 
-      AtomicReference<PayloadSample> result = new AtomicReference<>();
+      //TODO: decide whether to store in memory or serialize resource samples files upon completion
+      AtomicReference<Map<String, List<PayloadSample>>> resourcePayloadSamplesMap = new AtomicReference<>(new LinkedHashMap<>());
       standardResources.get().stream().parallel().forEach(resourceName -> {
-        result.set(fetchAndProcessRecords(resourceName, numRecords));
+        resourcePayloadSamplesMap.get().putIfAbsent(resourceName, new LinkedList<>());
+        resourcePayloadSamplesMap.get().put(resourceName, fetchAndProcessRecords(resourceName, numRecords));
       });
+
+      createDataAvailabilityReport(resourcePayloadSamplesMap.get());
     }
   }
 
-  PayloadSample fetchAndProcessRecords(String resourceName, int targetRecordCount) {
-    final AtomicReference<ZonedDateTime> lastFetchedDate = new AtomicReference<>(ZonedDateTime.now()); //.minus(5, ChronoUnit.YEARS)
-    final ZonedDateTime startDate = lastFetchedDate.get();
+  List<PayloadSample> fetchAndProcessRecords(String resourceName, int targetRecordCount) {
+    final String TIMESTAMP_STANDARD_FIELD = "ModificationTimestamp";
+    final AtomicReference<ZonedDateTime> lastFetchedDate = new AtomicReference<>(ZonedDateTime.now());
+    final List<String> timestampCandidateFields = new LinkedList<>();
+    final EdmEntityType entityType = container.get().getEdm().getEntityContainer().getEntitySet(resourceName).getEntityType();
 
     ODataTransportWrapper transportWrapper;
-    final String TIMESTAMP_STANDARD_FIELD = "ModificationTimestamp";
     boolean hasStandardTimestampField = false;
 
-    List<String> timestampCandidateFields = new LinkedList<>();
-    if (container.get().getEdm().getEntityContainer().getEntitySet(resourceName).getEntityType().getProperty(TIMESTAMP_STANDARD_FIELD) == null) {
+    if (entityType.getProperty(TIMESTAMP_STANDARD_FIELD) == null) {
       LOG.info("Could not find " + MODIFICATION_TIMESTAMP_FIELD + " in the " + resourceName + " resource!");
       LOG.info("Searching for suitable timestamp fields...");
 
-      container.get().getEdm().getEntityContainer().getEntitySet(resourceName).getEntityType().getPropertyNames().forEach(propertyName -> {
-        if (container.get().getEdm().getEntityContainer().getEntitySet(resourceName).getEntityType().getProperty(propertyName).getType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName().getFullQualifiedNameAsString())) {
-          LOG.info("Found DateTimeOffset field " + propertyName + " in the " + resourceName + " resource!");
+      entityType.getPropertyNames().forEach(propertyName -> {
+        if (entityType.getProperty(propertyName).getType().getFullQualifiedName().getFullQualifiedNameAsString()
+            .contentEquals(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName().getFullQualifiedNameAsString())) {
+          LOG.info("Found Edm.DateTimeOffset field " + propertyName + " in the " + resourceName + " resource!");
           timestampCandidateFields.add(propertyName);
         }
       });
@@ -150,15 +154,14 @@ public class IDXPayload {
       hasStandardTimestampField = true;
     }
 
-    //consider parameterizing the timestamp field and let applicant pass them in the config
     //all RESO Resources MUST have ModificationTimestamp or previous test steps will fail
-    final String REQUEST_URI_TEMPLATE = "?$filter=%s"
-        + " lt %s&$orderby=%s desc";
+    //TODO: need to add UOI for shared systems
+    final String REQUEST_URI_TEMPLATE = "?$filter=%s" + " lt %s&$orderby=%s desc&$top=100";
 
     String requestUri;
-    ResWrap<EntityCollection> entityCollectionResWrap = null;
-    //Map of String Resource Names to Key-Mapped Hash of Field and SHA value
-    final AtomicReference<Map<String, Map<String, List<Vector<String>>>>> encodedSamples = new AtomicReference<>(new LinkedHashMap<>());
+    ResWrap<EntityCollection> entityCollectionResWrap;
+
+    final AtomicReference<Map<String, String>> encodedSample = new AtomicReference<>();
 
     //assumes the 0th key is always used. TODO: determine if we need to scan the keys.
     final List<EdmKeyPropertyRef> keyFields = container.get().getEdm().getEntityContainer()
@@ -171,7 +174,11 @@ public class IDXPayload {
     int lastTimestampCandidateIndex = 0;
     String timestampField;
 
-    AtomicBoolean noMoreRecords = new AtomicBoolean(false);
+    final int MAX_RETRIES = 3;
+
+    final AtomicBoolean noMoreRecords = new AtomicBoolean(false);
+    final AtomicReference<PayloadSample> payloadSample = new AtomicReference<>();
+    final AtomicReference<List<PayloadSample>> payloadSamples = new AtomicReference<>(new LinkedList<>());
 
     do {
       if (hasStandardTimestampField) {
@@ -188,21 +195,29 @@ public class IDXPayload {
           .appendEntitySetSegment(resourceName).build().toString()
           + String.format(REQUEST_URI_TEMPLATE, timestampField, lastFetchedDate.get().format(DateTimeFormatter.ISO_INSTANT), timestampField);
 
+
+      payloadSample.set(new PayloadSample(resourceName, timestampField, keyFields));
+      payloadSample.get().setRequestUri(requestUri);
+
       LOG.info("Making request to: " + requestUri);
       transportWrapper = container.get().getCommander().executeODataGetRequest(requestUri);
 
+      // retries. sometimes requests can time out and fail and we don't want to stop sampling
+      // immediately, but retry a couple of times before we bail
       if (recordsProcessed == 0 && transportWrapper.getResponseData() == null) {
+        //only count retries if we're constantly making requests and not getting anything
         numRetries += 1;
       } else {
         numRetries = 0;
       }
 
-      if (numRetries >= 3) {
+      if (numRetries >= MAX_RETRIES) {
         if (timestampCandidateFields.size() > 0 && (lastTimestampCandidateIndex < timestampCandidateFields.size())) {
           scenario.log("Trying next candidate timestamp field: " + timestampCandidateFields.get(lastTimestampCandidateIndex));
           numRetries = 0;
         } else {
-          scenario.log("Could not fetch records from the " + resourceName + " resource after 3 tries from the given URL: " + requestUri);
+          scenario.log("Could not fetch records from the " + resourceName + " resource after " + MAX_RETRIES
+              + " tries from the given URL: " + requestUri);
           break;
         }
       }
@@ -228,27 +243,17 @@ public class IDXPayload {
             assert (keyFields.size() > 0) :
                 getDefaultErrorMessage("no Key Fields found! Resources MUST have at least one key.");
 
-            //we will always key the hash by the first key, the other key fields will still be there
-            //for the MUST requirement checks
             final String keyField = keyFields.get(0).getName();
             LOG.info("Hashing " + resourceName + " payload values...");
             entityCollectionResWrap.getPayload().getEntities().forEach(entity -> {
+              encodedSample.set(new LinkedHashMap<>());
               entity.getProperties().forEach(property -> {
-                encodedSamples.get().computeIfAbsent(resourceName, k -> new LinkedHashMap<>());
-
-                if (!encodedSamples.get().get(resourceName).containsKey(keyField)) {
-                  encodedSamples.get().get(resourceName).put(entity.getProperty(keyField).getValue().toString(), new LinkedList<>());
-                }
-
-                final Vector<String> fieldMeta = new Vector<>();
-                fieldMeta.setSize(2);
-                fieldMeta.set(0, property.getName());
-                fieldMeta.set(1, property.getName().contentEquals(MODIFICATION_TIMESTAMP_FIELD) || keyFields.stream().reduce(false,
-                    (acc, f) -> acc && f.getName().contentEquals(property.getName()), Boolean::logicalAnd)
-                    ? property.getValue().toString() : (property.getValue() != null
-                    ? hashValues(property.getValue().toString()) : null));
-
-                encodedSamples.get().get(resourceName).get(entity.getProperty(keyField).getValue().toString()).add(fieldMeta);
+                // TODO: clean up. If field is timestamp field or key field unmask, if field is null report null, otherwise hash value
+                encodedSample.get().put(property.getName(),
+                    property.getName().contentEquals(MODIFICATION_TIMESTAMP_FIELD) || keyFields.stream().reduce(false,
+                        (acc, f) -> acc && f.getName().contentEquals(property.getName()), Boolean::logicalAnd)
+                        ? property.getValue().toString() : (property.getValue() != null
+                        ? hashValues(property.getValue().toString()) : null));
 
                 if (property.getName().contentEquals(MODIFICATION_TIMESTAMP_FIELD)) {
                   if (ZonedDateTime.parse(property.getValue().toString()).isBefore(lastFetchedDate.get())) {
@@ -256,54 +261,45 @@ public class IDXPayload {
                   }
                 }
               });
+              payloadSample.get().addSample(encodedSample.get());
             });
             LOG.info("Values encoded!");
-
             recordsProcessed += entityCollectionResWrap.getPayload().getEntities().size();
-
             LOG.info("Records processed: " + recordsProcessed + ". Target record count: " + targetRecordCount + "\n");
+            payloadSample.get().setResponseTimeMillis(transportWrapper.getElapsedTimeMillis());
+            payloadSamples.get().add(payloadSample.get());
           } else {
             LOG.info("All available records fetched! Total: " + recordsProcessed);
             noMoreRecords.set(true);
           }
         } catch (Exception ex) {
-          getDefaultErrorMessage(ex.toString());
+          LOG.error(getDefaultErrorMessage(ex.toString()));
         }
       }
     } while (!noMoreRecords.get() && recordsProcessed < targetRecordCount);
-    return null;
+    return payloadSamples.get();
   }
 
-  public void createDataAvailabilityReport(AtomicReference<Map<String, Map<String, List<Vector<String>>>>> encodedSamples) {
+  public void createDataAvailabilityReport(Map<String, List<PayloadSample>> resourcePayloadSamplesMap) {
     AtomicReference<Map<String, Map<String, Integer>>> resourceTallies = new AtomicReference<>(new LinkedHashMap<>());
-    encodedSamples.get().keySet().forEach(resourceName -> {
+    resourcePayloadSamplesMap.keySet().forEach(resourceName -> {
       LOG.debug("Processing resource: " + resourceName);
-      LOG.debug("Sample size: " + encodedSamples.get().get(resourceName).keySet().size());
+      LOG.debug("Sample size: " + resourcePayloadSamplesMap.get(resourceName).size());
       //for each resource, go through the keys and tally the data presence counts for each field
       //as well as the number of samples in each case
-
-      resourceTallies.get().put(resourceName, new LinkedHashMap<>());
-      encodedSamples.get().get(resourceName).forEach((key, value) -> {
-        if (value != null) {
-          value.forEach(sample -> {
-            if (sample != null) {
-              //if element has a value
-              if (sample.get(1) != null) {
-                //if the value hasn't already been tallied, then just add one
-                if (!resourceTallies.get().get(resourceName).containsKey(sample.get(0))) {
-                  resourceTallies.get().get(resourceName).put(sample.get(0), 1);
-                } else {
-                  //otherwise, increment the current value
-                  resourceTallies.get().get(resourceName).put(sample.get(0),
-                      resourceTallies.get().get(resourceName).get(sample.get(0) + 1));
-                }
-              }
+      resourceTallies.get().putIfAbsent(resourceName, new LinkedHashMap<>());
+      resourcePayloadSamplesMap.get(resourceName).forEach(payloadSample -> {
+        payloadSample.getSamples().forEach(sample -> {
+          sample.forEach((fieldName, encodedValue) -> {
+            if (encodedValue != null) {
+              resourceTallies.get().get(resourceName).putIfAbsent(fieldName, 0);
+              resourceTallies.get().get(resourceName).put(fieldName, resourceTallies.get().get(resourceName).get(fieldName) + 1);
             }
           });
-        }
+        });
       });
     });
-    LOG.info(resourceTallies.get());
+    Utils.createFile("build", "availability-report.txt", resourceTallies.get().toString());
   }
 
   @When("{int} records are sampled from each non standard resource in the server metadata")
