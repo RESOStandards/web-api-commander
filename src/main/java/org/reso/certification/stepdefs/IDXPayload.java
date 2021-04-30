@@ -1,6 +1,7 @@
 package org.reso.certification.stepdefs;
 
 import com.google.common.collect.Sets;
+import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
@@ -21,6 +22,7 @@ import org.reso.commander.common.DataDictionaryMetadata;
 import org.reso.commander.common.Utils;
 import org.reso.models.ODataTransportWrapper;
 import org.reso.models.PayloadSample;
+import org.reso.models.PayloadSampleReport;
 import org.reso.models.Settings;
 
 import java.io.ByteArrayInputStream;
@@ -103,8 +105,8 @@ public class IDXPayload {
     return sha256().hashString(String.join(SEPARATOR_CHARACTER, values), StandardCharsets.UTF_8).toString();
   }
 
-  @When("{int} records are sampled from each RESO Standard resource in the server metadata")
-  public void recordsAreSampledFromEachRESOStandardResourceInTheServerMetadata(int numRecords) {
+  @When("up to {int} records are sampled from each RESO Standard resource in the server metadata")
+  public void upToRecordsAreSampledFromEachRESOStandardResourceInTheServerMetadata(int numRecords) {
     if (!hasStandardResources.get()) {
       scenario.log("No RESO Standard Resources to sample");
       assumeTrue(true);
@@ -120,9 +122,10 @@ public class IDXPayload {
       */
 
       //TODO: decide whether to store in memory or serialize resource samples files upon completion
-      AtomicReference<Map<String, List<PayloadSample>>> resourcePayloadSamplesMap = new AtomicReference<>(new LinkedHashMap<>());
-      standardResources.get().stream().parallel().forEach(resourceName -> {
-        resourcePayloadSamplesMap.get().putIfAbsent(resourceName, new LinkedList<>());
+      AtomicReference<Map<String, List<PayloadSample>>> resourcePayloadSamplesMap = new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
+
+      standardResources.get().forEach(resourceName -> {
+        resourcePayloadSamplesMap.get().putIfAbsent(resourceName, Collections.synchronizedList(new LinkedList<>()));
         resourcePayloadSamplesMap.get().put(resourceName, fetchAndProcessRecords(resourceName, numRecords));
       });
 
@@ -230,14 +233,15 @@ public class IDXPayload {
         }
         break;
       } else {
-        //need to look at the records from the response and get the lowest timestamp
+        LOG.info("Time taken: "
+            + (transportWrapper.getElapsedTimeMillis() >= 1000 ? (transportWrapper.getElapsedTimeMillis() / 1000) + "s" : transportWrapper.getElapsedTimeMillis() + "ms"));
+
         try {
+          payloadSample.get().setResponseSizeBytes(transportWrapper.getResponseData().getBytes().length);
+
           entityCollectionResWrap = container.get().getCommander().getClient()
               .getDeserializer(ContentType.APPLICATION_JSON)
               .toEntitySet(new ByteArrayInputStream(transportWrapper.getResponseData().getBytes()));
-
-          LOG.info("Time taken: "
-              + (transportWrapper.getElapsedTimeMillis() >= 1000 ? (transportWrapper.getElapsedTimeMillis() / 1000) + "s" : transportWrapper.getElapsedTimeMillis() + "ms"));
 
           if (entityCollectionResWrap.getPayload().getEntities().size() > 0) {
             assert (keyFields.size() > 0) :
@@ -281,29 +285,15 @@ public class IDXPayload {
   }
 
   public void createDataAvailabilityReport(Map<String, List<PayloadSample>> resourcePayloadSamplesMap) {
-    AtomicReference<Map<String, Map<String, Integer>>> resourceTallies = new AtomicReference<>(new LinkedHashMap<>());
-    resourcePayloadSamplesMap.keySet().forEach(resourceName -> {
-      LOG.debug("Processing resource: " + resourceName);
-      LOG.debug("Sample size: " + resourcePayloadSamplesMap.get(resourceName).size());
-      //for each resource, go through the keys and tally the data presence counts for each field
-      //as well as the number of samples in each case
-      resourceTallies.get().putIfAbsent(resourceName, new LinkedHashMap<>());
-      resourcePayloadSamplesMap.get(resourceName).forEach(payloadSample -> {
-        payloadSample.getSamples().forEach(sample -> {
-          sample.forEach((fieldName, encodedValue) -> {
-            if (encodedValue != null) {
-              resourceTallies.get().get(resourceName).putIfAbsent(fieldName, 0);
-              resourceTallies.get().get(resourceName).put(fieldName, resourceTallies.get().get(resourceName).get(fieldName) + 1);
-            }
-          });
-        });
-      });
-    });
-    Utils.createFile("build", "availability-report.txt", resourceTallies.get().toString());
+    PayloadSampleReport payloadSampleReport = new PayloadSampleReport(container.get().getEdm(), resourcePayloadSamplesMap);
+    GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting();
+    gsonBuilder.registerTypeAdapter(PayloadSampleReport.class, payloadSampleReport);
+
+    Utils.createFile("build", "availability-report.json", gsonBuilder.create().toJson(payloadSampleReport));
   }
 
-  @When("{int} records are sampled from each non standard resource in the server metadata")
-  public void recordsAreSampledFromEachNonStandardResourceInTheServerMetadata(int numRecords) {
+  @When("up to {int} records are sampled from each non standard resource in the server metadata")
+  public void upToRecordsAreSampledFromEachNonStandardResourceInTheServerMetadata(int numRecords) {
   }
 
   @Then("each record MUST have the string version of the Primary Key and ModificationTimestamp field")

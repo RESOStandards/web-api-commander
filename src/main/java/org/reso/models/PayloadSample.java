@@ -2,12 +2,15 @@ package org.reso.models;
 
 import org.apache.olingo.commons.api.edm.EdmKeyPropertyRef;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class PayloadSample {
   String resourceName;
   String dateField;
   Long responseTimeMillis = null;
+  Integer responseSizeBytes = null;
   String requestUri = null;
 
   //format is a list of key/value pairs where all fields besides
@@ -47,5 +50,14 @@ public class PayloadSample {
   public void setRequestUri(String value) {
     requestUri = value;
   }
+
+  public Integer getResponseSizeBytes() {
+    return responseSizeBytes;
+  }
+
+  public void setResponseSizeBytes(Integer responseSizeBytes) {
+    this.responseSizeBytes = responseSizeBytes;
+  }
+
 
 }
