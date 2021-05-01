@@ -166,16 +166,16 @@ public class IDXPayload {
 
     final AtomicReference<Map<String, String>> encodedSample = new AtomicReference<>();
 
-    //assumes the 0th key is always used. TODO: determine if we need to scan the keys.
     final List<EdmKeyPropertyRef> keyFields = container.get().getEdm().getEntityContainer()
         .getEntitySet(resourceName).getEntityType().getKeyPropertyRefs();
 
+    LOG.info("Sampling resource: " + resourceName);
     LOG.info("Keys found: " + keyFields.stream().map(EdmKeyPropertyRef::getName).collect(Collectors.joining(", ")));
 
     int recordsProcessed = 0;
     int numRetries = 0;
     int lastTimestampCandidateIndex = 0;
-    String timestampField;
+    final AtomicReference<String> timestampField = new AtomicReference<>();
 
     final int MAX_RETRIES = 3;
 
@@ -185,9 +185,9 @@ public class IDXPayload {
 
     do {
       if (hasStandardTimestampField) {
-        timestampField = TIMESTAMP_STANDARD_FIELD;
+        timestampField.set(TIMESTAMP_STANDARD_FIELD);
       } else if (timestampCandidateFields.size() > 0 && lastTimestampCandidateIndex < timestampCandidateFields.size()) {
-        timestampField = timestampCandidateFields.get(lastTimestampCandidateIndex++);
+        timestampField.set(timestampCandidateFields.get(lastTimestampCandidateIndex++));
       } else {
         scenario.log("ERROR: Could not find a suitable timestamp field in the " + resourceName + " resource to sample with...");
         return null;
@@ -198,8 +198,7 @@ public class IDXPayload {
           .appendEntitySetSegment(resourceName).build().toString()
           + String.format(REQUEST_URI_TEMPLATE, timestampField, lastFetchedDate.get().format(DateTimeFormatter.ISO_INSTANT), timestampField);
 
-
-      payloadSample.set(new PayloadSample(resourceName, timestampField, keyFields));
+      payloadSample.set(new PayloadSample(resourceName, timestampField.get(), keyFields));
       payloadSample.get().setRequestUri(requestUri);
 
       LOG.info("Making request to: " + requestUri);
@@ -254,10 +253,11 @@ public class IDXPayload {
               entity.getProperties().forEach(property -> {
                 // TODO: clean up. If field is timestamp field or key field unmask, if field is null report null, otherwise hash value
                 encodedSample.get().put(property.getName(),
-                    property.getName().contentEquals(MODIFICATION_TIMESTAMP_FIELD) || keyFields.stream().reduce(false,
+                    property.getName().contentEquals(timestampField.get()) || keyFields.stream().reduce(false,
                         (acc, f) -> acc && f.getName().contentEquals(property.getName()), Boolean::logicalAnd)
-                        ? property.getValue().toString() : (property.getValue() != null
-                        ? hashValues(property.getValue().toString()) : null));
+                        ? property.getValue().toString() :
+                        (property.getValue() != null && property.getValue().toString().trim().length() > 0
+                          ? hashValues(property.getValue().toString()) : null));
 
                 if (property.getName().contentEquals(MODIFICATION_TIMESTAMP_FIELD)) {
                   if (ZonedDateTime.parse(property.getValue().toString()).isBefore(lastFetchedDate.get())) {

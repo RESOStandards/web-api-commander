@@ -5,15 +5,21 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmElement;
+import org.apache.olingo.commons.api.edm.EdmKeyPropertyRef;
 import org.reso.commander.common.Utils;
 
 import java.lang.reflect.Type;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> {
   private static final Logger LOG = LogManager.getLogger(PayloadSampleReport.class);
@@ -78,10 +84,13 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
     @Override
     public JsonElement serialize(FieldAvailabilityJson src, Type typeOfSrc, JsonSerializationContext context) {
       JsonObject field = new JsonObject();
-      int numTimesPresent = resourceFieldTallies != null && resourceFieldTallies.get(src.resourceName) != null && resourceFieldTallies.get(src.resourceName).get(src.edmElement.getName()) != null
+
+      int numTimesPresent = resourceFieldTallies != null && resourceFieldTallies.get(src.resourceName) != null
+          && resourceFieldTallies.get(src.resourceName).get(src.edmElement.getName()) != null
           ? resourceFieldTallies.get(src.resourceName).get(src.edmElement.getName()) : 0;
+
       int numSamples = resourcePayloadSamplesMap.get(src.resourceName) != null
-          ? resourcePayloadSamplesMap.get(src.resourceName).stream().reduce(0, (acc, f) -> acc + f.encodedSamples.size(), Integer::sum) : 0;
+          ? resourcePayloadSamplesMap.get(src.resourceName).stream().reduce(0, (a, f) -> a + f.encodedSamples.size(), Integer::sum) : 0;
 
       field.addProperty(RESOURCE_NAME_KEY, src.resourceName);
       field.addProperty(FIELD_NAME_KEY, src.edmElement.getName());
@@ -96,8 +105,8 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
     AtomicInteger numSamples = new AtomicInteger(0);
     resourcePayloadSamplesMap.keySet().forEach(resourceName -> {
       LOG.info("Processing resource: " + resourceName);
-      numSamples.set(resourcePayloadSamplesMap.get(resourceName) != null ? resourcePayloadSamplesMap.get(resourceName).stream()
-          .reduce(0, (acc, f) -> acc + f.getSamples().size(), Integer::sum) : 0);
+      numSamples.set(resourcePayloadSamplesMap.get(resourceName) != null
+          ? resourcePayloadSamplesMap.get(resourceName).stream().reduce(0, (a, f) -> a + f.getSamples().size(), Integer::sum) : 0);
       LOG.info("Sample size: " + numSamples.get());
 
       //for each resource, go through the keys and tally the data presence counts for each field
@@ -147,18 +156,32 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
 
     final JsonArray resourceTotalsByResource = new JsonArray();
     src.resourcePayloadSamplesMap.keySet().forEach(resourceName -> {
-      ResourceTotals resourceTotals = new ResourceTotals(resourceName);
+      ResourceInfo resourceInfo = new ResourceInfo(resourceName);
+      PayloadSample zerothSample = resourcePayloadSamplesMap.get(resourceName) != null
+          ? resourcePayloadSamplesMap.get(resourceName).get(0) : null;
+
+      if (zerothSample != null) {
+        resourceInfo.keyFields.set(zerothSample.keyFields.stream().map(EdmKeyPropertyRef::getName).collect(Collectors.toList()));
+        resourceInfo.dateField.set(zerothSample.dateField);
+      }
+
       if (src.resourcePayloadSamplesMap.get(resourceName) != null) {
        src.resourcePayloadSamplesMap.get(resourceName).forEach(payloadSample -> {
-         resourceTotals.totalBytesReceived.getAndAdd(payloadSample.getResponseSizeBytes());
-         resourceTotals.totalResponseTimeMillis.getAndAdd(payloadSample.getResponseTimeMillis());
-         resourceTotals.numSamplesProcessed.getAndIncrement();
-         resourceTotals.numRecordsFetched.getAndAdd(payloadSample.encodedSamples.size());
+         resourceInfo.totalBytesReceived.getAndAdd(payloadSample.getResponseSizeBytes());
+         resourceInfo.totalResponseTimeMillis.getAndAdd(payloadSample.getResponseTimeMillis());
+         resourceInfo.numSamplesProcessed.getAndIncrement();
+         resourceInfo.numRecordsFetched.getAndAdd(payloadSample.encodedSamples.size());
 
-         if (resourceTotals.pageSize.get() == 0) resourceTotals.pageSize.set(payloadSample.getSamples().size());
+         payloadSample.encodedSamples.forEach(encodedSample -> {
+           OffsetDateTime offsetDateTime = OffsetDateTime.parse(encodedSample.get(payloadSample.dateField));
+           if (offsetDateTime.isBefore(resourceInfo.dateLow.get())) resourceInfo.dateLow.set(offsetDateTime);
+           if (offsetDateTime.isAfter(resourceInfo.dateHigh.get())) resourceInfo.dateHigh.set(offsetDateTime);
+         });
+
+         if (resourceInfo.pageSize.get() == 0) resourceInfo.pageSize.set(payloadSample.getSamples().size());
        });
       }
-      resourceTotalsByResource.add(resourceTotals.serialize(resourceTotals, ResourceTotals.class, null));
+      resourceTotalsByResource.add(resourceInfo.serialize(resourceInfo, ResourceInfo.class, null));
     });
 
     availabilityReport.add(RESOURCE_TOTALS_KEY, resourceTotalsByResource);
@@ -167,14 +190,18 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
     return availabilityReport;
   }
 
-  static final class ResourceTotals implements JsonSerializer<ResourceTotals> {
+  static final class ResourceInfo implements JsonSerializer<ResourceInfo> {
     final String
         RESOURCE_NAME_KEY = "resourceName",
         TOTAL_NUM_RECORDS_FETCHED = "numRecordsFetched",
         TOTAL_NUM_SAMPLES_KEY = "numSamples",
         PAGE_SIZE_KEY = "pageSize",
         AVERAGE_RESPONSE_TIME_MILLIS_KEY = "averageResponseTimeMillis",
-        AVERAGE_RESPONSE_BYTES_KEY = "averageResponseBytes";
+        AVERAGE_RESPONSE_BYTES_KEY = "averageResponseBytes",
+        KEY_FIELDS_KEY = "keyFields",
+        DATE_FIELD_KEY = "dateField",
+        DATE_LOW_KEY = "dateLow",
+        DATE_HIGH_KEY = "dateHigh";
 
     final AtomicInteger numSamplesProcessed = new AtomicInteger(0);
     final AtomicInteger numRecordsFetched = new AtomicInteger(0);
@@ -182,8 +209,12 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
     final AtomicLong totalResponseTimeMillis = new AtomicLong(0);
     final AtomicLong totalBytesReceived = new AtomicLong(0);
     final AtomicInteger pageSize = new AtomicInteger(0);
+    final AtomicReference<List<String>> keyFields = new AtomicReference<>(new LinkedList<>());
+    final AtomicReference<String> dateField = new AtomicReference<>();
+    final AtomicReference<OffsetDateTime> dateLow = new AtomicReference<>(OffsetDateTime.now().plus(100, ChronoUnit.YEARS));
+    final AtomicReference<OffsetDateTime> dateHigh = new AtomicReference<>(OffsetDateTime.now().minus(100, ChronoUnit.YEARS));
 
-    public ResourceTotals (String resourceName) {
+    public ResourceInfo(String resourceName) {
       this.resourceName.set(resourceName);
     }
 
@@ -203,7 +234,7 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
      * @return a JsonElement corresponding to the specified object.
      */
     @Override
-    public JsonElement serialize(ResourceTotals src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(ResourceInfo src, Type typeOfSrc, JsonSerializationContext context) {
       JsonObject totals = new JsonObject();
       totals.addProperty(RESOURCE_NAME_KEY, src.resourceName.get());
       totals.addProperty(TOTAL_NUM_RECORDS_FETCHED, src.numRecordsFetched.get());
@@ -211,6 +242,14 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
       totals.addProperty(PAGE_SIZE_KEY, src.pageSize.get());
       totals.addProperty(AVERAGE_RESPONSE_BYTES_KEY, src.numSamplesProcessed.get() > 0 ? src.totalBytesReceived.get() / src.numSamplesProcessed.get() : 0);
       totals.addProperty(AVERAGE_RESPONSE_TIME_MILLIS_KEY, src.numSamplesProcessed.get() > 0 ? src.totalResponseTimeMillis.get() / src.numSamplesProcessed.get() : 0);
+      totals.addProperty(DATE_FIELD_KEY, src.dateField.get());
+      totals.addProperty(DATE_LOW_KEY, src.dateLow.get().format(DateTimeFormatter.ISO_INSTANT));
+      totals.addProperty(DATE_HIGH_KEY, src.dateHigh.get().format(DateTimeFormatter.ISO_INSTANT));
+
+      JsonArray keyFields = new JsonArray();
+      src.keyFields.get().forEach(keyFields::add);
+      totals.add(KEY_FIELDS_KEY, keyFields);
+
       return totals;
     }
   }
