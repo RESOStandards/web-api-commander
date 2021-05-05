@@ -19,7 +19,7 @@
     </Logger>
     <Root level="all">
       <AppenderRef ref="Console" level="info"/>
-      <AppenderRef ref="Log"/>
+      <AppenderRef ref="Log" level="error"/>
     </Root>
   </Loggers>
 </Configuration>

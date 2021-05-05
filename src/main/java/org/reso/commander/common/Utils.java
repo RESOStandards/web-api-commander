@@ -8,10 +8,11 @@ import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Objects;
 
 public class Utils {
   private static final Logger LOG = LogManager.getLogger(Utils.class);
@@ -85,6 +86,32 @@ public class Utils {
     return outputFile;
   }
 
+  /**
+   * Removes a directory at the given pathToDirectory.
+   *
+   * If current user has write access then directory creation will result in True being returned.
+   * Otherwise will return false if the directory couldn't be created for some reason.
+   * @param pathToDirectory
+   * @return
+   */
+  public static Boolean removeDirectory(String pathToDirectory) {
+    if (pathToDirectory == null) return null;
+    File outputDirectory = new File(pathToDirectory);
+
+    if (outputDirectory.exists()) {
+      if (outputDirectory.canWrite()) {
+        if (outputDirectory.listFiles() != null) {
+          Arrays.stream(Objects.requireNonNull(outputDirectory.listFiles())).forEach(File::delete);
+        }
+        return outputDirectory.delete();
+      } else {
+        LOG.error("Tried deleting directory " + outputDirectory.getPath() + " but didn't have sufficient access.");
+        return false;
+      }
+    }
+    return true;
+  }
+
   public static String pluralize(int lengthAttribute) {
     return lengthAttribute != 1 ? "s" : "";
   }
@@ -109,11 +136,11 @@ public class Utils {
   }
 
   public static String getIsoTimestamp() {
-    return ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
+    return OffsetDateTime.now().format(DateTimeFormatter.ISO_INSTANT);
   }
 
-  public static String getIsoTimestamp(ZonedDateTime fromDate) {
-    return ZonedDateTime.from(fromDate.toInstant()).format(DateTimeFormatter.ISO_INSTANT);
+  public static String getIsoTimestamp(OffsetDateTime fromDate) {
+    return OffsetDateTime.from(fromDate.toInstant()).format(DateTimeFormatter.ISO_INSTANT);
   }
 
 }

@@ -11,11 +11,7 @@ import org.reso.commander.common.Utils;
 import java.lang.reflect.Type;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -134,10 +130,11 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
         DESCRIPTION_KEY = "description", DESCRIPTION = "RESO Data Availability Report",
         VERSION_KEY = "version", VERSION = "1.7",
         GENERATED_ON_KEY = "generatedOn",
-        RESOURCE_TOTALS_KEY = "resourceTotals",
+        RESOURCE_INFO_KEY = "resourceInfo",
         FIELDS_KEY = "fields";
 
     JsonArray fields = new JsonArray();
+    Set<String> postalCodes = new LinkedHashSet<>();
 
     src.metadata.getSchemas().forEach(edmSchema -> {
       //serialize entities (resources) and members (fields)
@@ -158,6 +155,7 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
     src.resourcePayloadSamplesMap.keySet().forEach(resourceName -> {
       ResourceInfo resourceInfo = new ResourceInfo(resourceName);
       PayloadSample zerothSample = resourcePayloadSamplesMap.get(resourceName) != null
+          && resourcePayloadSamplesMap.get(resourceName).size() > 0
           ? resourcePayloadSamplesMap.get(resourceName).get(0) : null;
 
       if (zerothSample != null) {
@@ -174,8 +172,19 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
 
          payloadSample.encodedSamples.forEach(encodedSample -> {
            OffsetDateTime offsetDateTime = OffsetDateTime.parse(encodedSample.get(payloadSample.dateField));
-           if (offsetDateTime.isBefore(resourceInfo.dateLow.get())) resourceInfo.dateLow.set(offsetDateTime);
-           if (offsetDateTime.isAfter(resourceInfo.dateHigh.get())) resourceInfo.dateHigh.set(offsetDateTime);
+           if (offsetDateTime != null) {
+             if (resourceInfo.dateLow.get() != null && offsetDateTime.isBefore(resourceInfo.dateLow.get())) {
+               resourceInfo.dateLow.set(offsetDateTime);
+             }
+
+             if (resourceInfo.dateHigh.get() != null && offsetDateTime.isAfter(resourceInfo.dateHigh.get())) {
+               resourceInfo.dateHigh.set(offsetDateTime);
+             }
+           }
+
+           if (encodedSample.containsKey("PostalCode")) {
+             postalCodes.add(encodedSample.get("PostalCode"));
+           }
          });
 
          if (resourceInfo.pageSize.get() == 0) resourceInfo.pageSize.set(payloadSample.getSamples().size());
@@ -184,7 +193,8 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
       resourceTotalsByResource.add(resourceInfo.serialize(resourceInfo, ResourceInfo.class, null));
     });
 
-    availabilityReport.add(RESOURCE_TOTALS_KEY, resourceTotalsByResource);
+    LOG.info("Postal Codes: " + postalCodes);
+    availabilityReport.add(RESOURCE_INFO_KEY, resourceTotalsByResource);
     availabilityReport.add(FIELDS_KEY, fields);
 
     return availabilityReport;
@@ -211,8 +221,8 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
     final AtomicInteger pageSize = new AtomicInteger(0);
     final AtomicReference<List<String>> keyFields = new AtomicReference<>(new LinkedList<>());
     final AtomicReference<String> dateField = new AtomicReference<>();
-    final AtomicReference<OffsetDateTime> dateLow = new AtomicReference<>(OffsetDateTime.now().plus(100, ChronoUnit.YEARS));
-    final AtomicReference<OffsetDateTime> dateHigh = new AtomicReference<>(OffsetDateTime.now().minus(100, ChronoUnit.YEARS));
+    final AtomicReference<OffsetDateTime> dateLow = new AtomicReference<>(null);
+    final AtomicReference<OffsetDateTime> dateHigh = new AtomicReference<>(null);
 
     public ResourceInfo(String resourceName) {
       this.resourceName.set(resourceName);
@@ -240,11 +250,15 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
       totals.addProperty(TOTAL_NUM_RECORDS_FETCHED, src.numRecordsFetched.get());
       totals.addProperty(TOTAL_NUM_SAMPLES_KEY, src.numSamplesProcessed.get());
       totals.addProperty(PAGE_SIZE_KEY, src.pageSize.get());
-      totals.addProperty(AVERAGE_RESPONSE_BYTES_KEY, src.numSamplesProcessed.get() > 0 ? src.totalBytesReceived.get() / src.numSamplesProcessed.get() : 0);
-      totals.addProperty(AVERAGE_RESPONSE_TIME_MILLIS_KEY, src.numSamplesProcessed.get() > 0 ? src.totalResponseTimeMillis.get() / src.numSamplesProcessed.get() : 0);
+      totals.addProperty(AVERAGE_RESPONSE_BYTES_KEY, src.numSamplesProcessed.get() > 0
+          ? src.totalBytesReceived.get() / src.numSamplesProcessed.get() : 0);
+      totals.addProperty(AVERAGE_RESPONSE_TIME_MILLIS_KEY, src.numSamplesProcessed.get() > 0
+          ? src.totalResponseTimeMillis.get() / src.numSamplesProcessed.get() : 0);
       totals.addProperty(DATE_FIELD_KEY, src.dateField.get());
-      totals.addProperty(DATE_LOW_KEY, src.dateLow.get().format(DateTimeFormatter.ISO_INSTANT));
-      totals.addProperty(DATE_HIGH_KEY, src.dateHigh.get().format(DateTimeFormatter.ISO_INSTANT));
+      totals.addProperty(DATE_LOW_KEY, src.dateLow.get() != null
+          ? src.dateLow.get().format(DateTimeFormatter.ISO_INSTANT) : null);
+      totals.addProperty(DATE_HIGH_KEY, src.dateHigh.get() != null
+          ? src.dateHigh.get().format(DateTimeFormatter.ISO_INSTANT): null);
 
       JsonArray keyFields = new JsonArray();
       src.keyFields.get().forEach(keyFields::add);
