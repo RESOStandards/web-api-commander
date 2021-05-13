@@ -180,17 +180,12 @@ public class ResourceInfoProcessor extends WorksheetProcessor {
 
       return "\n" +
           "    fieldInfo = new FieldInfo(\"" + field.getStandardName() + "\", EdmPrimitiveTypeKind.Decimal.getFullQualifiedName());\n" +
-          "    fieldInfo.addAnnotation(\"" + field.getDisplayName() + "\", \"" + ANNOTATION_TERM_DISPLAY_NAME + "\");\n" +
+          "    fieldInfo.setPrecision(" + field.getSuggestedMaxLength() + ");\n" +
+          "    fieldInfo.setScale(" + field.getSuggestedMaxPrecision() + ");\n" +
           "    fieldInfo.addAnnotation(\"" + field.getDefinition().replace('"','\'') + "\", \"" + ANNOTATION_TERM_DESCRIPTION + "\");\n" +
           "    fieldInfo.addAnnotation(\"" + field.getWikiPageUrl() + "\", \"" + ANNOTATION_TERM_URL + "\");\n" +
           "    list.add(fieldInfo);" +
           "\n";
-
-      //TODO: Length is actually scale for Decimal fields by the DD! :/
-      //TODO: Add setScale property to Decimal types in FieldInfo
-
-      //TODO: Precision is actually Scale for Decimal fields by the DD! :/
-      //TODO: Add setPrecision property to Decimal types in FieldInfo
     }
 
     public static String buildIntegerMarkup(ReferenceStandardField field) {
