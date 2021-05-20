@@ -150,9 +150,8 @@ public class DataDictionary {
 
   @When("a metadata file is provided")
   public void aMetadataFileIsProvided() {
-    boolean result = false;
     if (isUsingMetadata) {
-      result = pathToMetadata != null && Files.exists(Paths.get(pathToMetadata));
+      boolean result = pathToMetadata != null && Files.exists(Paths.get(pathToMetadata));
       if (!result) {
         failAndExitWithErrorMessage("Path to given metadata file does not exist: " + PATH_TO_METADATA_ARG + "=" + pathToMetadata, scenario);
       }
@@ -195,8 +194,6 @@ public class DataDictionary {
 
   @And("valid metadata were retrieved from the server")
   public void validMetadataWereRetrievedFromTheServer() {
-    boolean result = false;
-
     if (isUsingRESOScript && container.getShouldValidateMetadata()) {
       //request metadata from server using service root in RESOScript file
       TestUtils.assertXMLMetadataAreRequestedFromTheServer(container, scenario);

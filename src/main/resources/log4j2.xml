@@ -14,7 +14,7 @@
     </File>
   </Appenders>
   <Loggers>
-    <Logger name="org.apache.olingo.client.core" level="all" additivity="false">
+    <Logger name="org.apache.olingo.client.core" level="error" additivity="false">
       <AppenderRef ref="Log"/>
     </Logger>
     <Root level="all">

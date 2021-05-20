@@ -1,7 +1,6 @@
 package org.reso.models;
 
 import com.google.gson.*;
-import org.apache.olingo.commons.api.edm.EdmKeyPropertyRef;
 import org.reso.commander.common.Utils;
 
 import java.lang.reflect.Type;
@@ -11,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PayloadSample implements JsonSerializer<PayloadSample> {
+
   String resourceName;
   String dateField;
   Long responseTimeMillis = null;
@@ -22,13 +22,19 @@ public class PayloadSample implements JsonSerializer<PayloadSample> {
   final List<Map<String, String>> encodedSamples = Collections.synchronizedList(new LinkedList<>());
 
   //keeps track of the list of key fields found on the server
-  final List<EdmKeyPropertyRef> keyFields = new LinkedList<>();
+  final List<String> keyFields = new LinkedList<>();
 
-  public PayloadSample(String resourceName, String dateField, List<EdmKeyPropertyRef> keyFields) {
+  final List<String> payloadFields = new LinkedList<>();
+
+  public PayloadSample(String resourceName, String dateField, List<String> keyFields) {
     assert resourceName != null : "resourceName MUST be present";
     this.resourceName = resourceName;
     this.dateField = dateField;
     this.keyFields.addAll(keyFields);
+  }
+
+  public void setPayloadFields(List<String> payloadFields) {
+    this.payloadFields.addAll(payloadFields);
   }
 
   public void addSample(Map<String, String> sample) {
@@ -81,15 +87,16 @@ public class PayloadSample implements JsonSerializer<PayloadSample> {
   @Override
   public JsonElement serialize(PayloadSample src, Type typeOfSrc, JsonSerializationContext context) {
     final String
-      DESCRIPTION_KEY = "description",
-      GENERATED_ON_KEY = "generatedOn",
-      NUM_SAMPLES_KEY = "numSamples",
-      REQUEST_URI_KEY = "requestUri",
-      RESOURCE_NAME_KEY = "resourceName",
-      DATE_FIELD_KEY = "dateField",
-      KEY_FIELDS_KEY = "keyFields",
-      ENCODED_VALUES_KEY = "encodedValues",
-      DESCRIPTION = "RESO Payload Sample";
+        DESCRIPTION = "RESO Payload Sample",
+        DESCRIPTION_KEY = "description",
+        GENERATED_ON_KEY = "generatedOn",
+        NUM_SAMPLES_KEY = "numSamples",
+        REQUEST_URI_KEY = "requestUri",
+        RESOURCE_NAME_KEY = "resourceName",
+        DATE_FIELD_KEY = "dateField",
+        KEY_FIELDS_KEY = "keyFields",
+        ENCODED_VALUES_KEY = "encodedValues",
+        PAYLOAD_FIELDS_KEY = "payloadFields";
 
 
     JsonObject serialized = new JsonObject();
@@ -100,10 +107,14 @@ public class PayloadSample implements JsonSerializer<PayloadSample> {
     serialized.addProperty(RESOURCE_NAME_KEY,src.resourceName);
 
     JsonArray keyFields = new JsonArray();
-    src.keyFields.forEach(k -> keyFields.add(k.getName()));
+    src.keyFields.forEach(keyFields::add);
     serialized.add(KEY_FIELDS_KEY, keyFields);
 
     serialized.addProperty(DATE_FIELD_KEY, src.dateField);
+
+    JsonArray payloadFieldsJson = new JsonArray();
+    src.payloadFields.forEach(payloadFieldsJson::add);
+    serialized.add(PAYLOAD_FIELDS_KEY, payloadFieldsJson);
 
     JsonArray encodedSamplesJson = new JsonArray();
     src.encodedSamples.forEach(sample -> {
@@ -117,3 +128,4 @@ public class PayloadSample implements JsonSerializer<PayloadSample> {
     return serialized;
   }
 }
+

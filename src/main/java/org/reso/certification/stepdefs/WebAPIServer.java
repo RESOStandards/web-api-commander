@@ -2,6 +2,7 @@ package org.reso.certification.stepdefs;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.POJONode;
+import com.google.inject.Inject;
 import io.cucumber.java8.En;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -77,7 +78,10 @@ class WebAPIServer implements En {
   /**
    * Entry point to the Web API Server tests
    */
-  public WebAPIServer() {
+  @Inject
+  public WebAPIServer(WebAPITestContainer c) {
+    container.set(c);
+
     getTestContainer().setShowResponses(showResponses);
 
     runBackground();

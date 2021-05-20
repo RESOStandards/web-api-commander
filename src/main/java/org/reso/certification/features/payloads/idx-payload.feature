@@ -8,8 +8,9 @@ Feature: IDX Payload Endorsement (Web API)
     And a test container was successfully created from the given RESOScript
     And the test container uses an authorization_code or client_credentials for authentication
 
+  # TODO: tie back into common metadata validation shared scenario
   @metadata-validation @idx-payload-endorsement @dd-1.7 @web-api-1.0.2
-  Scenario: metadata-validation - Request and Validate Server Metadata
+  Scenario: Request and Validate Server Metadata
     When XML Metadata are requested from the service root in "ClientSettings_WebAPIURI"
     Then the server responds with a status code of 200
     And the server has an OData-Version header value of "4.0" or "4.01"
@@ -18,17 +19,35 @@ Feature: IDX Payload Endorsement (Web API)
     And the XML Metadata returned by the server contains Edm metadata
     And the Edm metadata returned by the server are valid
     And the metadata contains a valid service document
+    And each resource MUST have a primary key field by the OData specification
 
-  @standard-resource-sampling @idx-payload-endorsement
-  Scenario: Standard Resource Sampling - Request Data from Each Server Resource
-    Given that metadata have been requested from the server
+  @standard-resource-sampling @dd-1.7 @idx-payload-endorsement
+  Scenario: Standard Resource Sampling
+    Given that valid metadata have been requested from the server
     And the metadata contains RESO Standard Resources
-    When up to 10000 records are sampled from each RESO Standard resource in the server metadata
-    Then each record MUST have the string version of the Primary Key and ModificationTimestamp field
-    And the data MUST match what is advertised in the metadata
+    And "payload-samples" has been created in the build directory
+    Then up to 10000 records are sampled from each resource with "IDX" payload samples stored in "payload-samples"
 
-  @non-standard-resource-sampling @idx-payload-endorsement
+  # data are not stored in this case, just sampled and scored
+  @local-resource-sampling @dd-1.7 @idx-payload-endorsement
   Scenario: Non Standard Resource Sampling - Request Data from Each Server Resource
-    Given that metadata have been requested from the server
-    When up to 1000 records are sampled from each non standard resource in the server metadata
-    Then the data MUST match what is advertised in the metadata
+    Given that valid metadata have been requested from the server
+    And the metadata contains local resources
+    Then up to 10000 records are sampled from each local resource
+
+  @idx-payload-endorsement @dd-1.7
+  Scenario: A Data Availability Report is Created from Sampled Records
+    Given standard and local resources have been processed
+    Then a data availability report is created in "data-availability-report.json"
+
+  @idx-user-sampling @dd-1.7 @idx-payload-endorsement
+  Scenario: IDX User Sampling
+    Given samples exist in "payload-samples" in the build directory
+    And a RESOScript file was provided for the IDX User
+    And Client Settings and Parameters were read from the file
+    And a test container was successfully created from the given RESOScript
+    And the test container uses an authorization_code or client_credentials for authentication
+    When samples from "payload-samples" are fetched as the representative user for each resource in the "IDX" payload
+    Then each result MUST contain the string version of the key and the following fields
+      |ModificationTimestamp|
+    And the "IDX" payload field values MUST match those in the samples
