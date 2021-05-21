@@ -179,9 +179,7 @@ task testIdxPayload_1_7() {
   group = 'RESO Certification'
   description = 'Runs IDX Payload 1.7 Automated Acceptance Tests.' +
       '\n  Example: ' +
-      '\n    $ ./gradlew testIdxPayload_1_7 -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true\n' +
-      '\n    Note: by default the Web API tests assume Collection(Edm.EnumType).' +
-      '\n      Pass -DuseCollections=false if using OData IsFlags.\n'
+      '\n    $ ./gradlew testIdxPayload_1_7 -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true\n'
 
   dependsOn jar
   doLast {

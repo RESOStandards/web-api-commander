@@ -188,7 +188,7 @@ public class IDXPayload {
       }
     } else {
       String oDataCountString = from(transportWrapper.getResponseData()).getString("\"@odata.count\"");
-      count = Integer.parseInt(oDataCountString);
+      count = oDataCountString != null && oDataCountString.trim().length() > 0 ? Integer.parseInt(oDataCountString) : 0;
       scenario.log("Total record count for the " + resourceName + " resource: " + oDataCountString);
     }
     return count;
@@ -525,7 +525,7 @@ public class IDXPayload {
 
   @And("a RESOScript file was provided for the IDX User")
   public void aRESOScriptFileWasProvidedForTheIDXUser() {
-    scenario.log("A RESOScript file was provided for the IDX User!");
+    scenario.log("!!TODO!! A RESOScript file was provided for the IDX User!");
     assumeTrue(true);
   }
 
@@ -552,19 +552,19 @@ public class IDXPayload {
 
   @Then("each result MUST contain the string version of the key and the following fields")
   public void eachResultMUSTContainTheStringVersionOfTheKeyAndTheFollowingFields(List<String> requiredFields) {
-    scenario.log("Each result MUST contain the string version of the key and the following fields!");
+    scenario.log("!!TODO!! Each result MUST contain the string version of the key and the following fields!");
     assumeTrue(true);
   }
 
   @And("the {string} payload field values MUST match those in the samples")
   public void thePayloadFieldValuesMUSTMatchThoseInTheSamples(String arg0) {
-    scenario.log("The {string} payload field values MUST match those in the samples!");
+    scenario.log("!!TODO!! The {string} payload field values MUST match those in the samples!");
     assumeTrue(true);
   }
 
   @Given("standard and local resources have been processed")
   public void standardAndLocalResourcesHaveBeenProcessed() {
-    scenario.log("Standard and local resources have been processed!");
+    scenario.log("!!TODO!! Standard and local resources have been processed!");
     assumeTrue(true);
   }
 
