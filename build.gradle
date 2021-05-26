@@ -48,6 +48,8 @@ dependencies {
   compile 'io.cucumber:cucumber-guice:6.10.2'
   compile 'io.cucumber:cucumber-core:6.10.2'
 
+  compile 'com.github.javafaker:javafaker:1.0.2'
+
   compile 'net.masterthought:cucumber-reporting:5.5.2'
 
   //TODO: choose one schema validator between this and rest-assured

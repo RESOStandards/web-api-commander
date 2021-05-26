@@ -242,6 +242,12 @@ public class App {
           } catch (Exception ex) {
             LOG.error(getDefaultErrorMessage(ex));
           }
+        } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_SEED_DATA_SQL)) {
+          try {
+            DataDictionarySeedDataSqlGenerator generator = new DataDictionarySeedDataSqlGenerator();
+          } catch (Exception ex) {
+            LOG.error(getDefaultErrorMessage(ex));
+          }
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_QUERIES)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_QUERIES);
 
@@ -424,6 +430,8 @@ public class App {
         }
       } else if (action.matches(ACTIONS.GENERATE_QUERIES)) {
         validationResponse = validateOptions(cmd, INPUT_FILE);
+      } else if (action.matches(ACTIONS.GENERATE_REFERENCE_DDL) || action.matches(ACTIONS.GENERATE_SEED_DATA_SQL)) {
+        validationResponse = validateOptions(cmd, INPUT_FILE);
       }
 
       if (validationResponse != null) {
@@ -528,6 +536,8 @@ public class App {
               .desc("Generates reference metadata in EDMX format.").build())
           .addOption(Option.builder().argName("k").longOpt(ACTIONS.GENERATE_REFERENCE_DDL)
               .desc("Generates reference DDL to create a RESO-compliant SQL database. Pass --useKeyNumeric to generate the DB using numeric keys.").build())
+          .addOption(Option.builder().argName("d").longOpt(ACTIONS.GENERATE_SEED_DATA_SQL)
+              .desc("Generates SQL statements to seed data (Data Dictionary 1.7). Pass --useKeyNumeric to generate the DB using numeric keys.").build())
           .addOption(Option.builder().argName("m").longOpt(ACTIONS.GET_METADATA)
               .desc("Fetches metadata from <serviceRoot> using <bearerToken> and saves results in <outputFile>.").build())
           .addOption(Option.builder().argName("g").longOpt(ACTIONS.GENERATE_METADATA_REPORT)
@@ -560,6 +570,7 @@ public class App {
       public static final String GENERATE_DD_ACCEPTANCE_TESTS = "generateDDAcceptanceTests";
       public static final String GENERATE_REFERENCE_EDMX = "generateReferenceEDMX";
       public static final String GENERATE_REFERENCE_DDL = "generateReferenceDDL";
+      public static final String GENERATE_SEED_DATA_SQL = "generateSeedDataSql";
       public static final String GENERATE_QUERIES = "generateQueries";
       public static final String RUN_RESOSCRIPT = "runRESOScript";
       public static final String GET_METADATA = "getMetadata";

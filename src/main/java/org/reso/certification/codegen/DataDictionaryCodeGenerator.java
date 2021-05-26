@@ -9,7 +9,7 @@ import org.reso.commander.common.DataDictionaryMetadata;
 import static org.reso.certification.codegen.WorksheetProcessor.REFERENCE_WORKSHEET;
 import static org.reso.certification.codegen.WorksheetProcessor.buildWellKnownStandardFieldHeaderMap;
 
-public class DataDictionaryCodeGenerator {
+public final class DataDictionaryCodeGenerator {
   private static final Logger LOG = LogManager.getLogger(DataDictionaryCodeGenerator.class);
   WorksheetProcessor processor = null;
   Workbook workbook = null;
@@ -33,21 +33,25 @@ public class DataDictionaryCodeGenerator {
    * Generates Data Dictionary references for local workbook instance using the configured WorksheetProcessor
    */
   public void processWorksheets() {
-    Sheet currentWorksheet, standardResourcesWorksheet;
+    Sheet currentWorksheet, standardRelationshipsWorksheet;
     int sheetIndex, rowIndex;
     final int ROW_HEADER_INDEX = 0, FIRST_ROW_INDEX = 1;
     final String STANDARD_RELATIONSHIPS_WORKSHEET = "Standard Relationships";
 
     try {
-      standardResourcesWorksheet = workbook.getSheet(STANDARD_RELATIONSHIPS_WORKSHEET);
-      assert standardResourcesWorksheet != null;
+      standardRelationshipsWorksheet = workbook.getSheet(STANDARD_RELATIONSHIPS_WORKSHEET);
+      assert standardRelationshipsWorksheet != null : "Standard Relationships worksheet MUST be present!";
 
-      processor.buildStandardRelationships(standardResourcesWorksheet);
+      processor.buildStandardRelationships(standardRelationshipsWorksheet);
 
       //workbook consists of many sheets, process only the ones that have the name of a well-known resource
+      //TODO: change to stream processing logic
       for (sheetIndex = ROW_HEADER_INDEX; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++) {
+        assert workbook != null && sheetIndex >= 0 && sheetIndex < workbook.getNumberOfSheets()
+            : "Worksheet at index + " + sheetIndex + " does not exist!";
         currentWorksheet = workbook.getSheetAt(sheetIndex);
 
+        //TODO: make DD version dynamic
         if (DataDictionaryMetadata.v1_7.WELL_KNOWN_RESOURCES.contains(currentWorksheet.getSheetName()) && currentWorksheet.getPhysicalNumberOfRows() > 1) {
           processor.beforeResourceSheetProcessed(currentWorksheet);
 

@@ -1,5 +1,7 @@
 package org.reso.certification.codegen;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.reso.models.ReferenceStandardField;
 
 import java.util.LinkedHashMap;
@@ -8,15 +10,25 @@ import java.util.List;
 import java.util.Map;
 
 public class DDCacheProcessor extends WorksheetProcessor {
-  Map<String, List<ReferenceStandardField>> standardFieldCache = new LinkedHashMap<>();
+  private static final Logger LOG = LogManager.getLogger(DDCacheProcessor.class);
+  Map<String, List<ReferenceStandardField>> fieldCache = new LinkedHashMap<>();
 
   private void addToFieldCache(ReferenceStandardField field) {
-    standardFieldCache.putIfAbsent(field.getParentResourceName(), new LinkedList<>());
-    standardFieldCache.get(field.getParentResourceName()).add(field);
+    fieldCache.putIfAbsent(field.getParentResourceName(), new LinkedList<>());
+    fieldCache.get(field.getParentResourceName()).add(field);
   }
 
-  public Map<String, List<ReferenceStandardField>> getStandardFieldCache() {
-    return standardFieldCache;
+  public Map<String, List<ReferenceStandardField>> getFieldCache() {
+    return fieldCache;
+  }
+
+  public static Map<String, List<ReferenceStandardField>> getDDReferenceStandardFieldCache() {
+    LOG.info("Creating standard field cache...");
+    DDCacheProcessor cacheProcessor = new DDCacheProcessor();
+    DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(cacheProcessor);
+    generator.processWorksheets();
+    LOG.info("Standard field cache created!");
+    return cacheProcessor.getFieldCache();
   }
 
   @Override

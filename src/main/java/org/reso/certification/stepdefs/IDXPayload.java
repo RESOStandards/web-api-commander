@@ -22,7 +22,6 @@ import org.apache.olingo.commons.api.edm.EdmNamed;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.codegen.DDCacheProcessor;
-import org.reso.certification.codegen.DataDictionaryCodeGenerator;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.DataDictionaryMetadata;
 import org.reso.commander.common.Utils;
@@ -420,12 +419,7 @@ public class IDXPayload {
     try {
       if (container.get().hasValidMetadata()) {
         if (standardFieldCache.get().size() == 0) {
-          LOG.info("Creating standard field cache...");
-          DDCacheProcessor cacheProcessor = new DDCacheProcessor();
-          DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(cacheProcessor);
-          generator.processWorksheets();
-          standardFieldCache.get().putAll(cacheProcessor.getStandardFieldCache());
-          LOG.info("Standard field cache created!");
+          standardFieldCache.get().putAll(DDCacheProcessor.getDDReferenceStandardFieldCache());
         }
       } else {
         failAndExitWithErrorMessage("Valid metadata was not retrieved from the server. Exiting!", scenario);
