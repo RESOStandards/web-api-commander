@@ -4,76 +4,76 @@
   "generatedOn": "2021-05-26T20:42:29.007Z",
   "resourceInfo": [{
     "resourceName": "Property",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "Member",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "Office",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "Contacts",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "ContactListings",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "HistoryTransactional",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "InternetTracking",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "Media",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "OpenHouse",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "OUID",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "Prospecting",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "Queue",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "Rules",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "SavedSearch",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "Showing",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "Teams",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "TeamMembers",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "ContactListingNotes",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "OtherPhone",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "PropertyGreenVerification",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "PropertyPowerProduction",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "PropertyRooms",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "PropertyUnitTypes",
-    "recordCount": 100
+    "recordCount": 10
   }, {
     "resourceName": "SocialMedia",
-    "recordCount": 100
+    "recordCount": 10
   }],
   "fields": [{
     "resourceName": "Property",

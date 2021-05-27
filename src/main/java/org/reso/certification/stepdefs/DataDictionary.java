@@ -29,7 +29,6 @@ import org.reso.models.Settings;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -588,11 +587,9 @@ public class DataDictionary {
 
   private XMLMetadata getReferenceMetadata() {
     if (referenceMetadata == null) {
-      URL resource = Thread.currentThread().getContextClassLoader().getResource(REFERENCE_METADATA);
-      assert resource != null;
-      referenceMetadata = Commander
-          .deserializeXMLMetadata(Commander.convertInputStreamToString(Commander.deserializeFileFromPath(resource.getPath())),
-              container.getCommander().getClient());
+      final String xmlMetadata = Commander.convertInputStreamToString(Thread.currentThread().getContextClassLoader().getResourceAsStream(REFERENCE_METADATA));
+      assert xmlMetadata != null : getDefaultErrorMessage("could not load reference metadata from: " + REFERENCE_METADATA);
+      referenceMetadata = Commander.deserializeXMLMetadata(xmlMetadata, container.getCommander().getClient());
     }
     return referenceMetadata;
   }

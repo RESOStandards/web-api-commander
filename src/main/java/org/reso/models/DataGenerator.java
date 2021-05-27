@@ -7,18 +7,16 @@ import org.apache.logging.log4j.Logger;
 import org.reso.commander.Commander;
 
 import java.lang.reflect.Type;
-import java.net.URL;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+
+import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 /**
  * Used to deserialize the Data Dictionary reference sheet into a cache of generators
  */
 public class DataGenerator {
   private static final Logger LOG = LogManager.getLogger(DataGenerator.class);
-  private final static String DATA_GENERATOR_JSON = "data-generator-dd1.7.json";
+  private final static String DATA_GENERATOR_JSON = "RESODataDictionary-1.7.data-generator.json";
 
   private String description;
   private String version;
@@ -34,13 +32,10 @@ public class DataGenerator {
    * @return nested hashes of standard field generators
    */
   public static DataGenerator deserialize() {
-    Map<String, Map<String, DataGenerator>> dataGeneratorResourceFieldMap =
-        Collections.synchronizedMap(new LinkedHashMap<>());
+    final String generatorJson = Commander.convertInputStreamToString(Thread.currentThread().getContextClassLoader().getResourceAsStream(DATA_GENERATOR_JSON));
+    assert generatorJson != null : getDefaultErrorMessage("could not load resource " + DATA_GENERATOR_JSON);
 
-    URL resource = Thread.currentThread().getContextClassLoader().getResource(DATA_GENERATOR_JSON);
-    assert resource != null : "ERROR: could not load resource " + DATA_GENERATOR_JSON;
-
-    final String generatorJson = Commander.convertInputStreamToString(Commander.deserializeFileFromPath(resource.getPath()));
+    //final String generatorJson = Commander.convertInputStreamToString(Commander.deserializeFileFromPath(resource.getPath()));
 
     //note the open braces before getType()
     Type targetClassType = new TypeToken<DataGenerator>() {}.getType();

@@ -37,7 +37,7 @@ import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_
  */
 public class DataDictionarySeedDataSqlGenerator {
   private static final Logger LOG = LogManager.getLogger(DataDictionarySeedDataSqlGenerator.class);
-  private DDCacheProcessor processor;
+  final private DDCacheProcessor processor;
 
   /**
    * Cache of fields and their data generators by resource
@@ -62,9 +62,8 @@ public class DataDictionarySeedDataSqlGenerator {
    * TODO: add a standard relationships cache so keys can be sampled from the keyCache for related records
    */
 
-
-
   public DataDictionarySeedDataSqlGenerator() {
+    LOG.info("Welcome to the RESO Data Dictionary Database Seed Generator!");
     LOG.info("Creating standard field cache...");
     DDCacheProcessor processor = new DDCacheProcessor();
     DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(processor);
@@ -178,14 +177,13 @@ public class DataDictionarySeedDataSqlGenerator {
   }
 
   String generateBoolean(ReferenceStandardField referenceStandardField) {
-    return String.valueOf(new Random().nextBoolean()).toUpperCase();
+    return String.valueOf(ThreadLocalRandom.current().nextBoolean()).toUpperCase();
   }
 
   String generateStringListSingle(ReferenceStandardField referenceStandardField) {
     List<String> possibleChoices;
     List<String> customExamples = dataGeneratorResourceFieldMap.get().get(referenceStandardField.getParentResourceName()).get(referenceStandardField.getStandardName()) != null
         ? dataGeneratorResourceFieldMap.get().get(referenceStandardField.getParentResourceName()).get(referenceStandardField.getStandardName()).getCustomExamples() : null;
-    int numElements;
 
     if (processor.getEnumerations().containsKey(referenceStandardField.getLookupStandardName())) {
       possibleChoices = processor.getEnumerations().get(referenceStandardField.getLookupStandardName()).stream()
@@ -199,10 +197,6 @@ public class DataDictionarySeedDataSqlGenerator {
 
     Collections.shuffle(possibleChoices);
     return wrapInQuotes(possibleChoices.get(0));
-  }
-
-  static String wrapInQuotes(String item) {
-    return "\"" + item + "\"";
   }
 
   List<String> generateStringListMulti(ReferenceStandardField referenceStandardField) {
@@ -237,6 +231,10 @@ public class DataDictionarySeedDataSqlGenerator {
     return new ArrayList<>(enumNames);
   }
 
+  static String wrapInQuotes(String item) {
+    return "\"" + item + "\"";
+  }
+
   /**
    * TODO: determine whether we need to be able to go both ways on dates on demand.
    * For example, it might make sense to have open house dates in the future.
@@ -245,7 +243,7 @@ public class DataDictionarySeedDataSqlGenerator {
    * @return
    */
   String generateDate(ReferenceStandardField referenceStandardField) {
-    long numDays = new Random().nextInt(5 * 365); //max 5 years back
+    long numDays = ThreadLocalRandom.current().nextInt(5 * 365); //max 5 years back
     return wrapInQuotes(Utils.getIsoDate(OffsetDateTime.now().minus(numDays, ChronoUnit.DAYS)));
   }
 
@@ -261,7 +259,7 @@ public class DataDictionarySeedDataSqlGenerator {
     String value;
 
     if (customExamples != null && customExamples.size() > 0) {
-      value = customExamples.get(new Random().nextInt(customExamples.size()));
+      value = customExamples.get(ThreadLocalRandom.current().nextInt(customExamples.size()));
     } else {
       value = Faker.instance().buffy().quotes();
     }
@@ -274,7 +272,7 @@ public class DataDictionarySeedDataSqlGenerator {
   }
 
   String generateTimestamp(ReferenceStandardField referenceStandardField) {
-    long numDays = new Random().nextInt(5 * 365); //max 5 years back
+    long numDays = ThreadLocalRandom.current().nextInt(5 * 365); //max 5 years back
     return wrapInQuotes(Utils.getIsoTimestamp(OffsetDateTime.now().minus(numDays, ChronoUnit.DAYS)));
   }
 
