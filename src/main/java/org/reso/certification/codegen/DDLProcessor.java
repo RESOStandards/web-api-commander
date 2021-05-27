@@ -168,8 +168,6 @@ public class DDLProcessor extends WorksheetProcessor {
     return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, resourceName).replace("o_u_i_d", "ouid");
   }
 
-
-
   private static String buildCreateLookupStatement(boolean useKeyNumeric) {
       return
           "\n\n/**\n" +

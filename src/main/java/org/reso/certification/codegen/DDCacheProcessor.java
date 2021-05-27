@@ -22,13 +22,18 @@ public class DDCacheProcessor extends WorksheetProcessor {
     return fieldCache;
   }
 
-  public static Map<String, List<ReferenceStandardField>> getDDReferenceStandardFieldCache() {
+  public static Map<String, List<ReferenceStandardField>> buildCache() {
     LOG.info("Creating standard field cache...");
     DDCacheProcessor cacheProcessor = new DDCacheProcessor();
     DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(cacheProcessor);
     generator.processWorksheets();
     LOG.info("Standard field cache created!");
     return cacheProcessor.getFieldCache();
+  }
+
+  public static DataDictionaryCodeGenerator getGeneratorInstance() {
+    DDCacheProcessor cacheProcessor = new DDCacheProcessor();
+    return new DataDictionaryCodeGenerator(cacheProcessor);
   }
 
   @Override

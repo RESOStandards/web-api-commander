@@ -11,7 +11,7 @@ import static org.reso.certification.codegen.WorksheetProcessor.buildWellKnownSt
 
 public final class DataDictionaryCodeGenerator {
   private static final Logger LOG = LogManager.getLogger(DataDictionaryCodeGenerator.class);
-  WorksheetProcessor processor = null;
+  private WorksheetProcessor processor = null;
   Workbook workbook = null;
 
   private DataDictionaryCodeGenerator() {
@@ -72,5 +72,9 @@ public final class DataDictionaryCodeGenerator {
     } catch (Exception ex) {
       LOG.info(ex);
     }
+  }
+
+  public WorksheetProcessor getProcessor() {
+    return processor;
   }
 }

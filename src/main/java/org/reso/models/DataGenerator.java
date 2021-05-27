@@ -1,6 +1,6 @@
 package org.reso.models;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -8,7 +8,10 @@ import org.reso.commander.Commander;
 
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Used to deserialize the Data Dictionary reference sheet into a cache of generators
@@ -30,7 +33,7 @@ public class DataGenerator {
    *
    * @return nested hashes of standard field generators
    */
-  public static Map<String, Map<String, DataGenerator>> buildReferenceGeneratorCache() {
+  public static DataGenerator deserialize() {
     Map<String, Map<String, DataGenerator>> dataGeneratorResourceFieldMap =
         Collections.synchronizedMap(new LinkedHashMap<>());
 
@@ -41,11 +44,27 @@ public class DataGenerator {
 
     //note the open braces before getType()
     Type targetClassType = new TypeToken<DataGenerator>() {}.getType();
-    DataGenerator dataGenerator = new Gson().fromJson(generatorJson, targetClassType);
+    return new Gson().fromJson(generatorJson, targetClassType);
+  }
 
-    LOG.info("Target Collection deserialized: " + dataGenerator);
+  public String getDescription() {
+    return description;
+  }
 
-    return dataGeneratorResourceFieldMap;
+  public String getVersion() {
+    return version;
+  }
+
+  public String getGeneratedOn() {
+    return generatedOn;
+  }
+
+  public List<ResourceInfo> getResourceInfo() {
+    return resourceInfo;
+  }
+
+  public List<FieldDataGenerator> getFields() {
+    return fields;
   }
 
   public static final class FieldDataGenerator {
@@ -72,15 +91,49 @@ public class DataGenerator {
     public void setResourceName(String resourceName) {
       this.resourceName = resourceName;
     }
+
+    public String getFakerGeneratorName() {
+      return fakerGeneratorName;
+    }
+
+    public List<String> getCustomExamples() {
+      return customExamples;
+    }
+
+    public boolean hasFakerGenerator() {
+      return fakerGeneratorName != null && fakerGeneratorName.length() > 0;
+    }
+
+    public boolean hasCustomExamples() {
+      return customExamples != null && customExamples.size() > 0;
+    }
+
+    @Override
+    public String toString() {
+      return "FieldDataGenerator{" +
+          "fieldName='" + fieldName + '\'' +
+          ", resourceName=" + (resourceName == null ? "null" : "'" + resourceName + "'") +
+          ", fakerGeneratorName=" + (fakerGeneratorName == null ? "null" : "'" + fakerGeneratorName + "'") +
+          ", customExamples=" + customExamples +
+          '}';
+    }
   }
 
-  static final class ResourceInfo {
+  public static final class ResourceInfo {
     private String resourceName;
     private Integer recordCount;
 
     public ResourceInfo(String resourceName,Integer recordCount) {
       this.resourceName = resourceName;
       this.recordCount = recordCount;
+    }
+
+    public String getResourceName() {
+      return resourceName;
+    }
+
+    public Integer getRecordCount() {
+      return recordCount;
     }
   }
 }

@@ -136,11 +136,19 @@ public class Utils {
   }
 
   public static String getIsoTimestamp() {
-    return OffsetDateTime.now().format(DateTimeFormatter.ISO_INSTANT);
+    return getIsoTimestamp(OffsetDateTime.now());
   }
 
   public static String getIsoTimestamp(OffsetDateTime fromDate) {
-    return OffsetDateTime.from(fromDate.toInstant()).format(DateTimeFormatter.ISO_INSTANT);
+    return OffsetDateTime.from(fromDate).format(DateTimeFormatter.ISO_INSTANT);
+  }
+
+  public static String getIsoDate() {
+    return getIsoDate(OffsetDateTime.now());
+  }
+
+  public static String getIsoDate(OffsetDateTime fromDate) {
+    return fromDate.format(DateTimeFormatter.ISO_DATE);
   }
 
 }

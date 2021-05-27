@@ -419,7 +419,7 @@ public class IDXPayload {
     try {
       if (container.get().hasValidMetadata()) {
         if (standardFieldCache.get().size() == 0) {
-          standardFieldCache.get().putAll(DDCacheProcessor.getDDReferenceStandardFieldCache());
+          standardFieldCache.get().putAll(DDCacheProcessor.buildCache());
         }
       } else {
         failAndExitWithErrorMessage("Valid metadata was not retrieved from the server. Exiting!", scenario);

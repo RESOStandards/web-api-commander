@@ -27,7 +27,7 @@ public abstract class WorksheetProcessor {
   public static final String REFERENCE_WORKSHEET = "RESODataDictionary-1.7.xlsx";
 
   static final Map<String, String> resourceTemplates = new LinkedHashMap<>();
-  static final Map<String, Set<ReferenceStandardLookup>> standardEnumerationsMap = new LinkedHashMap<>();
+  static final Map<String, List<ReferenceStandardLookup>> standardEnumerationsMap = new LinkedHashMap<>();
   static final Map<String, Map<String, ReferenceStandardField>> standardFieldsMap = new LinkedHashMap<>(new LinkedHashMap<>());
   private static final Logger LOG = LogManager.getLogger(WorksheetProcessor.class);
   String referenceDocument = null;
@@ -332,9 +332,7 @@ public abstract class WorksheetProcessor {
 
   public void buildEnumerationMap() {
     final String ENUMERATION_TAB_NAME = "Lookup Fields and Values";
-    final int LOOKUP_NAME_INDEX = 0, STANDARD_NAME_INDEX = 1;
 
-    DataFormatter formatter = new DataFormatter();
     Sheet sheet = getReferenceWorkbook().getSheet(ENUMERATION_TAB_NAME);
     buildWellKnownStandardEnumerationHeaderMap(sheet);
 
@@ -345,12 +343,11 @@ public abstract class WorksheetProcessor {
         standardEnumeration.set(deserializeStandardEnumerationRow(row));
 
         if (!standardEnumerationsMap.containsKey(standardEnumeration.get().getLookupField())) {
-          standardEnumerationsMap.put(standardEnumeration.get().getLookupField(), new LinkedHashSet<>());
+          standardEnumerationsMap.put(standardEnumeration.get().getLookupField(), new ArrayList<>());
         }
         standardEnumerationsMap.get(standardEnumeration.get().getLookupField()).add(standardEnumeration.get());
       }
     });
-    //enumerations.forEach((key, items) -> LOG.info("key: " + key + " , items: " + items.toString()));
   }
 
   public void buildStandardRelationships(Sheet worksheet) {
@@ -366,7 +363,7 @@ public abstract class WorksheetProcessor {
     }
   }
 
-  public Map<String, Set<ReferenceStandardLookup>> getEnumerations() {
+  public Map<String, List<ReferenceStandardLookup>> getEnumerations() {
     return standardEnumerationsMap;
   }
 
