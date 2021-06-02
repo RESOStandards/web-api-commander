@@ -268,7 +268,7 @@ In this case, `BIGINT` values will be used for all related lookup values.
 
 The following items need to be added to the DDL generator still:
  - [ ] Foreign Key relationships.
- - [ ] Creation of Lookup resource. 
+ - [x] Creation of Lookup resource. 
 
 
 ## Converting metadata to Open API 3 format
@@ -301,8 +301,11 @@ OpenJDK Runtime Environment (build 1.8.0_275-8u275-b01-0ubuntu1~20.10-b01)
 OpenJDK 64-Bit Server VM (build 25.275-b01, mixed mode)
 ```
 If you don't see something like this, you need to install the JDK:
-* [Open JDK is recommended](https://openjdk.java.net/install/index.html).
+* [OpenJDK 8, 10, or 11 are recommended](https://openjdk.java.net/install/index.html).
 * [Oracle's SE Development kit may also be used](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html), but there may be additional licensing terms to accept.
+
+**Note**: there are known issues with Java/JDK 14+ and Groovy. The recommended JDK versions are 8 (1.8), 10, or 11. OpenJDK is preferred. If you're using MacOS you can install the JDK [using Homebrew](https://formulae.brew.sh/formula/openjdk@11). There are instructions for Windows and Linux [here](https://jdk.java.net/java-se-ri/11).
+
 
 ## Cloning Commander Repository
 The Commander may be run in automated testing mode using a terminal. Automated testing assumes that you have a Java 1.8+ JDK installed, as mentioned elsewhere in this [`README`](#java-and-the-jdk).
