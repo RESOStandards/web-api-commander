@@ -17,6 +17,9 @@
     <Logger name="org.apache.olingo.client.core" level="error" additivity="false">
       <AppenderRef ref="Log"/>
     </Logger>
+    <Logger name="org.apache.velocity.runtime" level="error" additivity="false">
+      <AppenderRef ref="Log"/>
+    </Logger>
     <Root level="all">
       <AppenderRef ref="Console" level="info"/>
       <AppenderRef ref="Log" level="error"/>
