@@ -4,10 +4,7 @@ import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.commons.api.format.ContentType;
-import org.reso.certification.codegen.BDDProcessor;
-import org.reso.certification.codegen.DDLProcessor;
-import org.reso.certification.codegen.DataDictionaryCodeGenerator;
-import org.reso.certification.codegen.EDMXProcessor;
+import org.reso.certification.codegen.*;
 import org.reso.models.ClientSettings;
 import org.reso.models.ODataTransportWrapper;
 import org.reso.models.Request;
@@ -222,6 +219,14 @@ public class App {
           } catch (Exception ex) {
             LOG.error(getDefaultErrorMessage(ex));
           }
+        } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_RESOURCE_INFO_MODELS)) {
+          APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_RESOURCE_INFO_MODELS);
+          try {
+            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new ResourceInfoProcessor());
+            generator.processWorksheets();
+          } catch (Exception ex) {
+            LOG.error(getDefaultErrorMessage(ex));
+          }
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_EDMX)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_EDMX);
           try {
@@ -373,10 +378,10 @@ public class App {
   private static class APP_OPTIONS {
 
     //parameter names
-    static final  String SERVICE_ROOT = "serviceRoot";
-    static final  String BEARER_TOKEN = "bearerToken";
-    static final  String CLIENT_ID = "clientId";
-    static final  String CLIENT_SECRET = "clientSecret";
+    static final String SERVICE_ROOT = "serviceRoot";
+    static final String BEARER_TOKEN = "bearerToken";
+    static final String CLIENT_ID = "clientId";
+    static final String CLIENT_SECRET = "clientSecret";
     static final String INPUT_FILE = "inputFile";
     static final String OUTPUT_FILE = "outputFile";
     static final String URI = "uri";
@@ -517,6 +522,8 @@ public class App {
               .desc("Runs commands in RESOScript file given as <inputFile>.").build())
           .addOption(Option.builder().argName("t").longOpt(ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)
               .desc("Generates acceptance tests in the current directory.").build())
+          .addOption(Option.builder().argName("i").longOpt(ACTIONS.GENERATE_RESOURCE_INFO_MODELS)
+              .desc("Generates Java Models for the Web API Reference Server in the current directory.").build())
           .addOption(Option.builder().argName("r").longOpt(ACTIONS.GENERATE_REFERENCE_EDMX)
               .desc("Generates reference metadata in EDMX format.").build())
           .addOption(Option.builder().argName("k").longOpt(ACTIONS.GENERATE_REFERENCE_DDL)
@@ -559,6 +566,7 @@ public class App {
       public static final String VALIDATE_METADATA = "validateMetadata";
       public static final String SAVE_GET_REQUEST = "saveGetRequest";
       public static final String GENERATE_METADATA_REPORT = "generateMetadataReport";
+      public static final String GENERATE_RESOURCE_INFO_MODELS = "generateResourceInfoModels";
     }
   }
 }

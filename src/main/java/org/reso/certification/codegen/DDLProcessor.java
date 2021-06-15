@@ -149,7 +149,7 @@ public class DDLProcessor extends WorksheetProcessor {
           .append("\n\n")
           .append("CREATE TABLE IF NOT EXISTS ")
           //exception for ouid so it doesn't become o_u_i_d
-          .append(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, resourceName).replace("o_u_i_d", "ouid"))
+          .append(buildDbTableName(resourceName))
           .append(" ( ")
           .append(templateContent).append(",\n")
           .append(PADDING).append(PADDING).append(buildPrimaryKeyMarkup(resourceName)).append("\n")
@@ -163,6 +163,12 @@ public class DDLProcessor extends WorksheetProcessor {
 
     LOG.info(this::buildInsertLookupsStatement);
   }
+
+  public static String buildDbTableName(String resourceName) {
+    return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, resourceName).replace("o_u_i_d", "ouid");
+  }
+
+
 
   private static String buildCreateLookupStatement(boolean useKeyNumeric) {
       return
