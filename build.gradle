@@ -175,6 +175,35 @@ task testDataDictionary_1_7() {
   }
 }
 
+task testIdxPayload_1_7() {
+  group = 'RESO Certification'
+  description = 'Runs IDX Payload 1.7 Automated Acceptance Tests.' +
+      '\n  Example: ' +
+      '\n    $ ./gradlew testIdxPayload_1_7 -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true\n'
+
+  dependsOn jar
+  doLast {
+    javaexec {
+      main = "io.cucumber.core.cli.Main"
+      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      systemProperties = System.getProperties()
+
+      args = [
+          '--strict',
+          '--plugin',
+          'pretty',
+          '--plugin',
+          'json:build/idx-payload.dd-1.7.json',
+          '--plugin',
+          'html:build/idx-payload.dd-1.7.html',
+          '--glue',
+          'org.reso.certification.stepdefs#IDXPayload',
+          'src/main/java/org/reso/certification/features/payloads/idx-payload.feature'
+      ]
+    }
+  }
+}
+
 task generateCertificationReport_DD_1_7() {
   group = 'RESO Certification'
   description = 'Runs Data Dictionary 1.7 tests and creates a certification report' +

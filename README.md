@@ -58,48 +58,51 @@ $ java -jar path/to/web-api-commander.jar
 Doing so displays the following information:
 ```
 usage: java -jar web-api-commander
-    --bearerToken <b>             Bearer token to be used with the
-                                  request.
-    --clientId <d>                Client Id to be used with the request.
+    --bearerToken <b>              Bearer token to be used with the
+                                   request.
+    --clientId <d>                 Client Id to be used with the request.
     --clientSecret <s>
-    --contentType <t>             Results format: JSON (default),
-                                  JSON_NO_METADATA, JSON_FULL_METADATA,
-                                  XML.
-    --entityName <n>              The name of the entity to fetch, e.g.
-                                  Property.
-    --generateDDAcceptanceTests   Generates acceptance tests in the
-                                  current directory.
-    --generateMetadataReport      Generates metadata report from given
-                                  <inputFile>.
-    --generateQueries             Resolves queries in a given RESOScript
-                                  <inputFile> and displays them in
-                                  standard out.
-    --generateReferenceDDL        Generates reference DDL to create a
-                                  RESO-compliant SQL database. Pass
-                                  --useKeyNumeric to generate the DB using
-                                  numeric keys.
-    --generateReferenceEDMX       Generates reference metadata in EDMX
-                                  format.
-    --getMetadata                 Fetches metadata from <serviceRoot>
-                                  using <bearerToken> and saves results in
-                                  <outputFile>.
-    --help                        print help
-    --inputFile <i>               Path to input file.
-    --outputFile <o>              Path to output file.
-    --runRESOScript               Runs commands in RESOScript file given
-                                  as <inputFile>.
-    --saveGetRequest              Performs GET from <requestURI> using the
-                                  given <bearerToken> and saves output to
-                                  <outputFile>.
-    --serviceRoot <s>             Service root URL on the host.
-    --uri <u>                     URI for raw request. Use 'single quotes'
-                                  to enclose.
-    --useEdmEnabledClient         present if an EdmEnabledClient should be
-                                  used.
-    --useKeyNumeric               present if numeric keys are to be used
-                                  for database DDL generation.
-    --validateMetadata            Validates previously-fetched metadata in
-                                  the <inputFile> path.
+    --contentType <t>              Results format: JSON (default),
+                                   JSON_NO_METADATA, JSON_FULL_METADATA,
+                                   XML.
+    --entityName <n>               The name of the entity to fetch, e.g.
+                                   Property.
+    --generateDDAcceptanceTests    Generates acceptance tests in the
+                                   current directory.
+    --generateMetadataReport       Generates metadata report from given
+                                   <inputFile>.
+    --generateQueries              Resolves queries in a given RESOScript
+                                   <inputFile> and displays them in
+                                   standard out.
+    --generateReferenceDDL         Generates reference DDL to create a
+                                   RESO-compliant SQL database. Pass
+                                   --useKeyNumeric to generate the DB
+                                   using numeric keys.
+    --generateReferenceEDMX        Generates reference metadata in EDMX
+                                   format.
+    --generateResourceInfoModels   Generates Java Models for the Web API
+                                   Reference Server in the current
+                                   directory.
+    --getMetadata                  Fetches metadata from <serviceRoot>
+                                   using <bearerToken> and saves results
+                                   in <outputFile>.
+    --help                         print help
+    --inputFile <i>                Path to input file.
+    --outputFile <o>               Path to output file.
+    --runRESOScript                Runs commands in RESOScript file given
+                                   as <inputFile>.
+    --saveGetRequest               Performs GET from <requestURI> using
+                                   the given <bearerToken> and saves
+                                   output to <outputFile>.
+    --serviceRoot <s>              Service root URL on the host.
+    --uri <u>                      URI for raw request. Use 'single
+                                   quotes' to enclose.
+    --useEdmEnabledClient          present if an EdmEnabledClient should
+                                   be used.
+    --useKeyNumeric                present if numeric keys are to be used
+                                   for database DDL generation.
+    --validateMetadata             Validates previously-fetched metadata
+                                   in the <inputFile> path.
 
 ```
 When using commands, if required arguments aren't provided, relevant feedback will be displayed in the terminal.
@@ -226,6 +229,17 @@ $ java -jar path/to/web-api-commander.jar --generateDDAcceptanceTests
 New Cucumber BDD acceptance tests will be generated and placed in a timestamped directory relative to your current path.
 
 To update the current tests, copy the newly generated ones into the [Data Dictionary BDD `.features` directory](src/main/java/org/reso/certification/features/data-dictionary/v1-7-0), run the `./gradlew build` task, and if everything works as expected, commit the newly generated tests. 
+
+## Generating RESO Web API Reference Server Data Models
+The RESO Commander can be used to generate data models for the Web API Reference server from the currently approved [Data Dictionary Spreadsheet](src/main/resources/RESODataDictionary-1.7.xlsx). 
+
+The Commander project's copy of the sheet needs to be updated with a copy of the [DD Google Sheet](https://docs.google.com/spreadsheets/d/1SZ0b6T4_lz6ti6qB2Je7NSz_9iNOaV_v9dbfhPwWgXA/edit?usp=sharing) prior to generating reference metadata.
+
+```
+$ java -jar path/to/web-api-commander.jar --generateResourceInfoModels
+```
+New ResourceInfo Models for the Web API Reference Server will be generated and placed in a timestamped directory relative to your current path.
+
 
 ## Generating RESO Data Dictionary Reference Metadata
 In addition to generating DD acceptance tests, the RESO Commander can generate reference metadata based on the current reference [Data Dictionary Spreadsheet](src/main/resources/RESODataDictionary-1.7.xlsx). 

@@ -2,6 +2,8 @@ package org.reso.auth;
 
 import org.apache.http.Header;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -44,10 +46,10 @@ public class TokenHttpClientFactory extends AbstractHttpClientFactory {
     return HttpClientBuilder.create()
         .setUserAgent(USER_AGENT)
         .setDefaultHeaders(headers)
+        .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
         .setConnectionManager(connectionManager)
         .build();
   }
-
 
   @Override
   public void close(final HttpClient httpClient) {

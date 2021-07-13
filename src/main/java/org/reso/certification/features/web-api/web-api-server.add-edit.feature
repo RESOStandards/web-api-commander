@@ -16,35 +16,39 @@ Feature: Web API Server Add/Edit Endorsement
   #      OData-Version: 4.01
   #      Content-Type: application/json;odata.metadata=minimal
   #      Accept: application/json
+  #
+  # This is without the prefer header and minimal value
+  #
   @create @create-succeeds @add-edit-endorsement @rcp-010 @1.0.2
   Scenario: Create operation succeeds using a given payload
     Given valid metadata have been retrieved
     And request data has been provided in "create-succeeds.json"
     And request data in "create-succeeds.json" is valid JSON
     And schema in "create-succeeds.json" matches the metadata
-    And the request header "OData-Version" is "4.01"
-    And the request header "Content-Type" contains "application/json"
-    And the request header "Accept" is "application/json"
+    And the request header "OData-Version" "equals" one of the following values
+      |4.0|4.01|
+    And the request header "Content-Type" "contains" "application/json"
+    And the request header "Accept" "contains" "application/json"
     When a "POST" request is made to the "resource-endpoint" URL with data in "create-succeeds.json"
-    Then the test is skipped if the server responds with a status code of 401
-    # TODO: check spec for 204
-    When the server responds with one of the following status codes
-      |200|201|
-    Then the response header "OData-Version" is "4.01"
-    And the response header "EntityId" is present
-    And the response header "Location" is present
-    And the response header "Location" is a valid URL
-    When the server responds with a 200 status code "valid JSON exists" in the JSON response
-    When the server responds with a 200 status code "@odata.context" "is present" in the JSON response
-    When the server responds with a 200 status code "@odata.context" "is a valid URL" in the JSON response
-    When the server responds with a 200 status code "@odata.id" "is present" in the JSON response
-    When the server responds with a 200 status code "@odata.id" "is a valid URL" in the JSON response
-    When the server responds with a 200 status code "@odata.editLink" "is present" in the JSON response
-    When the server responds with a 200 status code "@odata.editLink" "is a valid URL" in the JSON response
-    When the server responds with a 200 status code "@odata.etag" "is present" in the JSON response
-    When the server responds with a 200 status code "@odata.etag" "starts with" "W/" in the JSON response
-    When the server responds with a 200 status code data from "create-succeeds.json" "exists" in the JSON response
-    When a "GET" request is made to the response header "Location" URL
+    Then the server responds with one of the following status codes
+      |201|
+    And the response header "OData-Version" "equals" one of the following values
+      |4.0|4.01|
+    And the response header "EntityId" "MUST" "be present"
+    And the response header "Location" "MUST" "be present"
+    And the response header "Location" "is a valid URL"
+    And the response header "Location" "MUST" reference the resource being created
+    And the response is valid JSON
+    And the JSON response "MUST" contain "@odata.context"
+    And the JSON response value "@odata.context" "is a valid URL"
+    And the JSON response "MUST" contain "@odata.id"
+    And the JSON response value "@odata.id" "is a valid URL"
+    And the JSON response "MAY" contain "@odata.editLink"
+    And the JSON response value "@odata.editLink" "is a valid URL"
+    And the JSON response "MAY" contain "@odata.etag"
+    And the JSON response value "@odata.etag" "starts with" "W/"
+    And the JSON response "MUST" contain all JSON data in "create-succeeds.json"
+    When a "GET" request is made to the URL in response header "Location"
     Then the server responds with a status code of 200
     And the response has header "OData-Version" with one of the following values
       |4.0|4.01|
@@ -58,7 +62,7 @@ Feature: Web API Server Add/Edit Endorsement
   # SEE: https://reso.atlassian.net/wiki/spaces/RESOWebAPIRCP/pages/2239399511/RCP+-+WEBAPI-010+Add+Functionality+to+Web+API+Specification#Error-Message-Example
   # POST serviceRoot/Property
   #      OData-Version: 4.01
-  #      Content-Type: application/json;odata.metadata=minimal
+  #      Content-Type: application/json
   #      Accept: application/json
   @create @create-fails @add-edit-endorsement @rcp-010 @1.0.2
   Scenario: Create operation fails using a given payload
@@ -66,12 +70,16 @@ Feature: Web API Server Add/Edit Endorsement
     And request data has been provided in "create-fails.json"
     And request data in "create-fails.json" is valid JSON
     And schema in "create-fails.json" matches the metadata
-    And the request header "OData-Version" is "4.01"
-    And the request header "Content-Type" is "application/json;odata.metadata=minimal"
-    And the request header "Accept" is "application/json"
+    And the request header "OData-Version" "equals" one of the following values
+      |4.0|4.01|
+    And the request header "Content-Type" "MUST" "be present"
+    And the request header "Content-Type" "equals" "application/json"
+    And the request header "Accept" "MUST" "be present"
+    And the request header "Accept" "contains" "application/json"
     When a "POST" request is made to the "resource-endpoint" URL with data in "create-fails.json"
     Then the server responds with one of the following error codes
-      |400|401|403|405|408|500|501|503|
-    And the response header "OData-Version" is "4.01"
+      |400|
+    And the response has header "OData-Version" with one of the following values
+      |4.0|4.01|
     And the error response is in a valid format
     And the values in the "target" field in the JSON payload "error.details" path are contained within the metadata

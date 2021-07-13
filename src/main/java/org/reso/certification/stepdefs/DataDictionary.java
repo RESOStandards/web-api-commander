@@ -70,8 +70,8 @@ public class DataDictionary {
   //named args
   private static final String SHOW_RESPONSES_ARG = "showResponses";
   private static final String USE_STRICT_MODE_ARG = "strict";
-  private static final String PATH_TO_METADATA_ARG = "pathToMetadata";
-  private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
+  protected static final String PATH_TO_METADATA_ARG = "pathToMetadata";
+  protected static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final String LOOKUP_VALUE = "lookupValue";
 
   //extract any params here
@@ -150,9 +150,8 @@ public class DataDictionary {
 
   @When("a metadata file is provided")
   public void aMetadataFileIsProvided() {
-    boolean result = false;
     if (isUsingMetadata) {
-      result = pathToMetadata != null && Files.exists(Paths.get(pathToMetadata));
+      boolean result = pathToMetadata != null && Files.exists(Paths.get(pathToMetadata));
       if (!result) {
         failAndExitWithErrorMessage("Path to given metadata file does not exist: " + PATH_TO_METADATA_ARG + "=" + pathToMetadata, scenario);
       }
@@ -195,8 +194,6 @@ public class DataDictionary {
 
   @And("valid metadata were retrieved from the server")
   public void validMetadataWereRetrievedFromTheServer() {
-    boolean result = false;
-
     if (isUsingRESOScript && container.getShouldValidateMetadata()) {
       //request metadata from server using service root in RESOScript file
       TestUtils.assertXMLMetadataAreRequestedFromTheServer(container, scenario);

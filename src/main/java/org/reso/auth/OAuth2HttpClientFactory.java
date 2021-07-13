@@ -6,6 +6,8 @@ import org.apache.http.Header;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -64,6 +66,7 @@ public class OAuth2HttpClientFactory extends AbstractHttpClientFactory {
     try {
       LOG.debug("Fetching access token...");
       final HttpPost post = new HttpPost(tokenUri);
+      post.setConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
 
       params.add(new BasicNameValuePair("grant_type", "client_credentials"));
       params.add(new BasicNameValuePair("client_id", clientId));
@@ -118,6 +121,7 @@ public class OAuth2HttpClientFactory extends AbstractHttpClientFactory {
         .setUserAgent(USER_AGENT)
         .setDefaultHeaders(headers)
         .setConnectionManager(connectionManager)
+        .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
         .build();
   }
 

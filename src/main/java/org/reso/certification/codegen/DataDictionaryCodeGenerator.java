@@ -14,13 +14,15 @@ public class DataDictionaryCodeGenerator {
   WorksheetProcessor processor = null;
   Workbook workbook = null;
 
+  private DataDictionaryCodeGenerator() {
+    //private constructor, should not instantiate directly
+  }
+
   /**
    * Instantiates a new DataDictionary generator with the given worksheet processor
    * @param processor the worksheet processor to use to generate the data dictionary
-   * @throws Exception an exception if the Data Dictionary processor is null
    */
-  public DataDictionaryCodeGenerator(WorksheetProcessor processor) throws Exception {
-    if (processor == null) throw new Exception("Data Dictionary processor cannot be null!");
+  public DataDictionaryCodeGenerator(WorksheetProcessor processor) {
     this.processor = processor;
     processor.setReferenceResource(REFERENCE_WORKSHEET);
     workbook = processor.getReferenceWorkbook();

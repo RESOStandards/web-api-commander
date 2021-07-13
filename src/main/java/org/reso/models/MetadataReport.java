@@ -165,7 +165,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
   }
 
   static class SneakyAnnotationReader {
-    Class object;
+    Class<? extends EdmAnnotationImpl> object;
     Field field;
     EdmAnnotationImpl edmAnnotationImpl;
     ClientCsdlAnnotation clientCsdlAnnotation;

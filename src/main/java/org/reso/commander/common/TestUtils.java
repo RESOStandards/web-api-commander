@@ -31,7 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
@@ -680,7 +680,7 @@ public final class TestUtils {
   public static Integer getTimestampPart(String timestampPart, Object value) throws DateTimeParseException {
     if (timestampPart == null || value == null) return null;
 
-    ZonedDateTime dateTime = ZonedDateTime.parse((String) value, DateTimeFormatter.ISO_DATE_TIME);
+    OffsetDateTime dateTime = OffsetDateTime.parse((String) value, DateTimeFormatter.ISO_DATE_TIME);
 
     switch (timestampPart) {
       case DateParts.YEAR:

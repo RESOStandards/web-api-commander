@@ -114,7 +114,6 @@ public class CertificationReportGenerator {
     } catch (IOException e) {
       e.printStackTrace();
     }
-
     return null;
   }
 }

@@ -81,6 +81,8 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicBoolean isUsingMetadataFile = new AtomicBoolean(false);
 
   // request instance variables - these get resetMarkupBuffer with every request
+  //TODO: refactor underlying response properties to use a ODataTransportWrapper (or any TransportWrapper)
+  //      and create the test container with the appropriate response of the transport wrapper
   private final AtomicReference<String> selectList = new AtomicReference<>();
   private final AtomicReference<ODataRawResponse> oDataRawResponse = new AtomicReference<>();
   private final AtomicReference<Request> request = new AtomicReference<>();
