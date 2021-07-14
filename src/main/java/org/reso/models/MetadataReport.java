@@ -34,10 +34,10 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
     StringBuilder reportBuilder = new StringBuilder();
 
     reportBuilder
-      .append("\n\n" + REPORT_DIVIDER)
-      .append("\nRESO Metadata Report")
-      .append("\n").append(new Date())
-      .append("\n" + REPORT_DIVIDER);
+        .append("\n\n" + REPORT_DIVIDER)
+        .append("\nRESO Metadata Report")
+        .append("\n").append(new Date())
+        .append("\n" + REPORT_DIVIDER);
 
     JsonElement metadataReport = serialize(this, MetadataReport.class, null);
     reportBuilder.append(FieldJson.buildReportString(metadataReport));
@@ -48,12 +48,12 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
 
   /**
    * FieldJson uses a JSON payload with the following structure:
-   *
-   *    {
-   *       "resourceName": "Property",
-   *       "fieldName": "AboveGradeFinishedArea",
-   *       "type": "Edm.Decimal"
-   *     }
+   * <p>
+   * {
+   * "resourceName": "Property",
+   * "fieldName": "AboveGradeFinishedArea",
+   * "type": "Edm.Decimal"
+   * }
    */
   private static final class FieldJson implements JsonSerializer<FieldJson> {
     static final String
@@ -68,7 +68,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
         UNICODE_KEY = "unicode",
         TYPE_KEY = "type",
         TERM_KEY = "term",
-        VALUE_KEY= "value",
+        VALUE_KEY = "value",
         ANNOTATIONS_KEY = "annotations",
         FIELDS_KEY = "fields";
 
@@ -141,24 +141,39 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
       //TODO: report issue to Apache
       // Can only get the annotation term using ((ClientCsdlAnnotation) ((EdmAnnotationImpl)edmAnnotation).annotatable).term
       // which a private member and cannot be accessed
-      List<EdmAnnotation> annotations = ((EdmProperty)src.edmElement).getAnnotations();
+      List<EdmAnnotation> annotations = ((EdmProperty) src.edmElement).getAnnotations();
       if (annotations != null && annotations.size() > 0) {
         JsonArray annotationsJsonArray = new JsonArray();
         annotations.forEach(edmAnnotation -> {
-          JsonObject annotation = new JsonObject();
-          if (edmAnnotation.getTerm() != null) {
-            annotation.addProperty(TERM_KEY, edmAnnotation.getTerm().getFullQualifiedName().getFullQualifiedNameAsString());
-          } else {
-            SneakyAnnotationReader sneakyAnnotationReader = new SneakyAnnotationReader(edmAnnotation);
-            annotation.addProperty(TERM_KEY, sneakyAnnotationReader.getTerm());
-          }
-
           if (edmAnnotation.getExpression() != null) {
-            annotation.addProperty(VALUE_KEY, edmAnnotation.getExpression().asConstant().getValueAsString());
+            if (edmAnnotation.getExpression().isConstant()) {
+              JsonObject annotation = new JsonObject();
+              if (edmAnnotation.getTerm() != null) {
+                annotation.addProperty(TERM_KEY, edmAnnotation.getTerm().getFullQualifiedName().getFullQualifiedNameAsString());
+              } else {
+                SneakyAnnotationReader sneakyAnnotationReader = new SneakyAnnotationReader(edmAnnotation);
+                annotation.addProperty(TERM_KEY, sneakyAnnotationReader.getTerm());
+              }
+              annotation.addProperty(VALUE_KEY, edmAnnotation.getExpression().asConstant().getValueAsString());
+              annotationsJsonArray.add(annotation);
+            } else if (edmAnnotation.getExpression().isDynamic()) {
+              if (edmAnnotation.getExpression().asDynamic().isCollection()) {
+                edmAnnotation.getExpression().asDynamic().asCollection().getItems().forEach(edmExpression -> {
+                  //OData Allowed Values come across as Records, in which case their key is "Value"
+                  if (edmExpression.asDynamic().isRecord()) {
+                    JsonObject annotation = new JsonObject();
+                    edmExpression.asDynamic().asRecord().getPropertyValues().forEach(edmPropertyValue -> {
+                      annotation.addProperty(TERM_KEY, edmPropertyValue.getProperty());
+                      annotation.addProperty(VALUE_KEY, edmPropertyValue.getValue().asConstant().getValueAsString());
+                      annotationsJsonArray.add(annotation);
+                    });
+                  }
+                });
+              }
+            }
           }
-          annotationsJsonArray.add(annotation);
         });
-        field.add(ANNOTATIONS_KEY, annotationsJsonArray);
+        if (annotationsJsonArray.size() > 0) field.add(ANNOTATIONS_KEY, annotationsJsonArray);
       }
       return field;
     }
@@ -172,7 +187,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
 
     public SneakyAnnotationReader(EdmAnnotation edmAnnotation) {
       try {
-        edmAnnotationImpl = ((EdmAnnotationImpl)edmAnnotation);
+        edmAnnotationImpl = ((EdmAnnotationImpl) edmAnnotation);
 
         // create an object of the class named Class
         object = edmAnnotationImpl.getClass();
@@ -186,6 +201,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
 
       } catch (Exception ex) {
         LOG.error(ex);
+        ex.printStackTrace();
       }
     }
 
@@ -196,17 +212,17 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
 
   /**
    * LookupJson uses a JSON payload with the following structure:
-   *
-   *    {
-   *       "lookupName": "org.reso.metadata.enums.CommunityFeatures",
-   *       "lookupValue": "Stables",
-   *       "type": "Edm.Int32"
-   *     }
+   * <p>
+   * {
+   * "lookupName": "org.reso.metadata.enums.CommunityFeatures",
+   * "lookupValue": "Stables",
+   * "type": "Edm.Int32"
+   * }
    */
   private static final class LookupJson implements JsonSerializer<LookupJson> {
     static final String
         LOOKUP_NAME_KEY = "lookupName", LOOKUP_VALUE_KEY = "lookupValue",
-        TYPE_KEY = "type", VALUE_KEY= "value", ANNOTATIONS_KEY = "annotations",
+        TYPE_KEY = "type", VALUE_KEY = "value", ANNOTATIONS_KEY = "annotations",
         LOOKUPS_KEY = "lookups";
 
     EdmEnumType edmEnumType;

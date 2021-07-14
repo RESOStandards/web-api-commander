@@ -651,6 +651,9 @@ You may also run the tests in a Docker container locally by issuing one of the f
 Docker must be running on your local machine.
 
 #### MacOS or Linux All-In-One Commands
+
+You can run Gradle in Docker without building a container using the following command:
+
 ```
 cd ~; \
 rm -rf commander-tmp/; \
@@ -669,6 +672,14 @@ which is also where you will end up after runtime.
 ```
 cd C:\;mkdir commander-tmp;cd commander-tmp;git clone https://github.com/RESOStandards/web-api-commander.git;cd web-api-commander; docker run --rm -u gradle -v C:\current\path\web-api-commander:/home/gradle/project -v C:\path\to\your\resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_1_0_2_Core -DpathToRESOScript=/home/gradle/project/resoscripts/your.web-api-server.core.1.0.2.resoscript -DshowResponses=true
 ```
+
+#### Build Docker Image for Gradle Project
+You may also build a Docker image with Gradle included so you can run the commands there without installing anything.
+
+```
+$ docker build -f GradleDockerfile -t commander .
+```
+This will create a Docker image called `commander` that you can use to run the Gradle commands used in this README.
 
 ---
 ## Using the Commander as a Web API Client Library
