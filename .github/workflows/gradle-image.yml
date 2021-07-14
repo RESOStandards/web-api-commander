@@ -43,5 +43,5 @@ jobs:
           context: .
           push: true
           image: 'GradleDockerfile'
-          tags: {% raw %}${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
