@@ -1,0 +1,15 @@
+FROM gradle:6.2.1-jdk8 AS builder
+
+FROM alpine:3.10
+
+RUN apk add --update bash ca-certificates openjdk8-jre-base nss git "gradle=5.4.1-r0"   && \
+    rm -rf /var/cache/apk/*
+
+RUN git clone https://github.com/RESOStandards/web-api-commander.git
+
+WORKDIR web-api-commander
+
+RUN gradle jar
+
+ENTRYPOINT ["gradle"]
+CMD ["tasks"]
