@@ -5,7 +5,7 @@
     <option name="GLUE" value="org.reso.certification.stepdefs" />
     <option name="MAIN_CLASS_NAME" value="io.cucumber.core.cli.Main" />
     <module name="web-api-commander.main" />
-    <option name="PROGRAM_PARAMETERS" value=" --plugin org.jetbrains.plugins.cucumber.java.run.CucumberJvm4SMFormatter --strict" />
+    <option name="PROGRAM_PARAMETERS" value=" --plugin org.jetbrains.plugins.cucumber.java.run.CucumberJvm4SMFormatter" />
     <option name="SUGGESTED_NAME" value="Feature: web-api-server-1.0.2" />
     <option name="VM_PARAMETERS" value="-DpathToMetadata=$PROJECT_DIR$/src/main/resources/RESODataDictionary-1.7.xml -Dcucumber.filter.tags=&quot;&quot;" />
     <extension name="coverage">
