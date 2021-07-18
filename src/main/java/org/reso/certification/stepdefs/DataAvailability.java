@@ -378,9 +378,6 @@ public class DataAvailability {
             payloadSample.get().setResponseTimeMillis(transportWrapper.get().getElapsedTimeMillis());
 
             if (encodedResultsDirectoryName != null) {
-              payloadSample.get().setPayloadFields(standardFieldCache.get().get(resourceName).stream()
-                  .map(ReferenceStandardField::getStandardName).collect(Collectors.toList()));
-
               //serialize results once resource processing has finished
               Utils.createFile(String.format(SAMPLES_DIRECTORY_TEMPLATE, encodedResultsDirectoryName),
                   resourceName + "-" + Utils.getTimestamp() + ".json",
@@ -480,27 +477,18 @@ public class DataAvailability {
     }
   }
 
-  @Then("up to {int} records are sampled from each resource with {string} payload samples stored in {string}")
-  public void upToRecordsAreSampledFromEachResourceWithPayloadSamplesStoredIn(int numRecords, String payloadName, String resultsDirectoryName) {
+  @Then("up to {int} records are sampled from each resource with payload samples stored in {string}")
+  public void upToRecordsAreSampledFromEachResourceWithPayloadSamplesStoredIn(int numRecords, String resultsDirectoryName) {
     assertNotNull(getDefaultErrorMessage("resultsDirectoryName MUST be present!"), resultsDirectoryName);
-
     if (!hasStandardResources.get()) {
       scenario.log("No RESO Standard Resources to sample!");
       assumeTrue(true);
     } else {
-      Set<String> payloadResources = new LinkedHashSet<>();
-      standardFieldCache.get().forEach((resourceName, fieldList) -> {
-        if (!payloadResources.contains(resourceName) && fieldList.stream().anyMatch(field -> field.getPayloads().contains(payloadName))) {
-          payloadResources.add(resourceName);
-        }
-      });
-
       standardResources.get().forEach(resourceName -> {
         resourceCounts.get().put(resourceName, getResourceCount(resourceName));
         resourcePayloadSampleMap.get().putIfAbsent(resourceName, Collections.synchronizedList(new LinkedList<>()));
         //only save results to the directory if the resources are part of the given payload
-        resourcePayloadSampleMap.get().put(resourceName,
-            fetchAndProcessRecords(resourceName, numRecords, payloadResources.contains(resourceName) ? resultsDirectoryName : null));
+        resourcePayloadSampleMap.get().put(resourceName, fetchAndProcessRecords(resourceName, numRecords, resultsDirectoryName));
       });
     }
   }

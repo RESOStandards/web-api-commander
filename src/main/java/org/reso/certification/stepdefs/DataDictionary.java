@@ -518,7 +518,7 @@ public class DataDictionary {
   }
 
   @Given("that the following synonyms for {string} DO NOT exist in the {string} metadata")
-  public void theFollowingSynonymsForMUSTNOTExistInTheMetadata(String fieldName, String resourceName, List<String> synonyms) {
+  public void theFollowingSynonymsForDONOTExistInTheMetadata(String fieldName, String resourceName, List<String> synonyms) {
     if (container.getFieldMap(resourceName) == null) {
       assumeTrue("\"" + resourceName + "\" not found in metadata!", true);
     } else {

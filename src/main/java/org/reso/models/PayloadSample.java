@@ -24,17 +24,11 @@ public class PayloadSample implements JsonSerializer<PayloadSample> {
   //keeps track of the list of key fields found on the server
   final List<String> keyFields = new LinkedList<>();
 
-  final List<String> payloadFields = new LinkedList<>();
-
   public PayloadSample(String resourceName, String dateField, List<String> keyFields) {
     assert resourceName != null : "resourceName MUST be present";
     this.resourceName = resourceName;
     this.dateField = dateField;
     this.keyFields.addAll(keyFields);
-  }
-
-  public void setPayloadFields(List<String> payloadFields) {
-    this.payloadFields.addAll(payloadFields);
   }
 
   public void addSample(Map<String, String> sample) {
@@ -95,8 +89,7 @@ public class PayloadSample implements JsonSerializer<PayloadSample> {
         RESOURCE_NAME_KEY = "resourceName",
         DATE_FIELD_KEY = "dateField",
         KEY_FIELDS_KEY = "keyFields",
-        ENCODED_VALUES_KEY = "encodedValues",
-        PAYLOAD_FIELDS_KEY = "payloadFields";
+        ENCODED_VALUES_KEY = "encodedValues";
 
 
     JsonObject serialized = new JsonObject();
@@ -111,10 +104,6 @@ public class PayloadSample implements JsonSerializer<PayloadSample> {
     serialized.add(KEY_FIELDS_KEY, keyFields);
 
     serialized.addProperty(DATE_FIELD_KEY, src.dateField);
-
-    JsonArray payloadFieldsJson = new JsonArray();
-    src.payloadFields.forEach(payloadFieldsJson::add);
-    serialized.add(PAYLOAD_FIELDS_KEY, payloadFieldsJson);
 
     JsonArray encodedSamplesJson = new JsonArray();
     src.encodedSamples.forEach(sample -> {

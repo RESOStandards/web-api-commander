@@ -25,7 +25,7 @@ Feature: Payloads Sampling (Web API)
     Given that valid metadata have been requested from the server
     And the metadata contains RESO Standard Resources
     And "payload-samples" has been created in the build directory
-    Then up to 10000 records are sampled from each resource with "IDX" payload samples stored in "payload-samples"
+    Then up to 10000 records are sampled from each resource with payload samples stored in "payload-samples"
 
   @local-resource-sampling @dd-1.7 @payloads-sampling
   Scenario: Non Standard Resource Sampling - Request Data from Each Server Resource
