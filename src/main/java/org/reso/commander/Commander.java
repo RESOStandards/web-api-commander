@@ -196,7 +196,7 @@ public class Commander {
         targetReportFile = new File(fileName.replaceAll(".edmx|.xml", EMPTY_STRING)  + ".metadata-report.json");
       } else {
         //place unnamed files in the build directory
-        targetReportFile = new File("build", DEFAULT_FILENAME);
+        targetReportFile = new File("build" + File.separator + "certification" + File.separator + "results", DEFAULT_FILENAME);
       }
 
       FileUtils.copyInputStreamToFile(new ByteArrayInputStream(gsonBuilder.create().toJson(report).getBytes()), targetReportFile);

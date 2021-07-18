@@ -517,12 +517,16 @@ public class DataDictionary {
     LOG.info("PASSED: Field \"" + fieldName + "\" only contains Standard Names!");
   }
 
-  @And("the following synonyms for {string} MUST NOT exist in the metadata")
-  public void theFollowingSynonymsForMUSTNOTExistInTheMetadata(String fieldName, List<String> synonyms) {
-    synonyms.forEach(synonym ->
-        assertFalse(wrapColumns(getDefaultErrorMessage("Synonym", "\"" + synonym + "\"", "of fieldName", "\"" + fieldName + "\"", "found in the metadata!",
-            "\nSynonyms are not allowed!")),
-            container.getFieldMap(currentResourceName.get()).containsKey(synonym)));
+  @Given("that the following synonyms for {string} DO NOT exist in the {string} metadata")
+  public void theFollowingSynonymsForMUSTNOTExistInTheMetadata(String fieldName, String resourceName, List<String> synonyms) {
+    if (container.getFieldMap(resourceName) == null) {
+      assumeTrue("\"" + resourceName + "\" not found in metadata!", true);
+    } else {
+      synonyms.forEach(synonym ->
+          assertFalse(wrapColumns(getDefaultErrorMessage("Synonym", "\"" + synonym + "\"", "of fieldName", "\"" + fieldName + "\"", "found in the metadata!",
+              "\nSynonyms are not allowed!")),
+              container.getFieldMap(resourceName).containsKey(synonym)));
+    }
   }
 
   private static int getDistanceThreshold(String word) {

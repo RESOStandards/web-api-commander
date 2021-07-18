@@ -1,6 +1,3 @@
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-
 plugins {
   // Apply the java plugin to add support for Java
   id 'java'
@@ -48,8 +45,6 @@ dependencies {
   compile 'io.cucumber:cucumber-guice:6.10.2'
   compile 'io.cucumber:cucumber-core:6.10.2'
 
-  compile 'net.masterthought:cucumber-reporting:5.5.2'
-
   //TODO: choose one schema validator between this and rest-assured
   compile 'com.networknt:json-schema-validator:1.0.51'
   compile 'com.google.code.gson:gson:2.8.6'
@@ -77,7 +72,6 @@ jar {
 }
 
 
-
 // don't suppress warnings or deprecation notices
 tasks.withType(JavaCompile) {
   options.compilerArgs << '-Xlint:unchecked'
@@ -86,18 +80,24 @@ tasks.withType(JavaCompile) {
 
 String pathToMetadata = null,
        pathToRESOScript = null,
-       certFileName = null,
-       certOutputDir = null,
-       certJsonPath = null
+       certFileName = null
 
-// task for Web API Server 1.0.2 Core Testing
-task testWebApiServer_1_0_2_Core() {
+final String certOutputDir = 'build/certification',
+             cucumberJsonPath = certOutputDir + '/cucumberJson',
+             certReportsDir = certOutputDir + '/reports'
+
+
+task testWebApiCore_1_0_2() {
   group = 'RESO Certification'
-  description = 'Runs Web API Core 1.0.2 Automated Acceptance Tests.' +
-      '\n  Example: ' +
-      '\n    $ ./gradlew testWebApiServer_1_0_2_Core -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true\n' +
-      '\n    Note: by default the Web API tests assume Collection(Edm.EnumType).' +
-      '\n      Pass -DuseCollections=false if using OData IsFlags.\n'
+  description = 'Web API Core 1.0.2 Acceptance Tests' +
+      '\nExample: ' +
+      '\n  ./gradlew testWebApiServer_1_0_2_Core -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true' +
+      '\n\nNote: by default the Web API tests assume Collection(Edm.EnumType).' +
+      '\nPass -DuseCollections=false if using OData IsFlags.' +
+      '\n\n[Report location: ' + certReportsDir + ']' +
+      '\n\n'
+
+  String reportName = 'web-api-server.core.1.0.2'
 
   dependsOn jar
   doLast {
@@ -111,9 +111,9 @@ task testWebApiServer_1_0_2_Core() {
           '--plugin',
           'pretty',
           '--plugin',
-          'json:build/web-api-server.core.1.0.2.json',
+          'json:' + cucumberJsonPath + '/' + reportName + '.json',
           '--plugin',
-          'html:build/web-api-server.core.1.0.2.html',
+          'html:' + certReportsDir + '/' + reportName + '.html',
           '--glue',
           'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
           'src/main/java/org/reso/certification/features/web-api',
@@ -124,15 +124,18 @@ task testWebApiServer_1_0_2_Core() {
   }
 }
 
-// task for Data Dictionary 1.7
 task testDataDictionary_1_7() {
   group = 'RESO Certification'
-  description = 'Runs Data Dictionary 1.7 Automated Acceptance Tests and generates a "raw" report.' +
-      '\n  RESOScript Example:' +
-      '\n    ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dcucumber.filter.tags=""' +
-      '\n  Metadata File Example:' +
-      '\n    ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml -Dcucumber.filter.tags=""' +
-      '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
+  description = 'Data Dictionary 1.7 Acceptance Tests' +
+      '\nRESOScript Example:' +
+      '\n  ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dstrict=true' +
+      '\n\nMetadata File Example:' +
+      '\n  ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml' +
+      '\n\nTo disable strict mode, remove the -Dstrict=true parameter. All applicants MUST pass strict mode tests to be certified!' +
+      '\n\n[Report location: ' + certReportsDir + ']' +
+      '\n\n'
+
+  String reportName = 'data-dictionary-1.7'
 
   dependsOn jar
   doLast {
@@ -146,24 +149,19 @@ task testDataDictionary_1_7() {
 
       if (pathToMetadata != null) {
         certFileName = pathToMetadata
-            .substring(Math.max(pathToMetadata.lastIndexOf(File.separator)+1, 0), pathToMetadata.lastIndexOf('.'))
+            .substring(Math.max(pathToMetadata.lastIndexOf(File.separator) + 1, 0), pathToMetadata.lastIndexOf('.'))
       } else if (pathToRESOScript != null) {
         certFileName = pathToRESOScript
-            .substring(Math.max(pathToRESOScript.lastIndexOf(File.separator)+1, 0), pathToRESOScript.lastIndexOf('.'))
+            .substring(Math.max(pathToRESOScript.lastIndexOf(File.separator) + 1, 0), pathToRESOScript.lastIndexOf('.'))
       }
 
-      DateFormat df = new SimpleDateFormat("yyyyMMddHHMMssS")
-      certOutputDir = 'DD1.7-results' + (certFileName != null ? '-' + certFileName : '') + '-' + df.format(new Date())
-      certJsonPath = certOutputDir + '/data-dictionary-1.7.json'
-
       args = [
-          '--strict',
           '--plugin',
           'pretty',
           '--plugin',
-          'json:' + certJsonPath,
+          'json:' + cucumberJsonPath + '/' + reportName + '.json',
           '--plugin',
-          'html:' + certOutputDir + '/data-dictionary-1.7.html',
+          'html:' + certReportsDir + '/' + reportName + '.html',
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
           'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0',
@@ -175,11 +173,15 @@ task testDataDictionary_1_7() {
   }
 }
 
-task testIdxPayload_1_7() {
+task testDataAvailability_1_7() {
   group = 'RESO Certification'
-  description = 'Runs IDX Payload 1.7 Automated Acceptance Tests.' +
-      '\n  Example: ' +
-      '\n    $ ./gradlew testIdxPayload_1_7 -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true\n'
+  description = 'Data Dictionary 1.7 Data Availability Tests' +
+      '\nExample:' +
+      '\n  ./gradlew testDataAvailability_1_7 -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript' +
+      '\n\n[Report location: ' + certReportsDir + ']' +
+      '\n\n'
+
+  String reportName = 'data-availability.dd-1.7'
 
   dependsOn jar
   doLast {
@@ -189,46 +191,54 @@ task testIdxPayload_1_7() {
       systemProperties = System.getProperties()
 
       args = [
-          '--strict',
           '--plugin',
           'pretty',
           '--plugin',
-          'json:build/idx-payload.dd-1.7.json',
+          'json:' + cucumberJsonPath + '/' + reportName + '.json',
           '--plugin',
-          'html:build/idx-payload.dd-1.7.html',
+          'html:' + certReportsDir + '/' + reportName + '.html',
           '--glue',
-          'org.reso.certification.stepdefs#IDXPayload',
+          'org.reso.certification.stepdefs#DataAvailability',
+          'src/main/java/org/reso/certification/features/payloads/data-availability.feature'
+      ]
+    }
+  }
+}
+
+task testIdxPayload_1_7() {
+  group = 'RESO Certification'
+  description = 'Data Dictionary 1.7 Payloads Sampling Tests' +
+      '\nExample:' +
+      '\n  ./gradlew testIdxPayload_1_7 -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript' +
+      '\n\n[Report location: ' + certReportsDir + ']' +
+      '\n\n'
+
+  String reportName = 'idx-payload.dd-1.7'
+
+  dependsOn jar
+  doLast {
+    javaexec {
+      main = "io.cucumber.core.cli.Main"
+      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      systemProperties = System.getProperties()
+
+      args = [
+          '--plugin',
+          'pretty',
+          '--plugin',
+          'json:' + cucumberJsonPath + '/' + reportName + '.json',
+          '--plugin',
+          'html:' + certReportsDir + '/' + reportName + '.html',
+          '--glue',
+          'org.reso.certification.stepdefs#IdxPayload',
           'src/main/java/org/reso/certification/features/payloads/idx-payload.feature'
       ]
     }
   }
 }
 
-task generateCertificationReport_DD_1_7() {
-  group = 'RESO Certification'
-  description = 'Runs Data Dictionary 1.7 tests and creates a certification report' +
-      '\n  RESOScript Example:' +
-      '\n    ./gradlew generateCertificationReport_DD_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -Dminimal=true -Dstrict=true' +
-      '\n  Metadata File Example:' +
-      '\n    ./gradlew generateCertificationReport_DD_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml -Dminimal=true -Dstrict=true' +
-      '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
-
-  dependsOn testDataDictionary_1_7
-  doLast {
-    javaexec {
-      System.setProperty('pathToJsonResults', certJsonPath)
-      System.setProperty('reportDescription', 'RESO Data Dictionary 1.7 Certification Report')
-      systemProperties = System.getProperties()
-      classpath = sourceSets.main.runtimeClasspath
-      main = 'org.reso.certification.reporting.CertificationReportGenerator'
-    }
-  }
-}
-
 task testDataDictionaryReferenceMetadata_1_7() {
-  group = 'RESO Certification'
-  description = 'Runs Data Dictionary tests against reference metadata\n'
-
+  description = 'Runs Data Dictionary tests against reference metadata'
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
@@ -236,7 +246,6 @@ task testDataDictionaryReferenceMetadata_1_7() {
       System.setProperty('pathToMetadata', 'src/main/resources/RESODataDictionary-1.7.xml')
       systemProperties = System.getProperties()
       args = [
-          '--strict',
           '--plugin',
           'pretty',
           '--glue',
@@ -254,110 +263,13 @@ test {
     javaexec {
       main = "io.cucumber.core.cli.Main"
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-      args = ['--strict',
+      args = [
               '--plugin',
               'pretty',
               '--glue',
               'org.reso.commander.test.stepdefs',
               'src/test/java/org/reso/commander/test/features'
       ]
-    }
-  }
-}
-
-// task for Data Dictionary 1.7 in Jenkins
-// TODO: consolidate this with the DD tests it was copied from after further testing.
-task _jenkins_testDataDictionary_1_7() {
-  group = 'RESO Certification - Jenkins'
-  description = 'Runs Data Dictionary 1.7 Automated Acceptance Tests in a way that plays well with various Jenkins Plugins' +
-      "\n  Commands used in this case are the same as self-testing locally, they're just passed to a Jenkins-specific config." +
-      "\n  NOTE: Most people should never have to use this option unless they're using Jenkins for builds." +
-      '\n  RESOScript Example:' +
-      '\n    ./gradlew _jenkins_testDataDictionary_1_7() -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dcucumber.filter.tags=""' +
-      '\n  Metadata File Example:' +
-      '\n    ./gradlew _jenkins_testDataDictionary_1_7() -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml -Dcucumber.filter.tags=""' +
-      '\n  To enable strict mode, pass -Dstrict=true. All applicants MUST pass strict mode tests to be certified.\n'
-
-  dependsOn jar
-
-  doLast {
-    certJsonPath = 'build/data-dictionary-1.7.jenkins.json'
-
-    javaexec {
-
-      main = 'io.cucumber.core.cli.Main'
-      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-      systemProperties = System.getProperties()
-
-      pathToMetadata = System.getProperty('pathToMetadata', null)
-      pathToRESOScript = System.getProperty('pathToRESOScript', null)
-
-      if (pathToMetadata != null) {
-        certFileName = pathToMetadata
-            .substring(Math.max(pathToMetadata.lastIndexOf(File.separator) + 1, 0), pathToMetadata.lastIndexOf('.'))
-      } else if (pathToRESOScript != null) {
-        certFileName = pathToRESOScript
-            .substring(Math.max(pathToRESOScript.lastIndexOf(File.separator) + 1, 0), pathToRESOScript.lastIndexOf('.'))
-      }
-
-      args = [
-          '--strict',
-          '--plugin',
-          'json:' + certJsonPath,
-          '--glue',
-          'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0',
-          '--tags',
-          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0
-              ? systemProperties.get('cucumber.filter.tags') : '')
-      ]
-    }
-
-    javaexec {
-      System.setProperty('pathToJsonResults', certJsonPath)
-      systemProperties = System.getProperties()
-      classpath = sourceSets.main.runtimeClasspath
-      main = 'org.reso.certification.reporting.CertificationReportGenerator'
-    }
-  }
-}
-
-// task for Web API Server 1.0.2 Core Testing specific to Jenkins
-task _jenkins_testWebApiServer_1_0_2_Core() {
-  group = 'RESO Certification'
-  description = 'Runs Web API Server 1.0.2 Core Automated Acceptance Tests in a way that plays well with various Jenkins Plugins' +
-      "\n  Commands used in this case are the same as self-testing locally, they're just passed to a Jenkins-specific config." +
-      "\n  NOTE: Most people should never have to use this option unless they're using Jenkins for builds." +
-      '\n  RESOScript Example:' +
-      '\n    $ ./gradlew _jenkins_testWebApiServer_1_0_2_Core -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true\n' +
-      '\n    Note: by default the Web API tests assume Collection(Edm.EnumType).' +
-      '\n      Pass -DuseCollections=false if using OData IsFlags=true.\n'
-
-  dependsOn jar
-
-  doLast {
-    certJsonPath = 'build/web-api-server.core.1.0.2.jenkins.json'
-    javaexec {
-      main = "io.cucumber.core.cli.Main"
-      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-      systemProperties = System.getProperties()
-      args = [
-          '--strict',
-          '--plugin',
-          'json:' + certJsonPath,
-          '--glue',
-          'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
-          'src/main/java/org/reso/certification/features/web-api',
-          '--tags',
-          '@core-endorsement'
-      ]
-    }
-
-    javaexec {
-      System.setProperty('pathToJsonResults', certJsonPath)
-      systemProperties = System.getProperties()
-      classpath = sourceSets.main.runtimeClasspath
-      main = 'org.reso.certification.reporting.CertificationReportGenerator'
     }
   }
 }
