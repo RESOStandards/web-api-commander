@@ -3,6 +3,8 @@ package org.reso.certification.stepdefs;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.POJONode;
 import com.google.inject.Inject;
+import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
 import io.cucumber.java8.En;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -53,18 +55,20 @@ import static org.reso.models.Request.loadFromRESOScript;
  * Contains the glue code for Web API Core 1.0.2 Certification as well as previous Platinum tests,
  * which will converted to standalone endorsements, where applicable.
  */
-class WebAPIServer implements En {
-  private static final Logger LOG = LogManager.getLogger(WebAPIServer.class);
+public class WebAPIServerCore implements En {
+  private static final Logger LOG = LogManager.getLogger(WebAPIServerCore.class);
   private static final String
       SHOW_RESPONSES_PARAM = "showResponses",
       USE_COLLECTIONS_PARAM = "useCollections";
+
+  private static final String PATH_TO_RESOSCRIPT_KEY = "pathToRESOScript";
+  private static Scenario scenario;
 
   //extract any params here
   private static final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES_PARAM));
   // boolean used for indicating whether Web API tests are using collections of enums or not
   // defaults to useCollections=true since IsFlags is being deprecated
   private static final boolean useCollections = Boolean.parseBoolean(System.getProperty(USE_COLLECTIONS_PARAM, "true"));
-
 
   /*
    * Used to store a static instance of the WebAPITestContainer class
@@ -75,42 +79,59 @@ class WebAPIServer implements En {
   //for now this assumes the requests will always be Web API Core Server test queries, but could be $expand, for instance
   private static final String WEB_API_CORE_REFERENCE_REQUESTS = "reference-web-api-core-requests.xml";
 
+  @Before
+  public void beforeStep(Scenario scenario) {
+    final String pathToRESOScript = System.getProperty(PATH_TO_RESOSCRIPT_KEY, null);
+
+    if (pathToRESOScript == null) return;
+
+    WebAPIServerCore.scenario = scenario;
+
+    if (!container.get().getIsInitialized()) {
+      container.get().setSettings(Settings.loadFromRESOScript(new File(System.getProperty(PATH_TO_RESOSCRIPT_KEY))));
+
+      //overwrite any requests loaded with the reference queries
+      container.get().getSettings().setRequests(loadFromRESOScript(new File(Objects.requireNonNull(
+          getClass().getClassLoader().getResource(WEB_API_CORE_REFERENCE_REQUESTS)).getPath()))
+          .stream().map(request -> Settings.resolveParameters(request, container.get().getSettings())).collect(Collectors.toList()));
+
+      container.get().initialize();
+    }
+  }
+
   /**
    * Entry point to the Web API Server tests
    */
   @Inject
-  public WebAPIServer(WebAPITestContainer c) {
+  public WebAPIServerCore(WebAPITestContainer c) {
     container.set(c);
 
-    getTestContainer().setShowResponses(showResponses);
+    container.get().setShowResponses(showResponses);
 
     runBackground();
 
     And("^the XML Metadata returned by the server contains Edm metadata$", () -> {
-      getTestContainer().setEdm(
-          Commander.deserializeEdm(getTestContainer().getXMLResponseData(), getTestContainer().getCommander().getClient())
-      );
-      assertNotNull(getDefaultErrorMessage("Edm deserialized to an empty object!"), getTestContainer().getEdm());
+      container.get().setEdm(Commander.deserializeEdm(container.get().getXMLResponseData(), container.get().getCommander().getClient()));
+      assertNotNull(getDefaultErrorMessage("Edm deserialized to an empty object!"), container.get().getEdm());
     });
 
     /*
      * Edm Metadata Validator
      */
     And("^the Edm metadata returned by the server are valid$", () ->
-        assertTrue("Edm Metadata at the given service root is not valid! " + getTestContainer().getServiceRoot(),
-            getTestContainer().getIsValidEdm()));
+        assertTrue("Edm Metadata at the given service root is not valid! " + container.get().getServiceRoot(), container.get().getIsValidEdm()));
 
     /*
      * XML Metadata Validator
      */
     And("^the XML Metadata returned by the server are valid$", () -> {
-      if (!getTestContainer().getHaveMetadataBeenRequested()) {
+      if (!container.get().getHaveMetadataBeenRequested()) {
         //will lazy-load metadata from the server if not yet requested
-        getTestContainer().getXMLMetadata();
+        container.get().getXMLMetadata();
       }
-      getTestContainer().validateMetadata();
-      assertTrue("XML Metadata at the given service root is not valid! " + getTestContainer().getServiceRoot(),
-          getTestContainer().getIsValidXMLMetadata());
+      container.get().validateMetadata();
+      assertTrue("XML Metadata at the given service root is not valid! " + container.get().getServiceRoot(),
+          container.get().getIsValidXMLMetadata());
     });
 
     /*
@@ -118,9 +139,9 @@ class WebAPIServer implements En {
      */
     And("^the provided \"([^\"]*)\" is returned in \"([^\"]*)\"$", (String parameterUniqueIdValue, String parameterUniqueId) -> {
       try {
-        String expectedValueAsString = Settings.resolveParametersString(parameterUniqueIdValue, getTestContainer().getSettings());
-        Object resolvedValue = from(getTestContainer().getResponseData())
-            .get(Settings.resolveParametersString(parameterUniqueId, getTestContainer().getSettings()));
+        String expectedValueAsString = Settings.resolveParametersString(parameterUniqueIdValue, container.get().getSettings());
+        Object resolvedValue = from(container.get().getResponseData())
+            .get(Settings.resolveParametersString(parameterUniqueId, container.get().getSettings()));
 
         //both of the inputs should be present
         assertNotNull(expectedValueAsString);
@@ -156,15 +177,15 @@ class WebAPIServer implements En {
         double fill;
 
         assertNotNull(getDefaultErrorMessage("no fields found within the given $select list. Check request Id:",
-            getTestContainer().getRequest().getRequestId(), "in your .resoscript file!"), getTestContainer().getSelectList());
+            container.get().getRequest().getRequestId(), "in your .resoscript file!"), container.get().getSelectList());
 
-        LOG.info(QueryOption.SELECT + " list is: " + getTestContainer().getSelectList());
+        LOG.info(QueryOption.SELECT + " list is: " + container.get().getSelectList());
 
         AtomicInteger numResults = new AtomicInteger();
         //iterate over the items and count the number of fields with data to determine whether there are data present
-        from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(container.get().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           numResults.getAndIncrement();
-          getTestContainer().getSelectList().forEach(field -> {
+          container.get().getSelectList().forEach(field -> {
             if (item.get(field) != null) {
               numFieldsWithData.getAndIncrement();
             }
@@ -172,11 +193,11 @@ class WebAPIServer implements En {
         });
 
         LOG.info("Number of Results: " + numResults.get());
-        LOG.info("Number of Fields: " + getTestContainer().getSelectList().size());
+        LOG.info("Number of Fields: " + container.get().getSelectList().size());
         LOG.info("Fields with Data: " + numFieldsWithData.get());
 
-        if (numResults.get() > 0 && getTestContainer().getSelectList().size() > 0) {
-          fill = ((100.0 * numFieldsWithData.get()) / (numResults.get() * getTestContainer().getSelectList().size()));
+        if (numResults.get() > 0 && container.get().getSelectList().size() > 0) {
+          fill = ((100.0 * numFieldsWithData.get()) / (numResults.get() * container.get().getSelectList().size()));
           LOG.info("Percent Fill: " + df.format(fill) + "%");
         } else {
           LOG.info("Percent Fill: 0% - no fields with data found!");
@@ -194,10 +215,10 @@ class WebAPIServer implements En {
      */
     And("^the results contain at most \"([^\"]*)\" records$", (String parameterTopCount) -> {
       try {
-        List<String> items = from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH);
+        List<String> items = from(container.get().getResponseData()).getList(JSON_VALUE_PATH);
         AtomicInteger numResults = new AtomicInteger(items.size());
 
-        int topCount = Integer.parseInt(Settings.resolveParametersString(parameterTopCount, getTestContainer().getSettings()));
+        int topCount = Integer.parseInt(Settings.resolveParametersString(parameterTopCount, container.get().getSettings()));
         LOG.info("Number of values returned: " + numResults.get() + ", top count is: " + topCount);
 
         assertTrue(getDefaultErrorMessage("results count must be greater than zero and less than", parameterTopCount + "!"),
@@ -207,26 +228,25 @@ class WebAPIServer implements En {
       }
     });
 
-
     /*
      * skip - $skip
      * $skip=*Parameter_TopCount*
      */
     And("^a GET request is made to the resolved Url in \"([^\"]*)\" with \\$skip=\"([^\"]*)\"$", (String requestId, String parameterTopCount) -> {
       try {
-        int skipCount = Integer.parseInt(Settings.resolveParametersString(parameterTopCount, getTestContainer().getSettings()));
+        int skipCount = Integer.parseInt(Settings.resolveParametersString(parameterTopCount, container.get().getSettings()));
         LOG.info("Skip count is: " + skipCount);
 
-        getTestContainer().setRequest(requestId);
+        container.get().setRequest(requestId);
 
         //preserve initial response data for later comparisons
-        getTestContainer().setInitialResponseData(getTestContainer().getResponseData());
+        container.get().setInitialResponseData(container.get().getResponseData());
 
         //TODO: convert to OData filter factory
-        getTestContainer().setRequestUri(Commander.prepareURI(
-            Settings.resolveParameters(getTestContainer().getSettings().getRequest(requestId), getTestContainer().getSettings()).getRequestUrl()
+        container.get().setRequestUri(Commander.prepareURI(
+            Settings.resolveParameters(container.get().getSettings().getRequest(requestId), container.get().getSettings()).getRequestUrl()
                 + AMPERSAND + ODATA_QUERY_PARAMS.SKIP + EQUALS + skipCount));
-        getTestContainer().executePreparedRawGetRequest();
+        container.get().executePreparedRawGetRequest();
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -243,13 +263,13 @@ class WebAPIServer implements En {
     And("^the \"([^\"]*)\" value is greater than or equal to the number of results$", (String field) -> {
       assertTrue(getDefaultErrorMessage("the @odata.count value MUST be present",
           "and contain a non-zero value greater than or equal to the number of results!"),
-          TestUtils.validateODataCount(getTestContainer().getResponseData()));
+          TestUtils.validateODataCount(container.get().getResponseData()));
     });
 
     And("^data in the \"([^\"]*)\" fields are different in the second request than in the first$", (String parameterUniqueId) -> {
       try {
-        List<POJONode> l1 = from(getTestContainer().getInitialResponseData()).getJsonObject(JSON_VALUE_PATH);
-        List<POJONode> l2 = from(getTestContainer().getResponseData()).getJsonObject(JSON_VALUE_PATH);
+        List<POJONode> l1 = from(container.get().getInitialResponseData()).getJsonObject(JSON_VALUE_PATH);
+        List<POJONode> l2 = from(container.get().getResponseData()).getJsonObject(JSON_VALUE_PATH);
 
         int combinedCount = l1.size() + l2.size();
         Set<POJONode> intersection = new LinkedHashSet<>(l1);
@@ -288,36 +308,36 @@ class WebAPIServer implements En {
      * Assert response code
      */
     Then("^the server responds with a status code of (\\d+)$", (Integer assertedResponseCode) -> {
-      assertNotNull(getDefaultErrorMessage("request was null! \nCheck RESOScript to make sure requestId exists."), getTestContainer().getRequest());
+      assertNotNull(getDefaultErrorMessage("request was null! \nCheck RESOScript to make sure requestId exists."), container.get().getRequest());
       try {
-        LOG.info("Asserted Response Code: " + assertedResponseCode + ", Server Response Code: " + getTestContainer().getResponseCode());
+        LOG.info("Asserted Response Code: " + assertedResponseCode + ", Server Response Code: " + container.get().getResponseCode());
 
-        if (getTestContainer().getODataClientErrorException() != null) {
-          if (getTestContainer().getODataClientErrorException().getODataError().getMessage() != null) {
+        if (container.get().getODataClientErrorException() != null) {
+          if (container.get().getODataClientErrorException().getODataError().getMessage() != null) {
             LOG.error(getDefaultErrorMessage("Request failed with the following message:",
-                getTestContainer().getODataClientErrorException().getODataError().getMessage()));
-          } else if (getTestContainer().getODataClientErrorException().getMessage() != null) {
+                container.get().getODataClientErrorException().getODataError().getMessage()));
+          } else if (container.get().getODataClientErrorException().getMessage() != null) {
             LOG.error(getDefaultErrorMessage("Request failed with the following message:",
-                getTestContainer().getODataClientErrorException().getMessage()));
+                container.get().getODataClientErrorException().getMessage()));
           }
         }
 
-        if (getTestContainer().getODataServerErrorException() != null) {
+        if (container.get().getODataServerErrorException() != null) {
           LOG.error(getDefaultErrorMessage("Request failed with the following message:",
-              getTestContainer().getODataServerErrorException().toString()));
+              container.get().getODataServerErrorException().toString()));
 
-          if (getTestContainer().getODataServerErrorException().toString().contains(String.valueOf(HttpStatus.SC_INTERNAL_SERVER_ERROR))) {
-            getTestContainer().setResponseCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+          if (container.get().getODataServerErrorException().toString().contains(String.valueOf(HttpStatus.SC_INTERNAL_SERVER_ERROR))) {
+            container.get().setResponseCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
           }
         }
 
         //TODO: clean up logic
-        if (getTestContainer().getResponseCode() != null && assertedResponseCode.intValue() != getTestContainer().getResponseCode().intValue()) {
-          fail(getAssertResponseCodeErrorMessage(assertedResponseCode, getTestContainer().getResponseCode()));
+        if (container.get().getResponseCode() != null && assertedResponseCode.intValue() != container.get().getResponseCode().intValue()) {
+          fail(getAssertResponseCodeErrorMessage(assertedResponseCode, container.get().getResponseCode()));
         }
 
         //if we make it through without failing, things are good
-        assertTrue(getTestContainer().getResponseCode() > 0 && assertedResponseCode > 0);
+        assertTrue(container.get().getResponseCode() > 0 && assertedResponseCode > 0);
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -327,15 +347,15 @@ class WebAPIServer implements En {
      * validate XML wrapper
      */
     And("^the XML Metadata response is valid XML$", () -> {
-      assertNotNull(getDefaultErrorMessage("no XML Response data were found!"), getTestContainer().getXMLResponseData());
-      getTestContainer().validateXMLMetadataXML();
-      assertTrue(getDefaultErrorMessage("invalid XML response!"), getTestContainer().getIsValidXMLMetadataXML());
+      assertNotNull(getDefaultErrorMessage("no XML Response data were found!"), container.get().getXMLResponseData());
+      container.get().validateXMLMetadataXML();
+      assertTrue(getDefaultErrorMessage("invalid XML response!"), container.get().getIsValidXMLMetadataXML());
     });
 
     /*
      * validate JSON wrapper
      */
-    And("^the response is valid JSON$", getTestContainer()::validateJSON);
+    And("^the response is valid JSON$", container.get()::validateJSON);
 
     /*
      * Assert HTTP Response Code given asserted OData version
@@ -344,15 +364,15 @@ class WebAPIServer implements En {
      */
     Then("^the server responds with a status code of (\\d+) if the server reports OData-Version \"([^\"]*)\"$", (Integer assertedHttpResponseCode, String assertedODataVersion) -> {
       try {
-        boolean versionsMatch = getTestContainer().getServerODataHeaderVersion().equals(assertedODataVersion),
-            responseCodesMatch = getTestContainer().getResponseCode().intValue() == assertedHttpResponseCode.intValue();
+        boolean versionsMatch = container.get().getServerODataHeaderVersion().equals(assertedODataVersion),
+            responseCodesMatch = container.get().getResponseCode().intValue() == assertedHttpResponseCode.intValue();
 
-        LOG.info("Asserted OData Version: " + assertedODataVersion + ", Server Version: " + getTestContainer().getServerODataHeaderVersion());
+        LOG.info("Asserted OData Version: " + assertedODataVersion + ", Server Version: " + container.get().getServerODataHeaderVersion());
 
         if (versionsMatch) {
-          LOG.info("Asserted Response Code: " + assertedHttpResponseCode + ", Response code: " + getTestContainer().getResponseCode());
+          LOG.info("Asserted Response Code: " + assertedHttpResponseCode + ", Response code: " + container.get().getResponseCode());
           assertTrue(getDefaultErrorMessage("asserted response code (" + assertedHttpResponseCode + ")",
-              "does not match the one returned from the server (" + getTestContainer().getResponseCode() + ")!"), responseCodesMatch);
+              "does not match the one returned from the server (" + container.get().getResponseCode() + ")!"), responseCodesMatch);
         } else {
           LOG.info("Test skipped! Only applies when the asserted version matches the reported server version.");
         }
@@ -369,8 +389,8 @@ class WebAPIServer implements En {
     And("^the response has results$", () -> {
       try {
         assertTrue(getDefaultErrorMessage("no results were found in the '" + JSON_VALUE_PATH + "' path of the JSON response!"),
-            from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, Map.class).size() > 0);
-        LOG.info("Results count is: " + from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, Map.class).size());
+            from(container.get().getResponseData()).getList(JSON_VALUE_PATH, Map.class).size() > 0);
+        LOG.info("Results count is: " + from(container.get().getResponseData()).getList(JSON_VALUE_PATH, Map.class).size());
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -381,8 +401,8 @@ class WebAPIServer implements En {
      */
     And("^the response has singleton results in \"([^\"]*)\"", (String parameterFieldName) -> {
       try {
-        String value = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
-        boolean isPresent = from(getTestContainer().getResponseData()).get() != null;
+        String value = Settings.resolveParametersString(parameterFieldName, container.get().getSettings());
+        boolean isPresent = from(container.get().getResponseData()).get() != null;
         assertTrue(getDefaultErrorMessage("OData singleton results not found for '" + value + "'!"), isPresent);
         LOG.info("Data are present and response value is: " + value);
       } catch (Exception ex) {
@@ -395,8 +415,8 @@ class WebAPIServer implements En {
      */
     And("^the number of results is less than or equal to \"([^\"]*)\"$", (String limitField) -> {
       try {
-        int count = from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).size(),
-            limit = Integer.parseInt(Settings.resolveParametersString(limitField, getTestContainer().getSettings()));
+        int count = from(container.get().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).size(),
+            limit = Integer.parseInt(Settings.resolveParametersString(limitField, container.get().getSettings()));
         LOG.info("Results count is: " + count + ", Limit is: " + limit);
         assertTrue(getDefaultErrorMessage("number of results exceeds that specified in '" + limitField + "'!"), count <= limit);
       } catch (Exception ex) {
@@ -410,11 +430,11 @@ class WebAPIServer implements En {
      */
     And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
       try {
-        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
-        int assertedValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
+        String fieldName = Settings.resolveParametersString(parameterFieldName, container.get().getSettings());
+        int assertedValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, container.get().getSettings()));
 
         LOG.info("fieldName: " + fieldName + ", op: " + op + ", assertedValue: " + assertedValue);
-        assertTrue(TestUtils.compareIntegerPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue));
+        assertTrue(TestUtils.compareIntegerPayloadToAssertedValue(container.get().getResponseData(), fieldName, op, assertedValue));
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -422,11 +442,11 @@ class WebAPIServer implements En {
 
     And("^Decimal data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
       try {
-        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
-        Double assertedValue = Double.parseDouble(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
+        String fieldName = Settings.resolveParametersString(parameterFieldName, container.get().getSettings());
+        Double assertedValue = Double.parseDouble(Settings.resolveParametersString(parameterAssertedValue, container.get().getSettings()));
 
         LOG.info("fieldName: " + fieldName + ", op: " + op + ", assertedValue: " + assertedValue);
-        assertTrue(TestUtils.compareDecimalPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue));
+        assertTrue(TestUtils.compareDecimalPayloadToAssertedValue(container.get().getResponseData(), fieldName, op, assertedValue));
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -438,9 +458,9 @@ class WebAPIServer implements En {
      */
     And("^Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String opLhs, String parameterAssertedLhsValue, String andOrOp, String opRhs, String parameterAssertedRhsValue) -> {
       try {
-        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
-        Integer assertedLhsValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedLhsValue, getTestContainer().getSettings())),
-            assertedRhsValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedRhsValue, getTestContainer().getSettings()));
+        String fieldName = Settings.resolveParametersString(parameterFieldName, container.get().getSettings());
+        Integer assertedLhsValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedLhsValue, container.get().getSettings())),
+            assertedRhsValue = Integer.parseInt(Settings.resolveParametersString(parameterAssertedRhsValue, container.get().getSettings()));
 
         String op = andOrOp.toLowerCase();
         boolean isAndOp = op.contains(AND);
@@ -455,7 +475,7 @@ class WebAPIServer implements En {
             rhsValue = new AtomicReference<>();
 
         //iterate through response data and ensure that with data, the statement fieldName "op" assertValue is true
-        from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(container.get().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           lhsValue.set(Integer.parseInt(item.get(fieldName).toString()));
           rhsValue.set(Integer.parseInt(item.get(fieldName).toString()));
 
@@ -483,14 +503,14 @@ class WebAPIServer implements En {
      */
     And("^Date data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
       try {
-        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
+        String fieldName = Settings.resolveParametersString(parameterFieldName, container.get().getSettings());
         AtomicReference<Date> fieldValue = new AtomicReference<>();
         AtomicReference<Date> assertedValue = new AtomicReference<>();
 
-        assertedValue.set(TestUtils.parseDateFromEdmDateString(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings())));
+        assertedValue.set(TestUtils.parseDateFromEdmDateString(Settings.resolveParametersString(parameterAssertedValue, container.get().getSettings())));
         LOG.info("Asserted value is: " + assertedValue.get().toString());
 
-        from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(container.get().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           try {
             fieldValue.set(TestUtils.parseDateFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
             assertTrue(TestUtils.compare(fieldValue.get(), op, assertedValue.get()));
@@ -508,14 +528,14 @@ class WebAPIServer implements En {
      */
     And("^TimeOfDay data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
       try {
-        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
+        String fieldName = Settings.resolveParametersString(parameterFieldName, container.get().getSettings());
         AtomicReference<Time> fieldValue = new AtomicReference<>();
         AtomicReference<Time> assertedValue = new AtomicReference<>();
 
-        assertedValue.set(TestUtils.parseTimeOfDayFromEdmTimeOfDayString(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings())));
+        assertedValue.set(TestUtils.parseTimeOfDayFromEdmTimeOfDayString(Settings.resolveParametersString(parameterAssertedValue, container.get().getSettings())));
         LOG.info("Asserted value is: " + assertedValue.get().toString());
 
-        from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(container.get().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           try {
             fieldValue.set(TestUtils.parseTimeOfDayFromEdmDateTimeOffsetString(item.get(fieldName).toString()));
             assertTrue(TestUtils.compare(fieldValue.get(), op, assertedValue.get()));
@@ -533,7 +553,7 @@ class WebAPIServer implements En {
      */
     And("^DateTimeOffset data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
       try {
-        TestUtils.assertDateTimeOffset(parameterFieldName, op, parameterAssertedValue, getTestContainer().getResponseData(), getTestContainer().getSettings());
+        TestUtils.assertDateTimeOffset(parameterFieldName, op, parameterAssertedValue, container.get().getResponseData(), container.get().getSettings());
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -544,7 +564,7 @@ class WebAPIServer implements En {
      */
     And("^DateTimeOffset data in \"([^\"]*)\" \"([^\"]*)\" now\\(\\)$", (String parameterFieldName, String op) -> {
       try {
-        TestUtils.assertDateTimeOffset(parameterFieldName, op, Timestamp.from(Instant.now()), getTestContainer().getResponseData(), getTestContainer().getSettings());
+        TestUtils.assertDateTimeOffset(parameterFieldName, op, Timestamp.from(Instant.now()), container.get().getResponseData(), container.get().getSettings());
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -556,16 +576,16 @@ class WebAPIServer implements En {
     And("^Single Valued Enumeration Data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
       try {
 
-        final String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
+        final String fieldName = Settings.resolveParametersString(parameterFieldName, container.get().getSettings());
         AtomicReference<String> fieldValue = new AtomicReference<>();
         AtomicReference<String> assertedValue = new AtomicReference<>();
 
         AtomicBoolean result = new AtomicBoolean(false);
 
-        assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
+        assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, container.get().getSettings()));
         LOG.info("Asserted value is: " + assertedValue.get());
 
-        from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(container.get().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           fieldValue.set(item.get(fieldName).toString());
           if (op.toLowerCase().contentEquals(EQ) || op.toLowerCase().contentEquals(HAS)) {
             result.set(fieldValue.get().contentEquals(assertedValue.get()));
@@ -586,15 +606,15 @@ class WebAPIServer implements En {
      */
     And("^Multiple Valued Enumeration Data in \"([^\"]*)\" has \"([^\"]*)\"$", (String parameterFieldName, String parameterAssertedValue) -> {
       try {
-        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
+        String fieldName = Settings.resolveParametersString(parameterFieldName, container.get().getSettings());
         AtomicReference<String> fieldValue = new AtomicReference<>();
         AtomicReference<String> assertedValue = new AtomicReference<>();
         AtomicBoolean result = new AtomicBoolean(true);
 
-        assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
+        assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, container.get().getSettings()));
         LOG.info("Asserted value is: " + assertedValue.get());
 
-        from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, ObjectNode.class).forEach(item -> {
+        from(container.get().getResponseData()).getList(JSON_VALUE_PATH, ObjectNode.class).forEach(item -> {
           fieldValue.set(item.get(fieldName).toString());
           if (useCollections) {
             if (item.get(fieldName).isArray()) {
@@ -617,16 +637,16 @@ class WebAPIServer implements En {
 
     And("^Multiple Valued Enumeration Data in \"([^\"]*)\" is empty OR has \"([^\"]*)\"$", (String parameterFieldName, String parameterAssertedValue) -> {
       try {
-        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
+        String fieldName = Settings.resolveParametersString(parameterFieldName, container.get().getSettings());
         AtomicReference<String> fieldValue = new AtomicReference<>();
         AtomicReference<String> assertedValue = new AtomicReference<>();
 
         AtomicBoolean result = new AtomicBoolean(true);
 
-        assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
+        assertedValue.set(Settings.resolveParametersString(parameterAssertedValue, container.get().getSettings()));
         LOG.info("Asserted value is: " + assertedValue.get());
 
-        from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, ObjectNode.class).forEach(item -> {
+        from(container.get().getResponseData()).getList(JSON_VALUE_PATH, ObjectNode.class).forEach(item -> {
           fieldValue.set(item.get(fieldName).toString());
           if (item.get(fieldName).isArray()) {
             result.set(result.get() && testAllOperator(item, fieldName, assertedValue.get()));
@@ -646,7 +666,7 @@ class WebAPIServer implements En {
      */
     And("^DateTimeOffset data in \"([^\"]*)\" is sorted in \"([^\"]*)\" order$", (String parameterFieldName, String parameterOrderByDirection) -> {
       try {
-        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
+        String fieldName = Settings.resolveParametersString(parameterFieldName, container.get().getSettings());
         final String ASC = "asc", DESC = "desc";
         AtomicReference<String> orderBy = new AtomicReference<>(parameterOrderByDirection.toLowerCase());
 
@@ -657,12 +677,12 @@ class WebAPIServer implements En {
         AtomicReference<Timestamp> currentValue = new AtomicReference<>();
         AtomicInteger count = new AtomicInteger(0);
 
-        from(getTestContainer().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
+        from(container.get().getResponseData()).getList(JSON_VALUE_PATH, HashMap.class).forEach(item -> {
           try {
             if (count.get() == 0) {
-              initialValue.set(TestUtils.parseTimestampFromEdmDateTimeOffsetString((String)item.get(fieldName)));
+              initialValue.set(TestUtils.parseTimestampFromEdmDateTimeOffsetString((String) item.get(fieldName)));
             } else {
-              currentValue.set(TestUtils.parseTimestampFromEdmDateTimeOffsetString((String)item.get(fieldName)));
+              currentValue.set(TestUtils.parseTimestampFromEdmDateTimeOffsetString((String) item.get(fieldName)));
               if (orderBy.get().equals(ASC)) {
                 assertTrue(TestUtils.compare(initialValue.get(), LESS_THAN_OR_EQUAL, currentValue.get()));
               } else if (orderBy.get().equals(DESC)) {
@@ -684,15 +704,15 @@ class WebAPIServer implements En {
      * Date Field comparisons
      */
     And("^\"([^\"]*)\" data in Date Field \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String stringDatePart, String parameterFieldName, String op, String parameterAssertedValue) -> {
-      String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
+      String fieldName = Settings.resolveParametersString(parameterFieldName, container.get().getSettings());
       AtomicInteger assertedValue = new AtomicInteger();
       AtomicReference<String> datePart = new AtomicReference<>(stringDatePart.toLowerCase());
       AtomicReference<String> operator = new AtomicReference<>(op.toLowerCase());
 
       try {
-        assertedValue.set(Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings())));
+        assertedValue.set(Integer.parseInt(Settings.resolveParametersString(parameterAssertedValue, container.get().getSettings())));
         LOG.info("Asserted value is: " + assertedValue.get());
-        assertTrue(TestUtils.compareDatePayloadToAssertedDatePartValue(getTestContainer().getResponseData(), datePart.get(), fieldName, operator.get(), assertedValue.intValue()));
+        assertTrue(TestUtils.compareDatePayloadToAssertedDatePartValue(container.get().getResponseData(), datePart.get(), fieldName, operator.get(), assertedValue.intValue()));
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -703,22 +723,22 @@ class WebAPIServer implements En {
      */
     And("^\"([^\"]*)\" data in Timestamp Field \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String stringDatePart, String parameterFieldName, String op, String parameterAssertedValue) -> {
       try {
-        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
+        String fieldName = Settings.resolveParametersString(parameterFieldName, container.get().getSettings());
         double assertedValue;
         String datePart = stringDatePart.toLowerCase();
         String operator = op.toLowerCase();
 
         try {
-          assertedValue = Double.parseDouble(Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings()));
+          assertedValue = Double.parseDouble(Settings.resolveParametersString(parameterAssertedValue, container.get().getSettings()));
 
           if (assertedValue % 1 == 0) LOG.info("Asserted value is: " + (int) assertedValue);
           else LOG.info("Asserted value is: " + assertedValue);
 
           //TODO: re-consolidate fractional with other date part ops
           if (datePart.contentEquals(FRACTIONAL)) {
-            assertTrue(TestUtils.compareFractionalSecondsPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, operator, assertedValue));
+            assertTrue(TestUtils.compareFractionalSecondsPayloadToAssertedValue(container.get().getResponseData(), fieldName, operator, assertedValue));
           } else {
-            assertTrue(TestUtils.compareTimestampPayloadToAssertedDatePartValue(getTestContainer().getResponseData(), datePart, fieldName, operator, (int) assertedValue));
+            assertTrue(TestUtils.compareTimestampPayloadToAssertedDatePartValue(container.get().getResponseData(), datePart, fieldName, operator, (int) assertedValue));
           }
         } catch (Exception ex) {
           fail(getDefaultErrorMessage(ex));
@@ -733,9 +753,9 @@ class WebAPIServer implements En {
      */
     And("^String data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String op, String parameterAssertedValue) -> {
       try {
-        String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings());
-        String assertedValue = Settings.resolveParametersString(parameterAssertedValue, getTestContainer().getSettings());
-        assertTrue(TestUtils.compareStringPayloadToAssertedValue(getTestContainer().getResponseData(), fieldName, op, assertedValue));
+        String fieldName = Settings.resolveParametersString(parameterFieldName, container.get().getSettings());
+        String assertedValue = Settings.resolveParametersString(parameterAssertedValue, container.get().getSettings());
+        assertTrue(TestUtils.compareStringPayloadToAssertedValue(container.get().getResponseData(), fieldName, op, assertedValue));
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -750,11 +770,11 @@ class WebAPIServer implements En {
       Checks that metadata are accessible and contain the resource name specified in generic.resoscript
      */
     And("^the metadata contains the \"([^\"]*)\" resource$", (String parameterResourceName) -> {
-      final String resourceName = Settings.resolveParametersString(parameterResourceName, getTestContainer().getSettings());
+      final String resourceName = Settings.resolveParametersString(parameterResourceName, container.get().getSettings());
       AtomicReference<CsdlEntityContainer> entityContainer = new AtomicReference<>();
 
       try {
-        entityContainer.set(TestUtils.findDefaultEntityContainer(getTestContainer().getEdm(), getTestContainer().getXMLMetadata()));
+        entityContainer.set(TestUtils.findDefaultEntityContainer(container.get().getEdm(), container.get().getXMLMetadata()));
 
         assertNotNull(getDefaultErrorMessage("server metadata does not contain the given resource name:", resourceName),
             entityContainer.get().getEntitySet(resourceName));
@@ -771,17 +791,17 @@ class WebAPIServer implements En {
      * all of the fields in the given parameterSelectList.
      */
     And("^resource metadata for \"([^\"]*)\" contains the fields in the given select list$", (String parameterResourceName) -> {
-      assertTrue(getDefaultErrorMessage("no $select list found for requestId:", getTestContainer().getRequest().getRequestId()),
-          getTestContainer().getSelectList().size() > 0);
+      assertTrue(getDefaultErrorMessage("no $select list found for requestId:", container.get().getRequest().getRequestId()),
+          container.get().getSelectList().size() > 0);
 
       try {
-        LOG.info("Searching metadata for fields in given select list: " + getTestContainer().getSelectList().toString());
-        getTestContainer().getSelectList().forEach(fieldName -> {
+        LOG.info("Searching metadata for fields in given select list: " + container.get().getSelectList().toString());
+        container.get().getSelectList().forEach(fieldName -> {
           //need to skip the expand field when looking through the metadata
-          if (getTestContainer().getExpandField() != null && !fieldName.contentEquals(getTestContainer().getExpandField())) {
+          if (container.get().getExpandField() != null && !fieldName.contentEquals(container.get().getExpandField())) {
             try {
               assertNotNull(getDefaultErrorMessage("Field name '" + fieldName + "' is not present in server metadata!"),
-                  getTestContainer().getCsdlProperty(parameterResourceName, fieldName));
+                  container.get().getCsdlProperty(parameterResourceName, fieldName));
               LOG.info("Found: '" + fieldName.trim() + "'");
             } catch (Exception ex) {
               LOG.error(getDefaultErrorMessage(ex));
@@ -801,10 +821,10 @@ class WebAPIServer implements En {
     When("^the metadata contains a valid service document$", () -> {
       try {
         assertNotNull(getDefaultErrorMessage("could not find default entity container for given service root:",
-            getTestContainer().getServiceRoot()), getTestContainer().getEdm().getEntityContainer());
-        LOG.info("Found Default Entity Container: '" + getTestContainer().getEdm().getEntityContainer().getNamespace() + "'");
+            container.get().getServiceRoot()), container.get().getEdm().getEntityContainer());
+        LOG.info("Found Default Entity Container: '" + container.get().getEdm().getEntityContainer().getNamespace() + "'");
       } catch (ODataClientErrorException cex) {
-        getTestContainer().setResponseCode(cex.getStatusLine().getStatusCode());
+        container.get().setResponseCode(cex.getStatusLine().getStatusCode());
         fail(cex.toString());
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
@@ -815,19 +835,19 @@ class WebAPIServer implements En {
      * XML Metadata getter
      */
     And("^XML Metadata are requested from the service root in \"([^\"]*)\"$", (String clientSettingsServiceRoot) -> {
-      final String serviceRoot = Settings.resolveParametersString(clientSettingsServiceRoot, getTestContainer().getSettings());
+      final String serviceRoot = Settings.resolveParametersString(clientSettingsServiceRoot, container.get().getSettings());
       assertEquals(getDefaultErrorMessage("given service root doesn't match the one configured in the Commander"),
           serviceRoot,
-          getTestContainer().getCommander().getServiceRoot());
+          container.get().getCommander().getServiceRoot());
 
       try {
-        if (getTestContainer().fetchXMLMetadata() == null) {
+        if (container.get().fetchXMLMetadata() == null) {
           //force exit rather than allowing the tests to finish
           LOG.error(getDefaultErrorMessage("could not retrieve valid XML Metadata for given service root:", serviceRoot));
           System.exit(NOT_OK);
         }
       } catch (ODataClientErrorException cex) {
-        getTestContainer().setResponseCode(cex.getStatusLine().getStatusCode());
+        container.get().setResponseCode(cex.getStatusLine().getStatusCode());
         LOG.error(getDefaultErrorMessage(cex));
         System.exit(NOT_OK);
       } catch (Exception ex) {
@@ -840,10 +860,10 @@ class WebAPIServer implements En {
      * Tests whether a navigation property can be found in the given resource name.
      */
     And("^an OData NavigationProperty exists for the given \"([^\"]*)\"$", (String parameterEndpointResource) -> {
-      String resourceName = Settings.resolveParametersString(parameterEndpointResource, getTestContainer().getSettings());
+      String resourceName = Settings.resolveParametersString(parameterEndpointResource, container.get().getSettings());
 
       List<CsdlNavigationProperty> navigationProperties
-          = TestUtils.findNavigationPropertiesForEntityTypeName(getTestContainer().getEdm(), getTestContainer().getXMLMetadata(), resourceName);
+          = TestUtils.findNavigationPropertiesForEntityTypeName(container.get().getEdm(), container.get().getXMLMetadata(), resourceName);
 
       assertTrue(getDefaultErrorMessage("no navigation properties found for the given '" + resourceName + "' resource!"),
           navigationProperties.size() > 0);
@@ -860,11 +880,11 @@ class WebAPIServer implements En {
      * Checks to see whether the expanded field has data
      */
     And("^data and type information exist in the results and within the given \"([^\"]*)\"$", (String parameterExpandField) -> {
-      String expandField = Settings.resolveParametersString(parameterExpandField, getTestContainer().getSettings());
+      String expandField = Settings.resolveParametersString(parameterExpandField, container.get().getSettings());
       assertFalse(getDefaultErrorMessage("no expand field found for", parameterExpandField), expandField.isEmpty());
 
-      ClientEntitySet results = getTestContainer().getCommander().getClient().getRetrieveRequestFactory()
-          .getEntitySetRequest(getTestContainer().getRequestUri()).execute().getBody();
+      ClientEntitySet results = container.get().getCommander().getClient().getRetrieveRequestFactory()
+          .getEntitySetRequest(container.get().getRequestUri()).execute().getBody();
 
       LOG.info("Results count is: " + results.getEntities().size());
       AtomicInteger counter = new AtomicInteger();
@@ -918,7 +938,7 @@ class WebAPIServer implements En {
      */
     And("^the metadata contains at least one resource from \"([^\"]*)\"$", (String parameterRequiredResourceList) -> {
       String requiredResourceString =
-          Settings.resolveParametersString(parameterRequiredResourceList, getTestContainer().getSettings()).replace(SINGLE_SPACE, EMPTY_STRING);
+          Settings.resolveParametersString(parameterRequiredResourceList, container.get().getSettings()).replace(SINGLE_SPACE, EMPTY_STRING);
       List<String> requiredResources = Arrays.asList(requiredResourceString.split(FIELD_SEPARATOR));
 
       LOG.info("Searching the default entity container for one of the following Standard Resources: "
@@ -928,7 +948,7 @@ class WebAPIServer implements En {
       requiredResources.forEach(requiredResource -> {
         try {
           if (!found.get())
-            found.set(found.get() || getTestContainer().getEdm().getEntityContainer().getEntitySet(requiredResource) != null);
+            found.set(found.get() || container.get().getEdm().getEntityContainer().getEntitySet(requiredResource) != null);
         } catch (Exception ex) {
           fail(getDefaultErrorMessage(ex));
         }
@@ -946,8 +966,8 @@ class WebAPIServer implements En {
      * latest version of the Data Dictionary, currently 1.7.
      */
     And("^the given \"([^\"]*)\" resource exists within \"([^\"]*)\"$", (String parameterResourceName, String parameterResourceList) -> {
-      String resourceName = Settings.resolveParametersString(parameterResourceName, getTestContainer().getSettings()),
-          allowedResourceString = Settings.resolveParametersString(parameterResourceList, getTestContainer().getSettings()).replace(" ", "");
+      String resourceName = Settings.resolveParametersString(parameterResourceName, container.get().getSettings()),
+          allowedResourceString = Settings.resolveParametersString(parameterResourceList, container.get().getSettings()).replace(" ", "");
       List<String> allowedResources = new ArrayList<>(Arrays.asList(allowedResourceString.split(FIELD_SEPARATOR)));
 
       LOG.info("Resource Name: " + resourceName);
@@ -960,25 +980,25 @@ class WebAPIServer implements En {
 
 
     When("^a GET request is made to the resolved Url in \"([^\"]*)\" using the OData Client$", (String requestId) -> {
-      Request request = getTestContainer().getSettings().getRequest(requestId);
-      String uriString = Settings.resolveParameters(request, getTestContainer().getSettings()).getRequestUrl();
+      Request request = container.get().getSettings().getRequest(requestId);
+      String uriString = Settings.resolveParameters(request, container.get().getSettings()).getRequestUrl();
       assertTrue(getDefaultErrorMessage("the resolved Url in", "'" + requestId + "'", "was invalid!"), uriString != null && uriString.length() > 0);
 
       LOG.info("Request Id: " + requestId);
       try {
-        getTestContainer().setRequest(request);
-        getTestContainer().setRequestUri(prepareUri(uriString));
-        getTestContainer().setClientEntitySetRequest(getTestContainer().getCommander().getClient().getRetrieveRequestFactory().getEntitySetRequest(getTestContainer().getRequestUri()));
+        container.get().setRequest(request);
+        container.get().setRequestUri(prepareUri(uriString));
+        container.get().setClientEntitySetRequest(container.get().getCommander().getClient().getRetrieveRequestFactory().getEntitySetRequest(container.get().getRequestUri()));
         LOG.info("OData Client Request being made to: " + uriString);
-        getTestContainer().setClientEntitySetRequest(getTestContainer().getClientEntitySetRequest());
-        getTestContainer().setClientEntitySetResponse(getTestContainer().getClientEntitySetRequest().execute());
-        getTestContainer().setResponseCode(getTestContainer().getClientEntitySetResponse().getStatusCode());
+        container.get().setClientEntitySetRequest(container.get().getClientEntitySetRequest());
+        container.get().setClientEntitySetResponse(container.get().getClientEntitySetRequest().execute());
+        container.get().setResponseCode(container.get().getClientEntitySetResponse().getStatusCode());
 
-        ResWrap<EntityCollection> coll = (getTestContainer().getCommander().getClient().getDeserializer(ContentType.JSON).toEntitySet(getTestContainer().getClientEntitySetResponse().getRawResponse()));
-        getTestContainer().setClientEntitySet(getTestContainer().getCommander().getClient().getBinder().getODataEntitySet(coll));
+        ResWrap<EntityCollection> coll = (container.get().getCommander().getClient().getDeserializer(ContentType.JSON).toEntitySet(container.get().getClientEntitySetResponse().getRawResponse()));
+        container.get().setClientEntitySet(container.get().getCommander().getClient().getBinder().getODataEntitySet(coll));
       } catch (ODataClientErrorException cex) {
-        getTestContainer().setODataClientErrorException(cex);
-        getTestContainer().setResponseCode(cex.getStatusLine().getStatusCode());
+        container.get().setODataClientErrorException(cex);
+        container.get().setResponseCode(cex.getStatusLine().getStatusCode());
       } catch (Exception ex) {
         fail(getDefaultErrorMessage(ex));
       }
@@ -988,23 +1008,23 @@ class WebAPIServer implements En {
      * Uses the OData ClientEntitySet rather than raw JSON responses for comparisons
      */
     And("^client entity set Integer data in \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"$", (String parameterFieldName, String operator, String parameterFieldValue) -> {
-      String fieldName = Settings.resolveParametersString(parameterFieldName, getTestContainer().getSettings()),
+      String fieldName = Settings.resolveParametersString(parameterFieldName, container.get().getSettings()),
           op = operator.trim().toLowerCase();
 
-      Integer fieldValue = Integer.parseInt(Settings.resolveParametersString(parameterFieldValue, getTestContainer().getSettings()));
+      Integer fieldValue = Integer.parseInt(Settings.resolveParametersString(parameterFieldValue, container.get().getSettings()));
       assertNotNull(fieldValue);
 
-      getTestContainer().getClientEntitySet().getEntities().forEach(entity ->
+      container.get().getClientEntitySet().getEntities().forEach(entity ->
           assertTrue(compare((Integer) entity.getProperty(fieldName).getValue().asPrimitive().toValue(), op, fieldValue)));
 
     });
 
     And("^the OData client response has client entity set data$", () -> {
-      assertNotNull(getDefaultErrorMessage("no entity collection returned in response!"), getTestContainer().getClientEntitySet());
-      assertTrue(getDefaultErrorMessage("no results returned!"), getTestContainer().getClientEntitySet().getCount() > 0);
+      assertNotNull(getDefaultErrorMessage("no entity collection returned in response!"), container.get().getClientEntitySet());
+      assertTrue(getDefaultErrorMessage("no results returned!"), container.get().getClientEntitySet().getCount() > 0);
 
       if (showResponses) {
-        getTestContainer().getClientEntitySet().getEntities().forEach(entity -> {
+        container.get().getClientEntitySet().getEntities().forEach(entity -> {
           LOG.info("Entity Type is: " + entity.getTypeName());
           entity.getProperties().forEach(property -> LOG.info("\tProperty: " + property.toString()));
         });
@@ -1021,13 +1041,13 @@ class WebAPIServer implements En {
 
       assertNotNull(getDefaultErrorMessage("must specify an 'OData-Version' in the response header!"
               + "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Toc453752225\n"),
-          getTestContainer().getServerODataHeaderVersion());
+          container.get().getServerODataHeaderVersion());
 
-      LOG.info("Reported OData-Version header value: '" + getTestContainer().getServerODataHeaderVersion() + "'");
+      LOG.info("Reported OData-Version header value: '" + container.get().getServerODataHeaderVersion() + "'");
 
       assertTrue(getDefaultErrorMessage("the 'OData-Version' response header must either be", "'" + val1 + "'", "or", "'" + val2 + "'", "(without quotes)."),
-          getTestContainer().getServerODataHeaderVersion().contentEquals(val1)
-              || getTestContainer().getServerODataHeaderVersion().contentEquals(val2));
+          container.get().getServerODataHeaderVersion().contentEquals(val1)
+              || container.get().getServerODataHeaderVersion().contentEquals(val2));
     });
 
     /*
@@ -1035,12 +1055,12 @@ class WebAPIServer implements En {
      */
     Given("^valid metadata have been retrieved$", () -> {
       //NOTE: this is here so that tests may be run individually
-      if (!getTestContainer().getHaveMetadataBeenRequested()) {
-        getTestContainer().getXMLMetadata();
-        getTestContainer().validateMetadata();
+      if (!container.get().getHaveMetadataBeenRequested()) {
+        container.get().getXMLMetadata();
+        container.get().validateMetadata();
       }
 
-      if (!getTestContainer().hasValidMetadata()) {
+      if (!container.get().hasValidMetadata()) {
         LOG.error(getDefaultErrorMessage("Valid metadata could not be retrieved from the server! Please check the log for more information."));
         System.exit(NOT_OK);
       }
@@ -1056,13 +1076,13 @@ class WebAPIServer implements En {
       assumeTrue("Skipping Test: using IsFlags enumerations.", useCollections);
 
       final String
-          resolvedFieldName = Settings.resolveParametersString(fieldName, getTestContainer().getSettings()),
-          resolvedResourceName = Settings.resolveParametersString(resourceName, getTestContainer().getSettings());
+          resolvedFieldName = Settings.resolveParametersString(fieldName, container.get().getSettings()),
+          resolvedResourceName = Settings.resolveParametersString(resourceName, container.get().getSettings());
 
       assertNotNull(getDefaultErrorMessage("resolved field name for parameter", "'" + fieldName + "'", "was null!"), resolvedFieldName);
       assertNotNull(getDefaultErrorMessage("resolved resource name for parameter", "'" + resourceName + "'", "was null!"), resolvedResourceName);
 
-      CsdlProperty csdlProperty = getTestContainer().getCsdlProperty(resolvedResourceName, resolvedFieldName);
+      CsdlProperty csdlProperty = container.get().getCsdlProperty(resolvedResourceName, resolvedFieldName);
 
       assertNotNull(getDefaultErrorMessage("could not find metadata item for", "'" + resolvedResourceName + "'", "and", "'" + resolvedFieldName + "'!"),
           csdlProperty);
@@ -1075,37 +1095,33 @@ class WebAPIServer implements En {
 
   }
 
-  static WebAPITestContainer getTestContainer() {
-    return container.get();
-  }
-
   /*
    * Execute Get Request Wrapper
    */
   void prepareAndExecuteRawGetRequest(String requestId) {
     try {
       //reset local state each time a get request request is run
-      getTestContainer().resetState();
+      container.get().resetState();
 
       assertNotNull(getDefaultErrorMessage("request Id cannot be null!"), requestId);
 
-      Request request = getTestContainer().getSettings().getRequest(requestId);
+      Request request = container.get().getSettings().getRequest(requestId);
 
       if (request == null) {
         throw new Exception(getDefaultErrorMessage("request for requestId:", requestId, "was null!"));
       }
 
-      getTestContainer().setRequest(getTestContainer().getSettings().getRequest(requestId));
+      container.get().setRequest(container.get().getSettings().getRequest(requestId));
       LOG.info("Request ID: " + requestId);
 
-      URI requestUri = prepareURI(getTestContainer().getRequest().getRequestUrl());
+      URI requestUri = prepareURI(container.get().getRequest().getRequestUrl());
 
       //prepare request URI
-      getTestContainer().setRequestUri(requestUri);
-      LOG.info("Request URI: " + getTestContainer().getRequestUri().toString());
+      container.get().setRequestUri(requestUri);
+      scenario.log("Request URI: " + container.get().getRequestUri().toString());
 
       //execute request
-      getTestContainer().executePreparedRawGetRequest();
+      container.get().executePreparedRawGetRequest();
     } catch (MalformedURLException urlException) {
       LOG.info("Malformed URL was thrown in " + this.getClass() + ": " + urlException.toString()
           + "\nSkipping Request!");
@@ -1122,33 +1138,29 @@ class WebAPIServer implements En {
      * Background
      */
     Given("^a RESOScript file was provided$", () -> {
-      if (getTestContainer().getPathToRESOScript() == null) {
-        getTestContainer().setPathToRESOScript(System.getProperty("pathToRESOScript"));
-        LOG.info("Using RESOScript: " + getTestContainer().getPathToRESOScript());
+      if (container.get().getPathToRESOScript() == null) {
+        container.get().setPathToRESOScript(System.getProperty("pathToRESOScript"));
+        LOG.info("Using RESOScript: " + container.get().getPathToRESOScript());
       }
       assertNotNull(getDefaultErrorMessage("pathToRESOScript must be present in command arguments, see README"),
-          getTestContainer().getPathToRESOScript());
+          container.get().getPathToRESOScript());
     });
 
     And("^Client Settings and Parameters were read from the file$", () -> {
-      if (getTestContainer().getSettings() == null) {
-        getTestContainer().setSettings(Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript"))));
-
-        getTestContainer().getSettings().setRequests(loadFromRESOScript(new File(Objects.requireNonNull(
-            getClass().getClassLoader().getResource(WEB_API_CORE_REFERENCE_REQUESTS)).getPath()))
-            .parallelStream().map(request -> Settings.resolveParameters(request, getTestContainer().getSettings())).collect(Collectors.toList()));
+      if (container.get().getSettings() == null) {
+        container.get().setSettings(Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript"))));
 
         LOG.info("Test configuration loaded successfully!");
       }
-      assertNotNull(getDefaultErrorMessage("Settings could not be loaded."), getTestContainer().getSettings());
+      assertNotNull(getDefaultErrorMessage("Settings could not be loaded."), container.get().getSettings());
     });
 
     Given("^a test container was successfully created from the given RESOScript$", () -> {
-      if (!getTestContainer().getIsInitialized()) {
-        getTestContainer().initialize();
-        if (getTestContainer().getCommander().isAuthTokenClient()) {
+      if (!container.get().getIsInitialized()) {
+        container.get().initialize();
+        if (container.get().getCommander().isAuthTokenClient()) {
           LOG.info("Authentication Type: authorization_code");
-        } else if (getTestContainer().getCommander().isOAuth2Client()) {
+        } else if (container.get().getCommander().isOAuth2Client()) {
           LOG.info("Authentication Type: client_credentials");
         }
       }
@@ -1158,10 +1170,10 @@ class WebAPIServer implements En {
      * Ensures that the client either uses Authorization Codes or Client Credentials
      */
     And("^the test container uses an authorization_code or client_credentials for authentication$", () -> {
-      assertNotNull(getTestContainer().getCommander());
+      assertNotNull(container.get().getCommander());
       assertTrue(getDefaultErrorMessage("Commander must either have a valid Authorization Code or Client Credentials configuration."),
-          getTestContainer().getCommander().isAuthTokenClient()
-              || (getTestContainer().getCommander().isOAuth2Client() && getTestContainer().getCommander().hasValidAuthConfig()));
+          container.get().getCommander().isAuthTokenClient()
+              || (container.get().getCommander().isOAuth2Client() && container.get().getCommander().hasValidAuthConfig()));
     });
   }
 }

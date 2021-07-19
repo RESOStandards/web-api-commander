@@ -51,16 +51,18 @@ import static org.reso.commander.Commander.NOT_OK;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
 
-public class IDXPayload {
-  private static final Logger LOG = LogManager.getLogger(IDXPayload.class);
+public class DataAvailability {
+  private static final Logger LOG = LogManager.getLogger(DataAvailability.class);
   private static final String MODIFICATION_TIMESTAMP_FIELD = "ModificationTimestamp";
   private static final String POSTAL_CODE_FIELD = "PostalCode";
   private static final int TOP_COUNT = 100;
 
   private static final int MAX_RETRIES = 3;
 
-  private static final String SAMPLES_DIRECTORY_ROOT = "build";
-  private static final String SAMPLES_DIRECTORY_TEMPLATE = SAMPLES_DIRECTORY_ROOT + File.separator + "%s";
+  private static final String BUILD_DIRECTORY_PATH = "build";
+  private static final String CERTIFICATION_PATH = BUILD_DIRECTORY_PATH + File.separator + "certification";
+  private static final String DATA_AVAILABILITY_REPORT_PATH = BUILD_DIRECTORY_PATH + File.separator + "certification" + File.separator + "results";
+  private static final String SAMPLES_DIRECTORY_TEMPLATE = BUILD_DIRECTORY_PATH + File.separator + "%s";
   private static final String PATH_TO_RESOSCRIPT_KEY = "pathToRESOScript";
 
   final String REQUEST_URI_TEMPLATE = "?$filter=%s" + " lt %s&$orderby=%s desc&$top=" + TOP_COUNT;
@@ -88,7 +90,7 @@ public class IDXPayload {
       new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
 
   @Inject
-  public IDXPayload(WebAPITestContainer c) {
+  public DataAvailability(WebAPITestContainer c) {
     container.set(c);
   }
 
@@ -98,7 +100,7 @@ public class IDXPayload {
 
     if (pathToRESOScript == null) return;
 
-    IDXPayload.scenario = scenario;
+    DataAvailability.scenario = scenario;
 
     if (!container.get().getIsInitialized()) {
       container.get().setSettings(Settings.loadFromRESOScript(new File(System.getProperty(PATH_TO_RESOSCRIPT_KEY))));
@@ -117,7 +119,7 @@ public class IDXPayload {
     GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting();
     gsonBuilder.registerTypeAdapter(PayloadSampleReport.class, payloadSampleReport);
 
-    Utils.createFile(SAMPLES_DIRECTORY_ROOT, reportName, gsonBuilder.create().toJson(payloadSampleReport));
+    Utils.createFile(DATA_AVAILABILITY_REPORT_PATH, reportName, gsonBuilder.create().toJson(payloadSampleReport));
   }
 
   /**
@@ -376,9 +378,6 @@ public class IDXPayload {
             payloadSample.get().setResponseTimeMillis(transportWrapper.get().getElapsedTimeMillis());
 
             if (encodedResultsDirectoryName != null) {
-              payloadSample.get().setPayloadFields(standardFieldCache.get().get(resourceName).stream()
-                  .map(ReferenceStandardField::getStandardName).collect(Collectors.toList()));
-
               //serialize results once resource processing has finished
               Utils.createFile(String.format(SAMPLES_DIRECTORY_TEMPLATE, encodedResultsDirectoryName),
                   resourceName + "-" + Utils.getTimestamp() + ".json",
@@ -478,27 +477,18 @@ public class IDXPayload {
     }
   }
 
-  @Then("up to {int} records are sampled from each resource with {string} payload samples stored in {string}")
-  public void upToRecordsAreSampledFromEachResourceWithPayloadSamplesStoredIn(int numRecords, String payloadName, String resultsDirectoryName) {
+  @Then("up to {int} records are sampled from each resource with payload samples stored in {string}")
+  public void upToRecordsAreSampledFromEachResourceWithPayloadSamplesStoredIn(int numRecords, String resultsDirectoryName) {
     assertNotNull(getDefaultErrorMessage("resultsDirectoryName MUST be present!"), resultsDirectoryName);
-
     if (!hasStandardResources.get()) {
       scenario.log("No RESO Standard Resources to sample!");
       assumeTrue(true);
     } else {
-      Set<String> payloadResources = new LinkedHashSet<>();
-      standardFieldCache.get().forEach((resourceName, fieldList) -> {
-        if (!payloadResources.contains(resourceName) && fieldList.stream().anyMatch(field -> field.getPayloads().contains(payloadName))) {
-          payloadResources.add(resourceName);
-        }
-      });
-
       standardResources.get().forEach(resourceName -> {
         resourceCounts.get().put(resourceName, getResourceCount(resourceName));
         resourcePayloadSampleMap.get().putIfAbsent(resourceName, Collections.synchronizedList(new LinkedList<>()));
         //only save results to the directory if the resources are part of the given payload
-        resourcePayloadSampleMap.get().put(resourceName,
-            fetchAndProcessRecords(resourceName, numRecords, payloadResources.contains(resourceName) ? resultsDirectoryName : null));
+        resourcePayloadSampleMap.get().put(resourceName, fetchAndProcessRecords(resourceName, numRecords, resultsDirectoryName));
       });
     }
   }
@@ -517,21 +507,9 @@ public class IDXPayload {
     }
   }
 
-  @Given("samples exist in {string} in the build directory")
-  public void samplesExistInInTheBuildDirectory(String resultsDirectory) {
-    scenario.log("Samples exist in {string} in the build directory!");
-    assumeTrue(true);
-  }
-
-  @And("a RESOScript file was provided for the IDX User")
-  public void aRESOScriptFileWasProvidedForTheIDXUser() {
-    scenario.log("!!TODO!! A RESOScript file was provided for the IDX User!");
-    assumeTrue(true);
-  }
-
   @When("samples from {string} are fetched as the representative user for each resource in the {string} payload")
   public void samplesFromAreFetchedAsTheRepresentativeUserForEachResourceInThePayload(String resultsDirectory, String payloadName) {
-    File f = new File(SAMPLES_DIRECTORY_ROOT + File.separator + resultsDirectory);
+    File f = new File(CERTIFICATION_PATH + File.separator + resultsDirectory);
     AtomicReference<PayloadSample> payloadSample = new AtomicReference<>();
 
     if (f.list() == null) return;
@@ -548,24 +526,6 @@ public class IDXPayload {
         ioException.printStackTrace();
       }
     });
-  }
-
-  @Then("each result MUST contain the string version of the key and the following fields")
-  public void eachResultMUSTContainTheStringVersionOfTheKeyAndTheFollowingFields(List<String> requiredFields) {
-    scenario.log("!!TODO!! Each result MUST contain the string version of the key and the following fields!");
-    assumeTrue(true);
-  }
-
-  @And("the {string} payload field values MUST match those in the samples")
-  public void thePayloadFieldValuesMUSTMatchThoseInTheSamples(String arg0) {
-    scenario.log("!!TODO!! The {string} payload field values MUST match those in the samples!");
-    assumeTrue(true);
-  }
-
-  @Given("standard and local resources have been processed")
-  public void standardAndLocalResourcesHaveBeenProcessed() {
-    scenario.log("!!TODO!! Standard and local resources have been processed!");
-    assumeTrue(true);
   }
 
   @Then("a data availability report is created in {string}")

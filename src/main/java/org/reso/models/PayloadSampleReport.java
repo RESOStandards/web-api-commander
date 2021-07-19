@@ -132,7 +132,7 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
         DESCRIPTION_KEY = "description", DESCRIPTION = "RESO Data Availability Report",
         VERSION_KEY = "version", VERSION = "1.7",
         GENERATED_ON_KEY = "generatedOn",
-        RESOURCE_INFO_KEY = "resourceInfo",
+        RESOURCE_INFO_KEY = "resources",
         FIELDS_KEY = "fields";
 
     JsonArray fields = new JsonArray();
