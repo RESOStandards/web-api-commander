@@ -2,21 +2,20 @@ package org.reso.certification.codegen;
 
 import org.reso.models.ReferenceStandardField;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DDCacheProcessor extends WorksheetProcessor {
-  Map<String, List<ReferenceStandardField>> standardFieldCache = new LinkedHashMap<>();
+  final AtomicReference<Map<String, Map<String, ReferenceStandardField>>> standardFieldCache =
+      new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
 
   private void addToFieldCache(ReferenceStandardField field) {
-    standardFieldCache.putIfAbsent(field.getParentResourceName(), new LinkedList<>());
-    standardFieldCache.get(field.getParentResourceName()).add(field);
+    standardFieldCache.get().putIfAbsent(field.getParentResourceName(), new LinkedHashMap<>());
+    standardFieldCache.get().get(field.getParentResourceName()).put(field.getStandardName(), field);
   }
 
-  public Map<String, List<ReferenceStandardField>> getStandardFieldCache() {
-    return standardFieldCache;
+  public Map<String, Map<String, ReferenceStandardField>> getStandardFieldCache() {
+    return standardFieldCache.get();
   }
 
   @Override
