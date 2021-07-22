@@ -31,6 +31,8 @@ public class DataDictionaryCodeGenerator {
 
   /**
    * Generates Data Dictionary references for local workbook instance using the configured WorksheetProcessor
+   *
+   *  TODO: convert to .parallelStream()
    */
   public void processWorksheets() {
     Sheet currentWorksheet, standardResourcesWorksheet;

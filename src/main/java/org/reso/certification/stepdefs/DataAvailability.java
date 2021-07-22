@@ -46,6 +46,8 @@ import java.util.stream.Collectors;
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeTrue;
+import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.STRING_LIST_MULTI;
+import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.STRING_LIST_SINGLE;
 import static org.reso.certification.containers.WebAPITestContainer.EMPTY_STRING;
 import static org.reso.commander.Commander.NOT_OK;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
@@ -80,14 +82,21 @@ public class DataAvailability {
   private final static AtomicReference<WebAPITestContainer> container = new AtomicReference<>();
   private final static AtomicBoolean hasSamplesDirectoryBeenCleared = new AtomicBoolean(false);
 
+  //TODO: compute moving averages and search each payload sample immediately so no collection is needed
   private final static AtomicReference<Map<String, List<PayloadSample>>> resourcePayloadSampleMap =
       new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
 
-  private final static AtomicReference<Map<String, List<ReferenceStandardField>>> standardFieldCache =
+  private final static AtomicReference<Map<String, Map<String, ReferenceStandardField>>> resourceFieldMap =
       new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
 
   private final static AtomicReference<Map<String, Integer>> resourceCounts =
       new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
+
+  //resourceName, fieldName, lookupName, lookupValue, tally
+  private final static AtomicReference<Map<LookupValue, Integer>> resourceFieldLookupTallies =
+      new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
+
+  private final static AtomicReference<DDCacheProcessor> processor = new AtomicReference<>();
 
   @Inject
   public DataAvailability(WebAPITestContainer c) {
@@ -110,12 +119,15 @@ public class DataAvailability {
 
   /**
    * Creates a data availability report for the given samples map
+   *
    * @param resourcePayloadSamplesMap the samples map to create the report from
-   * @param reportName the name of the report
+   * @param reportName                the name of the report
    */
-  public void createDataAvailabilityReport(Map<String, List<PayloadSample>> resourcePayloadSamplesMap,
-                                           String reportName, Map<String, Integer> resourceCounts) {
-    PayloadSampleReport payloadSampleReport = new PayloadSampleReport(container.get().getEdm(), resourcePayloadSamplesMap, resourceCounts);
+  public void createDataAvailabilityReport(Map<String, List<PayloadSample>> resourcePayloadSamplesMap, String reportName,
+                                           Map<String, Integer> resourceCounts, Map<LookupValue, Integer> resourceFieldLookupTallies) {
+
+    PayloadSampleReport payloadSampleReport =
+        new PayloadSampleReport(container.get().getEdm(), resourcePayloadSamplesMap, resourceCounts, resourceFieldLookupTallies);
     GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting();
     gsonBuilder.registerTypeAdapter(PayloadSampleReport.class, payloadSampleReport);
 
@@ -129,14 +141,16 @@ public class DataAvailability {
    * @return the SHA hash of the given values
    */
   private static String hashValues(String... values) {
+    //noinspection UnstableApiUsage
     return Hashing.sha256().hashString(String.join(EMPTY_STRING, values), StandardCharsets.UTF_8).toString();
   }
 
   /**
    * Builds a request URI string, taking into account whether the sampling is being done with an optional
    * filter, for instance in the shared systems case
-   * @param resourceName the resource name to query
-   * @param timestampField the timestamp field for the resource
+   *
+   * @param resourceName    the resource name to query
+   * @param timestampField  the timestamp field for the resource
    * @param lastFetchedDate the last fetched date for filtering
    * @return a string OData query used for sampling
    */
@@ -154,6 +168,7 @@ public class DataAvailability {
   /**
    * Builds a request URI string for counting the number of available items on a resource, taking into account
    * whether the sample is being done with an optional filter, for instance in the shared system case
+   *
    * @param resourceName the resource name to query
    * @return a request URI string for getting OData counts
    */
@@ -169,6 +184,7 @@ public class DataAvailability {
 
   /**
    * Queries the server and fetches a resource count for the given resource name
+   *
    * @param resourceName the resource name to get the count for
    * @return the count found for the resource, or null if the request did not return a count
    */
@@ -227,7 +243,7 @@ public class DataAvailability {
         edmSchema.getEntityTypes().stream().filter(edmEntityType -> edmEntityType.getName().equals(resourceName))
             .findFirst().ifPresent(entityType::set));
 
-    //return null if the entity type isn't defined
+    //return an empty list if the entity type isn't defined
     if (entityType.get() == null) return new ArrayList<>();
 
     if (entityType.get().getProperty(MODIFICATION_TIMESTAMP_FIELD) == null) {
@@ -307,6 +323,7 @@ public class DataAvailability {
         }
         break;
       } else {
+        //TODO: add pluralizer
         LOG.info("Time taken: "
             + (transportWrapper.get().getElapsedTimeMillis() >= 1000 ? (transportWrapper.get().getElapsedTimeMillis() / 1000) + "s"
             : transportWrapper.get().getElapsedTimeMillis() + "ms"));
@@ -347,6 +364,41 @@ public class DataAvailability {
 
                   if (property.isGeospatial() && property.asGeospatial() != null) {
                     LOG.info("Found Enum for field: " + property.getName() + ", value: " + property.asGeospatial());
+                  }
+                }
+
+
+                //if the field is a lookup field, collect the frequency of each unique set of enumerations for the field
+                if (property.isEnum() || (processor.get().getStandardFieldCache().containsKey(resourceName)
+                    && processor.get().getStandardFieldCache().get(resourceName).containsKey(property.getName()))) {
+                  ReferenceStandardField standardField = processor.get().getStandardFieldCache().get(resourceName).get(property.getName());
+                  //if the field is declared as an OData Edm.EnumType or String List, Single or Multii in the DD, then collect its value
+                  if (property.isEnum() || (standardField.getSimpleDataType().contentEquals(STRING_LIST_SINGLE)
+                      || standardField.getSimpleDataType().contentEquals(STRING_LIST_MULTI))) {
+
+                    ArrayList<String> values = new ArrayList<>();
+
+                    if (value == null || value.contentEquals("[]")) {
+                      values.add("null");
+                    } else {
+                      if (property.isCollection()) {
+                        property.asCollection().forEach(v -> values.add(v.toString()));
+                      } else {
+                        if (value.contains(",")) {
+                          values.addAll(Arrays.asList(value.split(",")));
+                        } else {
+                          values.add(value);
+                        }
+                      }
+                    }
+
+                    values.forEach(v -> {
+                      LookupValue binder = new LookupValue(resourceName, property.getName(), v);
+                      resourceFieldLookupTallies.get().putIfAbsent(binder, 0);
+
+                      //now increment the lookup value
+                      resourceFieldLookupTallies.get().put(binder, resourceFieldLookupTallies.get().get(binder) + 1);
+                    });
                   }
                 }
 
@@ -418,12 +470,11 @@ public class DataAvailability {
   public void thatValidMetadataHaveBeenRequestedFromTheServer() {
     try {
       if (container.get().hasValidMetadata()) {
-        if (standardFieldCache.get().size() == 0) {
+        if (processor.get() == null || processor.get().getStandardFieldCache().size() == 0) {
           LOG.info("Creating standard field cache...");
-          DDCacheProcessor cacheProcessor = new DDCacheProcessor();
-          DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(cacheProcessor);
+          processor.set(new DDCacheProcessor());
+          DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(processor.get());
           generator.processWorksheets();
-          standardFieldCache.get().putAll(cacheProcessor.getStandardFieldCache());
           LOG.info("Standard field cache created!");
         }
       } else {
@@ -437,8 +488,8 @@ public class DataAvailability {
   @And("the metadata contains RESO Standard Resources")
   public void theMetadataContainsRESOStandardResources() {
     Set<String> resources = container.get().getEdm().getSchemas().stream().map(schema ->
-      schema.getEntityTypes().stream().map(EdmNamed::getName)
-          .collect(Collectors.toSet()))
+        schema.getEntityTypes().stream().map(EdmNamed::getName)
+            .collect(Collectors.toSet()))
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
 
@@ -535,7 +586,7 @@ public class DataAvailability {
       assumeTrue(true);
     }
     LOG.info("\n\nCreating data availability report!");
-    createDataAvailabilityReport(resourcePayloadSampleMap.get(), reportFileName, resourceCounts.get());
+    createDataAvailabilityReport(resourcePayloadSampleMap.get(), reportFileName, resourceCounts.get(), resourceFieldLookupTallies.get());
   }
 
   @And("{string} has been created in the build directory")

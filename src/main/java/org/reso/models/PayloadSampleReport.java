@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmElement;
+import org.apache.regexp.RE;
 import org.reso.commander.common.Utils;
 
 import java.lang.reflect.Type;
@@ -18,31 +19,29 @@ import java.util.concurrent.atomic.AtomicReference;
 public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> {
   private static final Logger LOG = LogManager.getLogger(PayloadSampleReport.class);
   private static final String POSTAL_CODE_KEY = "PostalCode";
-  private final Map<String, List<PayloadSample>> resourcePayloadSamplesMap = Collections.synchronizedMap(new LinkedHashMap<>());
-  private final Map<String, Map<String, Integer>> resourceFieldTallies = Collections.synchronizedMap(new LinkedHashMap<>(new LinkedHashMap<>()));
-  private final Map<String, Integer> resourceCounts = Collections.synchronizedMap(new LinkedHashMap<>());
+  private static final AtomicReference<Map<String, List<PayloadSample>>> resourcePayloadSamplesMap = new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
+  private static final AtomicReference<Map<String, Map<String, Integer>>> resourceFieldFrequencyMap = new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>(new LinkedHashMap<>())));
+  private static final AtomicReference<Map<LookupValue, Integer>> lookupValueFrequencyMap = new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
+  private static final AtomicReference<Map<String, Integer>> resourceCounts = new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
 
-  private Edm metadata;
+  private static Edm metadata;
 
-  private PayloadSampleReport() {
-    //private default constructor
-  }
-
-  public PayloadSampleReport(final Edm metadata, final Map<String, List<PayloadSample>> resourcePayloadSamplesMap, final Map<String, Integer> resourceCounts) {
-    this.metadata = metadata;
-    this.resourcePayloadSamplesMap.putAll(resourcePayloadSamplesMap);
-    resourceFieldTallies.putAll(createResourceFieldTallies(resourcePayloadSamplesMap));
-
-    this.resourceCounts.putAll(resourceCounts);
+  public PayloadSampleReport(final Edm metadata, final Map<String, List<PayloadSample>> resourcePayloadSamplesMap,
+                             final Map<String, Integer> resourceCounts, final Map<LookupValue, Integer> lookupValueFrequencyMap) {
+    PayloadSampleReport.metadata = metadata;
+    PayloadSampleReport.resourcePayloadSamplesMap.get().putAll(resourcePayloadSamplesMap);
+    PayloadSampleReport.resourceFieldFrequencyMap.get().putAll(createResourceFieldTallies(resourcePayloadSamplesMap));
+    PayloadSampleReport.lookupValueFrequencyMap.get().putAll(lookupValueFrequencyMap);
+    PayloadSampleReport.resourceCounts.get().putAll(resourceCounts);
   }
 
   @Override
   public String toString() {
-    return String.valueOf(serialize(this, FieldAvailabilityJson.class, null));
+    return String.valueOf(serialize(this, FieldsJson.class, null));
   }
 
   /**
-   * FieldAvailabilityJson uses a JSON payload with the following structure:
+   * FieldsJson uses a JSON payload with the following structure:
    *
    *    {
    *       "resourceName": "Property",
@@ -50,17 +49,17 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
    *       "availability": 0.1
    *     }
    */
-  private final class FieldAvailabilityJson implements JsonSerializer<FieldAvailabilityJson> {
+  private static final class FieldsJson implements JsonSerializer<FieldsJson> {
     static final String
         RESOURCE_NAME_KEY = "resourceName",
         FIELD_NAME_KEY = "fieldName",
         FIELDS_KEY = "fields",
-        AVAILABILITY_KEY = "availability";
+        FREQUENCY_KEY = "frequency";
 
     String resourceName;
     EdmElement edmElement;
 
-    public FieldAvailabilityJson(String resourceName, EdmElement edmElement) {
+    public FieldsJson(String resourceName, EdmElement edmElement) {
       this.resourceName = resourceName;
       this.edmElement = edmElement;
     }
@@ -72,29 +71,78 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
         reportBuilder.append(field.getAsJsonObject().get(RESOURCE_NAME_KEY));
         reportBuilder.append("\nField: ");
         reportBuilder.append(field.getAsJsonObject().get(FIELD_NAME_KEY));
-        reportBuilder.append("\nAvailability: ");
-        reportBuilder.append(field.getAsJsonObject().get(AVAILABILITY_KEY));
+        reportBuilder.append("\nFrequency: ");
+        reportBuilder.append(field.getAsJsonObject().get(FREQUENCY_KEY));
         reportBuilder.append("\n");
       });
       return reportBuilder.toString();
     }
 
     @Override
-    public JsonElement serialize(FieldAvailabilityJson src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(FieldsJson src, Type typeOfSrc, JsonSerializationContext context) {
       JsonObject field = new JsonObject();
 
-      int numTimesPresent = resourceFieldTallies.get(src.resourceName) != null
-          && resourceFieldTallies.get(src.resourceName).get(src.edmElement.getName()) != null
-          ? resourceFieldTallies.get(src.resourceName).get(src.edmElement.getName()) : 0;
-
-      int numSamples = resourcePayloadSamplesMap.get(src.resourceName) != null
-          ? resourcePayloadSamplesMap.get(src.resourceName).stream().reduce(0, (a, f) -> a + f.encodedSamples.size(), Integer::sum) : 0;
+      int frequency = resourceFieldFrequencyMap.get().get(src.resourceName) != null
+          && resourceFieldFrequencyMap.get().get(src.resourceName).get(src.edmElement.getName()) != null
+          ? resourceFieldFrequencyMap.get().get(src.resourceName).get(src.edmElement.getName()) : 0;
 
       field.addProperty(RESOURCE_NAME_KEY, src.resourceName);
       field.addProperty(FIELD_NAME_KEY, src.edmElement.getName());
-      field.addProperty(AVAILABILITY_KEY, numSamples > 0 ? (1.0 * numTimesPresent) / numSamples : 0);
+      field.addProperty(FREQUENCY_KEY, frequency);
 
       return field;
+    }
+  }
+
+  /**
+   *   resourceName: "Property",
+   *   fieldName: "StateOrProvince",
+   *   lookupName: "StateOrProvince",
+   *   lookupValue: "CA",
+   *   availability: 0.03
+   */
+  private static final class LookupValuesJson implements JsonSerializer<LookupValuesJson> {
+    final String resourceName, fieldName, lookupValue;
+    final Integer frequency;
+
+    static final String
+        RESOURCE_NAME_KEY = "resourceName",
+        FIELD_NAME_KEY = "fieldName",
+        LOOKUP_VALUE_KEY = "lookupValue",
+        FREQUENCY_KEY = "frequency";
+
+    public LookupValuesJson(String resourceName, String fieldName, String lookupValue, Integer frequency) {
+      this.resourceName = resourceName;
+      this.fieldName = fieldName;
+      this.lookupValue = lookupValue;
+      this.frequency = frequency;
+    }
+
+    /**
+     * Gson invokes this call-back method during serialization when it encounters a field of the
+     * specified type.
+     *
+     * <p>In the implementation of this call-back method, you should consider invoking
+     * {@link JsonSerializationContext#serialize(Object, Type)} method to create JsonElements for any
+     * non-trivial field of the {@code src} object. However, you should never invoke it on the
+     * {@code src} object itself since that will cause an infinite loop (Gson will call your
+     * call-back method again).</p>
+     *
+     * @param src       the object that needs to be converted to Json.
+     * @param typeOfSrc the actual type (fully genericized version) of the source object.
+     * @param context   the context of the request
+     * @return a JsonElement corresponding to the specified object.
+     */
+    @Override
+    public JsonElement serialize(LookupValuesJson src, Type typeOfSrc, JsonSerializationContext context) {
+      JsonObject obj = new JsonObject();
+
+      obj.addProperty(RESOURCE_NAME_KEY, resourceName);
+      obj.addProperty(FIELD_NAME_KEY, fieldName);
+      obj.addProperty(LOOKUP_VALUE_KEY, lookupValue);
+      obj.addProperty(FREQUENCY_KEY, frequency);
+
+      return obj;
     }
   }
 
@@ -111,16 +159,15 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
       //as well as the number of samples in each case
       resourceTallies.get().putIfAbsent(resourceName, new LinkedHashMap<>());
       if (numSamples.get() > 0) {
-        resourcePayloadSamplesMap.get(resourceName).forEach(payloadSample -> {
-          payloadSample.getSamples().forEach(sample -> {
-            sample.forEach((fieldName, encodedValue) -> {
-              if (encodedValue != null) {
-                resourceTallies.get().get(resourceName).putIfAbsent(fieldName, 0);
-                resourceTallies.get().get(resourceName).put(fieldName, resourceTallies.get().get(resourceName).get(fieldName) + 1);
-              }
-            });
-          });
-        });
+        resourcePayloadSamplesMap.get(resourceName)
+            .forEach(payloadSample -> payloadSample.getSamples()
+                .forEach(sample -> sample
+                    .forEach((fieldName, encodedValue) -> {
+          if (encodedValue != null) {
+            resourceTallies.get().get(resourceName).putIfAbsent(fieldName, 0);
+            resourceTallies.get().get(resourceName).put(fieldName, resourceTallies.get().get(resourceName).get(fieldName) + 1);
+          }
+        })));
       }
     });
     return resourceTallies.get();
@@ -133,18 +180,42 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
         VERSION_KEY = "version", VERSION = "1.7",
         GENERATED_ON_KEY = "generatedOn",
         RESOURCE_INFO_KEY = "resources",
-        FIELDS_KEY = "fields";
+        FIELDS_KEY = "fields",
+        LOOKUPS_KEY = "lookups",
+        LOOKUP_VALUES_KEY = "lookupValues";
 
+    //serialize fields
     JsonArray fields = new JsonArray();
-
-    src.metadata.getSchemas().forEach(edmSchema -> {
+    metadata.getSchemas().forEach(edmSchema -> {
       //serialize entities (resources) and members (fields)
-      edmSchema.getEntityTypes().forEach(edmEntityType -> {
-        edmEntityType.getPropertyNames().forEach(propertyName -> {
-          FieldAvailabilityJson fieldJson = new FieldAvailabilityJson(edmEntityType.getName(), edmEntityType.getProperty(propertyName));
-          fields.add(fieldJson.serialize(fieldJson, FieldAvailabilityJson.class, null));
-        });
+      edmSchema.getEntityTypes().forEach(edmEntityType -> edmEntityType.getPropertyNames().forEach(propertyName -> {
+        FieldsJson fieldJson = new FieldsJson(edmEntityType.getName(), edmEntityType.getProperty(propertyName));
+        fields.add(fieldJson.serialize(fieldJson, FieldsJson.class, null));
+      }));
+    });
+
+    //serialize lookups
+    JsonArray lookups = new JsonArray();
+    final Map<String, Map<String, Integer>> resourceFieldLookupTotalsMap = new LinkedHashMap<>();
+    lookupValueFrequencyMap.get().forEach((lookupValue, frequency) -> {
+      resourceFieldLookupTotalsMap.putIfAbsent(lookupValue.getResourceName(), new LinkedHashMap<>());
+      resourceFieldLookupTotalsMap.get(lookupValue.getResourceName()).putIfAbsent(lookupValue.getFieldName(), 0);
+      resourceFieldLookupTotalsMap.get(lookupValue.getResourceName()).put(lookupValue.getFieldName(),
+          resourceFieldLookupTotalsMap.get(lookupValue.getResourceName()).get(lookupValue.getFieldName()) + frequency);
+    });
+
+    resourceFieldLookupTotalsMap.forEach((resourceName, fieldLookupTotalsMap) -> {
+      fieldLookupTotalsMap.forEach((fieldName, numLookupsTotal) -> {
+        LookupsJson lookupsJson = new LookupsJson(resourceName, fieldName, numLookupsTotal);
+        lookups.add(lookupsJson.serialize(lookupsJson, LookupsJson.class, null));
       });
+    });
+
+    //serialize lookup values
+    JsonArray lookupValues = new JsonArray();
+    lookupValueFrequencyMap.get().forEach((lookupValue, frequency) -> {
+     LookupValuesJson lookupValuesJson = new LookupValuesJson(lookupValue.getResourceName(), lookupValue.getFieldName(), lookupValue.getLookupValue(), frequency);
+     lookupValues.add(lookupValuesJson.serialize(lookupValuesJson, LookupValuesJson.class, null));
     });
 
     JsonObject availabilityReport = new JsonObject();
@@ -153,47 +224,47 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
     availabilityReport.addProperty(GENERATED_ON_KEY, Utils.getIsoTimestamp());
 
     final JsonArray resourceTotalsByResource = new JsonArray();
-    src.resourcePayloadSamplesMap.keySet().forEach(resourceName -> {
+    resourcePayloadSamplesMap.get().keySet().forEach(resourceName -> {
       Set<String> postalCodes = new LinkedHashSet<>();
-      ResourceInfo resourceInfo = new ResourceInfo(resourceName);
+      ResourcesJson resourcesJson = new ResourcesJson(resourceName);
 
       int resourceRecordCount = 0;
-      if (src.resourceCounts.get(resourceName) != null) {
-        resourceRecordCount = src.resourceCounts.get(resourceName);
+      if (resourceCounts.get().get(resourceName) != null) {
+        resourceRecordCount = resourceCounts.get().get(resourceName);
       }
-      resourceInfo.numRecordsTotal.set(resourceRecordCount);
+      resourcesJson.numRecordsTotal.set(resourceRecordCount);
 
-      PayloadSample zerothSample = resourcePayloadSamplesMap.get(resourceName) != null
-          && resourcePayloadSamplesMap.get(resourceName).size() > 0
-          ? resourcePayloadSamplesMap.get(resourceName).get(0) : null;
+      PayloadSample zerothSample = resourcePayloadSamplesMap.get().get(resourceName) != null
+          && resourcePayloadSamplesMap.get().get(resourceName).size() > 0
+          ? resourcePayloadSamplesMap.get().get(resourceName).get(0) : null;
 
       if (zerothSample != null) {
-        resourceInfo.keyFields.set(zerothSample.keyFields);
-        resourceInfo.dateField.set(zerothSample.dateField);
+        resourcesJson.keyFields.set(zerothSample.keyFields);
+        resourcesJson.dateField.set(zerothSample.dateField);
       }
 
-      if (src.resourcePayloadSamplesMap.get(resourceName) != null) {
+      if (resourcePayloadSamplesMap.get().get(resourceName) != null) {
         AtomicReference<OffsetDateTime> offsetDateTime = new AtomicReference<>();
 
-        src.resourcePayloadSamplesMap.get(resourceName).forEach(payloadSample -> {
-         resourceInfo.totalBytesReceived.getAndAdd(payloadSample.getResponseSizeBytes());
-         resourceInfo.totalResponseTimeMillis.getAndAdd(payloadSample.getResponseTimeMillis());
-         resourceInfo.numSamplesProcessed.getAndIncrement();
-         resourceInfo.numRecordsFetched.getAndAdd(payloadSample.encodedSamples.size());
+        resourcePayloadSamplesMap.get().get(resourceName).forEach(payloadSample -> {
+         resourcesJson.totalBytesReceived.getAndAdd(payloadSample.getResponseSizeBytes());
+         resourcesJson.totalResponseTimeMillis.getAndAdd(payloadSample.getResponseTimeMillis());
+         resourcesJson.numSamplesProcessed.getAndIncrement();
+         resourcesJson.numRecordsFetched.getAndAdd(payloadSample.encodedSamples.size());
 
          payloadSample.encodedSamples.forEach(encodedSample -> {
            offsetDateTime.set(OffsetDateTime.parse(encodedSample.get(payloadSample.dateField)));
            if (offsetDateTime.get() != null) {
-             if (resourceInfo.dateLow.get() == null) {
-               resourceInfo.dateLow.set(offsetDateTime.get());
-             } else if (offsetDateTime.get().isBefore(resourceInfo.dateLow.get())) {
-               resourceInfo.dateLow.set(offsetDateTime.get());
+             if (resourcesJson.dateLow.get() == null) {
+               resourcesJson.dateLow.set(offsetDateTime.get());
+             } else if (offsetDateTime.get().isBefore(resourcesJson.dateLow.get())) {
+               resourcesJson.dateLow.set(offsetDateTime.get());
              }
 
-             if (resourceInfo.dateHigh.get() == null) {
-               resourceInfo.dateHigh.set(offsetDateTime.get());
-             } else if (offsetDateTime.get().isAfter(resourceInfo.dateHigh.get())) {
-               resourceInfo.dateHigh.set(offsetDateTime.get());
+             if (resourcesJson.dateHigh.get() == null) {
+               resourcesJson.dateHigh.set(offsetDateTime.get());
+             } else if (offsetDateTime.get().isAfter(resourcesJson.dateHigh.get())) {
+               resourcesJson.dateHigh.set(offsetDateTime.get());
              }
            }
 
@@ -202,23 +273,65 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
            }
          });
 
-         if (resourceInfo.pageSize.get() == 0) resourceInfo.pageSize.set(payloadSample.getSamples().size());
+         if (resourcesJson.pageSize.get() == 0) resourcesJson.pageSize.set(payloadSample.getSamples().size());
        });
       }
       if (postalCodes.size() > 0) {
-        resourceInfo.postalCodes.set(postalCodes);
+        resourcesJson.postalCodes.set(postalCodes);
       }
 
-      resourceTotalsByResource.add(resourceInfo.serialize(resourceInfo, ResourceInfo.class, null));
+      resourceTotalsByResource.add(resourcesJson.serialize(resourcesJson, ResourcesJson.class, null));
     });
 
     availabilityReport.add(RESOURCE_INFO_KEY, resourceTotalsByResource);
     availabilityReport.add(FIELDS_KEY, fields);
+    availabilityReport.add(LOOKUPS_KEY, lookups);
+    availabilityReport.add(LOOKUP_VALUES_KEY, lookupValues);
 
     return availabilityReport;
   }
 
-  static final class ResourceInfo implements JsonSerializer<ResourceInfo> {
+  static final class LookupsJson implements JsonSerializer<LookupsJson> {
+    final String resourceName, fieldName;
+    final Integer numLookupsTotal;
+
+    public LookupsJson(String resourceName, String fieldName, Integer numLookupsTotal) {
+      this.resourceName = resourceName;
+      this.fieldName = fieldName;
+      this.numLookupsTotal = numLookupsTotal;
+    }
+
+    final String
+      RESOURCE_NAME_KEY = "resourceName",
+      FIELD_NAME_KEY = "fieldName",
+      NUM_LOOKUPS_TOTAL = "numLookupsTotal";
+
+    /**
+     * Gson invokes this call-back method during serialization when it encounters a field of the
+     * specified type.
+     *
+     * <p>In the implementation of this call-back method, you should consider invoking
+     * {@link JsonSerializationContext#serialize(Object, Type)} method to create JsonElements for any
+     * non-trivial field of the {@code src} object. However, you should never invoke it on the
+     * {@code src} object itself since that will cause an infinite loop (Gson will call your
+     * call-back method again).</p>
+     *
+     * @param src       the object that needs to be converted to Json.
+     * @param typeOfSrc the actual type (fully genericized version) of the source object.
+     * @param context   the context of the request
+     * @return a JsonElement corresponding to the specified object.
+     */
+    @Override
+    public JsonElement serialize(LookupsJson src, Type typeOfSrc, JsonSerializationContext context) {
+      JsonObject obj = new JsonObject();
+      obj.addProperty(RESOURCE_NAME_KEY, src.resourceName);
+      obj.addProperty(FIELD_NAME_KEY, src.fieldName);
+      obj.addProperty(NUM_LOOKUPS_TOTAL, src.numLookupsTotal);
+      return obj;
+    }
+  }
+
+  static final class ResourcesJson implements JsonSerializer<ResourcesJson> {
     final String
         RESOURCE_NAME_KEY = "resourceName",
         RECORD_COUNT_KEY = "recordCount",
@@ -246,7 +359,7 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
     final AtomicReference<OffsetDateTime> dateHigh = new AtomicReference<>(null);
     final AtomicReference<Set<String>> postalCodes = new AtomicReference<>(new LinkedHashSet<>());
 
-    public ResourceInfo(String resourceName) {
+    public ResourcesJson(String resourceName) {
       this.resourceName.set(resourceName);
     }
 
@@ -262,11 +375,11 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
      *
      * @param src       the object that needs to be converted to Json.
      * @param typeOfSrc the actual type (fully genericized version) of the source object.
-     * @param context
+     * @param context   the context of the request
      * @return a JsonElement corresponding to the specified object.
      */
     @Override
-    public JsonElement serialize(ResourceInfo src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(ResourcesJson src, Type typeOfSrc, JsonSerializationContext context) {
       JsonObject totals = new JsonObject();
 
       totals.addProperty(RESOURCE_NAME_KEY, src.resourceName.get());
@@ -306,5 +419,4 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
       return totals;
     }
   }
-
 }
