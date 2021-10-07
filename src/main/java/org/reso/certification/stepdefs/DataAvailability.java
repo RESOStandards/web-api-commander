@@ -50,8 +50,10 @@ import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.STRING_LIST_SINGLE;
 import static org.reso.certification.containers.WebAPITestContainer.EMPTY_STRING;
 import static org.reso.commander.Commander.NOT_OK;
+import static org.reso.commander.Commander.prepareURI;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
+import static org.reso.commander.common.TestUtils.prepareUri;
 
 public class DataAvailability {
   private static final Logger LOG = LogManager.getLogger(DataAvailability.class);
@@ -67,8 +69,17 @@ public class DataAvailability {
   private static final String SAMPLES_DIRECTORY_TEMPLATE = BUILD_DIRECTORY_PATH + File.separator + "%s";
   private static final String PATH_TO_RESOSCRIPT_KEY = "pathToRESOScript";
 
-  final String REQUEST_URI_TEMPLATE = "?$filter=%s" + " lt %s&$orderby=%s desc&$top=" + TOP_COUNT;
-  final String COUNT_REQUEST_URI_TEMPLATE = "?$count=true";
+  //TODO: read from params
+  final String ORIGINATING_SYSTEM_FIELD = "OriginatingSystemName";
+  final String ORIGINATING_SYSTEM_FIELD_VALUE = EMPTY_STRING;
+
+  final boolean USE_ORIGINATING_SYSTEM_QUERY = ORIGINATING_SYSTEM_FIELD.length() > 0 && ORIGINATING_SYSTEM_FIELD_VALUE.length() > 0;
+  final String ORIGINATING_SYSTEM_QUERY = ORIGINATING_SYSTEM_FIELD + " eq '" + ORIGINATING_SYSTEM_FIELD_VALUE + "'";
+  final String REQUEST_URI_TEMPLATE = "?$filter="
+      + (USE_ORIGINATING_SYSTEM_QUERY ? ORIGINATING_SYSTEM_QUERY + " and " : EMPTY_STRING)
+      + "%s" + " lt %s&$orderby=%s desc&$top=" + TOP_COUNT;
+  
+  final String COUNT_REQUEST_URI_TEMPLATE = "?" + (USE_ORIGINATING_SYSTEM_QUERY ? "$filter=" + ORIGINATING_SYSTEM_QUERY + "&": EMPTY_STRING) + "$count=true";
 
   //TODO: get this from the parameters
   private final static boolean DEBUG = false;

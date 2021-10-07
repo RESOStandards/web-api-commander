@@ -52,7 +52,7 @@ import static org.reso.commander.common.TestUtils.Operators.*;
 import static org.reso.models.Request.loadFromRESOScript;
 
 /**
- * Contains the glue code for Web API Core 1.0.2 Certification as well as previous Platinum tests,
+ * Contains the glue code for Web API Core 2.0.0 Certification as well as previous Platinum tests,
  * which will converted to standalone endorsements, where applicable.
  */
 public class WebAPIServerCore implements En {

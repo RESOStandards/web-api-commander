@@ -87,17 +87,17 @@ final String certOutputDir = 'build/certification',
              certReportsDir = certOutputDir + '/reports'
 
 
-task testWebApiCore_1_0_2() {
+task testWebApiCore_2_0_0() {
   group = 'RESO Certification'
-  description = 'Web API Core 1.0.2 Acceptance Tests' +
+  description = 'Web API Core 2.0.0 Acceptance Tests' +
       '\nExample: ' +
-      '\n  ./gradlew testWebApiServer_1_0_2_Core -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true' +
+      '\n  ./gradlew testWebApiCore_2_0_0 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript -DshowResponses=true' +
       '\n\nNote: by default the Web API tests assume Collection(Edm.EnumType).' +
       '\nPass -DuseCollections=false if using OData IsFlags.' +
       '\n\n[Report location: ' + certReportsDir + ']' +
       '\n\n'
 
-  String reportName = 'web-api-server.core.1.0.2'
+  String reportName = 'web-api-server.core.2.0.0'
 
   dependsOn jar
   doLast {
@@ -115,7 +115,7 @@ task testWebApiCore_1_0_2() {
           '--plugin',
           'html:' + certReportsDir + '/' + reportName + '.html',
           '--glue',
-          'org.reso.certification.stepdefs#WebAPIServer_1_0_2',
+          'org.reso.certification.stepdefs#WebAPIServerCore',
           'src/main/java/org/reso/certification/features/web-api',
           '--tags',
           '@core-endorsement'
@@ -177,7 +177,7 @@ task testDataAvailability_1_7() {
   group = 'RESO Certification'
   description = 'Data Dictionary 1.7 Data Availability Tests' +
       '\nExample:' +
-      '\n  ./gradlew testDataAvailability_1_7 -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript' +
+      '\n  ./gradlew testDataAvailability_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript' +
       '\n\n[Report location: ' + certReportsDir + ']' +
       '\n\n'
 
@@ -209,7 +209,7 @@ task testIdxPayload_1_7() {
   group = 'RESO Certification'
   description = 'Data Dictionary 1.7 Payloads Sampling Tests' +
       '\nExample:' +
-      '\n  ./gradlew testIdxPayload_1_7 -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript' +
+      '\n  ./gradlew testIdxPayload_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript' +
       '\n\n[Report location: ' + certReportsDir + ']' +
       '\n\n'
 
