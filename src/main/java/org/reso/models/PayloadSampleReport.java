@@ -11,6 +11,7 @@ import org.reso.commander.common.Utils;
 import java.lang.reflect.Type;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -253,23 +254,30 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
          resourcesJson.numRecordsFetched.getAndAdd(payloadSample.encodedSamples.size());
 
          payloadSample.encodedSamples.forEach(encodedSample -> {
-           offsetDateTime.set(OffsetDateTime.parse(encodedSample.get(payloadSample.dateField)));
-           if (offsetDateTime.get() != null) {
-             if (resourcesJson.dateLow.get() == null) {
-               resourcesJson.dateLow.set(offsetDateTime.get());
-             } else if (offsetDateTime.get().isBefore(resourcesJson.dateLow.get())) {
-               resourcesJson.dateLow.set(offsetDateTime.get());
+           try {
+             offsetDateTime.set(OffsetDateTime.parse(encodedSample.get(payloadSample.dateField)));
+             if (offsetDateTime.get() != null) {
+               if (resourcesJson.dateLow.get() == null) {
+                 resourcesJson.dateLow.set(offsetDateTime.get());
+               } else if (offsetDateTime.get().isBefore(resourcesJson.dateLow.get())) {
+                 resourcesJson.dateLow.set(offsetDateTime.get());
+               }
+
+               if (resourcesJson.dateHigh.get() == null) {
+                 resourcesJson.dateHigh.set(offsetDateTime.get());
+               } else if (offsetDateTime.get().isAfter(resourcesJson.dateHigh.get())) {
+                 resourcesJson.dateHigh.set(offsetDateTime.get());
+               }
              }
 
-             if (resourcesJson.dateHigh.get() == null) {
-               resourcesJson.dateHigh.set(offsetDateTime.get());
-             } else if (offsetDateTime.get().isAfter(resourcesJson.dateHigh.get())) {
-               resourcesJson.dateHigh.set(offsetDateTime.get());
+             if (encodedSample.containsKey(POSTAL_CODE_KEY)) {
+               postalCodes.add(encodedSample.get(POSTAL_CODE_KEY));
              }
-           }
-
-           if (encodedSample.containsKey(POSTAL_CODE_KEY)) {
-             postalCodes.add(encodedSample.get(POSTAL_CODE_KEY));
+           } catch (DateTimeParseException dateTimeParseException) {
+             LOG.error("Could not parse date for field " + payloadSample.dateField + ", with value: "
+                 + encodedSample.get(payloadSample.dateField) + ". Expected ISO 8601 timestamp format!"
+             );
+             throw dateTimeParseException;
            }
          });
 

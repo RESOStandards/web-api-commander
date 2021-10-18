@@ -76,7 +76,10 @@ public class DataDictionary {
 
   //extract any params here
   private final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES_ARG));
-  private final boolean strictMode = Boolean.parseBoolean(System.getProperty(USE_STRICT_MODE_ARG));
+
+  //strict mode is enabled by default
+  private final boolean strictMode = System.getProperty(USE_STRICT_MODE_ARG) == null || Boolean.parseBoolean(System.getProperty(USE_STRICT_MODE_ARG));
+
   private final String pathToMetadata = System.getProperty(PATH_TO_METADATA_ARG);
   private final String pathToRESOScript = System.getProperty(PATH_TO_RESOSCRIPT_ARG);
 

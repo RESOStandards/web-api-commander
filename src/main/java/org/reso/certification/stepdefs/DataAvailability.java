@@ -44,6 +44,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static io.restassured.path.json.JsonPath.from;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeTrue;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.STRING_LIST_MULTI;
@@ -68,6 +69,10 @@ public class DataAvailability {
   private static final String DATA_AVAILABILITY_REPORT_PATH = BUILD_DIRECTORY_PATH + File.separator + "certification" + File.separator + "results";
   private static final String SAMPLES_DIRECTORY_TEMPLATE = BUILD_DIRECTORY_PATH + File.separator + "%s";
   private static final String PATH_TO_RESOSCRIPT_KEY = "pathToRESOScript";
+  private static final String USE_STRICT_MODE_ARG = "strict";
+
+  //strict mode is enabled by default
+  private final boolean strictMode = System.getProperty(USE_STRICT_MODE_ARG) == null || Boolean.parseBoolean(System.getProperty(USE_STRICT_MODE_ARG));
 
   //TODO: read from params
   final String ORIGINATING_SYSTEM_FIELD = "OriginatingSystemName";
@@ -78,7 +83,7 @@ public class DataAvailability {
   final String REQUEST_URI_TEMPLATE = "?$filter="
       + (USE_ORIGINATING_SYSTEM_QUERY ? ORIGINATING_SYSTEM_QUERY + " and " : EMPTY_STRING)
       + "%s" + " lt %s&$orderby=%s desc&$top=" + TOP_COUNT;
-  
+
   final String COUNT_REQUEST_URI_TEMPLATE = "?" + (USE_ORIGINATING_SYSTEM_QUERY ? "$filter=" + ORIGINATING_SYSTEM_QUERY + "&": EMPTY_STRING) + "$count=true";
 
   //TODO: get this from the parameters
@@ -111,7 +116,10 @@ public class DataAvailability {
 
   @Inject
   public DataAvailability(WebAPITestContainer c) {
-    container.set(c);
+    if (container.get() == null) {
+      container.set(c);
+      LOG.info("Using strict mode: " + strictMode);
+    }
   }
 
   @Before
@@ -143,6 +151,7 @@ public class DataAvailability {
     gsonBuilder.registerTypeAdapter(PayloadSampleReport.class, payloadSampleReport);
 
     Utils.createFile(DATA_AVAILABILITY_REPORT_PATH, reportName, gsonBuilder.create().toJson(payloadSampleReport));
+
   }
 
   /**
@@ -596,8 +605,17 @@ public class DataAvailability {
       LOG.info("No resource payload samples found! Skipping...");
       assumeTrue(true);
     }
-    LOG.info("\n\nCreating data availability report!");
-    createDataAvailabilityReport(resourcePayloadSampleMap.get(), reportFileName, resourceCounts.get(), resourceFieldLookupTallies.get());
+    try {
+      LOG.info("\n\nCreating data availability report!");
+      createDataAvailabilityReport(resourcePayloadSampleMap.get(), reportFileName, resourceCounts.get(), resourceFieldLookupTallies.get());
+    } catch (Exception ex) {
+      final String errorMsg = "Data Availability Report could not be created.\n" + ex;
+      if (strictMode) {
+        failAndExitWithErrorMessage(errorMsg, scenario);
+      } else {
+        LOG.error(errorMsg);
+      }
+    }
   }
 
   @And("{string} has been created in the build directory")

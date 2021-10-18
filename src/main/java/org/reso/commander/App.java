@@ -3,6 +3,7 @@ package org.reso.commander;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.codegen.*;
 import org.reso.models.ClientSettings;
@@ -13,10 +14,12 @@ import org.reso.models.Settings;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Map;
 
 import static org.reso.commander.Commander.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.Utils.getTimestamp;
+import static org.reso.commander.common.XMLMetadataToJSONSchemaConverter.convertEdmToJsonSchemaDocuments;
 
 /**
  * Entry point of the RESO Web API Commander, which is a command line OData client that uses the Java Olingo
@@ -242,6 +245,14 @@ public class App {
           } catch (Exception ex) {
             LOG.error(getDefaultErrorMessage(ex));
           }
+        } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_JSON_SCHEMAS_FROM_XML_METADATA)) {
+          try {
+            Edm edm = deserializeEdmFromPath(inputFilename, commander.getClient());
+            final Map<String, String> jsonSchemaMap = convertEdmToJsonSchemaDocuments(edm);
+            //jsonSchemaMap.forEach((model, jsonSchema) -> LOG.info("Model is: " + model + "\nSchema is: " + jsonSchema));
+          } catch (Exception ex) {
+            LOG.error(getDefaultErrorMessage(ex));
+          }
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_QUERIES)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_QUERIES);
 
@@ -424,6 +435,8 @@ public class App {
         }
       } else if (action.matches(ACTIONS.GENERATE_QUERIES)) {
         validationResponse = validateOptions(cmd, INPUT_FILE);
+      } else if (action.matches(ACTIONS.GENERATE_JSON_SCHEMAS_FROM_XML_METADATA)) {
+        validationResponse = validateOptions(cmd, INPUT_FILE);
       }
 
       if (validationResponse != null) {
@@ -522,6 +535,8 @@ public class App {
               .desc("Runs commands in RESOScript file given as <inputFile>.").build())
           .addOption(Option.builder().argName("t").longOpt(ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)
               .desc("Generates acceptance tests in the current directory.").build())
+          .addOption(Option.builder().argName("j").longOpt(ACTIONS.GENERATE_JSON_SCHEMAS_FROM_XML_METADATA)
+              .desc("Generates JSON Schema documents from the given XML metadata.").build())
           .addOption(Option.builder().argName("i").longOpt(ACTIONS.GENERATE_RESOURCE_INFO_MODELS)
               .desc("Generates Java Models for the Web API Reference Server in the current directory.").build())
           .addOption(Option.builder().argName("r").longOpt(ACTIONS.GENERATE_REFERENCE_EDMX)
@@ -560,6 +575,7 @@ public class App {
       public static final String GENERATE_DD_ACCEPTANCE_TESTS = "generateDDAcceptanceTests";
       public static final String GENERATE_REFERENCE_EDMX = "generateReferenceEDMX";
       public static final String GENERATE_REFERENCE_DDL = "generateReferenceDDL";
+      public static final String GENERATE_JSON_SCHEMAS_FROM_XML_METADATA = "generateJSONSchemasFromXMLMetadata";
       public static final String GENERATE_QUERIES = "generateQueries";
       public static final String RUN_RESOSCRIPT = "runRESOScript";
       public static final String GET_METADATA = "getMetadata";
