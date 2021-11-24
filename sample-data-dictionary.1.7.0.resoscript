@@ -83,17 +83,6 @@
 
   </ClientSettings>
 
-
-  <!--
-  ############################################################
-    Parameters Section - add your testing variables here
-  ############################################################-->
-
-  <Parameters>
-    <!-- OPTIONAL: Useful for testing the OData Format Parameter - Value="?$format=application/xml" -->
-    <Parameter Name="OptionalMetadataFormatParameter" Value="" />
-  </Parameters>
-
   <!--
   ############################################################
     Requests Section - Queries used during testing,
@@ -103,8 +92,8 @@
 
     <Request
         RequestId="metadata-request"
-        OutputFile="metadata-metadata-request.xml"
-        Url="*ClientSettings_WebAPIURI*/$metadata*Parameter_OptionalMetadataFormatParameter*"
+        OutputFile="metadata-request.xml"
+        Url="*ClientSettings_WebAPIURI*/$metadata?$format=application/xml"
     />
 
   </Requests>

@@ -19,7 +19,7 @@ import java.util.Map;
 import static org.reso.commander.Commander.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.Utils.getTimestamp;
-import static org.reso.commander.common.XMLMetadataToJSONSchemaConverter.convertEdmToJsonSchemaDocuments;
+import static org.reso.commander.common.XMLMetadataToJSONSchemaSerializer.convertEdmToJsonSchemaDocuments;
 
 /**
  * Entry point of the RESO Web API Commander, which is a command line OData client that uses the Java Olingo

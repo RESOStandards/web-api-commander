@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "fs-extra": "^10.0.0",
+    "aws-sdk":"^2.1026.0",
+    "axios": "^0.24.0"
+  }
+}

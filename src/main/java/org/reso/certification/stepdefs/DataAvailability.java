@@ -44,17 +44,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static io.restassured.path.json.JsonPath.from;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeTrue;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.STRING_LIST_MULTI;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.STRING_LIST_SINGLE;
 import static org.reso.certification.containers.WebAPITestContainer.EMPTY_STRING;
 import static org.reso.commander.Commander.NOT_OK;
-import static org.reso.commander.Commander.prepareURI;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
-import static org.reso.commander.common.TestUtils.prepareUri;
 
 public class DataAvailability {
   private static final Logger LOG = LogManager.getLogger(DataAvailability.class);
@@ -62,7 +59,7 @@ public class DataAvailability {
   private static final String POSTAL_CODE_FIELD = "PostalCode";
   private static final int TOP_COUNT = 100;
 
-  private static final int MAX_RETRIES = 3;
+  private static final int MAX_TIMESTAMP_RETRIES = 3;
 
   private static final String BUILD_DIRECTORY_PATH = "build";
   private static final String CERTIFICATION_PATH = BUILD_DIRECTORY_PATH + File.separator + "certification";
@@ -70,9 +67,15 @@ public class DataAvailability {
   private static final String SAMPLES_DIRECTORY_TEMPLATE = BUILD_DIRECTORY_PATH + File.separator + "%s";
   private static final String PATH_TO_RESOSCRIPT_KEY = "pathToRESOScript";
   private static final String USE_STRICT_MODE_ARG = "strict";
+  private static final String A_B_TESTING_MODE_ARG = "abTesting";
 
   //strict mode is enabled by default
-  private final boolean strictMode = System.getProperty(USE_STRICT_MODE_ARG) == null || Boolean.parseBoolean(System.getProperty(USE_STRICT_MODE_ARG));
+  private final boolean strictMode =
+      System.getProperty(USE_STRICT_MODE_ARG) == null || Boolean.parseBoolean(System.getProperty(USE_STRICT_MODE_ARG));
+
+  //abTesting mode is disabled by default
+  private final boolean abTestingMode =
+      System.getProperty(A_B_TESTING_MODE_ARG) != null && Boolean.parseBoolean(System.getProperty(A_B_TESTING_MODE_ARG));
 
   //TODO: read from params
   final String ORIGINATING_SYSTEM_FIELD = "OriginatingSystemName";
@@ -247,6 +250,7 @@ public class DataAvailability {
     final AtomicReference<Map<String, String>> encodedSample = new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
     final AtomicReference<ODataTransportWrapper> transportWrapper = new AtomicReference<>();
     final AtomicReference<ResWrap<EntityCollection>> entityCollectionResWrap = new AtomicReference<>();
+    final AtomicReference<ResWrap<EntityCollection>> lastEntityCollectionResWrap = new AtomicReference<>();
     final AtomicReference<String> timestampField = new AtomicReference<>();
     final AtomicBoolean hasRecords = new AtomicBoolean(true);
     final AtomicReference<PayloadSample> payloadSample = new AtomicReference<>();
@@ -256,7 +260,7 @@ public class DataAvailability {
     boolean hasStandardTimestampField = false;
     String requestUri;
     int recordsProcessed = 0;
-    int numRetries = 0;
+    int numTimestampRetries = 0;
     int lastTimestampCandidateIndex = 0;
 
     container.get().getEdm().getSchemas().forEach(edmSchema ->
@@ -317,17 +321,17 @@ public class DataAvailability {
       // immediately, but retry a couple of times before we bail
       if (recordsProcessed == 0 && transportWrapper.get().getResponseData() == null) {
         //only count retries if we're constantly making requests and not getting anything
-        numRetries += 1;
+        numTimestampRetries += 1;
       } else {
-        numRetries = 0;
+        numTimestampRetries = 0;
       }
 
-      if (numRetries >= MAX_RETRIES) {
+      if (numTimestampRetries >= MAX_TIMESTAMP_RETRIES) {
         if (timestampCandidateFields.size() > 0 && (lastTimestampCandidateIndex < timestampCandidateFields.size())) {
           LOG.info("Trying next candidate timestamp field: " + timestampCandidateFields.get(lastTimestampCandidateIndex));
-          numRetries = 0;
+          numTimestampRetries = 0;
         } else {
-          LOG.info("Could not fetch records from the " + resourceName + " resource after " + MAX_RETRIES
+          LOG.info("Could not fetch records from the " + resourceName + " resource after " + MAX_TIMESTAMP_RETRIES
               + " tries from the given URL: " + requestUri);
           break;
         }
@@ -351,12 +355,22 @@ public class DataAvailability {
         try {
           payloadSample.get().setResponseSizeBytes(transportWrapper.get().getResponseData().getBytes().length);
 
+          lastEntityCollectionResWrap.set(entityCollectionResWrap.get());
+
           entityCollectionResWrap.set(container.get().getCommander().getClient()
               .getDeserializer(ContentType.APPLICATION_JSON)
               .toEntitySet(new ByteArrayInputStream(transportWrapper.get().getResponseData().getBytes())));
 
-          if (entityCollectionResWrap.get().getPayload().getEntities().size() > 0) {
-            LOG.info("Hashing " + resourceName + " payload values...");
+          if (lastEntityCollectionResWrap.get() != null && entityCollectionResWrap.get() != null
+              && lastEntityCollectionResWrap.get().getPayload().hashCode() == entityCollectionResWrap.get().getPayload().hashCode()) {
+            //if the payload is the same between pages, we need to skip it and subtract some more time
+            LOG.info("Found identical pages. Subtracting one day from the time...");
+            lastFetchedDate.set(lastFetchedDate.get().minus(1, ChronoUnit.DAYS));
+            break;
+          } else if (entityCollectionResWrap.get().getPayload().getEntities().size() > 0) {
+
+            LOG.debug("Hashing " + resourceName + " payload values...");
+
             entityCollectionResWrap.get().getPayload().getEntities().forEach(entity -> {
               encodedSample.set(Collections.synchronizedMap(new LinkedHashMap<>()));
 
@@ -398,11 +412,17 @@ public class DataAvailability {
 
                     ArrayList<String> values = new ArrayList<>();
 
-                    if (value == null || value.contentEquals("[]")) {
-                      values.add("null");
+                    if (value == null) {
+                      values.add("NULL_VALUE");
+                    } else if (value.contentEquals("[]")) {
+                      values.add("EMPTY_LIST");
                     } else {
                       if (property.isCollection()) {
-                        property.asCollection().forEach(v -> values.add(v.toString()));
+                        if (property.asCollection().size() > 0) {
+                          property.asCollection().forEach(v -> values.add(v.toString()));
+                        } else {
+                          values.add("EMPTY_LIST");
+                        }
                       } else {
                         if (value.contains(",")) {
                           values.addAll(Arrays.asList(value.split(",")));
@@ -442,14 +462,14 @@ public class DataAvailability {
               });
               payloadSample.get().addSample(encodedSample.get());
             });
-            LOG.info("Values encoded!");
+            LOG.debug("Values encoded!");
 
             recordsProcessed += entityCollectionResWrap.get().getPayload().getEntities().size();
             LOG.info("Records processed: " + recordsProcessed + ". Target record count: " + targetRecordCount + "\n");
 
             payloadSample.get().setResponseTimeMillis(transportWrapper.get().getElapsedTimeMillis());
 
-            if (encodedResultsDirectoryName != null) {
+            if (abTestingMode && encodedResultsDirectoryName != null) {
               //serialize results once resource processing has finished
               Utils.createFile(String.format(SAMPLES_DIRECTORY_TEMPLATE, encodedResultsDirectoryName),
                   resourceName + "-" + Utils.getTimestamp() + ".json",

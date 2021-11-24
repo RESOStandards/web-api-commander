@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmElement;
-import org.apache.regexp.RE;
 import org.reso.commander.common.Utils;
 
 import java.lang.reflect.Type;
@@ -43,12 +42,12 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
 
   /**
    * FieldsJson uses a JSON payload with the following structure:
-   *
-   *    {
-   *       "resourceName": "Property",
-   *       "fieldName": "AboveGradeFinishedArea",
-   *       "availability": 0.1
-   *     }
+   * <p>
+   * {
+   * "resourceName": "Property",
+   * "fieldName": "AboveGradeFinishedArea",
+   * "availability": 0.1
+   * }
    */
   private static final class FieldsJson implements JsonSerializer<FieldsJson> {
     static final String
@@ -96,11 +95,11 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
   }
 
   /**
-   *   resourceName: "Property",
-   *   fieldName: "StateOrProvince",
-   *   lookupName: "StateOrProvince",
-   *   lookupValue: "CA",
-   *   availability: 0.03
+   * resourceName: "Property",
+   * fieldName: "StateOrProvince",
+   * lookupName: "StateOrProvince",
+   * lookupValue: "CA",
+   * availability: 0.03
    */
   private static final class LookupValuesJson implements JsonSerializer<LookupValuesJson> {
     final String resourceName, fieldName, lookupValue;
@@ -148,12 +147,15 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
   }
 
   private static Map<String, Map<String, Integer>> createResourceFieldTallies(Map<String, List<PayloadSample>> resourcePayloadSamplesMap) {
-    AtomicReference<Map<String, Map<String, Integer>>> resourceTallies = new AtomicReference<>(new LinkedHashMap<>());
+    AtomicReference<Map<String, Map<String, Integer>>> resourceTallies = new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
     AtomicInteger numSamples = new AtomicInteger(0);
     resourcePayloadSamplesMap.keySet().forEach(resourceName -> {
       LOG.info("Processing resource: " + resourceName);
+
+      //if there are samples for the given resource, sum the tallies, otherwise 0.
       numSamples.set(resourcePayloadSamplesMap.get(resourceName) != null
           ? resourcePayloadSamplesMap.get(resourceName).stream().reduce(0, (a, f) -> a + f.getSamples().size(), Integer::sum) : 0);
+
       LOG.info("Sample size: " + numSamples.get());
 
       //for each resource, go through the keys and tally the data presence counts for each field
@@ -164,11 +166,11 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
             .forEach(payloadSample -> payloadSample.getSamples()
                 .forEach(sample -> sample
                     .forEach((fieldName, encodedValue) -> {
-          if (encodedValue != null) {
-            resourceTallies.get().get(resourceName).putIfAbsent(fieldName, 0);
-            resourceTallies.get().get(resourceName).put(fieldName, resourceTallies.get().get(resourceName).get(fieldName) + 1);
-          }
-        })));
+                      if (encodedValue != null) {
+                        resourceTallies.get().get(resourceName).putIfAbsent(fieldName, 0);
+                        resourceTallies.get().get(resourceName).put(fieldName, resourceTallies.get().get(resourceName).get(fieldName) + 1);
+                      }
+                    })));
       }
     });
     return resourceTallies.get();
@@ -215,8 +217,8 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
     //serialize lookup values
     JsonArray lookupValues = new JsonArray();
     lookupValueFrequencyMap.get().forEach((lookupValue, frequency) -> {
-     LookupValuesJson lookupValuesJson = new LookupValuesJson(lookupValue.getResourceName(), lookupValue.getFieldName(), lookupValue.getLookupValue(), frequency);
-     lookupValues.add(lookupValuesJson.serialize(lookupValuesJson, LookupValuesJson.class, null));
+      LookupValuesJson lookupValuesJson = new LookupValuesJson(lookupValue.getResourceName(), lookupValue.getFieldName(), lookupValue.getLookupValue(), frequency);
+      lookupValues.add(lookupValuesJson.serialize(lookupValuesJson, LookupValuesJson.class, null));
     });
 
     JsonObject availabilityReport = new JsonObject();
@@ -248,41 +250,41 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
         AtomicReference<OffsetDateTime> offsetDateTime = new AtomicReference<>();
 
         resourcePayloadSamplesMap.get().get(resourceName).forEach(payloadSample -> {
-         resourcesJson.totalBytesReceived.getAndAdd(payloadSample.getResponseSizeBytes());
-         resourcesJson.totalResponseTimeMillis.getAndAdd(payloadSample.getResponseTimeMillis());
-         resourcesJson.numSamplesProcessed.getAndIncrement();
-         resourcesJson.numRecordsFetched.getAndAdd(payloadSample.encodedSamples.size());
+          resourcesJson.totalBytesReceived.getAndAdd(payloadSample.getResponseSizeBytes());
+          resourcesJson.totalResponseTimeMillis.getAndAdd(payloadSample.getResponseTimeMillis());
+          resourcesJson.numSamplesProcessed.getAndIncrement();
+          resourcesJson.numRecordsFetched.getAndAdd(payloadSample.encodedSamples.size());
 
-         payloadSample.encodedSamples.forEach(encodedSample -> {
-           try {
-             offsetDateTime.set(OffsetDateTime.parse(encodedSample.get(payloadSample.dateField)));
-             if (offsetDateTime.get() != null) {
-               if (resourcesJson.dateLow.get() == null) {
-                 resourcesJson.dateLow.set(offsetDateTime.get());
-               } else if (offsetDateTime.get().isBefore(resourcesJson.dateLow.get())) {
-                 resourcesJson.dateLow.set(offsetDateTime.get());
-               }
+          payloadSample.encodedSamples.forEach(encodedSample -> {
+            try {
+              offsetDateTime.set(OffsetDateTime.parse(encodedSample.get(payloadSample.dateField)));
+              if (offsetDateTime.get() != null) {
+                if (resourcesJson.dateLow.get() == null) {
+                  resourcesJson.dateLow.set(offsetDateTime.get());
+                } else if (offsetDateTime.get().isBefore(resourcesJson.dateLow.get())) {
+                  resourcesJson.dateLow.set(offsetDateTime.get());
+                }
 
-               if (resourcesJson.dateHigh.get() == null) {
-                 resourcesJson.dateHigh.set(offsetDateTime.get());
-               } else if (offsetDateTime.get().isAfter(resourcesJson.dateHigh.get())) {
-                 resourcesJson.dateHigh.set(offsetDateTime.get());
-               }
-             }
+                if (resourcesJson.dateHigh.get() == null) {
+                  resourcesJson.dateHigh.set(offsetDateTime.get());
+                } else if (offsetDateTime.get().isAfter(resourcesJson.dateHigh.get())) {
+                  resourcesJson.dateHigh.set(offsetDateTime.get());
+                }
+              }
 
-             if (encodedSample.containsKey(POSTAL_CODE_KEY)) {
-               postalCodes.add(encodedSample.get(POSTAL_CODE_KEY));
-             }
-           } catch (DateTimeParseException dateTimeParseException) {
-             LOG.error("Could not parse date for field " + payloadSample.dateField + ", with value: "
-                 + encodedSample.get(payloadSample.dateField) + ". Expected ISO 8601 timestamp format!"
-             );
-             throw dateTimeParseException;
-           }
-         });
+              if (encodedSample.containsKey(POSTAL_CODE_KEY)) {
+                postalCodes.add(encodedSample.get(POSTAL_CODE_KEY));
+              }
+            } catch (DateTimeParseException dateTimeParseException) {
+              LOG.error("Could not parse date for field " + payloadSample.dateField + ", with value: "
+                  + encodedSample.get(payloadSample.dateField) + ". Expected ISO 8601 timestamp format!"
+              );
+              throw dateTimeParseException;
+            }
+          });
 
-         if (resourcesJson.pageSize.get() == 0) resourcesJson.pageSize.set(payloadSample.getSamples().size());
-       });
+          if (resourcesJson.pageSize.get() == 0) resourcesJson.pageSize.set(payloadSample.getSamples().size());
+        });
       }
       if (postalCodes.size() > 0) {
         resourcesJson.postalCodes.set(postalCodes);
@@ -310,9 +312,9 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
     }
 
     final String
-      RESOURCE_NAME_KEY = "resourceName",
-      FIELD_NAME_KEY = "fieldName",
-      NUM_LOOKUPS_TOTAL = "numLookupsTotal";
+        RESOURCE_NAME_KEY = "resourceName",
+        FIELD_NAME_KEY = "fieldName",
+        NUM_LOOKUPS_TOTAL = "numLookupsTotal";
 
     /**
      * Gson invokes this call-back method during serialization when it encounters a field of the
@@ -412,7 +414,7 @@ public class PayloadSampleReport implements JsonSerializer<PayloadSampleReport> 
           ? src.dateLow.get().format(DateTimeFormatter.ISO_INSTANT) : null);
 
       totals.addProperty(DATE_HIGH_KEY, src.dateHigh.get() != null
-          ? src.dateHigh.get().format(DateTimeFormatter.ISO_INSTANT): null);
+          ? src.dateHigh.get().format(DateTimeFormatter.ISO_INSTANT) : null);
 
       JsonArray keyFields = new JsonArray();
       src.keyFields.get().forEach(keyFields::add);

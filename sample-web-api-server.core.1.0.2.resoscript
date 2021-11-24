@@ -202,10 +202,6 @@
                Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue1*'"/>
     <Parameter Name="MultipleValueLookupValue2"
                Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue2*'"/>
-
-    <!-- OPTIONAL: Useful for testing the OData Format Parameter - Value="?$format=application/xml" -->
-    <Parameter Name="OptionalMetadataFormatParameter" Value="?$format=application/xml"/>
-
   </Parameters>
 
   <!--
@@ -218,7 +214,7 @@
     <Request
         RequestId="metadata-request"
         OutputFile="metadata-request.xml"
-        Url="*ClientSettings_WebAPIURI*/$metadata*Parameter_OptionalMetadataFormatParameter*"
+        Url="*ClientSettings_WebAPIURI*/$metadata?$format=application/xml"
     />
 
     <Request
