@@ -15,7 +15,7 @@ const buildRecipientPath = (providerUoi, recipientUoi) => {
   return `${providerUoi}/${recipientUoi}`;
 };
 
-const CONFIG_FILE = '/home/jdarnell/Desktop/in-progress/certs/SEI - T00000075/seiConfig.json';
+const CONFIG_FILE = '';
 
 let PROVIDER_INFO;
 
