@@ -2,10 +2,15 @@ const fs = require('fs');
 const fse = require('fs-extra');
 const { execSync } = require('child_process');
 
+//parse command line args
+const yargs = require('yargs/yargs');
+const { hideBin } = require('yargs/helpers');
+const argv = yargs(hideBin(process.argv)).argv;
+
 const { processDataDictionaryResults } = require('./services/postResultsToApi.js');
+const { processDataAvailabilityReport } = require('./services/processDataAvailabilityReport.js');
 
 const { COMMANDER_PATH } = require('./batch-config.json');
-
 const CERTIFICATION_RESULTS_PATH = `${COMMANDER_PATH}/build/certification`;
 
 const buildRecipientPath = (providerUoi, recipientUoi) => {
@@ -15,15 +20,6 @@ const buildRecipientPath = (providerUoi, recipientUoi) => {
   return `${providerUoi}/${recipientUoi}`;
 };
 
-const CONFIG_FILE = '';
-
-let PROVIDER_INFO;
-
-try {
-  PROVIDER_INFO = JSON.parse(fs.readFileSync(CONFIG_FILE));
-} catch (err) {
-  throw new Error('Could not read provider info!');
-}
 
 const createResoscriptBearerTokenConfig = ({uri, token} = config) => '<?xml version="1.0" encoding="utf-8" ?>' +
   '<OutputScript>' +
@@ -63,7 +59,14 @@ const buildResoscript = (config={}) => {
   return null;
 }
 
-const runTests = (providerInfo=PROVIDER_INFO) => {
+const runTests = async providerInfo => {
+  const CONFIG_FILE = '';
+
+  try {
+    providerInfo = JSON.parse(fs.readFileSync(CONFIG_FILE));
+  } catch (err) {
+    throw new Error('Could not read provider info!');
+  }
 
   const { providerUoi, configs } = providerInfo;
 
@@ -141,10 +144,49 @@ const runTests = (providerInfo=PROVIDER_INFO) => {
   }
 };
 
-const processDDResult = async (providerUoi, recipientUoi) =>
+const processDDResult = async (providerUoi, recipientUoi) => 
   await processDataDictionaryResults(providerUoi, recipientUoi, buildRecipientPath(providerUoi, recipientUoi));
+
+
+// const cliHandler = argv => {
+//   argv.command({
+//       command: "action",
+//       description: "top level command",
+//       builder: {
+//           command: "bar",
+//           description: "child command of foo",
+//           builder: function() {
+//               console.log("builder barr!");
+//           },
+//           handler: a => {
+//               console.log("handler barr!");
+//           }
+//       },
+//       handler: args => {
+//           console.log("handler foo!");
+//       }
+//   })
+//   .demand(1, "must provide a valid command")
+//   .help("h")
+//   .alias("h", "help")
+//   .argv
+
+//   if (runTests) {
+//       const { configFilePath } = argv;
+
+//       if (!configFilePath) console.log('configFilePath is required!\nUsage: $ node . --runTests');
+
+//   } else if (processDDResult) {
+    
+//   } else if (dataAvailabilityEtl) {
+
+//   } else {
+
+//   }
+// };
 
 module.exports = {
   runTests,
-  processDDResult
+  processDDResult,
+  processDataAvailabilityReport
 };
