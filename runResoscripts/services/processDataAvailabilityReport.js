@@ -13,70 +13,70 @@ const TRANSFORMED_TEMPLATE_OBJECT = {
   availability: {
     fields: {
       total: {
-        eq0 : 0,
-        gt0 : 0,
-        gte25 : 0,
-        gte50 : 0,
-        gte75 : 0,
-        eq100 : 0
+        eq0: 0,
+        gt0: 0,
+        gte25: 0,
+        gte50: 0,
+        gte75: 0,
+        eq100: 0
       },
       reso: {
-        eq0 : 0,
-        gt0 : 0,
-        gte25 : 0,
-        gte50 : 0,
-        gte75 : 0,
-        eq100 : 0
+        eq0: 0,
+        gt0: 0,
+        gte25: 0,
+        gte50: 0,
+        gte75: 0,
+        eq100: 0
       },
-      local: { 
-        eq0 : 0,
-        gt0 : 0,
-        gte25 : 0,
-        gte50 : 0,
-        gte75 : 0,
-        eq100 : 0
+      local: {
+        eq0: 0,
+        gt0: 0,
+        gte25: 0,
+        gte50: 0,
+        gte75: 0,
+        eq100: 0
       },
       idx: {
-        eq0 : 0,
-        gt0 : 0,
-        gte25 : 0,
-        gte50 : 0,
-        gte75 : 0,
-        eq100 : 0
+        eq0: 0,
+        gt0: 0,
+        gte25: 0,
+        gte50: 0,
+        gte75: 0,
+        eq100: 0
       }
     },
-    lookups : {
+    lookups: {
       total: {
-        eq0 : 0,
-        gt0 : 0,
-        gte25 : 0,
-        gte50 : 0,
-        gte75 : 0,
-        eq100 : 0
+        eq0: 0,
+        gt0: 0,
+        gte25: 0,
+        gte50: 0,
+        gte75: 0,
+        eq100: 0
       },
       reso: {
-        eq0 : 0,
-        gt0 : 0,
-        gte25 : 0,
-        gte50 : 0,
-        gte75 : 0,
-        eq100 : 0
+        eq0: 0,
+        gt0: 0,
+        gte25: 0,
+        gte50: 0,
+        gte75: 0,
+        eq100: 0
       },
-      local: { 
-        eq0 : 0,
-        gt0 : 0,
-        gte25 : 0,
-        gte50 : 0,
-        gte75 : 0,
-        eq100 : 0
+      local: {
+        eq0: 0,
+        gt0: 0,
+        gte25: 0,
+        gte50: 0,
+        gte75: 0,
+        eq100: 0
       },
       idx: {
-        eq0 : 0,
-        gt0 : 0,
-        gte25 : 0,
-        gte50 : 0,
-        gte75 : 0,
-        eq100 : 0
+        eq0: 0,
+        gt0: 0,
+        gte25: 0,
+        gte50: 0,
+        gte75: 0,
+        eq100: 0
       }
     },
     resources: {},
@@ -84,21 +84,21 @@ const TRANSFORMED_TEMPLATE_OBJECT = {
   }
 };
 
-const createStandardFieldCache = (fields=[]) => {
+const createStandardFieldCache = (fields = []) => {
   const resourceFieldCache = {};
   fields.forEach(field => {
-      if (!resourceFieldCache[field.resourceName]) {
-        resourceFieldCache[field.resourceName] = {};
-      }
-      resourceFieldCache[field.resourceName][field.fieldName] = field;
+    if (!resourceFieldCache[field.resourceName]) {
+      resourceFieldCache[field.resourceName] = {};
+    }
+    resourceFieldCache[field.resourceName][field.fieldName] = field;
   });
   return resourceFieldCache;
 };
 
-const isIdxField = (field, fieldCache={}) => field && field.resourceName && field.fieldName
+const isIdxField = (field, fieldCache = {}) => field && field.resourceName && field.fieldName
   && isResoField(field, fieldCache) && fieldCache[field.resourceName][field.fieldName].payloads.filter(x => x === "IDX");
 
-const isResoField = (field, fieldCache={}) => field && field.resourceName && field.fieldName 
+const isResoField = (field, fieldCache = {}) => field && field.resourceName && field.fieldName
   && fieldCache[field.resourceName] && fieldCache[field.resourceName][field.fieldName];
 
 const processDataAvailabilityReport = async pathToDataAvailabilityReport => {
@@ -112,13 +112,21 @@ const processDataAvailabilityReport = async pathToDataAvailabilityReport => {
   }
 }
 
-const createLookupCache = (lookups=[]) => {
+const createLookupValueCache = (lookupValues = []) => {
   const resourceFieldLookupCache = {};
-  lookups.forEach(lookup => {
-    
-  });
-}
+  lookupValues.forEach(lookupValue => {
+    if (!resourceFieldLookupCache[lookupValue.resourceName]) {
+      resourceFieldLookupCache[lookupValue.resourceName] = {};
+    }
 
+    if (!resourceFieldLookupCache[lookupValue.resourceName][lookupValue.fieldName]) {
+      resourceFieldLookupCache[lookupValue.resourceName][lookupValue.fieldName] = {};
+    }
+
+    resourceFieldLookupCache[lookupValue.resourceName][lookupValue.fieldName][lookupValue.lookupValue] = lookupValue;
+  });
+  return resourceFieldLookupCache;
+}
 
 const process = async availablityReport => {
   //iterate over each field and lookup and compute their availabilities
@@ -130,9 +138,6 @@ const process = async availablityReport => {
 
   const resourceCounts = {};
   resources.forEach(resource => resourceCounts[resource.resourceName] = resource.numRecordsFetched);
-
-  const calculateFieldAvailability = field => resourceCounts[field.resourceName] !== 0 ? 1.0 * field.frequency / resourceCounts[field.resourceName] : 0;  
-  const calculateLookupAvailability = lookup => 0;
 
   const updateBins = (bins, availability) => {
     return {
@@ -146,7 +151,7 @@ const process = async availablityReport => {
   };
 
   const processedFields = fields.map(field => {
-    const availability = calculateFieldAvailability(field);
+    const availability = resourceCounts[field.resourceName] !== 0 ? 1.0 * field.frequency / resourceCounts[field.resourceName] : 0;
 
     transformed.availability.fields.total = updateBins(transformed.availability.fields.total, availability);
     if (isResoField(field, standardFieldCache)) {
@@ -157,19 +162,28 @@ const process = async availablityReport => {
     } else {
       transformed.availability.fields.local = updateBins(transformed.availability.fields.local, availability);
     }
-        
+
     return { ...field, availability };
   });
 
-  const processedLookups = resources.map(lookup => {
-    const availability = calculateLookupAvailability();
+  const processedLookupValues = lookups.flatMap(lookup => {
+    const lookupValueCache = createLookupValueCache(lookupValues);
+
+    return Object.values(lookupValueCache[lookup.resourceName][lookup.fieldName])
+      .filter(lookupValue => !!lookupValue && lookupValue.lookupValue !== 'null')
+      .map(lookupValue => { return {
+        ...lookupValue, availability: lookup.numLookupsTotal !== 0 ? 1.0 * lookupValue.frequency / lookup.numLookupsTotal : 0
+      }
+    });
   });
 
-  transformed.resources.push(resources);
-  transformed.fields.push(processedFields);
+  transformed.resources = resources;
+  transformed.fields = processedFields;
+  transformed.lookups = lookups;
+  transformed.lookupValues = processedLookupValues;
 
   return transformed;
-};
+}
 
 module.exports = {
   processDataAvailabilityReport
