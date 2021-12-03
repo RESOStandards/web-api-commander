@@ -2,11 +2,6 @@ const fs = require('fs');
 const fse = require('fs-extra');
 const { execSync } = require('child_process');
 
-//parse command line args
-const yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
-const argv = yargs(hideBin(process.argv)).argv;
-
 const { processDataDictionaryResults } = require('./services/postResultsToApi.js');
 const { processDataAvailabilityReport } = require('./services/processDataAvailabilityReport.js');
 
@@ -60,7 +55,7 @@ const buildResoscript = (config={}) => {
 }
 
 const runTests = async providerInfo => {
-  const CONFIG_FILE = '';
+  const CONFIG_FILE = '/path/to/config.json';
 
   try {
     providerInfo = JSON.parse(fs.readFileSync(CONFIG_FILE));

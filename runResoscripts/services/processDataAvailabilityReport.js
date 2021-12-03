@@ -1,83 +1,36 @@
 const fs = require('fs').promises;
 const { standardMeta } = require('../references/standardMeta');
-const { lookupMap } = require('../references/lookupMap');
+const { lookupMap } = require('../references/lookupMap.js');
 
-const PATH_TO_SAMPLE_REPORT = '../samples/data-availability-report.utahre.json';
+const PATH_TO_SAMPLE_REPORT = '/path/to/availability-report.json';
 
 //TODO: move to consts file
-const TRANSFORMED_TEMPLATE_OBJECT = {
+const 
+  BINS_TEMPLATE = {
+    eq0: 0,
+    gt0: 0,
+    gte25: 0,
+    gte50: 0,
+    gte75: 0,
+    eq100: 0
+  },
+  AVAILABILITY_TEMPLATE = {
   fields: [],
   lookups: [],
   lookupValues: [],
   resources: [],
   availability: {
     fields: {
-      total: {
-        eq0: 0,
-        gt0: 0,
-        gte25: 0,
-        gte50: 0,
-        gte75: 0,
-        eq100: 0
-      },
-      reso: {
-        eq0: 0,
-        gt0: 0,
-        gte25: 0,
-        gte50: 0,
-        gte75: 0,
-        eq100: 0
-      },
-      local: {
-        eq0: 0,
-        gt0: 0,
-        gte25: 0,
-        gte50: 0,
-        gte75: 0,
-        eq100: 0
-      },
-      idx: {
-        eq0: 0,
-        gt0: 0,
-        gte25: 0,
-        gte50: 0,
-        gte75: 0,
-        eq100: 0
-      }
+      total: BINS_TEMPLATE,
+      reso: BINS_TEMPLATE,
+      local: BINS_TEMPLATE,
+      idx: BINS_TEMPLATE
     },
     lookups: {
-      total: {
-        eq0: 0,
-        gt0: 0,
-        gte25: 0,
-        gte50: 0,
-        gte75: 0,
-        eq100: 0
-      },
-      reso: {
-        eq0: 0,
-        gt0: 0,
-        gte25: 0,
-        gte50: 0,
-        gte75: 0,
-        eq100: 0
-      },
-      local: {
-        eq0: 0,
-        gt0: 0,
-        gte25: 0,
-        gte50: 0,
-        gte75: 0,
-        eq100: 0
-      },
-      idx: {
-        eq0: 0,
-        gt0: 0,
-        gte25: 0,
-        gte50: 0,
-        gte75: 0,
-        eq100: 0
-      }
+      total: BINS_TEMPLATE,
+      reso: BINS_TEMPLATE,
+      local: BINS_TEMPLATE,
+      idx: BINS_TEMPLATE
     },
     resources: {},
     resourcesBinary: {}
@@ -90,16 +43,30 @@ const createStandardFieldCache = (fields = []) => {
     if (!resourceFieldCache[field.resourceName]) {
       resourceFieldCache[field.resourceName] = {};
     }
+
     resourceFieldCache[field.resourceName][field.fieldName] = field;
   });
   return resourceFieldCache;
 };
 
-const isIdxField = (field, fieldCache = {}) => field && field.resourceName && field.fieldName
-  && isResoField(field, fieldCache) && fieldCache[field.resourceName][field.fieldName].payloads.filter(x => x === "IDX");
+const isIdxField = (resourceName, fieldName, standardFieldCache = {}) => resourceName && fieldName
+  && isResoField(resourceName, fieldName, standardFieldCache) && !!standardFieldCache[resourceName][fieldName].payloads.filter(x => x === "IDX").length > 0;
 
-const isResoField = (field, fieldCache = {}) => field && field.resourceName && field.fieldName
-  && fieldCache[field.resourceName] && fieldCache[field.resourceName][field.fieldName];
+const isResoField = (resourceName, fieldName, standardFieldCache = {}) => resourceName && fieldName
+  && standardFieldCache[resourceName] && !!standardFieldCache[resourceName][fieldName];
+
+const findResoLookup = (resourceName, fieldName, lookupValue, standardFieldCache = {}) => {
+  if (resourceName && fieldName && standardFieldCache[resourceName] && standardFieldCache[resourceName][fieldName]) {
+    const field = standardFieldCache[resourceName][fieldName];
+
+    if (field.simpleDataType.includes('String List') && field.type.includes('.')) {
+      const lookupName = field.type.substring(field.type.lastIndexOf('.') + 1, field.type.length);
+      //TODO: turn the lookup map into its own inverted hash by lookup values and display names
+      return {lookupName, lookup: lookupMap[lookupName] && lookupMap[lookupName].find(x => x.lookupValue === lookupValue || x.lookupDisplayName === lookupValue)};
+    }  
+  } 
+  return null;
+};
 
 const processDataAvailabilityReport = async pathToDataAvailabilityReport => {
   const startTime = new Date();
@@ -132,14 +99,14 @@ const process = async availablityReport => {
   //iterate over each field and lookup and compute their availabilities
   const { resources, fields, lookups, lookupValues } = availablityReport;
 
-  const transformed = TRANSFORMED_TEMPLATE_OBJECT;
+  const transformed = AVAILABILITY_TEMPLATE;
 
   const standardFieldCache = createStandardFieldCache(standardMeta.fields);
 
   const resourceCounts = {};
   resources.forEach(resource => resourceCounts[resource.resourceName] = resource.numRecordsFetched);
 
-  const updateBins = (bins, availability) => {
+  const updateBins = (availability, bins=BINS_TEMPLATE) => {
     return {
       eq0: availability === 0 ? bins.eq0 += 1 : bins.eq0 || 0,
       gt0: availability > 0 ? bins.gt0 += 1 : bins.gt0 || 0,
@@ -153,27 +120,48 @@ const process = async availablityReport => {
   const processedFields = fields.map(field => {
     const availability = resourceCounts[field.resourceName] !== 0 ? 1.0 * field.frequency / resourceCounts[field.resourceName] : 0;
 
-    transformed.availability.fields.total = updateBins(transformed.availability.fields.total, availability);
-    if (isResoField(field, standardFieldCache)) {
-      transformed.availability.fields.reso = updateBins(transformed.availability.fields.reso, availability);
-      if (isIdxField(field, standardFieldCache)) {
-        transformed.availability.fields.idx = updateBins(transformed.availability.fields.idx, availability);
+    transformed.availability.fields.total = updateBins(availability, transformed.availability.fields.total);
+    if (isResoField(field.resourceName, field.fieldName, standardFieldCache)) {
+      transformed.availability.fields.reso = updateBins(availability, transformed.availability.fields.reso);
+      if (isIdxField(field.resourceName, field.fieldName, standardFieldCache)) {
+        transformed.availability.fields.idx = updateBins(availability, transformed.availability.fields.idx);
       }
     } else {
-      transformed.availability.fields.local = updateBins(transformed.availability.fields.local, availability);
+      transformed.availability.fields.local = updateBins(availability, transformed.availability.fields.local);
     }
 
     return { ...field, availability };
   });
 
+  const lookupValuesSeen = {};
+
   const processedLookupValues = lookups.flatMap(lookup => {
     const lookupValueCache = createLookupValueCache(lookupValues);
-
     return Object.values(lookupValueCache[lookup.resourceName][lookup.fieldName])
-      .filter(lookupValue => !!lookupValue && lookupValue.lookupValue !== 'null')
-      .map(lookupValue => { return {
-        ...lookupValue, availability: lookup.numLookupsTotal !== 0 ? 1.0 * lookupValue.frequency / lookup.numLookupsTotal : 0
-      }
+      .filter(lookupValue => lookupValue.lookupValue !== 'null')
+      .map(lookupValue => { 
+        const resoLookup = findResoLookup(lookupValue.resourceName, lookupValue.fieldName, lookupValue.lookupValue, standardFieldCache);
+        const availability = lookup.numLookupsTotal !== 0 ? 1.0 * lookupValue.frequency / lookup.numLookupsTotal : 0;
+
+        if (!lookupValuesSeen[resoLookup.lookupName] || !lookupValuesSeen[resoLookup.lookupName][lookupValue.lookupValue]) {
+         
+          if (!lookupValuesSeen[resoLookup.lookupName]) lookupValuesSeen[resoLookup.lookupName] = {};
+          lookupValuesSeen[resoLookup.lookupName][lookupValue.lookupValue] = resoLookup;
+          
+          transformed.availability.lookups.total = updateBins(availability, transformed.availability.lookups.total);
+
+          if (resoLookup) {
+            if (isResoField(lookupValue.resourceName, lookupValue.fieldName, standardFieldCache)) {
+              transformed.availability.lookups.reso = updateBins(availability, transformed.availability.lookups.reso);
+              if (isIdxField(lookupValue.resourceName, lookupValue.fieldName, standardFieldCache)) {
+                transformed.availability.lookups.idx = updateBins(availability, transformed.availability.lookups.idx);
+              }
+            }
+          } else {
+            transformed.availability.lookups.local = updateBins(availability, transformed.availability.lookups.local);
+          } 
+        } 
+        return { ...lookupValue, availability };
     });
   });
 
