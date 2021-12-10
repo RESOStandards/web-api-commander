@@ -2,6 +2,11 @@ const fs = require('fs');
 const fse = require('fs-extra');
 const { execSync } = require('child_process');
 
+//parse command line args
+const yargs = require('yargs/yargs');
+const { hideBin } = require('yargs/helpers');
+const argv = yargs(hideBin(process.argv)).argv;
+
 const { processDataDictionaryResults } = require('./services/postResultsToApi.js');
 const { processDataAvailabilityReport } = require('./services/processDataAvailabilityReport.js');
 
@@ -54,14 +59,15 @@ const buildResoscript = (config={}) => {
   return null;
 }
 
-const runTests = async providerInfo => {
-  const CONFIG_FILE = '/path/to/config.json';
+const runTests = async jsonConfigPath => {
+  if (!jsonConfigPath) throw Error("Missing jsonConfigPath.");
 
   try {
-    providerInfo = JSON.parse(fs.readFileSync(CONFIG_FILE));
+    providerInfo = JSON.parse(fs.readFileSync(jsonConfigPath));
   } catch (err) {
     throw new Error('Could not read provider info!');
   }
+
 
   const { providerUoi, configs } = providerInfo;
 
