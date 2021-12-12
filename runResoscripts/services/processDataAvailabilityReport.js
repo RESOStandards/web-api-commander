@@ -234,7 +234,7 @@ const process = async availablityReport => {
     const lookupsForField = lookupValueCache[field.resourceName] && lookupValueCache[field.resourceName][field.fieldName];
     
     if (lookupsForField) {
-      Object.values(lookupsForField).map(lookupValue => {
+      Object.values(lookupsForField).forEach(lookupValue => {
         if (lookupValue.lookupValue !== 'null' && lookupValue.lookupValue !== 'NULL_VALUE') {
           const lookupAvailability = !!lookupValue.frequency && !!resourceCounts[field.resourceName]
             ? 1.0 * lookupValue.frequency / resourceCounts[field.resourceName] : 0;
@@ -258,9 +258,8 @@ const process = async availablityReport => {
             transformed.availability.lookups.local = computeBins(availability, transformed.availability.lookups.local);
             resourcesBinary[field.resourceName].lookups.local = computeBins(availability, resourcesBinary[field.resourceName].lookups.local);
           }
-          if (!!lookupValue) {
-            processedLookupValues.push({ ...lookupValue, lookupAvailability, ...computeBooleanBins(lookupBins) });
-          }
+
+          processedLookupValues.push({ ...lookupValue, lookupAvailability, ...computeBooleanBins(lookupBins) });
         }
       });
     }
