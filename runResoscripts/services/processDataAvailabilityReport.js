@@ -309,9 +309,9 @@ const process = async availablityReport => {
  * @param {String} pathToDataAvailabilityReport the path to the data availability report to process.
  */
  const processDataAvailabilityReport = async pathToDataAvailabilityReport => {
-  const startTime = new Date();
   try {
     const availablityReport = JSON.parse(await fs.readFile(pathToDataAvailabilityReport, 'utf8'));
+    const startTime = new Date();
     await fs.writeFile('./availability-processed.json', JSON.stringify(await process(availablityReport)));
     console.log("Time taken: ", new Date() - startTime, "ms");
   } catch (err) {
