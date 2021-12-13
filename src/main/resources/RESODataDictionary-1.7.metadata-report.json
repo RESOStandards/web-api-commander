@@ -1,7 +1,7 @@
 {
   "description": "RESO Data Dictionary Metadata Report",
   "version": "1.7",
-  "generatedOn": "2021-07-14T06:35:26.913Z",
+  "generatedOn": "2021-12-13T01:44:51.102Z",
   "fields": [
     {
       "resourceName": "Property",
@@ -29168,6 +29168,204 @@
         {
           "term": "Core.Description",
           "value": "The website URL or ID of social media site or account of the member.  This is a repeating element.  Replace [Type] with any of the options from the SocialMediaType field to create a unique field for that type of social media.  For example: SocialMediaFacebookUrlOrID, SocialMediaSkypeUrlOrID, etc."
+        }
+      ]
+    },
+    {
+      "resourceName": "Field",
+      "fieldName": "FieldKey",
+      "type": "Edm.String",
+      "nullable": true,
+      "isCollection": false,
+      "unicode": true,
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Field Key"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The key used to uniquely identify the Field."
+        }
+      ]
+    },
+    {
+      "resourceName": "Field",
+      "fieldName": "ResourceName",
+      "type": "Edm.String",
+      "nullable": true,
+      "isCollection": false,
+      "unicode": true,
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Resource Name"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The name of the resource the field belongs to. This will be a RESO Standard Name, when applicable, but may also be a local resource name, for example \"Property.\""
+        }
+      ]
+    },
+    {
+      "resourceName": "Field",
+      "fieldName": "FieldName",
+      "type": "Edm.String",
+      "nullable": true,
+      "isCollection": false,
+      "unicode": true,
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Field Name"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The name of the field as expressed in the payload. For OData APIs, this field MUST meet certain naming requirements and should be consistent with what’s advertised in the OData XML metadata (to be verified in certification). For example, \"ListPrice.\""
+        }
+      ]
+    },
+    {
+      "resourceName": "Field",
+      "fieldName": "DisplayName",
+      "type": "Edm.String",
+      "nullable": true,
+      "isCollection": false,
+      "unicode": true,
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Display Name"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The display name for the field. SHOULD be provided in all cases where the use of display names is needed, even if the display name is the same as the underlying field name. The DisplayName MAY be a RESO Standard Display Name or a local one."
+        }
+      ]
+    },
+    {
+      "resourceName": "Field",
+      "fieldName": "ModificationTimestamp",
+      "type": "Edm.DateTimeOffset",
+      "nullable": true,
+      "isCollection": false,
+      "unicode": true,
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Modification Timestamp"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The timestamp when the field metadata item was last modified. This is used to help rebuild caches when metadata items change so consumers don\u0027t have to re-pull and reprocess the entire set of metadata when only a small number of changes have been made."
+        }
+      ]
+    },
+    {
+      "resourceName": "Lookup",
+      "fieldName": "LookupKey",
+      "type": "Edm.String",
+      "nullable": true,
+      "isCollection": false,
+      "unicode": true,
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Lookup Key"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The key used to uniquely identify the Lookup entry."
+        }
+      ]
+    },
+    {
+      "resourceName": "Lookup",
+      "fieldName": "LookupName",
+      "type": "Edm.String",
+      "nullable": true,
+      "isCollection": false,
+      "unicode": true,
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Lookup Name"
+        },
+        {
+          "term": "Core.Description",
+          "value": "It is called a \"LookupName\" in this proposal because more than one field can have a given lookup, so it refers to the name of the lookup rather than a given field. For example, Listing with CountyOrParish and Office with OfficeCountyOrParish having the same CountyOrParish LookupName. This MUST match the Data Dictionary definition for in cases where the lookup is defined. Vendors MAY add their own enumerations otherwise. The LookupName a given field uses is required to be annotated at the field level in the OData XML Metadata, as outlined later in this proposal."
+        }
+      ]
+    },
+    {
+      "resourceName": "Lookup",
+      "fieldName": "LookupValue",
+      "type": "Edm.String",
+      "nullable": true,
+      "isCollection": false,
+      "unicode": true,
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Lookup Value"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The human-friendly display name the data consumer receives in the payload and uses in queries. This MAY be a local name or synonym for a given RESO Data Dictionary lookup item."
+        }
+      ]
+    },
+    {
+      "resourceName": "Lookup",
+      "fieldName": "StandardLookupValue",
+      "type": "Edm.String",
+      "nullable": true,
+      "isCollection": false,
+      "unicode": true,
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Standard Lookup Value"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The Data Dictionary LookupDisplayName of the enumerated value. This field is required when the LookupValue for a given item corresponds to a RESO standard value, meaning a standard lookup display name, known synonym, local name, or translation of that value. Local lookups MAY omit this value if they don\u0027t correspond to an existing RESO standard lookup value."
+        }
+      ]
+    },
+    {
+      "resourceName": "Lookup",
+      "fieldName": "LegacyODataValue",
+      "type": "Edm.String",
+      "nullable": true,
+      "isCollection": false,
+      "unicode": true,
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Legacy OData Value"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The Legacy OData lookup value that the server vendor provided in their OData XML Metadata. This value is optional, and has been included in order to provide a stable mechanism for translating OData lookup values to RESO standard lookup display names, as well as for historical data that might have included the OData value at some point, even after the vendor had converted to human friendly display names."
+        }
+      ]
+    },
+    {
+      "resourceName": "Lookup",
+      "fieldName": "ModificationTimestamp",
+      "type": "Edm.DateTimeOffset",
+      "nullable": true,
+      "isCollection": false,
+      "unicode": true,
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Modification Timestamp"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The timestamp for when the enumeration value was last modified. The timestamp for when the enumeration value was last modified."
         }
       ]
     }

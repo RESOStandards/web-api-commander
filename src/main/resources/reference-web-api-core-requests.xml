@@ -38,7 +38,7 @@
     <Request
         RequestId="metadata-request"
         OutputFile="metadata-request.xml"
-        Url="*ClientSettings_WebAPIURI*/$metadata*Parameter_OptionalMetadataFormatParameter*"
+        Url="*ClientSettings_WebAPIURI*/$metadata?$format=application/xml"
     />
 
     <Request

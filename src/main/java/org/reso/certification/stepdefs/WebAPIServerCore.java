@@ -52,7 +52,7 @@ import static org.reso.commander.common.TestUtils.Operators.*;
 import static org.reso.models.Request.loadFromRESOScript;
 
 /**
- * Contains the glue code for Web API Core 1.0.2 Certification as well as previous Platinum tests,
+ * Contains the glue code for Web API Core 2.0.0 Certification as well as previous Platinum tests,
  * which will converted to standalone endorsements, where applicable.
  */
 public class WebAPIServerCore implements En {
@@ -77,7 +77,7 @@ public class WebAPIServerCore implements En {
 
   //TODO: change this to allow passing of a given set of testing queries
   //for now this assumes the requests will always be Web API Core Server test queries, but could be $expand, for instance
-  private static final String WEB_API_CORE_REFERENCE_REQUESTS = "reference-web-api-core-requests.xml";
+  //private static final String WEB_API_CORE_REFERENCE_REQUESTS = "reference-web-api-core-requests.xml";
 
   @Before
   public void beforeStep(Scenario scenario) {
@@ -90,10 +90,11 @@ public class WebAPIServerCore implements En {
     if (!container.get().getIsInitialized()) {
       container.get().setSettings(Settings.loadFromRESOScript(new File(System.getProperty(PATH_TO_RESOSCRIPT_KEY))));
 
-      //overwrite any requests loaded with the reference queries
-      container.get().getSettings().setRequests(loadFromRESOScript(new File(Objects.requireNonNull(
-          getClass().getClassLoader().getResource(WEB_API_CORE_REFERENCE_REQUESTS)).getPath()))
-          .stream().map(request -> Settings.resolveParameters(request, container.get().getSettings())).collect(Collectors.toList()));
+      //moved to container initialization
+      //      //overwrite any requests loaded with the reference queries
+      //      container.get().getSettings().setRequests(loadFromRESOScript(new File(Objects.requireNonNull(
+      //          getClass().getClassLoader().getResource(WEB_API_CORE_REFERENCE_REQUESTS)).getPath()))
+      //          .stream().map(request -> Settings.resolveParameters(request, container.get().getSettings())).collect(Collectors.toList()));
 
       container.get().initialize();
     }
@@ -311,21 +312,18 @@ public class WebAPIServerCore implements En {
       assertNotNull(getDefaultErrorMessage("request was null! \nCheck RESOScript to make sure requestId exists."), container.get().getRequest());
       try {
         LOG.info("Asserted Response Code: " + assertedResponseCode + ", Server Response Code: " + container.get().getResponseCode());
+        String errorMessage = "";
 
         if (container.get().getODataClientErrorException() != null) {
           if (container.get().getODataClientErrorException().getODataError().getMessage() != null) {
-            LOG.error(getDefaultErrorMessage("Request failed with the following message:",
-                container.get().getODataClientErrorException().getODataError().getMessage()));
+            errorMessage = container.get().getODataClientErrorException().getODataError().getMessage();
+
           } else if (container.get().getODataClientErrorException().getMessage() != null) {
-            LOG.error(getDefaultErrorMessage("Request failed with the following message:",
-                container.get().getODataClientErrorException().getMessage()));
+            errorMessage = container.get().getODataClientErrorException().getMessage();
           }
-        }
-
-        if (container.get().getODataServerErrorException() != null) {
-          LOG.error(getDefaultErrorMessage("Request failed with the following message:",
-              container.get().getODataServerErrorException().toString()));
-
+        } else if (container.get().getODataServerErrorException() != null) {
+          errorMessage = container.get().getODataServerErrorException().getMessage();
+          scenario.log(getDefaultErrorMessage("Request failed with the following message:", errorMessage));
           if (container.get().getODataServerErrorException().toString().contains(String.valueOf(HttpStatus.SC_INTERNAL_SERVER_ERROR))) {
             container.get().setResponseCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
           }
@@ -333,12 +331,18 @@ public class WebAPIServerCore implements En {
 
         //TODO: clean up logic
         if (container.get().getResponseCode() != null && assertedResponseCode.intValue() != container.get().getResponseCode().intValue()) {
-          fail(getAssertResponseCodeErrorMessage(assertedResponseCode, container.get().getResponseCode()));
+          final String responseCodeErrorMessage = getAssertResponseCodeErrorMessage(assertedResponseCode, container.get().getResponseCode());
+          if (errorMessage.length() > 0) {
+            scenario.log(errorMessage);
+          }
+          scenario.log(responseCodeErrorMessage);
+          fail(responseCodeErrorMessage + "\n" + errorMessage);
         }
 
         //if we make it through without failing, things are good
         assertTrue(container.get().getResponseCode() > 0 && assertedResponseCode > 0);
       } catch (Exception ex) {
+        scenario.log(ex.toString());
         fail(getDefaultErrorMessage(ex));
       }
     });
@@ -616,18 +620,21 @@ public class WebAPIServerCore implements En {
 
         from(container.get().getResponseData()).getList(JSON_VALUE_PATH, ObjectNode.class).forEach(item -> {
           fieldValue.set(item.get(fieldName).toString());
+          String assertMessage = EMPTY_STRING;
           if (useCollections) {
             if (item.get(fieldName).isArray()) {
               result.set(result.get() && TestUtils.testAnyOperator(item, fieldName, assertedValue.get()));
-              LOG.info("Assert True: " + fieldValue.get() + " contains " + assertedValue.get() + " ==> " + result.get());
-              assertTrue(result.get());
+              assertMessage = "Assert True: " + fieldValue.get() + " contains " + assertedValue.get() + " ==> " + result.get();
+              LOG.info(assertMessage);
+              assertTrue(assertMessage, result.get());
             } else {
               fail(getDefaultErrorMessage(fieldName, "MUST contain an array of values but found:", item.get(fieldName).toString()));
             }
           } else {
             result.set(fieldValue.get().contains(assertedValue.get()));
-            LOG.info("Assert True: " + fieldValue.get() + " has " + assertedValue.get() + " ==> " + result.get());
-            assertTrue(result.get());
+            assertMessage = "Assert True: " + fieldValue.get() + " has " + assertedValue.get() + " ==> " + result.get();
+            LOG.info(assertMessage);
+            assertTrue(assertMessage, result.get());
           }
         });
       } catch (Exception ex) {

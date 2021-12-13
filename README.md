@@ -16,7 +16,7 @@ explains how to run the following tests:
 * Data Dictionary 1.7
 * Data Dictionary Availability Report
 * IDX Payload 1.7
-* Web API Core 1.0.2
+* Web API Core 2.0.0
 
 ## [Command-Line OData Web API Tools](/doc/CLI.md)
 The RESO Commander contains command line tools for working with OData Web APIs. 

@@ -19,7 +19,7 @@ Feature: Web API Server Add/Edit Endorsement
   #
   # This is without the prefer header and minimal value
   #
-  @create @create-succeeds @add-edit-endorsement @rcp-010 @1.0.2
+  @create @create-succeeds @add-edit-endorsement @rcp-010 @2.0.0
   Scenario: Create operation succeeds using a given payload
     Given valid metadata have been retrieved
     And request data has been provided in "create-succeeds.json"
@@ -64,7 +64,7 @@ Feature: Web API Server Add/Edit Endorsement
   #      OData-Version: 4.01
   #      Content-Type: application/json
   #      Accept: application/json
-  @create @create-fails @add-edit-endorsement @rcp-010 @1.0.2
+  @create @create-fails @add-edit-endorsement @rcp-010 @2.0.0
   Scenario: Create operation fails using a given payload
     Given valid metadata have been retrieved
     And request data has been provided in "create-fails.json"

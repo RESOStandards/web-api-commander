@@ -160,7 +160,7 @@ This should display something similar to the following:
 Web API Commander Starting... Press <ctrl+c> at any time to exit.
 ==============================================================
 Displaying 44 Request(s)
-RESOScript: src/test/resources/mock.web-api-server.core.1.0.2.resoscript
+RESOScript: src/test/resources/mock.web-api-server.core.2.0.0.resoscript
 ==============================================================
 
 
@@ -196,5 +196,5 @@ Results will be saved to the filenames specified in the given RESOScript, and er
 **RESOScript File Format**
 For examples of files using the RESOScript format, see:
 * [Data Dictionary 1.7 RESOScript Template](sample-data-dictionary.1.7.0.resoscript)
-* [Web API Core 1.0.2 RESOScript Template](sample-web-api-server.core.1.0.2.resoscript)
+* [Web API Core 2.0.0 RESOScript Template](sample-web-api-server.core.2.0.0.resoscript)
 

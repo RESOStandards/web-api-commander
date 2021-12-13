@@ -27,17 +27,20 @@ import org.reso.commander.common.DataDictionaryMetadata;
 import org.reso.commander.common.TestUtils;
 import org.reso.models.*;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.reso.commander.Commander.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.HEADER_ODATA_VERSION;
 import static org.reso.commander.common.TestUtils.JSON_VALUE_PATH;
+import static org.reso.models.Request.loadFromRESOScript;
 
 /**
  * Encapsulates Commander Requests and Responses during runtime
@@ -98,6 +101,7 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicReference<ODataEntitySetRequest<ClientEntitySet>> clientEntitySetRequest = new AtomicReference<>();
   private final AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
   private final AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
+  private static final String WEB_API_CORE_REFERENCE_REQUESTS = "reference-web-api-core-requests.xml";
 
   //singleton variables
   private static final AtomicReference<Map<String, Map<String, CsdlProperty>>> fieldMap = new AtomicReference<>();
@@ -110,6 +114,13 @@ public final class WebAPITestContainer implements TestContainer {
     Commander.Builder builder = new Commander.Builder().useEdmEnabledClient(true);
 
     if (!isUsingMetadataFile.get()) {
+      //overwrite any requests loaded with the reference queries
+      //TODO: make the reference requests something that can be passed in during initialization
+      getSettings().setRequests(loadFromRESOScript(new File(Objects.requireNonNull(
+          getClass().getClassLoader().getResource(WEB_API_CORE_REFERENCE_REQUESTS)).getPath()))
+          .stream().map(request -> Settings.resolveParameters(request, getSettings())).collect(Collectors.toList()));
+
+
       setServiceRoot(getSettings().getClientSettings().get(ClientSettings.SERVICE_ROOT));
 
       //TODO: add base64 un-encode when applicable
@@ -125,7 +136,7 @@ public final class WebAPITestContainer implements TestContainer {
       setRedirectUri(getSettings().getClientSettings().get(ClientSettings.REDIRECT_URI));
       setScope(getSettings().getClientSettings().get(ClientSettings.CLIENT_SCOPE));
 
-      LOG.info("Service root is: " + getServiceRoot());
+      LOG.debug("Service root is: " + getServiceRoot());
 
       builder
           .clientId(getClientId())

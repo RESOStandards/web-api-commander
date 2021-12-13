@@ -65,7 +65,7 @@ public class DataDictionary {
   private static final AtomicReference<Map<String, Map<String, Set<String>>>> ignoredItems = new AtomicReference<>(new LinkedHashMap<>());
 
   private static XMLMetadata referenceMetadata = null;
-  private static boolean areMetadataValid = false;
+  private static boolean isMetadataValid = false;
 
   //named args
   private static final String SHOW_RESPONSES_ARG = "showResponses";
@@ -76,7 +76,10 @@ public class DataDictionary {
 
   //extract any params here
   private final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES_ARG));
-  private final boolean strictMode = Boolean.parseBoolean(System.getProperty(USE_STRICT_MODE_ARG));
+
+  //strict mode is enabled by default
+  private final boolean strictMode = System.getProperty(USE_STRICT_MODE_ARG) == null || Boolean.parseBoolean(System.getProperty(USE_STRICT_MODE_ARG));
+
   private final String pathToMetadata = System.getProperty(PATH_TO_METADATA_ARG);
   private final String pathToRESOScript = System.getProperty(PATH_TO_RESOSCRIPT_ARG);
 
@@ -181,7 +184,7 @@ public class DataDictionary {
 
         //if we have gotten to this point without exceptions, then metadata are valid
         container.validateMetadata();
-        areMetadataValid = container.hasValidMetadata();
+        isMetadataValid = container.hasValidMetadata();
 
         //create metadata report
         Commander.generateMetadataReport(container.getEdm());
@@ -214,7 +217,15 @@ public class DataDictionary {
       container.setShouldValidateMetadata(false);
 
       //if we have gotten to this point without exceptions, then metadata are valid
-      areMetadataValid = container.hasValidMetadata();
+      isMetadataValid = container.hasValidMetadata();
+
+      if (!isMetadataValid) {
+        failAndExitWithErrorMessage("OData XML Metadata MUST be valid!", scenario);
+      }
+
+      //save metadata locally
+      Utils.createFile("build" + File.separator + "certification" + File.separator + "results",
+          "metadata.xml", container.getXMLResponseData());
 
       //create metadata report
       Commander.generateMetadataReport(container.getEdm());
@@ -224,7 +235,7 @@ public class DataDictionary {
   @When("{string} exists in the {string} metadata")
   public void existsInTheMetadata(String fieldName, String resourceName) {
 
-    if (strictMode && !areMetadataValid) {
+    if (strictMode && !isMetadataValid) {
       failAndExitWithErrorMessage("Metadata validation failed, but is required to pass when using strict mode!", scenario);
     }
 

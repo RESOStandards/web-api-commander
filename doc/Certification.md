@@ -86,7 +86,7 @@ RESO Certification tasks
 ------------------------
 testDataAvailability_1_7 - Data Dictionary 1.7 Data Availability Tests
 Example:
-  ./gradlew testDataAvailability_1_7 -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript
+  ./gradlew testDataAvailability_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript
 [Report location: build/certification/reports]
 
 
@@ -104,14 +104,14 @@ To disable strict mode, remove the -Dstrict=true parameter. All applicants MUST 
 
 testIdxPayload_1_7 - Data Dictionary 1.7 Payloads Sampling Tests
 Example:
-  ./gradlew testIdxPayload_1_7 -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript
+  ./gradlew testIdxPayload_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript
 
 [Report location: build/certification/reports]
 
 
-testWebApiCore_1_0_2 - Web API Core 1.0.2 Acceptance Tests
+testWebApiCore_2_0_0 - Web API Core 2.0.0 Acceptance Tests
 Example: 
-  ./gradlew testWebApiCore_1_0_2 -DpathToRESOScript=/path/to/web-api-core-1.0.2.resoscript -DshowResponses=true
+  ./gradlew testWebApiCore_2_0_0 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript -DshowResponses=true
 
 Note: by default the Web API tests assume Collection(Edm.EnumType).
 Pass -DuseCollections=false if using OData IsFlags.
@@ -128,14 +128,14 @@ To use the automated RESO testing tools, you must have a [JDK installed](#java-a
 ### Web API Core RESOScript Template
 To use the Commander for automated Web API Core testing, you need a RESOScript.
 
-For Web API 1.0.2 Server Core Certification, use [this resoscript](sample-web-api-server.core.1.0.2.resoscript) as a template. 
+For Web API 2.0.0 Server Core Certification, use [this resoscript](sample-web-api-server.core.2.0.0.resoscript) as a template. 
 
 For more information regarding Parameters and Client Settings, see the [Web API Walkthrough](https://github.com/RESOStandards/web-api-commander/wiki/Walkthrough:-Automated-Web-API-Certification-Using-the-RESO-Commander#configuring-the-resoscript-file) (in-progress).
 
 ### Web API Cucumber Acceptance Tests
-The Cucumber BDD acceptance tests for Web API 1.0.2 Core certification are [here](https://github.com/RESOStandards/web-api-commander/blob/issue-37-data-dictionary-testing/src/main/java/org/reso/certification/features/web-api/web-api-server.core.1.0.2.feature).  If you have any questions, please [send us an email](mailto:dev@reso.org).
+The Cucumber BDD acceptance tests for Web API 2.0.0 Core certification are [here](https://github.com/RESOStandards/web-api-commander/blob/issue-37-data-dictionary-testing/src/main/java/org/reso/certification/features/web-api/web-api-server.core.2.0.0.feature).  If you have any questions, please [send us an email](mailto:dev@reso.org).
 
-### Gradle Tasks for Web API 1.0.2 Server Certification
+### Gradle Tasks for Web API 2.0.0 Server Certification
 While you may use tags to filter tests as you choose, explained in the next section, it's convenient
 to be able to run a predefined set of tests Web API Core Certification. 
 
@@ -143,19 +143,19 @@ These tasks will also produce reports in the local `build` directory, named acco
 
 #### Core Certification
 
-This will run the Core tests against the Web API 1.0.2 Server provided as `WebAPIURI` in your `web-api-server.core.1.0.2.resoscript` file.
+This will run the Core tests against the Web API 2.0.0 Server provided as `WebAPIURI` in your `web-api-server.core.2.0.0.resoscript` file.
 
 **Note**: by default, the Commander uses `Collection(Edm.EnumType)` for multiple enumerations testing. 
 Pass `-DuseCollections=false` if you are using `IsFlags="true"` instead.
 
 ##### MacOS or Linux
 ```
-$ ./gradlew testWebApiCore_1_0_2 -DpathToRESOScript=/path/to/your.web-api-server.core.1.0.2.resoscript -DshowResponses=true
+$ ./gradlew testWebApiCore_2_0_0 -DpathToRESOScript=/path/to/your.web-api-server.core.2.0.0.resoscript -DshowResponses=true
 ```
 
 ##### Windows
 ```
-C:\path\to\web-api-commander> gradlew testWebApiCore_1_0_2 -DpathToRESOScript=C:\path\to\your.web-api-server.core.1.0.2.resoscript -DshowResponses=true
+C:\path\to\web-api-commander> gradlew testWebApiCore_2_0_0 -DpathToRESOScript=C:\path\to\your.web-api-server.core.2.0.0.resoscript -DshowResponses=true
 ```
 
 *Note: the first time you run these tasks, they will take some time as the environment must be configured and code is being compiled from the contents of the source directory downloaded in the previous step. 
@@ -165,12 +165,12 @@ C:\path\to\web-api-commander> gradlew testWebApiCore_1_0_2 -DpathToRESOScript=C:
 A sample of the runtime terminal output follows:
 
 ```gherkin
-> Task :testWebApiCore_1_0_2
+> Task :testWebApiCore_2_0_0
 
 @metadata-request @2.4.1
 Scenario: REQ-WA103-END3 - Request and Validate Server Metadata                                            
 
-Using RESOScript: ./web-api-server.core.1.0.2.resoscript
+Using RESOScript: ./web-api-server.core.2.0.0.resoscript
   Given a RESOScript file was provided                                                                     
 
 RESOScript loaded successfully!
@@ -311,7 +311,7 @@ You may filter by tags in any of the Web API or Data Dictionary tests. These are
 
 **Run Web API Core Metadata Tests Only**
 ```
-$ gradle testWebApiCore_1_0_2 -DpathToRESOScript=/path/to/your.web-api-server.core.1.0.2.resoscript -Dcucumber.filter.tags="@metadata"
+$ gradle testWebApiCore_2_0_0 -DpathToRESOScript=/path/to/your.web-api-server.core.2.0.0.resoscript -Dcucumber.filter.tags="@metadata"
 ```
 
 **Run Data Dictionary Tests on IDX Fields Only**
