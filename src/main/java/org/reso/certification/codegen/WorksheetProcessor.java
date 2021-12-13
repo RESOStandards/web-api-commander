@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.*;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_FIELD_HEADERS.COLLECTION;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_FIELD_HEADERS.STANDARD_NAME;
+import static org.reso.commander.common.DataDictionaryMetadata.v1_7.LOOKUP_FIELDS_AND_VALUES;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public abstract class WorksheetProcessor {
@@ -301,7 +302,8 @@ public abstract class WorksheetProcessor {
   }
 
   String getDirectoryName() {
-    return startTimestamp + "-" + REFERENCE_WORKSHEET.toLowerCase().substring(0, REFERENCE_WORKSHEET.lastIndexOf("."));
+    return startTimestamp + "-" + getReferenceResource()
+        .toLowerCase().substring(0, getReferenceResource().lastIndexOf("."));
   }
 
   public String getReferenceResource() {
@@ -331,11 +333,7 @@ public abstract class WorksheetProcessor {
   }
 
   public void buildEnumerationMap() {
-    final String ENUMERATION_TAB_NAME = "Lookup Fields and Values";
-    final int LOOKUP_NAME_INDEX = 0, STANDARD_NAME_INDEX = 1;
-
-    DataFormatter formatter = new DataFormatter();
-    Sheet sheet = getReferenceWorkbook().getSheet(ENUMERATION_TAB_NAME);
+    Sheet sheet = getReferenceWorkbook().getSheet(LOOKUP_FIELDS_AND_VALUES);
     buildWellKnownStandardEnumerationHeaderMap(sheet);
 
     AtomicReference<ReferenceStandardLookup> standardEnumeration = new AtomicReference<>();
@@ -350,7 +348,6 @@ public abstract class WorksheetProcessor {
         standardEnumerationsMap.get(standardEnumeration.get().getLookupField()).add(standardEnumeration.get());
       }
     });
-    //enumerations.forEach((key, items) -> LOG.info("key: " + key + " , items: " + items.toString()));
   }
 
   //TODO: convert to parallel stream

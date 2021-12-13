@@ -136,7 +136,7 @@ public final class WebAPITestContainer implements TestContainer {
       setRedirectUri(getSettings().getClientSettings().get(ClientSettings.REDIRECT_URI));
       setScope(getSettings().getClientSettings().get(ClientSettings.CLIENT_SCOPE));
 
-      LOG.info("Service root is: " + getServiceRoot());
+      LOG.debug("Service root is: " + getServiceRoot());
 
       builder
           .clientId(getClientId())

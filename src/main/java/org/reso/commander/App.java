@@ -82,7 +82,7 @@ public class App {
       //if we're running a batch, initialize variables from the settings file rather than from command line options
       Settings settings = null;
 
-      LOG.debug("Service Root is:" + commanderBuilder.serviceRoot);
+      LOG.debug("Service Root is: " + commanderBuilder.serviceRoot);
 
       //If the RESOScript option was passed, then the correct commander instance should exist at this point
       if (cmd.hasOption(APP_OPTIONS.ACTIONS.RUN_RESOSCRIPT)) {
