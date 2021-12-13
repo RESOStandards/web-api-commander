@@ -1,10 +1,10 @@
 # Codegen
 The RESO Commander CLI contains code generation for the following items:
-* [Generating RESO Data Dictionary Acceptance Tests](#Generating RESO Data Dictionary Acceptance Tests)
-* [Generating RESO Web API Reference Server Data Models](#Generating RESO Web API Reference Server Data Models)
-* [Generating RESO Data Dictionary Reference Metadata](#Generating RESO Data Dictionary Reference Metadata)
-* [Generating RESO Data Dictionary 1.7 Reference DDL](#Generating RESO Data Dictionary 1.7 Reference DDL)
-* [Converting OData XML Metadata to Open API 3 Format](#Converting OData XML Metadata to Open API 3 Format)
+* [Generating RESO Data Dictionary Acceptance Tests](#generating-reso-data-dictionary-acceptance-tests)
+* [Generating RESO Web API Reference Server Data Models](#generating-reso-web-api-reference-server-data-models)
+* [Generating RESO Data Dictionary Reference Metadata](#generating-reso-data-dictionary-reference-metadata)
+* [Generating RESO Data Dictionary 1.7 Reference DDL](#generating-reso-data-dictionary-17-reference-ddl)
+* [Converting OData XML Metadata to Open API 3 Format](#converting-odata-xml-metadata-to-open-api-3-format)
 
 ## Generating RESO Data Dictionary Acceptance Tests
 The RESO Commander can be used to generate Data Dictionary acceptance tests from the currently approved [Data Dictionary Spreadsheet](src/main/resources/RESODataDictionary-1.7.xlsx). 
@@ -74,6 +74,13 @@ The following items need to be added to the DDL generator still:
 
 
 ## Converting OData XML Metadata to Open API 3 Format
-See documentation regarding running the [nodejs-based tools in odata-openapi/lib/README.md](odata-openapi/lib/README.md).
+In order to generate an Open API 3 Spec from the reference metadata, run the following command from 
+the root of the odata-openapi3 directory:
+```
+$ odata-openapi3 --host 'api.reso.org' --scheme 'https' --basePath '' ../src/main/resources/RESODataDictionary-1.7.xml
+```
+You will need to issue an `npm install` command from the odata-openapi3 directory in order for the packages to be available.
+
+See documentation regarding running the nodejs-based tools [in the odata-openapi README.md](../odata-openapi/README.md).
 
 
