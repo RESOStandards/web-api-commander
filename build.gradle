@@ -21,12 +21,12 @@ repositories {
 dependencies {
   compile 'com.google.guava:guava:30.1.1-jre'
   compile 'com.google.inject:guice:5.0.1'
-  compile 'commons-cli:commons-cli:1.4'
+  compile 'commons-cli:commons-cli:1.5.0'
 
-  compile 'org.apache.logging.log4j:log4j-api:2.13.0'
-  compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.13.0'
-  compile 'org.apache.logging.log4j:log4j-1.2-api:2.13.0'
-  compile 'org.apache.logging.log4j:log4j-core:2.13.0'
+  compile 'org.apache.logging.log4j:log4j-api:2.17.0'
+  compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.0'
+  compile 'org.apache.logging.log4j:log4j-1.2-api:2.17.0'
+  compile 'org.apache.logging.log4j:log4j-core:2.17.0'
 
   compile 'org.apache.olingo:odata-client-api:4.8.0'
   compile 'org.apache.olingo:odata-commons-core:4.8.0'
@@ -35,19 +35,19 @@ dependencies {
   compile 'org.apache.poi:poi:5.0.0'
   compile 'org.apache.poi:poi-ooxml:5.0.0'
 
-  compile 'io.rest-assured:rest-assured:4.3.3'
-  compile 'io.rest-assured:json-path:4.3.3'
-  compile 'io.rest-assured:json-schema-validator:4.3.3'
+  compile 'io.rest-assured:rest-assured:4.4.0'
+  compile 'io.rest-assured:json-path:4.4.0'
+  compile 'io.rest-assured:json-schema-validator:4.4.0'
 
-  compile 'io.cucumber:cucumber-java8:6.10.2'
-  compile 'io.cucumber:cucumber-java:6.10.2'
-  compile 'io.cucumber:cucumber-junit:6.10.2'
-  compile 'io.cucumber:cucumber-guice:6.10.2'
-  compile 'io.cucumber:cucumber-core:6.10.2'
+  compile 'io.cucumber:cucumber-java8:7.1.0'
+  compile 'io.cucumber:cucumber-java:7.1.0'
+  compile 'io.cucumber:cucumber-junit:7.1.0'
+  compile 'io.cucumber:cucumber-guice:7.1.0'
+  compile 'io.cucumber:cucumber-core:7.1.0'
 
   //TODO: choose one schema validator between this and rest-assured
-  compile 'com.networknt:json-schema-validator:1.0.51'
-  compile 'com.google.code.gson:gson:2.8.6'
+  compile 'com.networknt:json-schema-validator:1.0.63'
+  compile 'com.google.code.gson:gson:2.8.9'
   compile 'org.apache.commons:commons-text:1.9'
 
 }
@@ -107,7 +107,6 @@ task testWebApiCore_2_0_0() {
       systemProperties = System.getProperties()
 
       args = [
-          '--strict',
           '--plugin',
           'pretty',
           '--plugin',
