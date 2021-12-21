@@ -6,7 +6,7 @@
     <option name="MAIN_CLASS_NAME" value="io.cucumber.core.cli.Main" />
     <module name="web-api-commander.test" />
     <option name="PROGRAM_PARAMETERS" value=" --plugin org.jetbrains.plugins.cucumber.java.run.CucumberJvm4SMFormatter" />
-    <option name="SUGGESTED_NAME" value="Feature: web-api-server-1.0.2" />
+    <option name="SUGGESTED_NAME" value="Feature: web-api-server-2.0.0" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="io.cucumber.core.cli.*" />

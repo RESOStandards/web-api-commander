@@ -1,7 +1,7 @@
 Feature: Web API Container Tests
 
   Background:
-    Given a Web API test container was created using the RESOScript "mock.web-api-server.core.1.0.2.resoscript"
+    Given a Web API test container was created using the RESOScript "mock.web-api-server.core.2.0.0.resoscript"
     And a Commander instance exists within the test container
 
   ####################################

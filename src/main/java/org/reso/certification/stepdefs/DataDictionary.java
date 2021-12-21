@@ -616,4 +616,33 @@ public class DataDictionary {
     return container.getFieldMap().containsKey(currentResourceName.get())
         && container.getFieldMap().get(currentResourceName.get()).containsKey(fieldName);
   }
+
+  @Then("data are replicated from the Lookup Resource")
+  public void dataAreReplicatedFromTheLookupResource() {
+  }
+
+  @And("items are added to the Lookup cache")
+  public void itemsAreAddedToTheLookupCache() {
+  }
+
+
+  @And("Lookup metadata have been retrieved from the Lookup resource")
+  public void lookupMetadataHaveBeenRetrievedFromTheLookupResource() {
+  }
+
+  @Then("the term {string} MUST be present in the annotations for each field")
+  public void theTermMUSTBePresentInTheAnnotationsForEachField(String arg0) {
+  }
+
+  @And("each LookupName MUST be declared in the String property of the field")
+  public void eachLookupNameMUSTBeDeclaredInTheStringPropertyOfTheField() {
+  }
+
+  @And("each given LookupName MUST exist in the Lookup Resource")
+  public void eachGivenLookupNameMUSTExistInTheLookupResource() {
+  }
+
+  @Given("the Lookup Resource exists in the metadata")
+  public void theLookupResourceExistsInTheMetadata() {
+  }
 }
