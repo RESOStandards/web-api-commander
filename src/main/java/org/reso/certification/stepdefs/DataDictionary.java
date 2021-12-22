@@ -24,6 +24,7 @@ import org.reso.commander.common.TestUtils;
 import org.reso.commander.common.TestUtils.TypeMappings;
 import org.reso.commander.common.Utils;
 import org.reso.models.IgnoredItem;
+import org.reso.models.LookupResourceItem;
 import org.reso.models.Settings;
 
 import java.io.File;
@@ -33,6 +34,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -63,6 +65,7 @@ public class DataDictionary {
   private static final AtomicReference<Set<EdmMember>> foundStandardMembers = new AtomicReference<>(new LinkedHashSet<>());
   private static final AtomicReference<Map<String, String>> currentLookups = new AtomicReference<>();
   private static final AtomicReference<Map<String, Map<String, Set<String>>>> ignoredItems = new AtomicReference<>(new LinkedHashMap<>());
+  private static final AtomicReference<Map<String, List<LookupResourceItem>>> lookupResourceLookupNameLookupValue = new AtomicReference<>();
 
   private static XMLMetadata referenceMetadata = null;
   private static boolean isMetadataValid = false;
@@ -617,32 +620,57 @@ public class DataDictionary {
         && container.getFieldMap().get(currentResourceName.get()).containsKey(fieldName);
   }
 
+  private AtomicBoolean hasLookupResource = new AtomicBoolean(false);
+
+  @Given("the Lookup Resource exists in the metadata")
+  public void theLookupResourceExistsInTheMetadata() {
+    hasLookupResource.set(container.getFieldMap("Lookup") != null);
+    assumeTrue("No Lookup Resource found in the metadata", hasLookupResource.get());
+    scenario.log("Found Lookup Resource!");
+  }
+
   @Then("data are replicated from the Lookup Resource")
   public void dataAreReplicatedFromTheLookupResource() {
+    if (hasLookupResource.get()) {
+      //replicate metadata
+      scenario.log("TODO: Replicate data from Lookup resource.");
+    }
   }
 
   @And("items are added to the Lookup cache")
   public void itemsAreAddedToTheLookupCache() {
+    scenario.log("TODO: Items have been added to the lookup cache!");
   }
-
 
   @And("Lookup metadata have been retrieved from the Lookup resource")
   public void lookupMetadataHaveBeenRetrievedFromTheLookupResource() {
+    if (hasLookupResource.get()) {
+      scenario.log("TODO: fetch lookups");
+    }
   }
 
   @Then("the term {string} MUST be present in the annotations for each field")
   public void theTermMUSTBePresentInTheAnnotationsForEachField(String arg0) {
+    if (hasLookupResource.get()) {
+      scenario.log("TODO: check annotation terms");
+    }
   }
 
   @And("each LookupName MUST be declared in the String property of the field")
   public void eachLookupNameMUSTBeDeclaredInTheStringPropertyOfTheField() {
+    if (hasLookupResource.get()) {
+      scenario.log("TODO: add each annotation string to the list of annotations");
+    }
   }
 
   @And("each given LookupName MUST exist in the Lookup Resource")
   public void eachGivenLookupNameMUSTExistInTheLookupResource() {
+    if (hasLookupResource.get()) {
+      scenario.log("TODO: check that each annotation exists in the lookups from the resource");
+    }
   }
 
-  @Given("the Lookup Resource exists in the metadata")
-  public void theLookupResourceExistsInTheMetadata() {
+  @Then("the following fields MUST be present")
+  public void theFollowingFieldsMUSTBePresent() {
   }
 }

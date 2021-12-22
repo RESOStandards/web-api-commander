@@ -23,6 +23,7 @@ import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.codegen.DDCacheProcessor;
 import org.reso.certification.codegen.DataDictionaryCodeGenerator;
+import org.reso.certification.codegen.WorksheetProcessor;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.DataDictionaryMetadata;
 import org.reso.commander.common.Utils;
@@ -45,6 +46,7 @@ import java.util.stream.Collectors;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.STRING_LIST_MULTI;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.STRING_LIST_SINGLE;
@@ -648,5 +650,32 @@ public class DataAvailability {
         hasSamplesDirectoryBeenCleared.set(true);
       }
     }
+  }
+
+  enum WebApiReplicationStrategy {
+    ModificationTimestampDescending
+  }
+
+  private static void replicateDataFromResource(String resourceName, WebApiReplicationStrategy strategy) {
+    if (resourceName == null) failAndExitWithErrorMessage("No resourceName specified!", scenario);
+
+    if (container.get().getXMLMetadata().getSchemas().parallelStream()
+        .anyMatch(item -> item.getEntityType(resourceName) != null)) {
+      scenario.log("TODO: replicating data from " + resourceName + " using strategy: " + strategy.toString());
+    } else {
+      failAndExitWithErrorMessage("Cannot retrieve data for the Lookup resource", scenario);
+    }
+  };
+
+
+  @Given("data has been retrieved from the {string} resource")
+  public void dataHasBeenRetrievedFromTheResource(String resourceName) {
+    replicateDataFromResource(resourceName, WebApiReplicationStrategy.ModificationTimestampDescending);
+  }
+
+  @And("and {string} resource data matches that advertised in the server metadata")
+  public void andResourceDataMatchesThatAdvertisedInTheServerMetadata(String resourceName) {
+    if (resourceName == null) failAndExitWithErrorMessage("No resourceName specified!", scenario);
+
   }
 }

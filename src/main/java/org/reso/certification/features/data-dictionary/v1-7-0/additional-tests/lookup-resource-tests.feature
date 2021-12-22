@@ -18,6 +18,16 @@ Feature: Lookup Acceptance Tests (RCP-032)
     Then data are replicated from the Lookup Resource
     And items are added to the Lookup cache
 
+  @dd-1.7 @rcp-032
+  Scenario: Ensure That Required Lookup Resource Fields Are Present
+    Given Lookup metadata have been retrieved from the Lookup resource
+    Then the following fields MUST be present
+      | LookupKey |
+      | LookupName |
+      | LookupValue |
+      | ModificationTimestamp |
+
+
   #  <!-- OData annotation for String List, Single field -->
   #  <Property Name="OfficeCountyOrParish" Type="Edm.String">
   #  <Annotation Term="RESO.OData.Metadata.LookupName" String="CountyOrParish" />
@@ -29,7 +39,8 @@ Feature: Lookup Acceptance Tests (RCP-032)
   #  </Property>
   @dd-1.7 @rcp-032
   Scenario: Check Required Annotations
-    Given Lookup metadata have been retrieved from the Lookup resource
+    Given data has been retrieved from the "Lookup" resource
+    And and "Lookup" resource data matches that advertised in the server metadata
     Then the term "RESO.OData.Metadata.LookupName" MUST be present in the annotations for each field
     And each LookupName MUST be declared in the String property of the field
     And each given LookupName MUST exist in the Lookup Resource
