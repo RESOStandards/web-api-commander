@@ -23,10 +23,10 @@ dependencies {
   compile 'com.google.inject:guice:5.0.1'
   compile 'commons-cli:commons-cli:1.5.0'
 
-  compile 'org.apache.logging.log4j:log4j-api:2.17.0'
-  compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.0'
-  compile 'org.apache.logging.log4j:log4j-1.2-api:2.17.0'
-  compile 'org.apache.logging.log4j:log4j-core:2.17.0'
+  compile 'org.apache.logging.log4j:log4j-api:2.17.1'
+  compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1'
+  compile 'org.apache.logging.log4j:log4j-1.2-api:2.17.1'
+  compile 'org.apache.logging.log4j:log4j-core:2.17.1'
 
   compile 'org.apache.olingo:odata-client-api:4.8.0'
   compile 'org.apache.olingo:odata-commons-core:4.8.0'
