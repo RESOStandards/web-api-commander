@@ -1,0 +1,3 @@
+[submodule "odata-openapi"]
+	path = odata-openapi
+	url = https://github.com/oasis-tcs/odata-openapi.git
