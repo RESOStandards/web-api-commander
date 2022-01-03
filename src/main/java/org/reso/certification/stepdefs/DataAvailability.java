@@ -23,7 +23,6 @@ import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.codegen.DDCacheProcessor;
 import org.reso.certification.codegen.DataDictionaryCodeGenerator;
-import org.reso.certification.codegen.WorksheetProcessor;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.DataDictionaryMetadata;
 import org.reso.commander.common.Utils;
@@ -46,7 +45,6 @@ import java.util.stream.Collectors;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.STRING_LIST_MULTI;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.STRING_LIST_SINGLE;
@@ -67,7 +65,7 @@ public class DataAvailability {
   private static final String CERTIFICATION_PATH = BUILD_DIRECTORY_PATH + File.separator + "certification";
   private static final String DATA_AVAILABILITY_REPORT_PATH = BUILD_DIRECTORY_PATH + File.separator + "certification" + File.separator + "results";
   private static final String SAMPLES_DIRECTORY_TEMPLATE = BUILD_DIRECTORY_PATH + File.separator + "%s";
-  private static final String PATH_TO_RESOSCRIPT_KEY = "pathToRESOScript";
+  private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final String USE_STRICT_MODE_ARG = "strict";
   private static final String A_B_TESTING_MODE_ARG = "abTesting";
 
@@ -129,14 +127,14 @@ public class DataAvailability {
 
   @Before
   public void beforeStep(Scenario scenario) {
-    final String pathToRESOScript = System.getProperty(PATH_TO_RESOSCRIPT_KEY, null);
+    final String pathToRESOScript = System.getProperty(PATH_TO_RESOSCRIPT_ARG, null);
 
     if (pathToRESOScript == null) return;
 
     DataAvailability.scenario = scenario;
 
     if (!container.get().getIsInitialized()) {
-      container.get().setSettings(Settings.loadFromRESOScript(new File(System.getProperty(PATH_TO_RESOSCRIPT_KEY))));
+      container.get().setSettings(Settings.loadFromRESOScript(new File(System.getProperty(PATH_TO_RESOSCRIPT_ARG))));
       container.get().initialize();
     }
   }
@@ -650,32 +648,5 @@ public class DataAvailability {
         hasSamplesDirectoryBeenCleared.set(true);
       }
     }
-  }
-
-  enum WebApiReplicationStrategy {
-    ModificationTimestampDescending
-  }
-
-  private static void replicateDataFromResource(String resourceName, WebApiReplicationStrategy strategy) {
-    if (resourceName == null) failAndExitWithErrorMessage("No resourceName specified!", scenario);
-
-    if (container.get().getXMLMetadata().getSchemas().parallelStream()
-        .anyMatch(item -> item.getEntityType(resourceName) != null)) {
-      scenario.log("TODO: replicating data from " + resourceName + " using strategy: " + strategy.toString());
-    } else {
-      failAndExitWithErrorMessage("Cannot retrieve data for the Lookup resource", scenario);
-    }
-  };
-
-
-  @Given("data has been retrieved from the {string} resource")
-  public void dataHasBeenRetrievedFromTheResource(String resourceName) {
-    replicateDataFromResource(resourceName, WebApiReplicationStrategy.ModificationTimestampDescending);
-  }
-
-  @And("and {string} resource data matches that advertised in the server metadata")
-  public void andResourceDataMatchesThatAdvertisedInTheServerMetadata(String resourceName) {
-    if (resourceName == null) failAndExitWithErrorMessage("No resourceName specified!", scenario);
-
   }
 }

@@ -117,13 +117,12 @@ public class DataDictionary {
   public void aRESOScriptFileIsProvided() {
     if (isUsingRESOScript) {
       if (container.getPathToRESOScript() == null) {
-        container.setPathToRESOScript(System.getProperty("pathToRESOScript"));
+        container.setPathToRESOScript(System.getProperty(PATH_TO_RESOSCRIPT_ARG));
       }
 
       if (container.getPathToRESOScript() == null) {
         failAndExitWithErrorMessage("pathToRESOScript must be present in command arguments, see README.", scenario);
       }
-      LOG.debug("Using RESOScript: " + container.getPathToRESOScript());
     }
   }
 
@@ -131,7 +130,7 @@ public class DataDictionary {
   public void clientSettingsAndParametersCanBeReadFromTheRESOScript() {
     if (isUsingRESOScript) {
       if (container.getSettings() == null) {
-        container.setSettings(Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript"))));
+        container.setSettings(Settings.loadFromRESOScript(new File(System.getProperty(PATH_TO_RESOSCRIPT_ARG))));
         if (container.getPathToRESOScript() == null) {
           failAndExitWithErrorMessage("Settings could not be loaded!", scenario);
         }
@@ -618,59 +617,5 @@ public class DataDictionary {
   private boolean isFieldContainedInMetadata(String fieldName) {
     return container.getFieldMap().containsKey(currentResourceName.get())
         && container.getFieldMap().get(currentResourceName.get()).containsKey(fieldName);
-  }
-
-  private AtomicBoolean hasLookupResource = new AtomicBoolean(false);
-
-  @Given("the Lookup Resource exists in the metadata")
-  public void theLookupResourceExistsInTheMetadata() {
-    hasLookupResource.set(container.getFieldMap("Lookup") != null);
-    assumeTrue("No Lookup Resource found in the metadata", hasLookupResource.get());
-    scenario.log("Found Lookup Resource!");
-  }
-
-  @Then("data are replicated from the Lookup Resource")
-  public void dataAreReplicatedFromTheLookupResource() {
-    if (hasLookupResource.get()) {
-      //replicate metadata
-      scenario.log("TODO: Replicate data from Lookup resource.");
-    }
-  }
-
-  @And("items are added to the Lookup cache")
-  public void itemsAreAddedToTheLookupCache() {
-    scenario.log("TODO: Items have been added to the lookup cache!");
-  }
-
-  @And("Lookup metadata have been retrieved from the Lookup resource")
-  public void lookupMetadataHaveBeenRetrievedFromTheLookupResource() {
-    if (hasLookupResource.get()) {
-      scenario.log("TODO: fetch lookups");
-    }
-  }
-
-  @Then("the term {string} MUST be present in the annotations for each field")
-  public void theTermMUSTBePresentInTheAnnotationsForEachField(String arg0) {
-    if (hasLookupResource.get()) {
-      scenario.log("TODO: check annotation terms");
-    }
-  }
-
-  @And("each LookupName MUST be declared in the String property of the field")
-  public void eachLookupNameMUSTBeDeclaredInTheStringPropertyOfTheField() {
-    if (hasLookupResource.get()) {
-      scenario.log("TODO: add each annotation string to the list of annotations");
-    }
-  }
-
-  @And("each given LookupName MUST exist in the Lookup Resource")
-  public void eachGivenLookupNameMUSTExistInTheLookupResource() {
-    if (hasLookupResource.get()) {
-      scenario.log("TODO: check that each annotation exists in the lookups from the resource");
-    }
-  }
-
-  @Then("the following fields MUST be present")
-  public void theFollowingFieldsMUSTBePresent() {
   }
 }
