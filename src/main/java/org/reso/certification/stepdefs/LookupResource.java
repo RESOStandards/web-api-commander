@@ -4,25 +4,18 @@ import com.google.inject.Inject;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
 import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
-import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
-import org.apache.olingo.client.api.communication.response.ODataRawResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
-import org.apache.olingo.client.api.domain.ClientPrimitiveValue;
 import org.apache.olingo.client.api.http.HttpClientException;
-import org.apache.olingo.client.api.serialization.ODataDeserializerException;
-import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
-import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.reso.certification.containers.WebAPITestContainer;
-import org.reso.commander.common.Utils;
+import org.reso.commander.common.ODataFetchApi;
 import org.reso.models.Settings;
 
 import java.io.File;
@@ -66,45 +59,16 @@ public class LookupResource {
 
   @Then("valid data is replicated from the {string} Resource")
   public void validDataIsReplicatedFromTheResource(String resourceName) {
-    final ODataClient client = container.get().getCommander().getClient();
-    final String serviceRoot = container.get().getServiceRoot();
-    final int DEFAULT_PAGE_SIZE = 100;
-
     if (!entityCache.get().containsKey(resourceName)) {
       entityCache.get().put(resourceName, new ArrayList<>());
-
       try {
-        int pageCount = DEFAULT_PAGE_SIZE, totalCount = 0;
-
-        //get initial count
-        URI requestUri = client.newURIBuilder(serviceRoot).count(true).top(1).appendEntitySetSegment(resourceName).build();
-        ODataRetrieveResponse<ClientEntitySet> response = client.getRetrieveRequestFactory().getEntitySetRequest(requestUri).execute();
-
-        if (response != null && response.getStatusCode() == HttpStatusCode.OK.getStatusCode() && response.getBody() != null) {
-          totalCount = response.getBody().getCount();
-          LOG.info("Total Count is: " + totalCount);
-        }
-
-        for (int skipAmount = 0; pageCount > 0 && entityCache.get().get(resourceName).size() <= totalCount; skipAmount += pageCount) {
-          requestUri = client.newURIBuilder(serviceRoot).appendEntitySetSegment(resourceName).top(pageCount).skip(skipAmount).build();
-          response = client.getRetrieveRequestFactory().getEntitySetRequest(requestUri).execute();
-
-          LOG.info("Fetching " + resourceName + " Resource data from URL: " + requestUri.toString());
-
-          if (response != null && response.getStatusCode() == HttpStatusCode.OK.getStatusCode() && response.getBody() != null) {
-            pageCount = response.getBody().getEntities().size();
-            if (pageCount > 0) {
-              entityCache.get().get(resourceName).addAll(response.getBody().getEntities());
-              LOG.info("Total records fetched: " + entityCache.get().get(resourceName).size());
-            }
-          }
-        }
-        scenario.log("Retrieved all available records from the " + resourceName + " Resource! Count: " + entityCache.get().get(resourceName).size());
-      } catch (HttpClientException exception) {
-        LOG.error("Could not retrieve data! " + exception.getMessage());
-        LOG.error("Cause " + exception.getCause().getMessage());
-        failAndExitWithErrorMessage("Unable to retrieve data from the Lookup Resource!", scenario);
+        entityCache.get().get(resourceName).addAll(ODataFetchApi.replicateDataFromResource(container.get(), resourceName,
+            ODataFetchApi.WebApiReplicationStrategy.TopAndSkip));
+      } catch (Exception exception) {
+        failAndExitWithErrorMessage("Unable to retrieve data from the Lookup Resource!" + exception.getMessage(), scenario);
       }
+    } else {
+      LOG.info("Using cached data from: " + resourceName);
     }
   }
 
@@ -135,29 +99,12 @@ public class LookupResource {
 
     //check resource data cache
     scenario.log("Ensuring mandatory fields " + mandatoryFields + " are present in " + resourceName + " Resource data");
-    entityCache.get().get(resourceName).forEach(clientEntity -> {
-      fields.forEach(fieldName -> {
-        if (clientEntity.getProperty(fieldName) == null || clientEntity.getProperty(fieldName).getValue() == null) {
-          failAndExitWithErrorMessage("Missing required field in the " + resourceName + " Resource!", scenario);
-        }
-      });
-    });
+    entityCache.get().get(resourceName).forEach(clientEntity -> fields.forEach(fieldName -> {
+      if (clientEntity.getProperty(fieldName) == null || clientEntity.getProperty(fieldName).getValue() == null) {
+        failAndExitWithErrorMessage("Missing required field in the " + resourceName + " Resource!", scenario);
+      }
+    }));
     scenario.log("All mandatory fields present!");
-  }
-
-  enum WebApiReplicationStrategy {
-    ModificationTimestampDescending
-  }
-
-  private void replicateDataFromResource(String resourceName, WebApiReplicationStrategy strategy) {
-    if (resourceName == null) failAndExitWithErrorMessage("No resourceName specified!", scenario);
-
-    if (container.get().getXMLMetadata().getSchemas().parallelStream()
-        .anyMatch(item -> item.getEntityType(resourceName) != null)) {
-      scenario.log("TODO: replicating data from " + resourceName + " using strategy: " + strategy.toString());
-    } else {
-      failAndExitWithErrorMessage("Cannot retrieve data for the Lookup resource", scenario);
-    }
   }
 
   @When("the {string} Resource exists in the metadata")

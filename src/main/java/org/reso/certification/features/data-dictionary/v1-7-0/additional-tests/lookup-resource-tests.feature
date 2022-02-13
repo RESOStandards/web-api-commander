@@ -15,7 +15,7 @@ Feature: Lookup Acceptance Tests (RCP-032)
     When the "Lookup" Resource exists in the metadata
     Then valid data is replicated from the "Lookup" Resource
 
-  @dd-1.7 @rcp-032
+  @dd-1.7 @rcp-032 @lookup-resource
   Scenario: Ensure That Required Lookup Resource Fields Are Present in Server Metadata
     When the "Lookup" Resource exists in the metadata
     Then "Lookup" Resource data and metadata MUST contain the following fields
@@ -23,7 +23,6 @@ Feature: Lookup Acceptance Tests (RCP-032)
       | LookupName |
       | LookupValue |
       | ModificationTimestamp |
-
 
   #  <!-- OData annotation for String List, Single field -->
   #  <Property Name="OfficeCountyOrParish" Type="Edm.String">
@@ -34,7 +33,7 @@ Feature: Lookup Acceptance Tests (RCP-032)
   #  <Property Name="ExteriorFeatures" Type="Collection(Edm.String)">
   #  <Annotation Term="RESO.OData.Metadata.LookupName" String="ExteriorFeatures" />
   #  </Property>
-  @dd-1.7 @rcp-032
+  @dd-1.7 @rcp-032 @lookup-resource
   Scenario: Check Required Annotations
     When the "Lookup" Resource exists in the metadata
     Then Lookup fields MUST have an annotation with term "RESO.OData.Metadata.LookupName" and string value of LookupName
