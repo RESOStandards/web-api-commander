@@ -28,7 +28,9 @@ public class ODataFetchApi {
   private static final Logger LOG = LogManager.getLogger(ODataFetchApi.class);
 
   final static int DEFAULT_PAGE_SIZE = 1000;
-  private final static String FILTER_REQUEST_TEMPLATE_STRING = "?$filter=%s" + " lt %s&$orderby=%s desc";
+  private final static String FILTER_DESCENDING_TEMPLATE = "?$filter=%s" + " lt %s&$orderby=%s desc";
+  private final static String FILTER_ASCENDING_INIT_TEMPLATE = "?$orderby=%s asc";
+  private final static String FILTER_ASCENDING_TEMPLATE = "?$filter=%s" + " gt %s&$orderby=%s asc";
   private final static String TOP_QUERY_PARAMETER = "&$top=" + DEFAULT_PAGE_SIZE;
   final static String DEFAULT_TIMESTAMP_FIELD = "ModificationTimestamp";
 
@@ -56,6 +58,7 @@ public class ODataFetchApi {
 
   public enum WebApiReplicationStrategy {
     ModificationTimestampDescending,
+    ModificationTimestampAscending,
     TopAndSkip
   }
 
@@ -70,7 +73,10 @@ public class ODataFetchApi {
         return replicateUsingTopAndSkip(container, resourceName);
 
       if (strategy == WebApiReplicationStrategy.ModificationTimestampDescending)
-        return replicateUsingModificationTimestampField(container, resourceName);
+        return replicateUsingModificationTimestampField(container, resourceName, WebApiReplicationStrategy.ModificationTimestampDescending);
+
+      if (strategy == WebApiReplicationStrategy.ModificationTimestampAscending)
+        return replicateUsingModificationTimestampField(container, resourceName, WebApiReplicationStrategy.ModificationTimestampAscending);
 
     } else {
       throw new Exception(resourceName + " resource was not found in metadata!");
@@ -112,11 +118,12 @@ public class ODataFetchApi {
     return entities;
   }
 
-  private static List<ClientEntity> replicateUsingModificationTimestampField(WebAPITestContainer container, String resourceName) throws Exception {
-    return replicateUsingTimestampField(container, resourceName, DEFAULT_TIMESTAMP_FIELD);
+  private static List<ClientEntity> replicateUsingModificationTimestampField(WebAPITestContainer container, String resourceName, WebApiReplicationStrategy strategy) throws Exception {
+    return replicateUsingTimestampField(container, resourceName, DEFAULT_TIMESTAMP_FIELD, strategy);
   }
 
-  private static List<ClientEntity> replicateUsingTimestampField(WebAPITestContainer container, String resourceName, String timestampField) throws Exception {
+
+  private static List<ClientEntity> replicateUsingTimestampField(WebAPITestContainer container, String resourceName, String timestampField, WebApiReplicationStrategy strategy) throws Exception {
     final ODataClient client = container.getCommander().getClient();
     final AtomicReference<OffsetDateTime> lastOffsetDateTime = new AtomicReference<>(OffsetDateTime.now());
     final int MAX_RETRIES = 3;
@@ -125,20 +132,29 @@ public class ODataFetchApi {
 
     final Integer resourceCount = ODataFetchApi.getResourceCount(container, resourceName);
     final Set<ClientEntity> entities = new HashSet<>();
-
+    boolean isInitialRequest = true;
     try {
-
       do {
-        URI requestUri = TestUtils.prepareUri(buildODataTimestampRequestUriString(container, resourceName, timestampField, lastOffsetDateTime.get()));
+        URI requestUri;
+        if (strategy == WebApiReplicationStrategy.ModificationTimestampDescending) {
+         requestUri = TestUtils.prepareUri(buildTimestampDescendingFilterRequestUri(container, resourceName, timestampField, lastOffsetDateTime.get()));
+        } else if (strategy == WebApiReplicationStrategy.ModificationTimestampAscending) {
+          if (isInitialRequest) {
+            requestUri = TestUtils.prepareUri(buildTimestampAscendingInitFilterRequestUri(container, resourceName, timestampField));
+          } else {
+            requestUri = TestUtils.prepareUri(buildTimestampAscendingFilterRequestUri(container, resourceName, timestampField, lastOffsetDateTime.get()));
+          }
+        } else {
+          throw new Exception("Unsupported WebApiReplicationStrategy: " + strategy);
+        }
+
         LOG.info("Fetching " + resourceName + " Resource data from URL: " + requestUri.toString());
         final ODataRetrieveResponse<ClientEntitySet> response = client.getRetrieveRequestFactory().getEntitySetRequest(requestUri).execute();
         final List<ClientEntity> currentPage = response.getBody().getEntities();
 
         if (currentPage.size() == 0) {
-          LOG.error("Page contained no records! Request URI: " + requestUri.toString());
-          LOG.error("\t--> Subtracting " + RETRY_SKIP_MS + " ms from the current time...");
-          lastOffsetDateTime.set(lastOffsetDateTime.get().minus(RETRY_SKIP_MS, ChronoUnit.MILLIS));
-          numRetries++;
+          LOG.error("Page contained no records, exiting! Request URI: " + requestUri.toString());
+          break;
         } else {
           for (ClientEntity clientEntity : currentPage) {
             try {
@@ -147,23 +163,36 @@ public class ODataFetchApi {
                 LOG.error("Last Timestamp: " + lastOffsetDateTime.get().format(DateTimeFormatter.ISO_INSTANT));
                 numRetries++;
 
-                LOG.error("\t--> Subtracting " + RETRY_SKIP_MS + " ms from the current time...");
-                lastOffsetDateTime.set(lastOffsetDateTime.get().minus(RETRY_SKIP_MS, ChronoUnit.MILLIS));
+                if (strategy == WebApiReplicationStrategy.ModificationTimestampDescending) {
+                  LOG.error("\t--> Subtracting " + RETRY_SKIP_MS + "ms from last timestamp...");
+                  lastOffsetDateTime.set(lastOffsetDateTime.get().minus(RETRY_SKIP_MS, ChronoUnit.MILLIS));
+                } else {
+                  LOG.error("\t--> Adding " + RETRY_SKIP_MS + "ms to last timestamp...");
+                  lastOffsetDateTime.set(lastOffsetDateTime.get().plus(RETRY_SKIP_MS, ChronoUnit.MILLIS));
+                }
+                break;
               } else {
                 entities.add(clientEntity);
                 OffsetDateTime currentOffsetDateTime = OffsetDateTime.parse(clientEntity.getProperty(timestampField).getValue().toString());
-                if (currentOffsetDateTime.isBefore(lastOffsetDateTime.get())) {
+                if (strategy == WebApiReplicationStrategy.ModificationTimestampDescending && currentOffsetDateTime.isBefore(lastOffsetDateTime.get())) {
                   LOG.debug("Current " + timestampField + " field timestamp is: " + currentOffsetDateTime.format(DateTimeFormatter.ISO_INSTANT));
                   LOG.debug("Found earlier timestamp! Last timestamp: " + lastOffsetDateTime.get().format(DateTimeFormatter.ISO_INSTANT) + "\n");
+                  lastOffsetDateTime.set(currentOffsetDateTime);
+                } else if (strategy == WebApiReplicationStrategy.ModificationTimestampAscending) {
+                  if (!isInitialRequest && currentOffsetDateTime.isAfter(lastOffsetDateTime.get())) {
+                    LOG.debug("Current " + timestampField + " field timestamp is: " + currentOffsetDateTime.format(DateTimeFormatter.ISO_INSTANT));
+                    LOG.debug("Found later timestamp! Last timestamp: " + lastOffsetDateTime.get().format(DateTimeFormatter.ISO_INSTANT) + "\n");
+                  }
                   lastOffsetDateTime.set(currentOffsetDateTime);
                 }
               }
             } catch (DateTimeParseException exception) {
               LOG.error(exception);
-              throw new Exception("Could not convert ModificationTimestamp to timestamp value!");
+              throw new Exception("Could not convert " + timestampField + " to timestamp value!");
             }
           }
         }
+        isInitialRequest = false;
       } while (entities.size() <= resourceCount && numRetries < MAX_RETRIES);
 
       if (numRetries >= MAX_RETRIES) {
@@ -197,15 +226,50 @@ public class ODataFetchApi {
    * @param lastFetchedDate the last fetched date for filtering
    * @return a string OData query used for sampling
    */
-  public static String buildODataTimestampRequestUriString(WebAPITestContainer container, String resourceName,
-                                                           String timestampField, OffsetDateTime lastFetchedDate) {
+  public static String buildTimestampDescendingFilterRequestUri(WebAPITestContainer container, String resourceName,
+                                                                String timestampField, OffsetDateTime lastFetchedDate) {
     String requestUri = container.getCommander().getClient()
         .newURIBuilder(container.getServiceRoot())
         .appendEntitySetSegment(resourceName).build().toString();
 
-    requestUri += String.format(FILTER_REQUEST_TEMPLATE_STRING + TOP_QUERY_PARAMETER, timestampField,
+    requestUri += String.format(FILTER_DESCENDING_TEMPLATE + TOP_QUERY_PARAMETER, timestampField,
         lastFetchedDate.format(DateTimeFormatter.ISO_INSTANT), timestampField);
 
     return requestUri;
   }
+
+  /**
+   * Builds a request URI string, taking into account whether the sampling is being done with an optional
+   * filter, for instance in the shared systems case
+   *
+   * @param resourceName    the resource name to query
+   * @param timestampField  the timestamp field for the resource
+   * @param lastFetchedDate the last fetched date for filtering
+   * @return a string OData query used for sampling
+   */
+  public static String buildTimestampAscendingFilterRequestUri(WebAPITestContainer container, String resourceName,
+                                                               String timestampField, OffsetDateTime lastFetchedDate) {
+    String requestUri = container.getCommander().getClient()
+        .newURIBuilder(container.getServiceRoot())
+        .appendEntitySetSegment(resourceName).build().toString();
+
+    requestUri += String.format(FILTER_ASCENDING_TEMPLATE + TOP_QUERY_PARAMETER, timestampField,
+        lastFetchedDate.format(DateTimeFormatter.ISO_INSTANT), timestampField);
+
+    return requestUri;
+  }
+
+  public static String buildTimestampAscendingInitFilterRequestUri(WebAPITestContainer container, String resourceName,
+                                                               String timestampField) {
+    String requestUri = container.getCommander().getClient()
+        .newURIBuilder(container.getServiceRoot())
+        .appendEntitySetSegment(resourceName).build().toString();
+
+    requestUri += String.format(FILTER_ASCENDING_INIT_TEMPLATE + TOP_QUERY_PARAMETER, timestampField);
+
+    return requestUri;
+  }
+
+
+
 }
