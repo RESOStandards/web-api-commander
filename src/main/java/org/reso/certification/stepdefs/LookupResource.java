@@ -66,7 +66,7 @@ public class LookupResource {
       entityCache.get().put(resourceName, new ArrayList<>());
       try {
         entityCache.get().get(resourceName).addAll(ODataFetchApi.replicateDataFromResource(container.get(), resourceName,
-            ODataFetchApi.WebApiReplicationStrategy.ModificationTimestampDescending));
+            ODataFetchApi.WebApiReplicationStrategy.TopAndSkip));
       } catch (Exception exception) {
         failAndExitWithErrorMessage("Unable to retrieve data from the Lookup Resource! " + exception.getMessage(), scenario);
       }
