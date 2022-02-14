@@ -9,9 +9,14 @@ import io.cucumber.java.en.When;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.domain.ClientEntity;
-import org.reso.certification.codegen.DDCacheProcessor;
+import org.apache.olingo.commons.api.edm.EdmAnnotation;
+import org.apache.olingo.commons.api.edm.EdmElement;
+import org.apache.olingo.commons.api.edm.EdmEntitySet;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
+import org.apache.olingo.commons.core.edm.EdmPropertyImpl;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.ODataFetchApi;
+import org.reso.models.MetadataReport;
 import org.reso.models.ReferenceStandardField;
 import org.reso.models.Settings;
 
@@ -30,8 +35,7 @@ public class LookupResource {
   private final static AtomicReference<WebAPITestContainer> container = new AtomicReference<>();
   private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final AtomicReference<Map<String, List<ClientEntity>>> entityCache = new AtomicReference<>(new LinkedHashMap<>());
-  private static final AtomicReference<DDCacheProcessor> ddCacheProcessor = new AtomicReference<>();
-
+  private static final String LOOKUP_RESOURCE_REQUIRED_ANNOTATION_TERM = "RESO.OData.Metadata.LookupName";
 
   @Inject
   public LookupResource(WebAPITestContainer c) {
@@ -129,10 +133,67 @@ public class LookupResource {
         standardLookupFieldCache.get(resourceName).values().stream()
             .filter(referenceStandardField -> referenceStandardField.getLookupName() != null)).collect(Collectors.toSet());
 
-    lookupFields.forEach(referenceStandardField -> LOG.debug("Standard Field: { "
-        + "resourceName: \"" + referenceStandardField.getParentResourceName() + "\""
-        + ", standardName: \"" + referenceStandardField.getStandardName() + "\""
-        + ", lookupName: \"" + referenceStandardField.getLookupName() + "\" }"));
+
+    final String LOOKUP_RESOURCE_NAME = "Lookup", LOOKUP_RESOURCE_LOOKUP_NAME_PROPERTY = "LookupName";
+
+    lookupFields.forEach(referenceStandardField -> {
+//      LOG.debug("Standard Field: { "
+//          + "resourceName: \"" + referenceStandardField.getParentResourceName() + "\""
+//          + ", standardName: \"" + referenceStandardField.getStandardName() + "\""
+//          + ", lookupName: \"" + referenceStandardField.getLookupName() + "\" }");
+
+      final EdmEntitySet entitySet = container.get().getEdm().getEntityContainer().getEntitySet(referenceStandardField.getParentResourceName());
+
+
+      if (entitySet != null) {
+        final EdmElement fieldEdm = entitySet.getEntityTypeWithAnnotations().getProperty(referenceStandardField.getStandardName());
+        if (fieldEdm != null) {
+          final boolean isStringDataType = fieldEdm.getType().getFullQualifiedName().toString().contentEquals(EdmPrimitiveTypeKind.String.getFullQualifiedName().toString());
+
+          LOG.info("\nFound field with resource: " + referenceStandardField.getParentResourceName() + " and standard name: " + referenceStandardField.getStandardName());
+          LOG.info("\t\t Data type is: " + fieldEdm.getType().getFullQualifiedName().toString());
+
+          if (isStringDataType) {
+            final Optional<EdmAnnotation> foundAnnotation = ((EdmPropertyImpl) fieldEdm).getAnnotations().stream()
+                .filter(edmAnnotation -> {
+                  final MetadataReport.SneakyAnnotationReader annotationReader = new MetadataReport.SneakyAnnotationReader(edmAnnotation);
+                  return annotationReader.getTerm() != null && annotationReader.getTerm().contentEquals(LOOKUP_RESOURCE_REQUIRED_ANNOTATION_TERM);
+                }).findFirst();
+
+            if (foundAnnotation.isPresent()) {
+              MetadataReport.SneakyAnnotationReader annotationReader = new MetadataReport.SneakyAnnotationReader(foundAnnotation.get());
+
+              LOG.info("Found annotation for " + referenceStandardField.getStandardName() + "!");
+
+              LOG.debug("Annotation term: " + annotationReader.getTerm());
+              final String lookupName = foundAnnotation.get().getExpression().asConstant().getValueAsString();
+
+              if (lookupName != null) {
+                LOG.info("Found lookupName annotation! LookupName is: " + lookupName);
+              } else {
+                failAndExitWithErrorMessage("Could not find value for annotation term: \"" + annotationTerm + "\"", scenario);
+              }
+
+              LOG.info("\t--> Checking for LookupName \"" + lookupName + "\" in the " + LOOKUP_RESOURCE_NAME + " resource...");
+              boolean lookupNameFoundInLookupData = entityCache.get().get(LOOKUP_RESOURCE_NAME).stream().anyMatch(clientEntity -> lookupName != null
+                  && clientEntity.getProperty(LOOKUP_RESOURCE_LOOKUP_NAME_PROPERTY).getValue().asPrimitive().toString().contentEquals(lookupName));
+
+              if (lookupNameFoundInLookupData) {
+                LOG.info("\t--> Found!");
+              } else {
+                failAndExitWithErrorMessage("Could not find LookupName \"" + lookupName + "\" in the " + LOOKUP_RESOURCE_NAME + " data! Field: " + fieldEdm.getName(), scenario);
+              }
+
+            } else {
+              failAndExitWithErrorMessage("Required annotation \"" + LOOKUP_RESOURCE_REQUIRED_ANNOTATION_TERM
+                  + "\" not present for the " + referenceStandardField.getStandardName() + " field in the "
+                  + referenceStandardField.getParentResourceName() + " resource!", scenario);
+            }
+          }
+        }
+      }
+    });
+
   }
 
   /*

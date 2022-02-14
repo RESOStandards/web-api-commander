@@ -179,7 +179,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
     }
   }
 
-  static class SneakyAnnotationReader {
+  public static class SneakyAnnotationReader {
     Class<? extends EdmAnnotationImpl> object;
     Field field;
     EdmAnnotationImpl edmAnnotationImpl;
