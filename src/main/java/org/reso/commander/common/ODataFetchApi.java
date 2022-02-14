@@ -27,7 +27,7 @@ public class ODataFetchApi {
 
   private static final Logger LOG = LogManager.getLogger(ODataFetchApi.class);
 
-  final static int DEFAULT_PAGE_SIZE = 1000;
+  final static int DEFAULT_PAGE_SIZE = 100;
   private final static String FILTER_DESCENDING_TEMPLATE = "?$filter=%s" + " lt %s&$orderby=%s desc";
   private final static String FILTER_ASCENDING_INIT_TEMPLATE = "?$orderby=%s asc";
   private final static String FILTER_ASCENDING_TEMPLATE = "?$filter=%s" + " gt %s&$orderby=%s asc";
@@ -35,6 +35,12 @@ public class ODataFetchApi {
   final static String DEFAULT_TIMESTAMP_FIELD = "ModificationTimestamp";
 
 
+  /***
+   * Gets the total count for the given resource.
+   * @param container the test container.
+   * @param resourceName the name of the resource to get the count for.
+   * @return the total available number of available records.
+   */
   public static Integer getResourceCount(WebAPITestContainer container, String resourceName) {
     final ODataClient client = container.getCommander().getClient();
     client.getConfiguration().setDefaultPubFormat(ContentType.APPLICATION_JSON);
@@ -56,12 +62,25 @@ public class ODataFetchApi {
     return count;
   }
 
+  /**
+   * Contains the replication strategies available for the fetch client replication methods.
+   */
   public enum WebApiReplicationStrategy {
     ModificationTimestampDescending,
     ModificationTimestampAscending,
     TopAndSkip
   }
 
+  /**
+   * Replicates data using the given WebApiReplicationStrategy
+   *
+   * @param container    the test container
+   * @param resourceName the name of the resource to replicate from
+   * @param strategy     the replication strategy
+   * @return a list of ClientEntity items that were replicated.
+   * @throws Exception exceptions are thrown with messages so that the caller can respond and exit or continue,
+   *                   as needed. Clients can use the included message for the reason for the error.
+   */
   public static List<ClientEntity> replicateDataFromResource(WebAPITestContainer container, String resourceName, WebApiReplicationStrategy strategy)
       throws Exception {
     LOG.info("Checking metadata for resource: " + resourceName);
@@ -85,6 +104,15 @@ public class ODataFetchApi {
   }
 
 
+  /**
+   * Implementation of an OData client using a TopAndSkip replication strategy.
+   *
+   * @param container    the test container.
+   * @param resourceName the name of the resource to replicate from.
+   * @return a list of ClientEntity items that were replicated.
+   * @throws Exception exceptions are thrown so that their messages can be used to fail or continue. Implementations
+   *                   should bubble any relevant errors up.
+   */
   private static List<ClientEntity> replicateUsingTopAndSkip(WebAPITestContainer container, String resourceName) throws Exception {
     final ODataClient client = container.getCommander().getClient();
     final String serviceRoot = container.getServiceRoot();
@@ -118,11 +146,32 @@ public class ODataFetchApi {
     return entities;
   }
 
+  /**
+   * Default ModificationTimestamp replication client.
+   *
+   * @param container    the test container.
+   * @param resourceName the name of the resource to replicate from.
+   * @param strategy     the replication strategy, either desc or asc.
+   * @return a list of ClientEntity items that were replicated.
+   * @throws Exception exceptions are thrown so that their messages can be used to fail or continue. Implementations
+   *                   should bubble any relevant errors up.
+   */
   private static List<ClientEntity> replicateUsingModificationTimestampField(WebAPITestContainer container, String resourceName, WebApiReplicationStrategy strategy) throws Exception {
     return replicateUsingTimestampField(container, resourceName, DEFAULT_TIMESTAMP_FIELD, strategy);
   }
 
 
+  /**
+   * General timestamp replication client.
+   *
+   * @param container      the test container.
+   * @param resourceName   the name of the resource to replicate from.
+   * @param timestampField the name of the timestamp field to use for comparisons.
+   * @param strategy       the replication strantegy, either asc or desc.
+   * @return a list of ClientEntity items that were replicated.
+   * @throws Exception exceptions are thrown so that their messages can be used to fail or continue. Implementations
+   *                   should bubble any relevant errors up.
+   */
   private static List<ClientEntity> replicateUsingTimestampField(WebAPITestContainer container, String resourceName, String timestampField, WebApiReplicationStrategy strategy) throws Exception {
     final ODataClient client = container.getCommander().getClient();
     final AtomicReference<OffsetDateTime> lastOffsetDateTime = new AtomicReference<>(OffsetDateTime.now());
@@ -137,7 +186,7 @@ public class ODataFetchApi {
       do {
         URI requestUri;
         if (strategy == WebApiReplicationStrategy.ModificationTimestampDescending) {
-         requestUri = TestUtils.prepareUri(buildTimestampDescendingFilterRequestUri(container, resourceName, timestampField, lastOffsetDateTime.get()));
+          requestUri = TestUtils.prepareUri(buildTimestampDescendingFilterRequestUri(container, resourceName, timestampField, lastOffsetDateTime.get()));
         } else if (strategy == WebApiReplicationStrategy.ModificationTimestampAscending) {
           if (isInitialRequest) {
             requestUri = TestUtils.prepareUri(buildTimestampAscendingInitFilterRequestUri(container, resourceName, timestampField));
@@ -259,8 +308,16 @@ public class ODataFetchApi {
     return requestUri;
   }
 
+  /**
+   * Builds a request URI string, taking into account whether the sampling is being done with an optional
+   * filter, for instance in the shared systems case
+   *
+   * @param resourceName    the resource name to query
+   * @param timestampField  the timestamp field for the resource
+   * @return a string OData query used for sampling
+   */
   public static String buildTimestampAscendingInitFilterRequestUri(WebAPITestContainer container, String resourceName,
-                                                               String timestampField) {
+                                                                   String timestampField) {
     String requestUri = container.getCommander().getClient()
         .newURIBuilder(container.getServiceRoot())
         .appendEntitySetSegment(resourceName).build().toString();
@@ -269,7 +326,4 @@ public class ODataFetchApi {
 
     return requestUri;
   }
-
-
-
 }

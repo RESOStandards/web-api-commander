@@ -7,6 +7,7 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
+import io.cucumber.java.bs.A;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,6 +23,7 @@ import org.apache.olingo.client.api.uri.QueryOption;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.format.ContentType;
+import org.reso.certification.codegen.DDCacheProcessor;
 import org.reso.commander.Commander;
 import org.reso.commander.common.DataDictionaryMetadata;
 import org.reso.commander.common.TestUtils;
@@ -102,6 +104,8 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicReference<ODataEntitySetRequest<ClientEntitySet>> clientEntitySetRequest = new AtomicReference<>();
   private final AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
   private final AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
+  private final AtomicReference<DDCacheProcessor> ddCacheProcessor = new AtomicReference<>();
+
   private static final String WEB_API_CORE_REFERENCE_REQUESTS = "reference-web-api-core-requests.xml";
 
   //singleton variables
@@ -888,6 +892,13 @@ public final class WebAPITestContainer implements TestContainer {
 
   public void setIsInitialized(boolean value) {
     isInitialized.set(value);
+  }
+
+  public DDCacheProcessor getDDCacheProcessor() {
+    if (ddCacheProcessor.get() == null) {
+      ddCacheProcessor.set(TestUtils.buildDataDictionaryCache());
+    }
+    return ddCacheProcessor.get();
   }
 
   public static final class ODATA_QUERY_PARAMS {

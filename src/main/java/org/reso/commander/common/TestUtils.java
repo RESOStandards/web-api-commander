@@ -18,6 +18,8 @@ import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmTimeOfDay;
+import org.reso.certification.codegen.DDCacheProcessor;
+import org.reso.certification.codegen.DataDictionaryCodeGenerator;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.Commander;
 import org.reso.models.Settings;
@@ -964,6 +966,19 @@ public final class TestUtils {
       scenario.log(getDefaultErrorMessage(msg));
     }
     System.exit(NOT_OK);
+  }
+
+  /**
+   * Builds a Data Dictionary Cache
+   * @return a DDProcessor Cache object
+   */
+  public static DDCacheProcessor buildDataDictionaryCache() {
+    LOG.info("Creating standard field cache...");
+    final DDCacheProcessor cache = new DDCacheProcessor();
+    DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(cache);
+    generator.processWorksheets();
+    LOG.info("Standard field cache created!");
+    return cache;
   }
 }
 

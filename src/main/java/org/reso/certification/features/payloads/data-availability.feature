@@ -22,14 +22,14 @@ Feature: Payloads Sampling (Web API)
 
   @standard-resource-sampling @dd-1.7 @payloads-sampling
   Scenario: Standard Resource Sampling
-    Given that valid metadata have been requested from the server
+    Given that metadata have been retrieved from the server and validated
     And the metadata contains RESO Standard Resources
     And "payload-samples" has been created in the build directory
     Then up to 100000 records are sampled from each resource with payload samples stored in "payload-samples"
 
   @local-resource-sampling @dd-1.7 @payloads-sampling
   Scenario: Non Standard Resource Sampling - Request Data from Each Server Resource
-    Given that valid metadata have been requested from the server
+    Given that metadata have been retrieved from the server and validated
     And the metadata contains local resources
     Then up to 100000 records are sampled from each local resource
 

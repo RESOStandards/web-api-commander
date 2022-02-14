@@ -22,9 +22,9 @@ import org.apache.olingo.commons.api.edm.EdmNamed;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.codegen.DDCacheProcessor;
-import org.reso.certification.codegen.DataDictionaryCodeGenerator;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.DataDictionaryMetadata;
+import org.reso.commander.common.TestUtils;
 import org.reso.commander.common.Utils;
 import org.reso.models.*;
 
@@ -115,7 +115,7 @@ public class DataAvailability {
   private final static AtomicReference<Map<LookupValue, Integer>> resourceFieldLookupTallies =
       new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
 
-  private final static AtomicReference<DDCacheProcessor> processor = new AtomicReference<>();
+  private final static AtomicReference<DDCacheProcessor> ddCacheProcessor = new AtomicReference<>();
 
   @Inject
   public DataAvailability(WebAPITestContainer c) {
@@ -403,9 +403,9 @@ public class DataAvailability {
 
 
                 //if the field is a lookup field, collect the frequency of each unique set of enumerations for the field
-                if (property.isEnum() || (processor.get().getStandardFieldCache().containsKey(resourceName)
-                    && processor.get().getStandardFieldCache().get(resourceName).containsKey(property.getName()))) {
-                  ReferenceStandardField standardField = processor.get().getStandardFieldCache().get(resourceName).get(property.getName());
+                if (property.isEnum() || (ddCacheProcessor.get().getStandardFieldCache().containsKey(resourceName)
+                    && ddCacheProcessor.get().getStandardFieldCache().get(resourceName).containsKey(property.getName()))) {
+                  ReferenceStandardField standardField = ddCacheProcessor.get().getStandardFieldCache().get(resourceName).get(property.getName());
                   //if the field is declared as an OData Edm.EnumType or String List, Single or Multii in the DD, then collect its value
                   if (property.isEnum() || (standardField.getSimpleDataType().contentEquals(STRING_LIST_SINGLE)
                       || standardField.getSimpleDataType().contentEquals(STRING_LIST_MULTI))) {
@@ -491,35 +491,20 @@ public class DataAvailability {
     return payloadSamples.get();
   }
 
-  /**
-   * fetches and processes records in cases where only sampling is required and encoding is not necessary
-   *
-   * @param resourceName      the resource name to sample from
-   * @param targetRecordCount the target record count for the resource (will stop if the end of the records is reached)
-   * @return a list of PayloadSample items
-   */
-  List<PayloadSample> fetchAndProcessRecords(String resourceName, int targetRecordCount) {
-    return fetchAndProcessRecords(resourceName, targetRecordCount, null);
-  }
-
 
   /*==================================== TESTS START HERE ====================================*/
 
-
-  @Given("that valid metadata have been requested from the server")
-  public void thatValidMetadataHaveBeenRequestedFromTheServer() {
+  @Given("that metadata have been retrieved from the server and validated")
+  public void thatValidMetadataHaveBeenRetrievedFromTheServerAndValidated() {
     try {
-      if (container.get().hasValidMetadata()) {
-        if (processor.get() == null || processor.get().getStandardFieldCache().size() == 0) {
-          LOG.info("Creating standard field cache...");
-          processor.set(new DDCacheProcessor());
-          DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(processor.get());
-          generator.processWorksheets();
-          LOG.info("Standard field cache created!");
-        }
-      } else {
+      if (!container.get().hasValidMetadata()) {
         failAndExitWithErrorMessage("Valid metadata was not retrieved from the server. Exiting!", scenario);
       }
+
+      if (container.get().getDDCacheProcessor() == null) {
+        failAndExitWithErrorMessage("Could not initialize standard field cache!", scenario);
+      }
+
     } catch (Exception ex) {
       failAndExitWithErrorMessage(ex.toString(), scenario);
     }

@@ -102,8 +102,14 @@ public class ReferenceStandardField {
     return lookup;
   }
 
-  public String getLookupStandardName() {
-    return getLookup().replace("Lookups", "").trim();
+  public String getLookupName() {
+    String lookupName = getLookup()
+        .replace("<n/a>", "")
+        .replace("Lookups", "").trim();
+
+    if (lookupName.length() == 0) return null;
+
+    return lookupName;
   }
 
   public String getCollection() {

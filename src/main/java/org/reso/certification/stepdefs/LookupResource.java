@@ -8,23 +8,17 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.olingo.client.api.ODataClient;
-import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.domain.ClientEntity;
-import org.apache.olingo.client.api.domain.ClientEntitySet;
-import org.apache.olingo.client.api.http.HttpClientException;
-import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.reso.certification.codegen.DDCacheProcessor;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.ODataFetchApi;
+import org.reso.models.ReferenceStandardField;
 import org.reso.models.Settings;
 
 import java.io.File;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
@@ -36,6 +30,7 @@ public class LookupResource {
   private final static AtomicReference<WebAPITestContainer> container = new AtomicReference<>();
   private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final AtomicReference<Map<String, List<ClientEntity>>> entityCache = new AtomicReference<>(new LinkedHashMap<>());
+  private static final AtomicReference<DDCacheProcessor> ddCacheProcessor = new AtomicReference<>();
 
 
   @Inject
@@ -59,11 +54,15 @@ public class LookupResource {
 
   @Then("valid data is replicated from the {string} Resource")
   public void validDataIsReplicatedFromTheResource(String resourceName) {
+    if (entityCache.get() == null) {
+      failAndExitWithErrorMessage("Could not replicate data from resource: " + resourceName, scenario);
+    }
+
     if (!entityCache.get().containsKey(resourceName)) {
       entityCache.get().put(resourceName, new ArrayList<>());
       try {
         entityCache.get().get(resourceName).addAll(ODataFetchApi.replicateDataFromResource(container.get(), resourceName,
-            ODataFetchApi.WebApiReplicationStrategy.ModificationTimestampDescending));
+            ODataFetchApi.WebApiReplicationStrategy.TopAndSkip));
       } catch (Exception exception) {
         failAndExitWithErrorMessage("Unable to retrieve data from the Lookup Resource! " + exception.getMessage(), scenario);
       }
@@ -72,24 +71,16 @@ public class LookupResource {
     }
   }
 
-  @Then("each lookup name referenced by a field in the metadata has the term {string}")
-  public void eachLookupNameReferencedByAFieldInTheMetadataHasTheTerm(String term) {
-  }
-
-  @And("data from the {string} Resource matches what is advertised in the server metadata")
-  public void dataFromTheResourceMatchesWhatIsAdvertisedInTheServerMetadata(String resourceName) {
-  }
-
-  @Then("each LookupName referenced by a field in the metadata MUST have the term {string}")
-  public void eachLookupNameReferencedByAFieldInTheMetadataMUSTHaveTheTerm(String annotationTerm) {
-  }
-
   @Then("Lookup fields MUST have an annotation with term {string} and string value of LookupName")
   public void lookupFieldsMUSTHaveAnAnnotationWithTermAndStringValueOfLookupName(String arg0) {
   }
 
   @Then("{string} Resource data and metadata MUST contain the following fields")
   public void resourceDataAndMetadataMUSTContainTheFollowingFields(String resourceName, List<String> fields) {
+    if (entityCache.get() == null || entityCache.get().get(resourceName) == null) {
+      failAndExitWithErrorMessage("Entity Cache could not be created for the " + resourceName + " resource!", scenario);
+    }
+
     final String mandatoryFields = "'" + String.join(", ", fields) + "'";
 
     //check metadata
@@ -113,4 +104,56 @@ public class LookupResource {
     assumeTrue("The " + resourceName + " Resource was not found in the default entity container in the metadata!", hasResource);
     scenario.log("Found Lookup Resource!");
   }
+
+  /*
+  <!-- OData annotation for String List, Single field -->
+    <Property Name="OfficeCountyOrParish" Type="Edm.String">
+    <Annotation Term="RESO.OData.Metadata.LookupName" String="CountyOrParish" />
+    </Property>
+
+    <!-- OData annotation for String List, Multi field -->
+     <Property Name="ExteriorFeatures" Type="Collection(Edm.String)">
+     <Annotation Term="RESO.OData.Metadata.LookupName" String="ExteriorFeatures" />
+     </Property>
+  */
+  @Then("RESO Lookups using String or String Collection data types MUST have the annotation {string}")
+  public void resoLookupsUsingStringOrStringCollectionDataTypesMUSTHaveTheAnnotation(String annotationTerm) {
+    if (container.get().getDDCacheProcessor() == null || container.get().getDDCacheProcessor().getStandardFieldCache() == null) {
+      failAndExitWithErrorMessage("Could not access standard field cache. Check to make sure metadata requests have succeeded.", scenario);
+    }
+
+    final Map<String, Map<String, ReferenceStandardField>> standardLookupFieldCache =
+        container.get().getDDCacheProcessor().getStandardFieldCache();
+
+    final Set<ReferenceStandardField> lookupFields = standardLookupFieldCache.keySet().stream().flatMap(resourceName ->
+        standardLookupFieldCache.get(resourceName).values().stream()
+            .filter(referenceStandardField -> referenceStandardField.getLookupName() != null)).collect(Collectors.toSet());
+
+    lookupFields.forEach(referenceStandardField -> LOG.debug("Standard Field: { "
+        + "resourceName: \"" + referenceStandardField.getParentResourceName() + "\""
+        + ", standardName: \"" + referenceStandardField.getStandardName() + "\""
+        + ", lookupName: \"" + referenceStandardField.getLookupName() + "\" }"));
+  }
+
+  /*
+  <!-- OData annotation for String List, Single field -->
+    <Property Name="OfficeCountyOrParish" Type="Edm.String">
+    <Annotation Term="RESO.OData.Metadata.LookupName" String="CountyOrParish" />
+    </Property>
+
+    <!-- OData annotation for String List, Multi field -->
+     <Property Name="ExteriorFeatures" Type="Collection(Edm.String)">
+     <Annotation Term="RESO.OData.Metadata.LookupName" String="ExteriorFeatures" />
+     </Property>
+  */
+  @And("fields with the annotation term {string} MUST have a LookupName in the Lookup Resource")
+  public void fieldsWithTheAnnotationTermMUSTHaveALookupNameInTheLookupResource(String annotationTerm) {
+//    final List<EdmAnnotation> lookupNameAnnotations = container.get().getEdm().getSchemas().parallelStream().map(
+//        edmSchema -> edmSchema.getEntityTypes().parallelStream().map(edmEntityType ->
+//          edmEntityType.getAnnotations().stream().filter(edmAnnotation ->
+//              edmAnnotation.getTerm().getFullQualifiedName().getName().contentEquals("RESO.OData.Metadata.LookupName")))
+//    );
+  }
+
+
 }
