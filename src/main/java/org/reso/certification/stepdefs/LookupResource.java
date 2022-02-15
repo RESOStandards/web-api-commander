@@ -36,6 +36,7 @@ public class LookupResource {
   private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final AtomicReference<Map<String, List<ClientEntity>>> entityCache = new AtomicReference<>(new LinkedHashMap<>());
   private static final String LOOKUP_RESOURCE_REQUIRED_ANNOTATION_TERM = "RESO.OData.Metadata.LookupName";
+  private static final String LOOKUP_RESOURCE_NAME = "Lookup", LOOKUP_RESOURCE_LOOKUP_NAME_PROPERTY = "LookupName";
 
   @Inject
   public LookupResource(WebAPITestContainer c) {
@@ -65,8 +66,14 @@ public class LookupResource {
     if (!entityCache.get().containsKey(resourceName)) {
       entityCache.get().put(resourceName, new ArrayList<>());
       try {
-        entityCache.get().get(resourceName).addAll(ODataFetchApi.replicateDataFromResource(container.get(), resourceName,
-            ODataFetchApi.WebApiReplicationStrategy.TopAndSkip));
+        final List<ClientEntity> lookups = ODataFetchApi.replicateDataFromResource(container.get(), resourceName,
+            ODataFetchApi.WebApiReplicationStrategy.TopAndSkip);
+
+        if (lookups.size() == 0) {
+          failAndExitWithErrorMessage("Could not replicate data from the " + resourceName + " resource!", scenario);
+        }
+        entityCache.get().get(resourceName).addAll(lookups);
+
       } catch (Exception exception) {
         failAndExitWithErrorMessage("Unable to retrieve data from the Lookup Resource! " + exception.getMessage(), scenario);
       }
@@ -102,7 +109,7 @@ public class LookupResource {
   public void theResourceExistsInTheMetadata(String resourceName) {
     boolean hasResource = container.get().getFieldMap(resourceName) != null;
     assumeTrue("The " + resourceName + " Resource was not found in the default entity container in the metadata!", hasResource);
-    scenario.log("Found Lookup Resource!");
+    scenario.log("Found " + resourceName + " Resource!");
   }
 
   /*
@@ -128,9 +135,6 @@ public class LookupResource {
     final Set<ReferenceStandardField> lookupFields = standardLookupFieldCache.keySet().stream().flatMap(resourceName ->
         standardLookupFieldCache.get(resourceName).values().stream()
             .filter(referenceStandardField -> referenceStandardField.getLookupName() != null)).collect(Collectors.toSet());
-
-
-    final String LOOKUP_RESOURCE_NAME = "Lookup", LOOKUP_RESOURCE_LOOKUP_NAME_PROPERTY = "LookupName";
 
     lookupFields.forEach(referenceStandardField -> {
       LOG.debug("Standard Field: { "
@@ -159,8 +163,8 @@ public class LookupResource {
               MetadataReport.SneakyAnnotationReader annotationReader = new MetadataReport.SneakyAnnotationReader(foundAnnotation.get());
 
               LOG.debug("Found annotation for " + referenceStandardField.getStandardName() + "!");
-
               LOG.debug("Annotation term: " + annotationReader.getTerm());
+
               final String lookupName = foundAnnotation.get().getExpression().asConstant().getValueAsString();
 
               if (lookupName != null) {
@@ -182,9 +186,12 @@ public class LookupResource {
               }
 
             } else {
-              failAndExitWithErrorMessage("Required annotation \"" + LOOKUP_RESOURCE_REQUIRED_ANNOTATION_TERM
-                  + "\" not present for the " + referenceStandardField.getStandardName() + " field in the "
-                  + referenceStandardField.getParentResourceName() + " resource!", scenario);
+              final String message = "Required annotation \"" + LOOKUP_RESOURCE_REQUIRED_ANNOTATION_TERM
+                  + "\" not present for the "
+                  + referenceStandardField.getParentResourceName() + "." + referenceStandardField.getStandardName() + " field!";
+
+              LOG.info(message);
+              //failAndExitWithErrorMessage(message, scenario);
             }
           }
         }

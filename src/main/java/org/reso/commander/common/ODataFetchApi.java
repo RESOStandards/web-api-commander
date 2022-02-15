@@ -132,7 +132,6 @@ public class ODataFetchApi {
           pageSize = response.getBody().getEntities().size();
           if (pageSize > 0) {
             entities.addAll(response.getBody().getEntities());
-            LOG.info("Total records fetched: " + entities.size());
           }
         }
       }
@@ -143,6 +142,7 @@ public class ODataFetchApi {
 
       throw new Exception(message);
     }
+    LOG.info("Total records fetched: " + entities.size());
     return entities;
   }
 
@@ -249,8 +249,7 @@ public class ODataFetchApi {
       }
 
       if (entities.size() != resourceCount) {
-        LOG.error("Could not fetch all records!");
-        throw new Exception("Could not fetch all records! Total Count: " + resourceCount + ". Records fetched: " + entities.size());
+        throw new Exception("Could not fetch all records!\n\tTotal Count: " + resourceCount + ". Records fetched: " + entities.size());
       }
 
       LOG.info("Records fetched: " + entities.size());

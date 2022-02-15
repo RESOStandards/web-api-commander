@@ -24,7 +24,6 @@ import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.codegen.DDCacheProcessor;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.DataDictionaryMetadata;
-import org.reso.commander.common.TestUtils;
 import org.reso.commander.common.Utils;
 import org.reso.models.*;
 
@@ -403,9 +402,9 @@ public class DataAvailability {
 
 
                 //if the field is a lookup field, collect the frequency of each unique set of enumerations for the field
-                if (property.isEnum() || (ddCacheProcessor.get().getStandardFieldCache().containsKey(resourceName)
-                    && ddCacheProcessor.get().getStandardFieldCache().get(resourceName).containsKey(property.getName()))) {
-                  ReferenceStandardField standardField = ddCacheProcessor.get().getStandardFieldCache().get(resourceName).get(property.getName());
+                if (property.isEnum() || (container.get().getDDCacheProcessor().getStandardFieldCache().containsKey(resourceName)
+                    && container.get().getDDCacheProcessor().getStandardFieldCache().get(resourceName).containsKey(property.getName()))) {
+                  ReferenceStandardField standardField = container.get().getDDCacheProcessor().getStandardFieldCache().get(resourceName).get(property.getName());
                   //if the field is declared as an OData Edm.EnumType or String List, Single or Multii in the DD, then collect its value
                   if (property.isEnum() || (standardField.getSimpleDataType().contentEquals(STRING_LIST_SINGLE)
                       || standardField.getSimpleDataType().contentEquals(STRING_LIST_MULTI))) {
