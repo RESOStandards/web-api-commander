@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
+import static org.reso.commander.common.Utils.wrapColumns;
 
 public class LookupResource {
   private static final Logger LOG = LogManager.getLogger(LookupResource.class);
@@ -142,83 +143,91 @@ public class LookupResource {
           + ", standardName: \"" + referenceStandardField.getStandardName() + "\""
           + ", lookupName: \"" + referenceStandardField.getLookupName() + "\" }");
 
-      final EdmEntitySet entitySet = container.get().getEdm().getEntityContainer().getEntitySet(referenceStandardField.getParentResourceName());
+      EdmElement foundElement = getEdmElement(referenceStandardField.getParentResourceName(), referenceStandardField.getStandardName());
+      final boolean isStringDataType = foundElement != null &&
+          foundElement.getType().getFullQualifiedName().toString().contentEquals(EdmPrimitiveTypeKind.String.getFullQualifiedName().toString());
 
-      if (entitySet != null) {
-        final EdmElement fieldEdm = entitySet.getEntityTypeWithAnnotations().getProperty(referenceStandardField.getStandardName());
-        if (fieldEdm != null) {
-          final boolean isStringDataType = fieldEdm.getType().getFullQualifiedName().toString().contentEquals(EdmPrimitiveTypeKind.String.getFullQualifiedName().toString());
-
-          LOG.debug("\nFound field with resource: " + referenceStandardField.getParentResourceName() + " and standard name: " + referenceStandardField.getStandardName());
-          LOG.debug("\t\t Data type is: " + fieldEdm.getType().getFullQualifiedName().toString() + (fieldEdm.isCollection() ? ", Collection: true" : ""));
-
-          if (isStringDataType) {
-            final Optional<EdmAnnotation> foundAnnotation = ((EdmPropertyImpl) fieldEdm).getAnnotations().stream()
-                .filter(edmAnnotation -> {
-                  final MetadataReport.SneakyAnnotationReader annotationReader = new MetadataReport.SneakyAnnotationReader(edmAnnotation);
-                  return annotationReader.getTerm() != null && annotationReader.getTerm().contentEquals(LOOKUP_RESOURCE_REQUIRED_ANNOTATION_TERM);
-                }).findFirst();
-
-            if (foundAnnotation.isPresent()) {
-              MetadataReport.SneakyAnnotationReader annotationReader = new MetadataReport.SneakyAnnotationReader(foundAnnotation.get());
-
-              LOG.debug("Found annotation for " + referenceStandardField.getStandardName() + "!");
-              LOG.debug("Annotation term: " + annotationReader.getTerm());
-
-              final String lookupName = foundAnnotation.get().getExpression().asConstant().getValueAsString();
-
-              if (lookupName != null) {
-                LOG.debug("Found lookupName annotation! LookupName is: " + lookupName);
-              } else {
-                failAndExitWithErrorMessage("Could not find value for annotation term: \"" + annotationTerm + "\"", scenario);
-              }
-
-              LOG.debug("\t--> Checking for LookupName \"" + lookupName + "\" in the " + LOOKUP_RESOURCE_NAME + " resource...");
-              boolean lookupNameFoundInLookupData = entityCache.get().get(LOOKUP_RESOURCE_NAME).stream().anyMatch(clientEntity -> lookupName != null
-                  && clientEntity.getProperty(LOOKUP_RESOURCE_LOOKUP_NAME_PROPERTY).getValue().asPrimitive().toString().contentEquals(lookupName));
-
-              if (lookupNameFoundInLookupData) {
-                LOG.debug("\t--> Found!");
-              } else {
-                //TODO: determine whether this should fail or not
-                //failAndExitWithErrorMessage("Could not find LookupName \"" + lookupName + "\" in the " + LOOKUP_RESOURCE_NAME + " data! Field: " + fieldEdm.getName(), scenario);
-                scenario.log("WARN: Could not find LookupName \"" + lookupName + "\" in the " + LOOKUP_RESOURCE_NAME + " data! Field: " + fieldEdm.getName());
-              }
-
-            } else {
-              final String message = "Required annotation \"" + LOOKUP_RESOURCE_REQUIRED_ANNOTATION_TERM
-                  + "\" not present for the "
-                  + referenceStandardField.getParentResourceName() + "." + referenceStandardField.getStandardName() + " field!";
-
-              LOG.info(message);
-              //failAndExitWithErrorMessage(message, scenario);
-            }
-          }
+      if (foundElement != null && isStringDataType) {
+        if (!hasAnnotationTerm(foundElement, annotationTerm)) {
+          final String message = "Could not find required annotation with term \"" + annotationTerm + "\" for field: "
+              + referenceStandardField.getStandardName();
+          LOG.info("WARN: " + message);
+          failAndExitWithErrorMessage(message, scenario);
         }
       }
     });
-
   }
 
-  /*
-  <!-- OData annotation for String List, Single field -->
-    <Property Name="OfficeCountyOrParish" Type="Edm.String">
-    <Annotation Term="RESO.OData.Metadata.LookupName" String="CountyOrParish" />
-    </Property>
+  private static EdmElement getEdmElement(String resourceName, String fieldName) {
+    final EdmEntitySet entitySet = container.get().getEdm().getEntityContainer().getEntitySet(resourceName);
 
-    <!-- OData annotation for String List, Multi field -->
-     <Property Name="ExteriorFeatures" Type="Collection(Edm.String)">
-     <Annotation Term="RESO.OData.Metadata.LookupName" String="ExteriorFeatures" />
-     </Property>
-  */
+    if (entitySet != null) {
+      final EdmElement fieldEdm = entitySet.getEntityTypeWithAnnotations().getProperty(fieldName);
+      if (fieldEdm != null && fieldEdm.getType().getFullQualifiedName().toString().contentEquals(EdmPrimitiveTypeKind.String.getFullQualifiedName().toString())) {
+        LOG.debug("\nFound field with resource: " + resourceName + " and standard name: " + fieldName);
+        LOG.debug("\t\t Data type is: " + fieldEdm.getType().getFullQualifiedName().toString() + (fieldEdm.isCollection() ? ", Collection: true" : ""));
+        return fieldEdm;
+      }
+    }
+    return null;
+  }
+
+  private static boolean hasAnnotationTerm(EdmElement element, String annotationTerm) {
+    return getAnnotationValue(element, annotationTerm) != null;
+  }
+
+  private static String getAnnotationValue(EdmElement element, String annotationTerm) {
+    if (element == null || annotationTerm == null) return null;
+
+    final Optional<EdmAnnotation> foundAnnotation = ((EdmPropertyImpl) element).getAnnotations().stream()
+        .filter(edmAnnotation -> {
+          final MetadataReport.SneakyAnnotationReader annotationReader = new MetadataReport.SneakyAnnotationReader(edmAnnotation);
+          return annotationReader.getTerm() != null && annotationReader.getTerm().contentEquals(annotationTerm);
+        }).findFirst();
+
+    if (foundAnnotation.isPresent()) {
+      final String value = foundAnnotation.get().getExpression().asConstant().getValueAsString();
+
+      if (value != null) {
+        LOG.debug("Found \"" + annotationTerm + "\" annotation! Value is: " + value);
+        return value;
+      }
+    }
+    return null;
+  }
+
   @And("fields with the annotation term {string} MUST have a LookupName in the Lookup Resource")
   public void fieldsWithTheAnnotationTermMUSTHaveALookupNameInTheLookupResource(String annotationTerm) {
-//    final List<EdmAnnotation> lookupNameAnnotations = container.get().getEdm().getSchemas().parallelStream().map(
-//        edmSchema -> edmSchema.getEntityTypes().parallelStream().map(edmEntityType ->
-//          edmEntityType.getAnnotations().stream().filter(edmAnnotation ->
-//              edmAnnotation.getTerm().getFullQualifiedName().getName().contentEquals("RESO.OData.Metadata.LookupName")))
-//    );
+    //every item annotated with the annotation should have a corresponding element in the Lookup set
+    //TODO move this into its own method
+    final Set<String> annotatedLookupNames = container.get().getEdm().getSchemas().stream()
+        .filter(edmSchema -> edmSchema.getEntityContainer() != null && edmSchema.getEntityContainer().getEntitySets() != null)
+        .flatMap(edmSchema -> edmSchema.getEntityContainer().getEntitySets().parallelStream()
+            .flatMap(edmEntitySet -> edmEntitySet.getEntityTypeWithAnnotations().getPropertyNames().parallelStream()
+                .map(fieldName -> getAnnotationValue(edmEntitySet.getEntityType().getProperty(fieldName), annotationTerm))))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
+
+    final Set<String> lookupNamesFromLookupData = entityCache.get().get(LOOKUP_RESOURCE_NAME).parallelStream()
+        .map(clientEntity -> clientEntity.getProperty(LOOKUP_RESOURCE_LOOKUP_NAME_PROPERTY).getValue().asPrimitive().toString())
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
+
+    Set<String> missingLookupNames = annotatedLookupNames.stream()
+        .filter(lookupName -> !lookupNamesFromLookupData.contains(lookupName))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
+
+    if (missingLookupNames.size() > 0) {
+      failAndExitWithErrorMessage("LookupName elements missing from LookupMetadata: "
+          + wrapColumns(String.join(", ", missingLookupNames)), scenario);
+    } else {
+      if (annotatedLookupNames.size() > 0) {
+        scenario.log("Found all annotated LookupName elements in the Lookup data. Unique count: " + annotatedLookupNames.size());
+        scenario.log("LookupNames: " + wrapColumns(String.join(", ", annotatedLookupNames)));
+      } else {
+        scenario.log("No annotated lookup names found in the OData XML Metadata.");
+      }
+    }
   }
-
-
 }
