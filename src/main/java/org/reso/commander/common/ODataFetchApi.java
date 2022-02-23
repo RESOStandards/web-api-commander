@@ -27,7 +27,7 @@ public class ODataFetchApi {
 
   private static final Logger LOG = LogManager.getLogger(ODataFetchApi.class);
 
-  final static int DEFAULT_PAGE_SIZE = 1000;
+  final static int DEFAULT_PAGE_SIZE = 100;
   private final static String FILTER_DESCENDING_TEMPLATE = "?$filter=%s" + " lt %s&$orderby=%s desc";
   private final static String FILTER_ASCENDING_INIT_TEMPLATE = "?$orderby=%s asc";
   private final static String FILTER_ASCENDING_TEMPLATE = "?$filter=%s" + " gt %s&$orderby=%s asc";

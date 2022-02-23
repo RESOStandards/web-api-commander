@@ -36,9 +36,8 @@ Feature: Lookup Acceptance Tests (RCP-032)
   #  <Annotation Term="RESO.OData.Metadata.LookupName" String="ExteriorFeatures" />
   #  </Property>
   @dd-1.7 @rcp-032 @lookup-resource
-  Scenario: Check Required Annotations
+  Scenario: Check Required Annotations and LookupName Data
     Given that metadata have been retrieved from the server and validated
     When the "Lookup" Resource exists in the metadata
     Then RESO Lookups using String or String Collection data types MUST have the annotation "RESO.OData.Metadata.LookupName"
     And fields with the annotation term "RESO.OData.Metadata.LookupName" MUST have a LookupName in the Lookup Resource
-

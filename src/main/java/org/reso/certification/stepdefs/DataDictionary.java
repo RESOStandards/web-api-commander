@@ -24,7 +24,6 @@ import org.reso.commander.common.TestUtils;
 import org.reso.commander.common.TestUtils.TypeMappings;
 import org.reso.commander.common.Utils;
 import org.reso.models.IgnoredItem;
-import org.reso.models.LookupResourceItem;
 import org.reso.models.Settings;
 
 import java.io.File;
@@ -34,7 +33,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -65,7 +63,6 @@ public class DataDictionary {
   private static final AtomicReference<Set<EdmMember>> foundStandardMembers = new AtomicReference<>(new LinkedHashSet<>());
   private static final AtomicReference<Map<String, String>> currentLookups = new AtomicReference<>();
   private static final AtomicReference<Map<String, Map<String, Set<String>>>> ignoredItems = new AtomicReference<>(new LinkedHashMap<>());
-  private static final AtomicReference<Map<String, List<LookupResourceItem>>> lookupResourceLookupNameLookupValue = new AtomicReference<>();
 
   private static XMLMetadata referenceMetadata = null;
   private static boolean isMetadataValid = false;

@@ -36,7 +36,6 @@ public class LookupResource {
   private final static AtomicReference<WebAPITestContainer> container = new AtomicReference<>();
   private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final AtomicReference<Map<String, List<ClientEntity>>> entityCache = new AtomicReference<>(new LinkedHashMap<>());
-  private static final String LOOKUP_RESOURCE_REQUIRED_ANNOTATION_TERM = "RESO.OData.Metadata.LookupName";
   private static final String LOOKUP_RESOURCE_NAME = "Lookup", LOOKUP_RESOURCE_LOOKUP_NAME_PROPERTY = "LookupName";
 
   @Inject
@@ -200,7 +199,7 @@ public class LookupResource {
   public void fieldsWithTheAnnotationTermMUSTHaveALookupNameInTheLookupResource(String annotationTerm) {
     //every item annotated with the annotation should have a corresponding element in the Lookup set
     //TODO move this into its own method
-    final Set<String> annotatedLookupNames = container.get().getEdm().getSchemas().stream()
+    final Set<String> annotatedLookupNames = container.get().getEdm().getSchemas().parallelStream()
         .filter(edmSchema -> edmSchema.getEntityContainer() != null && edmSchema.getEntityContainer().getEntitySets() != null)
         .flatMap(edmSchema -> edmSchema.getEntityContainer().getEntitySets().parallelStream()
             .flatMap(edmEntitySet -> edmEntitySet.getEntityTypeWithAnnotations().getPropertyNames().parallelStream()
@@ -213,7 +212,7 @@ public class LookupResource {
         .filter(Objects::nonNull)
         .collect(Collectors.toSet());
 
-    Set<String> missingLookupNames = annotatedLookupNames.stream()
+    final Set<String> missingLookupNames = annotatedLookupNames.stream()
         .filter(lookupName -> !lookupNamesFromLookupData.contains(lookupName))
         .filter(Objects::nonNull)
         .collect(Collectors.toSet());
