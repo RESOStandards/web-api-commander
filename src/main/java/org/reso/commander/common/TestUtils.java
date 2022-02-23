@@ -772,17 +772,18 @@ public final class TestUtils {
    * Asserts that metadata in the given container are valid. Fetches metadata if not present in the container.
    * @param container a test container with a valid config that metadata can be fetched into
    */
-  public static void assertValidXMLMetadata(WebAPITestContainer container) {
+  public static void assertValidXMLMetadata(WebAPITestContainer container, Scenario scenario) {
     try {
       if (!container.getHaveMetadataBeenRequested()) {
         //will lazy-load metadata from the server if not yet requested
         container.fetchXMLMetadata();
       }
       container.validateMetadata();
-      assertTrue("XML Metadata at the given service root is not valid! " + container.getServiceRoot(),
-          container.getIsValidXMLMetadata());
+      if (!container.getIsValidXMLMetadata()) {
+       failAndExitWithErrorMessage("Invalid XML Metadata! Service root: " + container.getServiceRoot(), scenario);
+      }
     } catch (Exception ex) {
-      fail(getDefaultErrorMessage(ex));
+      failAndExitWithErrorMessage(getDefaultErrorMessage(ex), scenario);
     }
   }
 
@@ -790,18 +791,11 @@ public final class TestUtils {
    * Asserts that the given container has XML Metadata that contains an Entity Data Model (Edm)
    * @param container the container with XML metadata to validate
    */
-  public static void assertXmlMetadataContainsEdm(WebAPITestContainer container) {
+  public static void assertXmlMetadataContainsEdm(WebAPITestContainer container, Scenario scenario) {
     container.setEdm(Commander.deserializeEdm(container.getXMLResponseData(), container.getCommander().getClient()));
-    assertNotNull(getDefaultErrorMessage("Edm de-serialized to an empty object!"), container.getEdm());
-  }
-
-  /**
-   * Asserts that the Edm in the given container are valid
-   * @param container the container with the XML Metadata to check
-   */
-  public static void assertValidEdm(WebAPITestContainer container) {
-    assertTrue("Edm Metadata at the given service root is not valid! " + container.getServiceRoot(),
-        container.getIsValidEdm());
+    if (container.getEdm() == null) {
+      failAndExitWithErrorMessage(getDefaultErrorMessage("Edm de-serialized to an empty object!"), scenario);
+    }
   }
 
   /**
@@ -849,16 +843,17 @@ public final class TestUtils {
    * Asserts that the XML metadata in the given container has a valid service document
    * @param container the container with XML Metadata to validate
    */
-  public static void assertXMLMetadataHasValidServiceDocument(WebAPITestContainer container) {
+  public static void assertXMLMetadataHasValidServiceDocument(WebAPITestContainer container, Scenario scenario) {
     try {
-      assertNotNull("ERROR: could not find default entity container for given service root: " +
-          container.getServiceRoot(), container.getEdm().getEntityContainer());
+      if (container == null || container.getEdm() == null || container.getEdm().getEntityContainer() == null) {
+        failAndExitWithErrorMessage("Could not find default entity container for given service root: " + container.getServiceRoot(), scenario);
+      }
       LOG.info("Found Default Entity Container: '" + container.getEdm().getEntityContainer().getNamespace() + "'");
     } catch (ODataClientErrorException cex) {
       container.setResponseCode(cex.getStatusLine().getStatusCode());
-      fail(cex.toString());
+      failAndExitWithErrorMessage(cex.toString(), scenario);
     } catch (Exception ex) {
-      fail(getDefaultErrorMessage(ex));
+      failAndExitWithErrorMessage(getDefaultErrorMessage(ex), scenario);
     }
   }
 

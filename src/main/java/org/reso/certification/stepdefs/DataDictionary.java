@@ -205,9 +205,9 @@ public class DataDictionary {
       }
 
       //metadata validation tests
-      TestUtils.assertValidXMLMetadata(container);
-      TestUtils.assertXmlMetadataContainsEdm(container);
-      TestUtils.assertXMLMetadataHasValidServiceDocument(container);
+      TestUtils.assertValidXMLMetadata(container, scenario);
+      TestUtils.assertXmlMetadataContainsEdm(container, scenario);
+      TestUtils.assertXMLMetadataHasValidServiceDocument(container, scenario);
 
       //build field map and ensure it's not null
       assertNotNull(container.getFieldMap());
