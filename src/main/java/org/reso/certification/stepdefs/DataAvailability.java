@@ -253,8 +253,8 @@ public class DataAvailability {
     final AtomicReference<String> timestampField = new AtomicReference<>();
     final AtomicBoolean hasRecords = new AtomicBoolean(true);
     final AtomicReference<PayloadSample> payloadSample = new AtomicReference<>();
-    final AtomicReference<List<PayloadSample>> payloadSamples =
-        new AtomicReference<>(Collections.synchronizedList(new LinkedList<>()));
+    final AtomicReference<Set<PayloadSample>> payloadSamples =
+        new AtomicReference<>(Collections.synchronizedSet(new LinkedHashSet<>()));
 
     boolean hasStandardTimestampField = false;
     String requestUri;
@@ -294,14 +294,18 @@ public class DataAvailability {
     scenario.log("Keys found: " + keyFields.stream().map(EdmKeyPropertyRef::getName).collect(Collectors.joining(", ")));
 
     //loop and fetch records as long as items are available and we haven't reached our target count yet
+    //TODO: switch to OData Fetch API
     while (hasRecords.get() && recordsProcessed < targetRecordCount) {
+
       if (hasStandardTimestampField) {
         timestampField.set(MODIFICATION_TIMESTAMP_FIELD);
       } else if (timestampCandidateFields.size() > 0 && lastTimestampCandidateIndex < timestampCandidateFields.size()) {
         timestampField.set(timestampCandidateFields.get(lastTimestampCandidateIndex++));
       } else {
-        scenario.log(getDefaultErrorMessage("Could not find a suitable timestamp field in the "
-            + resourceName + " resource to sample with..."));
+        if (recordsProcessed == 0) {
+          scenario.log(getDefaultErrorMessage("Could not find a suitable timestamp field in the "
+              + resourceName + " resource to sample with..."));
+        }
 
         //skip this resource since no suitable fields were found
         break;
@@ -318,7 +322,7 @@ public class DataAvailability {
 
       // retries. sometimes requests can time out and fail and we don't want to stop sampling
       // immediately, but retry a couple of times before we bail
-      if (recordsProcessed == 0 && transportWrapper.get().getResponseData() == null) {
+      if (recordsProcessed == 0 || transportWrapper.get().getResponseData() == null) {
         //only count retries if we're constantly making requests and not getting anything
         numTimestampRetries += 1;
       } else {
@@ -363,8 +367,8 @@ public class DataAvailability {
           if (lastEntityCollectionResWrap.get() != null && entityCollectionResWrap.get() != null
               && lastEntityCollectionResWrap.get().getPayload().hashCode() == entityCollectionResWrap.get().getPayload().hashCode()) {
             //if the payload is the same between pages, we need to skip it and subtract some more time
-            LOG.info("Found identical pages. Subtracting one day from the time...");
-            lastFetchedDate.set(lastFetchedDate.get().minus(1, ChronoUnit.DAYS));
+            LOG.info("Found identical pages. Subtracting one week from the time...");
+            lastFetchedDate.set(lastFetchedDate.get().minus(1, ChronoUnit.WEEKS));
             break;
           } else if (entityCollectionResWrap.get().getPayload().getEntities().size() > 0) {
 
@@ -477,17 +481,19 @@ public class DataAvailability {
 
             payloadSamples.get().add(payloadSample.get());
           } else {
-            scenario.log("All available records fetched! Total: " + recordsProcessed);
+            scenario.log("All available records fetched! Unique Records Processed: " + recordsProcessed);
             hasRecords.set(false);
           }
         } catch (Exception ex) {
           scenario.log("Error in fetchAndProcessRecords: " + getDefaultErrorMessage(ex.toString()));
           scenario.log("Skipping sample...");
+
+          //try subtracting some time to get unstuck, if possible
           lastFetchedDate.set(lastFetchedDate.get().minus(1, ChronoUnit.WEEKS));
         }
       }
     }
-    return payloadSamples.get();
+    return payloadSamples.get().parallelStream().collect(Collectors.toList());
   }
 
 

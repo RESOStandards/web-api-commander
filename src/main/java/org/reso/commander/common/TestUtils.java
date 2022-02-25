@@ -830,16 +830,6 @@ public final class TestUtils {
   }
 
   /**
-   * Asserts that the XML Response in the given container is valid XML
-   * @param container the container with the XML response to validate
-   */
-  public static void assertXMLResponseIsValidXML(WebAPITestContainer container) {
-    assertNotNull(getDefaultErrorMessage("no XML Response data were found!"), container.getXMLResponseData());
-    container.validateXMLMetadataXML();
-    assertTrue(getDefaultErrorMessage("invalid XML response!"), container.getIsValidXMLMetadataXML());
-  }
-
-  /**
    * Asserts that the XML metadata in the given container has a valid service document
    * @param container the container with XML Metadata to validate
    */

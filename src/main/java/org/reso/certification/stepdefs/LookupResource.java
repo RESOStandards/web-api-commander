@@ -14,6 +14,7 @@ import org.apache.olingo.commons.api.edm.EdmElement;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.core.edm.EdmPropertyImpl;
+import org.junit.AfterClass;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.ODataFetchApi;
 import org.reso.models.MetadataReport;
