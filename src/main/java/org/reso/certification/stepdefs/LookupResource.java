@@ -17,6 +17,7 @@ import org.apache.olingo.commons.core.edm.EdmPropertyImpl;
 import org.junit.AfterClass;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.ODataFetchApi;
+import org.reso.commander.common.Utils;
 import org.reso.models.MetadataReport;
 import org.reso.models.ReferenceStandardField;
 import org.reso.models.Settings;
@@ -181,7 +182,7 @@ public class LookupResource {
 
     final Optional<EdmAnnotation> foundAnnotation = ((EdmPropertyImpl) element).getAnnotations().stream()
         .filter(edmAnnotation -> {
-          final MetadataReport.SneakyAnnotationReader annotationReader = new MetadataReport.SneakyAnnotationReader(edmAnnotation);
+          final Utils.SneakyAnnotationReader annotationReader = new Utils.SneakyAnnotationReader(edmAnnotation);
           return annotationReader.getTerm() != null && annotationReader.getTerm().contentEquals(annotationTerm);
         }).findFirst();
 

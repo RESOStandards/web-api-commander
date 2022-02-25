@@ -2,9 +2,13 @@ package org.reso.commander.common;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.olingo.client.core.edm.xml.ClientCsdlAnnotation;
+import org.apache.olingo.commons.api.edm.EdmAnnotation;
+import org.apache.olingo.commons.core.edm.EdmAnnotationImpl;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -110,6 +114,37 @@ public class Utils {
       }
     }
     return true;
+  }
+
+  public static class SneakyAnnotationReader {
+    Class<? extends EdmAnnotationImpl> object;
+    Field field;
+    EdmAnnotationImpl edmAnnotationImpl;
+    ClientCsdlAnnotation clientCsdlAnnotation;
+
+    public SneakyAnnotationReader(EdmAnnotation edmAnnotation) {
+      try {
+        edmAnnotationImpl = ((EdmAnnotationImpl) edmAnnotation);
+
+        // create an object of the class named Class
+        object = edmAnnotationImpl.getClass();
+
+        // access the private variable
+        field = object.getDeclaredField("annotation");
+        // make private field accessible
+        field.setAccessible(true);
+
+        clientCsdlAnnotation = (ClientCsdlAnnotation) field.get(edmAnnotationImpl);
+
+      } catch (Exception ex) {
+        LOG.error(ex);
+        ex.printStackTrace();
+      }
+    }
+
+    public String getTerm() {
+      return clientCsdlAnnotation.getTerm();
+    }
   }
 
   public static String pluralize(int lengthAttribute) {

@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.core.edm.xml.ClientCsdlAnnotation;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.commons.core.edm.EdmAnnotationImpl;
+import org.apache.xmlgraphics.xmp.Metadata;
 import org.reso.commander.common.Utils;
 
 import java.lang.reflect.Field;
@@ -151,7 +152,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
               if (edmAnnotation.getTerm() != null) {
                 annotation.addProperty(TERM_KEY, edmAnnotation.getTerm().getFullQualifiedName().getFullQualifiedNameAsString());
               } else {
-                SneakyAnnotationReader sneakyAnnotationReader = new SneakyAnnotationReader(edmAnnotation);
+                Utils.SneakyAnnotationReader sneakyAnnotationReader = new Utils.SneakyAnnotationReader(edmAnnotation);
                 annotation.addProperty(TERM_KEY, sneakyAnnotationReader.getTerm());
               }
               annotation.addProperty(VALUE_KEY, edmAnnotation.getExpression().asConstant().getValueAsString());
@@ -176,37 +177,6 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
         if (annotationsJsonArray.size() > 0) field.add(ANNOTATIONS_KEY, annotationsJsonArray);
       }
       return field;
-    }
-  }
-
-  public static class SneakyAnnotationReader {
-    Class<? extends EdmAnnotationImpl> object;
-    Field field;
-    EdmAnnotationImpl edmAnnotationImpl;
-    ClientCsdlAnnotation clientCsdlAnnotation;
-
-    public SneakyAnnotationReader(EdmAnnotation edmAnnotation) {
-      try {
-        edmAnnotationImpl = ((EdmAnnotationImpl) edmAnnotation);
-
-        // create an object of the class named Class
-        object = edmAnnotationImpl.getClass();
-
-        // access the private variable
-        field = object.getDeclaredField("annotation");
-        // make private field accessible
-        field.setAccessible(true);
-
-        clientCsdlAnnotation = (ClientCsdlAnnotation) field.get(edmAnnotationImpl);
-
-      } catch (Exception ex) {
-        LOG.error(ex);
-        ex.printStackTrace();
-      }
-    }
-
-    public String getTerm() {
-      return clientCsdlAnnotation.getTerm();
     }
   }
 
@@ -280,7 +250,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
           if (edmAnnotation.getTerm() != null) {
             annotation.addProperty(FieldJson.TERM_KEY, edmAnnotation.getTerm().getFullQualifiedName().getFullQualifiedNameAsString());
           } else {
-            SneakyAnnotationReader sneakyAnnotationReader = new SneakyAnnotationReader(edmAnnotation);
+            Utils.SneakyAnnotationReader sneakyAnnotationReader = new Utils.SneakyAnnotationReader(edmAnnotation);
             annotation.addProperty(FieldJson.TERM_KEY, sneakyAnnotationReader.getTerm());
           }
 
