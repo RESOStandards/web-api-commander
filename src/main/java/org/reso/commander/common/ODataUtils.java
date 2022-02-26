@@ -89,14 +89,12 @@ public class ODataUtils {
     try {
       final Gson gson = new Gson();
       final JsonSerializer jsonSerializer = new JsonSerializer(false, ContentType.APPLICATION_JSON);
-      results.parallelStream().forEach(clientEntity -> {
+      results.forEach(clientEntity -> {
         try {
           StringWriter writer = new StringWriter();
           jsonSerializer.write(writer, client.getBinder().getEntity(clientEntity));
-          JsonElement element = gson.fromJson(writer.toString(), JsonElement.class);
-          if (element != null) {
-            elements.add(element);
-          }
+          Optional<JsonElement> element = Optional.ofNullable(gson.fromJson(writer.toString(), JsonElement.class));
+          element.ifPresent(elements::add);
         } catch (ODataSerializerException e) {
           LOG.error("ERROR: could not deserialize. Exception: " + e);
         }
