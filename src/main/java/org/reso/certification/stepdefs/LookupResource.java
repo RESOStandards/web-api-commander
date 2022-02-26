@@ -1,6 +1,8 @@
 package org.reso.certification.stepdefs;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
@@ -10,13 +12,10 @@ import io.cucumber.java.en.When;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.domain.ClientEntity;
-import org.apache.olingo.client.api.serialization.ODataSerializerException;
-import org.apache.olingo.client.core.serialization.JsonSerializer;
 import org.apache.olingo.commons.api.edm.EdmAnnotation;
 import org.apache.olingo.commons.api.edm.EdmElement;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
-import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.core.edm.EdmPropertyImpl;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.ODataFetchApi;
@@ -25,14 +24,13 @@ import org.reso.models.ReferenceStandardField;
 import org.reso.models.Settings;
 
 import java.io.File;
-import java.io.StringWriter;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
+import static org.reso.certification.stepdefs.DataAvailability.CERTIFICATION_RESULTS_PATH;
 import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
 import static org.reso.commander.common.Utils.wrapColumns;
 
@@ -43,7 +41,7 @@ public class LookupResource {
   private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final AtomicReference<Map<String, List<ClientEntity>>> entityCache = new AtomicReference<>(new LinkedHashMap<>());
   private static final String LOOKUP_RESOURCE_NAME = "Lookup", LOOKUP_RESOURCE_LOOKUP_NAME_PROPERTY = "LookupName";
-  private static final AtomicBoolean hasReplicatedDataBeenSaved = new AtomicBoolean(false);
+  private static final String LOOKUP_METADATA_FILE_NAME = "lookup-metadata.json";
 
   @Inject
   public LookupResource(WebAPITestContainer c) {
@@ -66,6 +64,7 @@ public class LookupResource {
 
   @Then("valid data is replicated from the {string} Resource")
   public void validDataIsReplicatedFromTheResource(String resourceName) {
+    final String JSON_ARRAY_NAME = "lookups";
     if (entityCache.get() == null) {
       failAndExitWithErrorMessage("Could not replicate data from resource: " + resourceName, scenario);
     }
@@ -80,7 +79,12 @@ public class LookupResource {
           failAndExitWithErrorMessage("Could not replicate data from the " + resourceName + " resource!", scenario);
         }
         entityCache.get().get(resourceName).addAll(results);
-        LOG.info("Results: " + serializeClientEntityJsonResults(results));
+
+        //create single object with JSON array called lookups
+        final JsonObject lookups = new JsonObject();
+        lookups.add(JSON_ARRAY_NAME,
+            Utils.serializeClientEntityJsonResultsToJsonArray(results, container.get().getCommander().getClient()));
+        Utils.createFile(CERTIFICATION_RESULTS_PATH, LOOKUP_METADATA_FILE_NAME, lookups.toString());
 
       } catch (Exception exception) {
         failAndExitWithErrorMessage("Unable to retrieve data from the Lookup Resource! " + exception.getMessage(), scenario);
@@ -88,33 +92,6 @@ public class LookupResource {
     } else {
       LOG.debug("Using cached data from: " + resourceName);
     }
-  }
-
-  public static String serializeClientEntityJsonResults(List<ClientEntity> results) {
-    try {
-      final JsonArray elements = new JsonArray();
-      results.parallelStream().forEach(clientEntity -> {
-        try {
-          StringWriter writer = new StringWriter();
-          JsonSerializer jsonSerializer = new JsonSerializer(false, ContentType.APPLICATION_JSON);
-          jsonSerializer.write(writer, container.get().getCommander().getClient().getBinder().getEntity(clientEntity));
-          JsonElement parsed = JsonParser.parseString(writer.toString());
-          if (parsed != null) {
-            elements.add(parsed);
-          }
-        } catch (ODataSerializerException e) {
-          LOG.error("ERROR: could not deserialize. Exception: " + e);
-        }
-      });
-
-      Gson gson = new Gson();
-      JsonObject lookups = new JsonObject();
-      lookups.addProperty("lookups", gson.toJson(elements));
-      return lookups.toString();
-    } catch (Exception exception) {
-      LOG.error(exception);
-    }
-    return null;
   }
 
   @Then("{string} Resource data and metadata MUST contain the following fields")

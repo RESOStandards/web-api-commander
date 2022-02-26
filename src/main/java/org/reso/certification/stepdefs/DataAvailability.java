@@ -62,7 +62,7 @@ public class DataAvailability {
 
   private static final String BUILD_DIRECTORY_PATH = "build";
   private static final String CERTIFICATION_PATH = BUILD_DIRECTORY_PATH + File.separator + "certification";
-  private static final String DATA_AVAILABILITY_REPORT_PATH = BUILD_DIRECTORY_PATH + File.separator + "certification" + File.separator + "results";
+  public static final String CERTIFICATION_RESULTS_PATH = BUILD_DIRECTORY_PATH + File.separator + "certification" + File.separator + "results";
   private static final String SAMPLES_DIRECTORY_TEMPLATE = BUILD_DIRECTORY_PATH + File.separator + "%s";
   private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final String USE_STRICT_MODE_ARG = "strict";
@@ -152,7 +152,7 @@ public class DataAvailability {
     GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting();
     gsonBuilder.registerTypeAdapter(PayloadSampleReport.class, payloadSampleReport);
 
-    Utils.createFile(DATA_AVAILABILITY_REPORT_PATH, reportName, gsonBuilder.create().toJson(payloadSampleReport));
+    Utils.createFile(CERTIFICATION_RESULTS_PATH, reportName, gsonBuilder.create().toJson(payloadSampleReport));
 
   }
 
