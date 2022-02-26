@@ -41,10 +41,22 @@ public class ODataUtils {
     return null;
   }
 
+  /**
+   * Determines whether the element has the given term.
+   * @param element the Edm element to check.
+   * @param annotationTerm the term to search for.
+   * @return true if the Edm element contains the annotationTerm, false otherwise.
+   */
   public static boolean hasAnnotationTerm(EdmElement element, String annotationTerm) {
-    return getAnnotationValue(element, annotationTerm) != null;
+    return Optional.ofNullable(getAnnotationValue(element, annotationTerm)).isPresent();
   }
 
+  /**
+   * Gets the annotation value for the given annotation term.
+   * @param element the Edm element to check.
+   * @param annotationTerm the term to search for.
+   * @return a string value, if present, otherwise null.
+   */
   public static String getAnnotationValue(EdmElement element, String annotationTerm) {
     if (element == null || annotationTerm == null) return null;
 
@@ -55,11 +67,11 @@ public class ODataUtils {
         }).findFirst();
 
     if (foundAnnotation.isPresent()) {
-      final String value = foundAnnotation.get().getExpression().asConstant().getValueAsString();
+      final Optional<String> value = Optional.ofNullable(foundAnnotation.get().getExpression().asConstant().getValueAsString());
 
-      if (value != null) {
+      if (value.isPresent()) {
         LOG.debug("Found \"" + annotationTerm + "\" annotation! Value is: " + value);
-        return value;
+        return value.get();
       }
     }
     return null;
@@ -116,12 +128,19 @@ public class ODataUtils {
   public final static Function<Map<EdmElement, String>, Set<String>> extractAnnotationNamesFromEdmElements = edmElementStringMap
       -> new HashSet<>(edmElementStringMap.values());
 
+  /**
+   * Class to read OData internal annotation variables.
+   */
   public static class SneakyAnnotationReader {
     Class<? extends EdmAnnotationImpl> object;
     Field field;
     EdmAnnotationImpl edmAnnotationImpl;
     ClientCsdlAnnotation clientCsdlAnnotation;
 
+    /**
+     * Allows the consumer to read internal annotations.
+     * @param edmAnnotation the annotation to read from
+     */
     public SneakyAnnotationReader(EdmAnnotation edmAnnotation) {
       try {
         edmAnnotationImpl = ((EdmAnnotationImpl) edmAnnotation);
@@ -143,7 +162,7 @@ public class ODataUtils {
     }
 
     public String getTerm() {
-      return clientCsdlAnnotation.getTerm();
+      return Optional.ofNullable(clientCsdlAnnotation.getTerm()).orElse(null);
     }
   }
 
