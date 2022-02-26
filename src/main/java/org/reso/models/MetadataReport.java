@@ -7,6 +7,7 @@ import org.apache.olingo.client.core.edm.xml.ClientCsdlAnnotation;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.commons.core.edm.EdmAnnotationImpl;
 import org.apache.xmlgraphics.xmp.Metadata;
+import org.reso.commander.common.ODataUtils;
 import org.reso.commander.common.Utils;
 
 import java.lang.reflect.Field;
@@ -152,7 +153,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
               if (edmAnnotation.getTerm() != null) {
                 annotation.addProperty(TERM_KEY, edmAnnotation.getTerm().getFullQualifiedName().getFullQualifiedNameAsString());
               } else {
-                Utils.SneakyAnnotationReader sneakyAnnotationReader = new Utils.SneakyAnnotationReader(edmAnnotation);
+                ODataUtils.SneakyAnnotationReader sneakyAnnotationReader = new ODataUtils.SneakyAnnotationReader(edmAnnotation);
                 annotation.addProperty(TERM_KEY, sneakyAnnotationReader.getTerm());
               }
               annotation.addProperty(VALUE_KEY, edmAnnotation.getExpression().asConstant().getValueAsString());
@@ -250,7 +251,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
           if (edmAnnotation.getTerm() != null) {
             annotation.addProperty(FieldJson.TERM_KEY, edmAnnotation.getTerm().getFullQualifiedName().getFullQualifiedNameAsString());
           } else {
-            Utils.SneakyAnnotationReader sneakyAnnotationReader = new Utils.SneakyAnnotationReader(edmAnnotation);
+            ODataUtils.SneakyAnnotationReader sneakyAnnotationReader = new ODataUtils.SneakyAnnotationReader(edmAnnotation);
             annotation.addProperty(FieldJson.TERM_KEY, sneakyAnnotationReader.getTerm());
           }
 

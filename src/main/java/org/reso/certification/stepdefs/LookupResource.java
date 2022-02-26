@@ -1,7 +1,6 @@
 package org.reso.certification.stepdefs;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
+import com.google.common.base.Functions;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import io.cucumber.java.Before;
@@ -12,13 +11,11 @@ import io.cucumber.java.en.When;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.domain.ClientEntity;
-import org.apache.olingo.commons.api.edm.EdmAnnotation;
-import org.apache.olingo.commons.api.edm.EdmElement;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
-import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
+import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.commons.core.edm.EdmPropertyImpl;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.ODataFetchApi;
+import org.reso.commander.common.ODataUtils;
 import org.reso.commander.common.Utils;
 import org.reso.models.ReferenceStandardField;
 import org.reso.models.Settings;
@@ -26,11 +23,15 @@ import org.reso.models.Settings;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.reso.certification.stepdefs.DataAvailability.CERTIFICATION_RESULTS_PATH;
+import static org.reso.commander.common.ODataUtils.getEdmElement;
+import static org.reso.commander.common.ODataUtils.hasAnnotationTerm;
 import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
 import static org.reso.commander.common.Utils.wrapColumns;
 
@@ -83,7 +84,7 @@ public class LookupResource {
         //create single object with JSON array called lookups
         final JsonObject lookups = new JsonObject();
         lookups.add(JSON_ARRAY_NAME,
-            Utils.serializeClientEntityJsonResultsToJsonArray(results, container.get().getCommander().getClient()));
+            ODataUtils.serializeClientEntityJsonResultsToJsonArray(results, container.get().getCommander().getClient()));
         Utils.createFile(CERTIFICATION_RESULTS_PATH, LOOKUP_METADATA_FILE_NAME, lookups.toString());
 
       } catch (Exception exception) {
@@ -154,7 +155,7 @@ public class LookupResource {
           + ", standardName: \"" + referenceStandardField.getStandardName() + "\""
           + ", lookupName: \"" + referenceStandardField.getLookupName() + "\" }");
 
-      EdmElement foundElement = getEdmElement(referenceStandardField.getParentResourceName(), referenceStandardField.getStandardName());
+      EdmElement foundElement = getEdmElement(container.get().getEdm(), referenceStandardField.getParentResourceName(), referenceStandardField.getStandardName());
       final boolean isStringDataType = foundElement != null &&
           foundElement.getType().getFullQualifiedName().toString().contentEquals(EdmPrimitiveTypeKind.String.getFullQualifiedName().toString());
 
@@ -169,73 +170,21 @@ public class LookupResource {
     });
   }
 
-  private static EdmElement getEdmElement(String resourceName, String fieldName) {
-    final EdmEntitySet entitySet = container.get().getEdm().getEntityContainer().getEntitySet(resourceName);
-
-    if (entitySet != null) {
-      final EdmElement fieldEdm = entitySet.getEntityTypeWithAnnotations().getProperty(fieldName);
-      if (fieldEdm != null && fieldEdm.getType().getFullQualifiedName().toString().contentEquals(EdmPrimitiveTypeKind.String.getFullQualifiedName().toString())) {
-        LOG.debug("\nFound field with resource: " + resourceName + " and standard name: " + fieldName);
-        LOG.debug("\t\t Data type is: " + fieldEdm.getType().getFullQualifiedName().toString() + (fieldEdm.isCollection() ? ", Collection: true" : ""));
-        return fieldEdm;
-      }
-    }
-    return null;
-  }
-
-  private static boolean hasAnnotationTerm(EdmElement element, String annotationTerm) {
-    return getAnnotationValue(element, annotationTerm) != null;
-  }
-
-  private static String getAnnotationValue(EdmElement element, String annotationTerm) {
-    if (element == null || annotationTerm == null) return null;
-
-    final Optional<EdmAnnotation> foundAnnotation = ((EdmPropertyImpl) element).getAnnotations().stream()
-        .filter(edmAnnotation -> {
-          final Utils.SneakyAnnotationReader annotationReader = new Utils.SneakyAnnotationReader(edmAnnotation);
-          return annotationReader.getTerm() != null && annotationReader.getTerm().contentEquals(annotationTerm);
-        }).findFirst();
-
-    if (foundAnnotation.isPresent()) {
-      final String value = foundAnnotation.get().getExpression().asConstant().getValueAsString();
-
-      if (value != null) {
-        LOG.debug("Found \"" + annotationTerm + "\" annotation! Value is: " + value);
-        return value;
-      }
-    }
-    return null;
-  }
-
   @And("fields with the annotation term {string} MUST have a LookupName in the Lookup Resource")
   public void fieldsWithTheAnnotationTermMUSTHaveALookupNameInTheLookupResource(String annotationTerm) {
     //every item annotated with the annotation should have a corresponding element in the Lookup set
-    //TODO move this into its own method
-    final Set<String> annotatedLookupNames = container.get().getEdm().getSchemas().parallelStream()
-        .filter(edmSchema -> edmSchema.getEntityContainer() != null && edmSchema.getEntityContainer().getEntitySets() != null)
-        .flatMap(edmSchema -> edmSchema.getEntityContainer().getEntitySets().parallelStream()
-            .flatMap(edmEntitySet -> edmEntitySet.getEntityTypeWithAnnotations().getPropertyNames().parallelStream()
-                .map(fieldName -> getAnnotationValue(edmEntitySet.getEntityType().getProperty(fieldName), annotationTerm))))
-        .filter(Objects::nonNull)
-        .collect(Collectors.toSet());
-
-    final Set<String> lookupNamesFromLookupData = entityCache.get().get(LOOKUP_RESOURCE_NAME).parallelStream()
-        .map(clientEntity -> clientEntity.getProperty(LOOKUP_RESOURCE_LOOKUP_NAME_PROPERTY).getValue().asPrimitive().toString())
-        .filter(Objects::nonNull)
-        .collect(Collectors.toSet());
-
-    final Set<String> missingLookupNames = annotatedLookupNames.stream()
-        .filter(lookupName -> !lookupNamesFromLookupData.contains(lookupName))
-        .filter(Objects::nonNull)
-        .collect(Collectors.toSet());
+    final Map<EdmElement, String> annotatedLookupFields = ODataUtils.getEdmElementsWithAnnotation.apply(container.get().getEdm(), annotationTerm);
+    final Set<String> lookupNamesFromLookupData = ODataUtils.extractAnnotationNamesFromEdmElements.apply(annotatedLookupFields);
+    final Set<String> missingLookupNames = Utils.getDifference(new HashSet<>(annotatedLookupFields.values()),
+        lookupNamesFromLookupData);
 
     if (missingLookupNames.size() > 0) {
       failAndExitWithErrorMessage("LookupName elements missing from LookupMetadata: "
           + wrapColumns(String.join(", ", missingLookupNames)), scenario);
     } else {
-      if (annotatedLookupNames.size() > 0) {
-        scenario.log("Found all annotated LookupName elements in the Lookup data. Unique count: " + annotatedLookupNames.size());
-        scenario.log("LookupNames: " + wrapColumns(String.join(", ", annotatedLookupNames)));
+      if (annotatedLookupFields.size() > 0) {
+        scenario.log("Found all annotated LookupName elements in the Lookup data. Unique count: " + annotatedLookupFields.size());
+        scenario.log("LookupNames: " + wrapColumns(String.join(", ", annotatedLookupFields.values())));
       } else {
         scenario.log("No annotated lookup names found in the OData XML Metadata.");
       }

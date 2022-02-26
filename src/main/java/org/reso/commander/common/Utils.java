@@ -1,5 +1,6 @@
 package org.reso.commander.common;
 
+import com.google.common.base.Functions;
 import com.google.gson.*;
 import io.cucumber.gherkin.internal.com.eclipsesource.json.Json;
 import org.apache.logging.log4j.LogManager;
@@ -9,7 +10,9 @@ import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.serialization.ODataSerializerException;
 import org.apache.olingo.client.core.edm.xml.ClientCsdlAnnotation;
 import org.apache.olingo.client.core.serialization.JsonSerializer;
+import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmAnnotation;
+import org.apache.olingo.commons.api.edm.EdmElement;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.core.edm.EdmAnnotationImpl;
 
@@ -22,10 +25,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Utils {
@@ -130,37 +132,6 @@ public class Utils {
     return true;
   }
 
-  public static class SneakyAnnotationReader {
-    Class<? extends EdmAnnotationImpl> object;
-    Field field;
-    EdmAnnotationImpl edmAnnotationImpl;
-    ClientCsdlAnnotation clientCsdlAnnotation;
-
-    public SneakyAnnotationReader(EdmAnnotation edmAnnotation) {
-      try {
-        edmAnnotationImpl = ((EdmAnnotationImpl) edmAnnotation);
-
-        // create an object of the class named Class
-        object = edmAnnotationImpl.getClass();
-
-        // access the private variable
-        field = object.getDeclaredField("annotation");
-        // make private field accessible
-        field.setAccessible(true);
-
-        clientCsdlAnnotation = (ClientCsdlAnnotation) field.get(edmAnnotationImpl);
-
-      } catch (Exception ex) {
-        LOG.error(ex);
-        ex.printStackTrace();
-      }
-    }
-
-    public String getTerm() {
-      return clientCsdlAnnotation.getTerm();
-    }
-  }
-
   public static String pluralize(int lengthAttribute) {
     return lengthAttribute != 1 ? "s" : "";
   }
@@ -193,31 +164,16 @@ public class Utils {
   }
 
   /**
-   * Serializes a list of OData ClientEntity items in a JSON Array with those properties.
-   * @param results list of OData ClientEntity results
-   * @param client OData client to use as serializer
-   * @return a JsonArray of results
+   * Gets the difference of two generic sets.
+   * @param a the minuend set
+   * @param b the subtrahend set
+   * @param <T> the type of set
+   * @return Set of type T that contains A \ B
    */
-  public static JsonArray serializeClientEntityJsonResultsToJsonArray(List<ClientEntity> results, ODataClient client) {
-    final JsonArray elements = new JsonArray();
-    try {
-      final Gson gson = new Gson();
-      final JsonSerializer jsonSerializer = new JsonSerializer(false, ContentType.APPLICATION_JSON);
-      results.parallelStream().forEach(clientEntity -> {
-        try {
-          StringWriter writer = new StringWriter();
-          jsonSerializer.write(writer, client.getBinder().getEntity(clientEntity));
-          JsonElement element = gson.fromJson(writer.toString(), JsonElement.class);
-          if (element != null) {
-            elements.add(element);
-          }
-        } catch (ODataSerializerException e) {
-          LOG.error("ERROR: could not deserialize. Exception: " + e);
-        }
-      });
-    } catch (Exception exception) {
-      LOG.error(exception);
-    }
-    return elements;
+  public static <T> Set<T> getDifference(Set<T> a, Set<T> b) {
+    return a.parallelStream()
+        .filter(item -> !b.contains(item))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
   }
 }
