@@ -86,7 +86,7 @@ public class DataAvailability {
       + (USE_ORIGINATING_SYSTEM_QUERY ? ORIGINATING_SYSTEM_QUERY + " and " : EMPTY_STRING)
       + "%s" + " lt %s&$orderby=%s desc&$top=" + TOP_COUNT;
 
-  final String COUNT_REQUEST_URI_TEMPLATE = "?" + (USE_ORIGINATING_SYSTEM_QUERY ? "$filter=" + ORIGINATING_SYSTEM_QUERY + "&": EMPTY_STRING) + "$count=true";
+  final String COUNT_REQUEST_URI_TEMPLATE = "?" + (USE_ORIGINATING_SYSTEM_QUERY ? "$filter=" + ORIGINATING_SYSTEM_QUERY + "&" : EMPTY_STRING) + "$count=true";
 
   //TODO: get this from the parameters
   private final static boolean DEBUG = false;
@@ -367,8 +367,8 @@ public class DataAvailability {
           if (lastEntityCollectionResWrap.get() != null && entityCollectionResWrap.get() != null
               && lastEntityCollectionResWrap.get().getPayload().hashCode() == entityCollectionResWrap.get().getPayload().hashCode()) {
             //if the payload is the same between pages, we need to skip it and subtract some more time
-            LOG.info("Found identical pages. Subtracting one week from the time...");
-            lastFetchedDate.set(lastFetchedDate.get().minus(1, ChronoUnit.WEEKS));
+            LOG.info("Found identical pages. Subtracting one day from the time...");
+            lastFetchedDate.set(lastFetchedDate.get().minus(1, ChronoUnit.DAYS));
             break;
           } else if (entityCollectionResWrap.get().getPayload().getEntities().size() > 0) {
 
@@ -409,7 +409,7 @@ public class DataAvailability {
                 if (property.isEnum() || (container.get().getDDCacheProcessor().getStandardFieldCache().containsKey(resourceName)
                     && container.get().getDDCacheProcessor().getStandardFieldCache().get(resourceName).containsKey(property.getName()))) {
                   ReferenceStandardField standardField = container.get().getDDCacheProcessor().getStandardFieldCache().get(resourceName).get(property.getName());
-                  //if the field is declared as an OData Edm.EnumType or String List, Single or Multii in the DD, then collect its value
+                  //if the field is declared as an OData Edm.EnumType or String List, Single or Multi in the DD, then collect its value
                   if (property.isEnum() || (standardField.getSimpleDataType().contentEquals(STRING_LIST_SINGLE)
                       || standardField.getSimpleDataType().contentEquals(STRING_LIST_MULTI))) {
 
@@ -489,7 +489,7 @@ public class DataAvailability {
           scenario.log("Skipping sample...");
 
           //try subtracting some time to get unstuck, if possible
-          lastFetchedDate.set(lastFetchedDate.get().minus(1, ChronoUnit.WEEKS));
+          lastFetchedDate.set(lastFetchedDate.get().minus(1, ChronoUnit.DAYS));
         }
       }
     }

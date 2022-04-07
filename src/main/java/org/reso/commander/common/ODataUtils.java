@@ -84,8 +84,9 @@ public class ODataUtils {
    * @param client OData client to use as serializer
    * @return a JsonArray of results
    */
-  public static JsonArray serializeClientEntityJsonResultsToJsonArray(List<ClientEntity> results, ODataClient client) {
-    final JsonArray elements = new JsonArray();
+  public static JsonArray serializeLookupMetadata(ODataClient client, List<ClientEntity> results) {
+    final JsonArray lookups = new JsonArray();
+
     try {
       final Gson gson = new Gson();
       final JsonSerializer jsonSerializer = new JsonSerializer(false, ContentType.APPLICATION_JSON);
@@ -94,7 +95,7 @@ public class ODataUtils {
           StringWriter writer = new StringWriter();
           jsonSerializer.write(writer, client.getBinder().getEntity(clientEntity));
           Optional<JsonElement> element = Optional.ofNullable(gson.fromJson(writer.toString(), JsonElement.class));
-          element.ifPresent(elements::add);
+          element.ifPresent(lookups::add);
         } catch (ODataSerializerException e) {
           LOG.error("ERROR: could not deserialize. Exception: " + e);
         }
@@ -102,7 +103,12 @@ public class ODataUtils {
     } catch (Exception exception) {
       LOG.error(exception);
     }
-    return elements;
+
+    return lookups;
+  }
+
+  public static JsonArray serializeFieldMetadata() {
+    return new JsonArray();
   }
 
   /**

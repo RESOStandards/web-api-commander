@@ -1,6 +1,6 @@
 package org.reso.certification.stepdefs;
 
-import com.google.common.base.Functions;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import io.cucumber.java.Before;
@@ -12,7 +12,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.commons.api.edm.*;
-import org.apache.olingo.commons.core.edm.EdmPropertyImpl;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.ODataFetchApi;
 import org.reso.commander.common.ODataUtils;
@@ -23,8 +22,6 @@ import org.reso.models.Settings;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
@@ -40,9 +37,11 @@ public class LookupResource {
   private static Scenario scenario;
   private final static AtomicReference<WebAPITestContainer> container = new AtomicReference<>();
   private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
-  private static final AtomicReference<Map<String, List<ClientEntity>>> entityCache = new AtomicReference<>(new LinkedHashMap<>());
-  private static final String LOOKUP_RESOURCE_NAME = "Lookup", LOOKUP_RESOURCE_LOOKUP_NAME_PROPERTY = "LookupName";
+  private static final AtomicReference<Map<String, List<ClientEntity>>> lookupResourceCache = new AtomicReference<>(new LinkedHashMap<>());
   private static final String LOOKUP_METADATA_FILE_NAME = "lookup-metadata.json";
+
+  //TODO: migrate to test file
+  private static final String LOOKUP_ANNOTATION_TERM = "RESO.OData.Metadata.LookupName";
 
   @Inject
   public LookupResource(WebAPITestContainer c) {
@@ -65,27 +64,27 @@ public class LookupResource {
 
   @Then("valid data is replicated from the {string} Resource")
   public void validDataIsReplicatedFromTheResource(String resourceName) {
-    final String JSON_ARRAY_NAME = "lookups";
-    if (entityCache.get() == null) {
+    if (lookupResourceCache.get() == null) {
       failAndExitWithErrorMessage("Could not replicate data from resource: " + resourceName, scenario);
     }
 
-    if (!entityCache.get().containsKey(resourceName)) {
-      entityCache.get().put(resourceName, new ArrayList<>());
+    if (!lookupResourceCache.get().containsKey(resourceName)) {
+      lookupResourceCache.get().put(resourceName, new ArrayList<>());
       try {
         final List<ClientEntity> results = ODataFetchApi.replicateDataFromResource(container.get(), resourceName,
-            ODataFetchApi.WebApiReplicationStrategy.TopAndSkip);
+            ODataFetchApi.WebApiReplicationStrategy.ModificationTimestampDescending);
 
         if (results.size() == 0) {
           failAndExitWithErrorMessage("Could not replicate data from the " + resourceName + " resource!", scenario);
         }
-        entityCache.get().get(resourceName).addAll(results);
+        lookupResourceCache.get().get(resourceName).addAll(results);
 
-        //create single object with JSON array called lookups
-        final JsonObject lookups = new JsonObject();
-        lookups.add(JSON_ARRAY_NAME,
-            ODataUtils.serializeClientEntityJsonResultsToJsonArray(results, container.get().getCommander().getClient()));
-        Utils.createFile(CERTIFICATION_RESULTS_PATH, LOOKUP_METADATA_FILE_NAME, lookups.toString());
+        final JsonObject metadata = new JsonObject();
+
+        metadata.add("fields", ODataUtils.serializeFieldMetadata());
+        metadata.add("lookups", ODataUtils.serializeLookupMetadata(container.get().getCommander().getClient(), results));
+
+        Utils.createFile(CERTIFICATION_RESULTS_PATH, LOOKUP_METADATA_FILE_NAME, metadata.toString());
 
       } catch (Exception exception) {
         failAndExitWithErrorMessage("Unable to retrieve data from the Lookup Resource! " + exception.getMessage(), scenario);
@@ -97,7 +96,7 @@ public class LookupResource {
 
   @Then("{string} Resource data and metadata MUST contain the following fields")
   public void resourceDataAndMetadataMUSTContainTheFollowingFields(String resourceName, List<String> fields) {
-    if (entityCache.get() == null || entityCache.get().get(resourceName) == null) {
+    if (lookupResourceCache.get() == null || lookupResourceCache.get().get(resourceName) == null) {
       failAndExitWithErrorMessage("Entity Cache could not be created for the " + resourceName + " resource!", scenario);
     }
 
@@ -110,7 +109,7 @@ public class LookupResource {
 
     //check resource data cache
     scenario.log("Ensuring mandatory fields " + mandatoryFields + " are present in " + resourceName + " Resource data");
-    entityCache.get().get(resourceName).forEach(clientEntity -> fields.forEach(fieldName -> {
+    lookupResourceCache.get().get(resourceName).forEach(clientEntity -> fields.forEach(fieldName -> {
       if (clientEntity.getProperty(fieldName) == null || clientEntity.getProperty(fieldName).getValue() == null) {
         failAndExitWithErrorMessage("Missing required field in the " + resourceName + " Resource!", scenario);
       }
