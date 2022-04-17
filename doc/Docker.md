@@ -1,11 +1,39 @@
 # RESO Commander and Docker
-Both the command-line and automated testing tools can be run in a Docker container.
+RESO automated testing tools and Commander utilities can both be run in a Docker containers. 
+The containers are slightly different in each case. 
 
-A [Dockerfile](./Dockerfile) has been provided to dockerize the application. 
-This can be used for CI/CD environments such as Jenkins or TravisCI. The following command will build an image for you:
+### RESO Automated Testing Tools
+A [GradleDockerfile](../GradleDockerfile) has been provided in order to prepare a Gradle 
+environment for the Commander. The container builds itself from the main branch of the source code, so you don't need
+the entire repo checked out locally, just the file.
+
+This can also be used in CI/CD environments such as Jenkins or TravisCI.
+
+Run the RESO Certification tests in a Docker container locally by issuing one of the following commands.
+Docker must be running on your local machine. 
+
+One way to do this is to build the container first and then run it:
+
+```docker build --file GradleDockerfile -t web-api-commander-gradle .```
+
+Once the container is built, you can use the Gradle commands normally with:
+```docker run -it web-api-commander-gradle testWebApiCore_2_0_0 -DpathToRESOScript=/home/gradle/project/resoscripts/your.resoscript -DshowResponses=true```
+
+You can also build the container on the fly:
+
+```docker run --rm -it -v "$PWD":/home/gradle/project -v /path/to/your/resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project -it $(docker build -f GradleDockerfile -q .) testWebApiCore_2_0_0 -DpathToRESOScript=/home/gradle/project/resoscripts/your.resoscript -DshowResponses=true```
+
+Note that this will create a directory in your home directory for the project, and build artifacts and the log will be placed in that directory,
+which is also where you will end up after runtime.
+
+You may need to adjust the path separators if using Windows.
 
 
-### Commander Features Other Than Automated Web API Testing
+### Commander Utilities
+A [Dockerfile](../Dockerfile) has also been provided to Dockerize the application for Commander utilities.
+
+To run the Commander utilities, use the following commands:
+
 ```
 $ docker build -t web-api-commander .
 ```
@@ -20,29 +48,4 @@ If you have input files you may need to mount your filesystem into the docker co
 
 ```
 $ docker run -it -v $PWD:/app web-api-commander --validateMetadata --inputFile <pathInContainer>
-```
-
-### Automated Web API Testing
-
-You may also run the tests in a Docker container locally by issuing one of the following commands. 
-Docker must be running on your local machine.
-
-#### MacOS or Linux All-In-One Commands
-```
-cd ~; \
-rm -rf commander-tmp/; \
-mkdir commander-tmp; \
-cd commander-tmp; \
-git clone https://github.com/RESOStandards/web-api-commander.git; \
-cd web-api-commander; \
-docker run --rm -u gradle -v "$PWD":/home/gradle/project -v /path/to/your/resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_2_0_0_Core -DpathToRESOScript=/home/gradle/project/resoscripts/your.web-api-server.core.2.0.0.resoscript -DshowResponses=true
-```
-
-Note that this will create a directory in your home directory for the project, and build artifacts and the log will be placed in that directory, 
-which is also where you will end up after runtime.
-
-
-#### Windows All-In-One WIP
-```
-cd C:\;mkdir commander-tmp;cd commander-tmp;git clone https://github.com/RESOStandards/web-api-commander.git;cd web-api-commander; docker run --rm -u gradle -v C:\current\path\web-api-commander:/home/gradle/project -v C:\path\to\your\resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project gradle gradle testWebAPIServer_2_0_0_Core -DpathToRESOScript=/home/gradle/project/resoscripts/your.web-api-server.core.2.0.0.resoscript -DshowResponses=true
 ```
