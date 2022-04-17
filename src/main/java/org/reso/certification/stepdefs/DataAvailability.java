@@ -11,6 +11,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import io.cucumber.java8.Te;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,6 +38,7 @@ import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -78,13 +80,15 @@ public class DataAvailability {
 
   //TODO: read from params
   final String ORIGINATING_SYSTEM_FIELD = "OriginatingSystemName";
-  final String ORIGINATING_SYSTEM_FIELD_VALUE = EMPTY_STRING;
+  final String ORIGINATING_SYSTEM_FIELD_VALUE = "";
 
   final boolean USE_ORIGINATING_SYSTEM_QUERY = ORIGINATING_SYSTEM_FIELD.length() > 0 && ORIGINATING_SYSTEM_FIELD_VALUE.length() > 0;
   final String ORIGINATING_SYSTEM_QUERY = ORIGINATING_SYSTEM_FIELD + " eq '" + ORIGINATING_SYSTEM_FIELD_VALUE + "'";
+
+
   final String REQUEST_URI_TEMPLATE = "?$filter="
       + (USE_ORIGINATING_SYSTEM_QUERY ? ORIGINATING_SYSTEM_QUERY + " and " : EMPTY_STRING)
-      + "%s" + " lt %s&$orderby=%s desc&$top=" + TOP_COUNT;
+      + "%s" + " gt %s&$orderby=%s asc&$top=" + TOP_COUNT;
 
   final String COUNT_REQUEST_URI_TEMPLATE = "?" + (USE_ORIGINATING_SYSTEM_QUERY ? "$filter=" + ORIGINATING_SYSTEM_QUERY + "&" : EMPTY_STRING) + "$count=true";
 
@@ -243,7 +247,7 @@ public class DataAvailability {
    * @return a list of PayloadSample items
    */
   List<PayloadSample> fetchAndProcessRecords(String resourceName, int targetRecordCount, String encodedResultsDirectoryName) {
-    final AtomicReference<OffsetDateTime> lastFetchedDate = new AtomicReference<>(OffsetDateTime.now());
+    final AtomicReference<OffsetDateTime> lastFetchedDate = new AtomicReference<>(OffsetDateTime.now().minus(1, ChronoUnit.YEARS));
     final List<String> timestampCandidateFields = new LinkedList<>();
     final AtomicReference<EdmEntityType> entityType = new AtomicReference<>();
     final AtomicReference<Map<String, String>> encodedSample = new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
@@ -278,7 +282,12 @@ public class DataAvailability {
           if (entityType.get().getProperty(propertyName).getType().getFullQualifiedName().getFullQualifiedNameAsString()
               .contentEquals(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName().getFullQualifiedNameAsString())) {
             scenario.log("Found Edm.DateTimeOffset field " + propertyName + " in the " + resourceName + " resource!\n");
-            timestampCandidateFields.add(propertyName);
+
+            if (propertyName.toLowerCase(Locale.ROOT).contains("modificationtimestamp")) {
+              timestampCandidateFields.add(0, propertyName);
+            } else {
+              timestampCandidateFields.add (propertyName);
+            }
           }
         } catch (Exception ex) {
           LOG.error(ex);
@@ -458,7 +467,7 @@ public class DataAvailability {
                 encodedSample.get().put(property.getName(), value);
 
                 if (property.getName().contentEquals(MODIFICATION_TIMESTAMP_FIELD)) {
-                  if (OffsetDateTime.parse(property.getValue().toString()).isBefore(lastFetchedDate.get())) {
+                  if (OffsetDateTime.parse(property.getValue().toString()).isAfter(lastFetchedDate.get())) {
                     lastFetchedDate.set(OffsetDateTime.parse(property.getValue().toString()));
                   }
                 }
