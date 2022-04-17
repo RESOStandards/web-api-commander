@@ -517,11 +517,9 @@ public class DataAvailability {
 
   @And("the metadata contains RESO Standard Resources")
   public void theMetadataContainsRESOStandardResources() {
-    Set<String> resources = container.get().getEdm().getSchemas().stream().map(schema ->
-        schema.getEntityTypes().stream().map(EdmNamed::getName)
-            .collect(Collectors.toSet()))
-        .flatMap(Collection::stream)
-        .collect(Collectors.toSet());
+    Set<String> resources = container.get().getEdm().getSchemas().stream().flatMap(schema ->
+        schema.getEntityTypes().stream().map(EdmNamed::getName))
+            .collect(Collectors.toSet());
 
     standardResources.set(resources.stream()
         .filter(DataDictionaryMetadata.v1_7.WELL_KNOWN_RESOURCES::contains).collect(Collectors.toSet()));

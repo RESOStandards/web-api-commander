@@ -1,7 +1,7 @@
 package org.reso.certification.stepdefs;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.google.inject.Inject;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
@@ -38,7 +38,9 @@ public class LookupResource {
   private final static AtomicReference<WebAPITestContainer> container = new AtomicReference<>();
   private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final AtomicReference<Map<String, List<ClientEntity>>> lookupResourceCache = new AtomicReference<>(new LinkedHashMap<>());
-  private static final String LOOKUP_METADATA_FILE_NAME = "lookup-metadata.json";
+  private static final String LOOKUP_RESOURCE_LOOKUP_METADATA_FILE_NAME = "lookup-resource-lookup-metadata.json";
+  private static final String LOOKUP_RESOURCE_FIELD_METADATA_FILE_NAME = "lookup-resource-field-metadata.json";
+
 
   //TODO: migrate to test file
   private static final String LOOKUP_ANNOTATION_TERM = "RESO.OData.Metadata.LookupName";
@@ -72,19 +74,17 @@ public class LookupResource {
       lookupResourceCache.get().put(resourceName, new ArrayList<>());
       try {
         final List<ClientEntity> results = ODataFetchApi.replicateDataFromResource(container.get(), resourceName,
-            ODataFetchApi.WebApiReplicationStrategy.ModificationTimestampDescending);
+            ODataFetchApi.WebApiReplicationStrategy.TopAndSkip);
 
         if (results.size() == 0) {
           failAndExitWithErrorMessage("Could not replicate data from the " + resourceName + " resource!", scenario);
         }
+
         lookupResourceCache.get().get(resourceName).addAll(results);
 
         final JsonObject metadata = new JsonObject();
-
-        metadata.add("fields", ODataUtils.serializeFieldMetadata());
         metadata.add("lookups", ODataUtils.serializeLookupMetadata(container.get().getCommander().getClient(), results));
-
-        Utils.createFile(CERTIFICATION_RESULTS_PATH, LOOKUP_METADATA_FILE_NAME, metadata.toString());
+        Utils.createFile(CERTIFICATION_RESULTS_PATH, LOOKUP_RESOURCE_LOOKUP_METADATA_FILE_NAME, metadata.toString());
 
       } catch (Exception exception) {
         failAndExitWithErrorMessage("Unable to retrieve data from the Lookup Resource! " + exception.getMessage(), scenario);
@@ -144,7 +144,8 @@ public class LookupResource {
     final Map<String, Map<String, ReferenceStandardField>> standardLookupFieldCache =
         container.get().getDDCacheProcessor().getStandardFieldCache();
 
-    final Set<ReferenceStandardField> lookupFields = standardLookupFieldCache.keySet().stream().flatMap(resourceName ->
+    final Set<ReferenceStandardField> lookupFields =
+        standardLookupFieldCache.keySet().stream().flatMap(resourceName ->
         standardLookupFieldCache.get(resourceName).values().stream()
             .filter(referenceStandardField -> referenceStandardField.getLookupName() != null)).collect(Collectors.toSet());
 
@@ -172,10 +173,14 @@ public class LookupResource {
   @And("fields with the annotation term {string} MUST have a LookupName in the Lookup Resource")
   public void fieldsWithTheAnnotationTermMUSTHaveALookupNameInTheLookupResource(String annotationTerm) {
     //every item annotated with the annotation should have a corresponding element in the Lookup set
-    final Map<EdmElement, String> annotatedLookupFields = ODataUtils.getEdmElementsWithAnnotation.apply(container.get().getEdm(), annotationTerm);
-    final Set<String> lookupNamesFromLookupData = ODataUtils.extractAnnotationNamesFromEdmElements.apply(annotatedLookupFields);
-    final Set<String> missingLookupNames = Utils.getDifference(new HashSet<>(annotatedLookupFields.values()),
-        lookupNamesFromLookupData);
+    final Map<EdmElement, String> annotatedLookupFields =
+        ODataUtils.getEdmElementsWithAnnotation.apply(container.get().getEdm(), annotationTerm);
+
+    final Set<String> lookupNamesFromLookupData =
+        ODataUtils.extractAnnotationNamesFromEdmElements.apply(annotatedLookupFields);
+
+    final Set<String> missingLookupNames =
+        Utils.getDifference(new HashSet<>(annotatedLookupFields.values()), lookupNamesFromLookupData);
 
     if (missingLookupNames.size() > 0) {
       failAndExitWithErrorMessage("LookupName elements missing from LookupMetadata: "
@@ -184,6 +189,9 @@ public class LookupResource {
       if (annotatedLookupFields.size() > 0) {
         scenario.log("Found all annotated LookupName elements in the Lookup data. Unique count: " + annotatedLookupFields.size());
         scenario.log("LookupNames: " + wrapColumns(String.join(", ", annotatedLookupFields.values())));
+
+        Utils.createFile(CERTIFICATION_RESULTS_PATH, LOOKUP_RESOURCE_FIELD_METADATA_FILE_NAME,
+            ODataUtils.serializeFieldMetadata(annotatedLookupFields).toString());
       } else {
         scenario.log("No annotated lookup names found in the OData XML Metadata.");
       }

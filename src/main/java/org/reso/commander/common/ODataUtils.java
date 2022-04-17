@@ -4,6 +4,8 @@ import com.google.common.base.Functions;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import io.cucumber.gherkin.internal.com.eclipsesource.json.Json;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
@@ -107,8 +109,28 @@ public class ODataUtils {
     return lookups;
   }
 
-  public static JsonArray serializeFieldMetadata() {
-    return new JsonArray();
+  public static JsonObject serializeFieldMetadata(Map<EdmElement, String> elements) {
+    final String
+        DESCRIPTION_KEY = "description", DESCRIPTION = "Lookup Resource Annotated Fields Metadata",
+        VERSION_KEY = "version", VERSION = "1.7",
+        GENERATED_ON_KEY = "generatedOn",
+        FIELDS_KEY = "fields";
+
+    JsonObject metadataReport = new JsonObject();
+    metadataReport.addProperty(DESCRIPTION_KEY, DESCRIPTION);
+    metadataReport.addProperty(VERSION_KEY, VERSION);
+    metadataReport.addProperty(GENERATED_ON_KEY, Utils.getIsoTimestamp());
+
+    JsonArray fieldsArray = new JsonArray();
+    elements.forEach((key, value) -> {
+      JsonObject fieldObject = new JsonObject();
+      fieldObject.addProperty("resourceName", key.getType().getKind().toString());
+      fieldObject.addProperty("fieldName:", key.getName());
+      fieldObject.addProperty("type", value);
+      fieldsArray.add(fieldObject);
+    });
+    metadataReport.add(FIELDS_KEY, fieldsArray) ;
+    return metadataReport;
   }
 
   /**
@@ -124,7 +146,6 @@ public class ODataUtils {
                           edmEntitySet.getEntityTypeWithAnnotations().getProperty(fieldName) : null)))
           .filter(Objects::nonNull)
           .collect(Collectors.toMap(Functions.identity(), edmElement -> getAnnotationValue(edmElement, annotationTerm)));
-
 
   /**
    * Extracts a Set of String annotation names from Edm Elements.

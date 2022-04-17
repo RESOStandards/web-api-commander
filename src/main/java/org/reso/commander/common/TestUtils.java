@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.cucumber.java.Scenario;
 import org.apache.http.Header;
+import org.apache.http.NameValuePair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
@@ -566,14 +567,9 @@ public final class TestUtils {
    * @return the value of the header with key, or null
    */
   public static String getHeaderData(String key, Collection<Header> headers) {
-    String data = null;
-
-    for (Header header : headers) {
-      if (header.getName().toLowerCase().contains(key.toLowerCase())) {
-        data = header.getValue();
-      }
-    }
-    return data;
+    return headers.stream()
+        .filter(header -> header.getName().toLowerCase().contains(key.toLowerCase()))
+          .findFirst().map(NameValuePair::getValue).orElse(null);
   }
 
   /**
@@ -585,14 +581,7 @@ public final class TestUtils {
    */
   public static String getHeaderData(String key, ODataResponse oDataResponse) {
     if (key == null || oDataResponse.getHeader(key) == null) return null;
-    ArrayList<String> result = new ArrayList<>(oDataResponse.getHeader(key));
-
-    if (result.size() > 0) {
-      return result.get(0);
-    } else {
-      return null;
-    }
-
+    return oDataResponse.getHeader(key).stream().reduce(String::concat).orElse(null);
   }
 
   /**
@@ -770,6 +759,7 @@ public final class TestUtils {
 
   /**
    * Asserts that metadata in the given container are valid. Fetches metadata if not present in the container.
+   *
    * @param container a test container with a valid config that metadata can be fetched into
    */
   public static void assertValidXMLMetadata(WebAPITestContainer container, Scenario scenario) {
@@ -780,7 +770,7 @@ public final class TestUtils {
       }
       container.validateMetadata();
       if (!container.getIsValidXMLMetadata()) {
-       failAndExitWithErrorMessage("Invalid XML Metadata! Service root: " + container.getServiceRoot(), scenario);
+        failAndExitWithErrorMessage("Invalid XML Metadata! Service root: " + container.getServiceRoot(), scenario);
       }
     } catch (Exception ex) {
       failAndExitWithErrorMessage(getDefaultErrorMessage(ex), scenario);
@@ -789,6 +779,7 @@ public final class TestUtils {
 
   /**
    * Asserts that the given container has XML Metadata that contains an Entity Data Model (Edm)
+   *
    * @param container the container with XML metadata to validate
    */
   public static void assertXmlMetadataContainsEdm(WebAPITestContainer container, Scenario scenario) {
@@ -800,6 +791,7 @@ public final class TestUtils {
 
   /**
    * Asserts that XML Metadata are retrieved from the server
+   *
    * @param container the container to retrieve metadata with
    */
   public static void assertXMLMetadataAreRequestedFromTheServer(WebAPITestContainer container, Scenario scenario) {
@@ -831,6 +823,7 @@ public final class TestUtils {
 
   /**
    * Asserts that the XML metadata in the given container has a valid service document
+   *
    * @param container the container with XML Metadata to validate
    */
   public static void assertXMLMetadataHasValidServiceDocument(WebAPITestContainer container, Scenario scenario) {
@@ -849,6 +842,7 @@ public final class TestUtils {
 
   /**
    * Asserts that valid Metadata have been retrieved. Fetches metadata if not present.
+   *
    * @param container a test container to validate
    */
   public static void assertValidMetadataHaveBeenRetrieved(WebAPITestContainer container) {
@@ -867,6 +861,7 @@ public final class TestUtils {
 
   /**
    * Validates that the given response data have a valid OData count
+   *
    * @param responseData the data to check for a count against
    * @return true if the there is a count present and it's greater than or equal to the number of results
    */
@@ -889,21 +884,21 @@ public final class TestUtils {
    * Contains the list of supported operators for use in query expressions.
    */
   public static class Operators {
-      public static final String
-          AND = "and",
-          OR = "or",
-          NE = "ne",
-          EQ = "eq",
-          GREATER_THAN = "gt",
-          GREATER_THAN_OR_EQUAL = "ge",
-          HAS = "has",
-          LESS_THAN = "lt",
-          LESS_THAN_OR_EQUAL = "le",
-          CONTAINS = "contains",
-          ENDS_WITH = "endswith",
-          STARTS_WITH = "startswith",
-          TO_LOWER = "tolower",
-          TO_UPPER = "toupper";
+    public static final String
+        AND = "and",
+        OR = "or",
+        NE = "ne",
+        EQ = "eq",
+        GREATER_THAN = "gt",
+        GREATER_THAN_OR_EQUAL = "ge",
+        HAS = "has",
+        LESS_THAN = "lt",
+        LESS_THAN_OR_EQUAL = "le",
+        CONTAINS = "contains",
+        ENDS_WITH = "endswith",
+        STARTS_WITH = "startswith",
+        TO_LOWER = "tolower",
+        TO_UPPER = "toupper";
   }
 
   public static final class DateParts {
@@ -955,6 +950,7 @@ public final class TestUtils {
 
   /**
    * Builds a Data Dictionary Cache
+   *
    * @return a DDProcessor Cache object
    */
   public static DDCacheProcessor buildDataDictionaryCache() {
