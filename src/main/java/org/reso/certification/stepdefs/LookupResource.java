@@ -1,7 +1,6 @@
 package org.reso.certification.stepdefs;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.google.inject.Inject;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
@@ -27,8 +26,7 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.reso.certification.stepdefs.DataAvailability.CERTIFICATION_RESULTS_PATH;
-import static org.reso.commander.common.ODataUtils.getEdmElement;
-import static org.reso.commander.common.ODataUtils.hasAnnotationTerm;
+import static org.reso.commander.common.ODataUtils.*;
 import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
 import static org.reso.commander.common.Utils.wrapColumns;
 
@@ -41,9 +39,7 @@ public class LookupResource {
   private static final String LOOKUP_RESOURCE_LOOKUP_METADATA_FILE_NAME = "lookup-resource-lookup-metadata.json";
   private static final String LOOKUP_RESOURCE_FIELD_METADATA_FILE_NAME = "lookup-resource-field-metadata.json";
 
-
-  //TODO: migrate to test file
-  private static final String LOOKUP_ANNOTATION_TERM = "RESO.OData.Metadata.LookupName";
+  private static final String LOOKUP_NAME_FIELD = "LookupName";
 
   @Inject
   public LookupResource(WebAPITestContainer c) {
@@ -173,25 +169,31 @@ public class LookupResource {
   @And("fields with the annotation term {string} MUST have a LookupName in the Lookup Resource")
   public void fieldsWithTheAnnotationTermMUSTHaveALookupNameInTheLookupResource(String annotationTerm) {
     //every item annotated with the annotation should have a corresponding element in the Lookup set
-    final Map<EdmElement, String> annotatedLookupFields =
-        ODataUtils.getEdmElementsWithAnnotation.apply(container.get().getEdm(), annotationTerm);
+    final Map<String, Set<EdmElement>> filteredResourceFieldMap =
+        ODataUtils.getEdmElementsWithAnnotation(container.get().getEdm(), annotationTerm);
 
-    final Set<String> lookupNamesFromLookupData =
-        ODataUtils.extractAnnotationNamesFromEdmElements.apply(annotatedLookupFields);
+    final Set<String> lookupNamesFromLookupData = lookupResourceCache.get().values().stream()
+        .flatMap(Collection::stream)
+        .map(clientEntity -> clientEntity.getProperty(LOOKUP_NAME_FIELD).getValue().toString())
+        .collect(Collectors.toSet());
 
-    final Set<String> missingLookupNames =
-        Utils.getDifference(new HashSet<>(annotatedLookupFields.values()), lookupNamesFromLookupData);
+    final Set<String> annotatedLookupNames = filteredResourceFieldMap.values().stream()
+        .flatMap(Collection::stream)
+        .map(edmElement -> getAnnotationValue(edmElement, annotationTerm))
+        .collect(Collectors.toSet());
+
+    final Set<String> missingLookupNames = Utils.getDifference(annotatedLookupNames, lookupNamesFromLookupData);
 
     if (missingLookupNames.size() > 0) {
       failAndExitWithErrorMessage("LookupName elements missing from LookupMetadata: "
           + wrapColumns(String.join(", ", missingLookupNames)), scenario);
     } else {
-      if (annotatedLookupFields.size() > 0) {
-        scenario.log("Found all annotated LookupName elements in the Lookup data. Unique count: " + annotatedLookupFields.size());
-        scenario.log("LookupNames: " + wrapColumns(String.join(", ", annotatedLookupFields.values())));
+      if (filteredResourceFieldMap.size() > 0) {
+        scenario.log("Found all annotated LookupName elements in the Lookup data. Unique count: " + annotatedLookupNames.size());
+        scenario.log("LookupNames: " + wrapColumns(String.join(", ", annotatedLookupNames)));
 
         Utils.createFile(CERTIFICATION_RESULTS_PATH, LOOKUP_RESOURCE_FIELD_METADATA_FILE_NAME,
-            ODataUtils.serializeFieldMetadata(annotatedLookupFields).toString());
+            ODataUtils.serializeFieldMetadataForLookupFields(filteredResourceFieldMap).toString());
       } else {
         scenario.log("No annotated lookup names found in the OData XML Metadata.");
       }

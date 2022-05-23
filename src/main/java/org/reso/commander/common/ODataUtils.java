@@ -1,11 +1,9 @@
 package org.reso.commander.common;
 
-import com.google.common.base.Functions;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import io.cucumber.gherkin.internal.com.eclipsesource.json.Json;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
@@ -21,8 +19,6 @@ import org.apache.olingo.commons.core.edm.EdmPropertyImpl;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ODataUtils {
@@ -45,7 +41,8 @@ public class ODataUtils {
 
   /**
    * Determines whether the element has the given term.
-   * @param element the Edm element to check.
+   *
+   * @param element        the Edm element to check.
    * @param annotationTerm the term to search for.
    * @return true if the Edm element contains the annotationTerm, false otherwise.
    */
@@ -55,7 +52,8 @@ public class ODataUtils {
 
   /**
    * Gets the annotation value for the given annotation term.
-   * @param element the Edm element to check.
+   *
+   * @param element        the Edm element to check.
    * @param annotationTerm the term to search for.
    * @return a string value, if present, otherwise null.
    */
@@ -79,11 +77,11 @@ public class ODataUtils {
     return null;
   }
 
-
   /**
    * Serializes a list of OData ClientEntity items in a JSON Array with those properties.
+   *
    * @param results list of OData ClientEntity results
-   * @param client OData client to use as serializer
+   * @param client  OData client to use as serializer
    * @return a JsonArray of results
    */
   public static JsonArray serializeLookupMetadata(ODataClient client, List<ClientEntity> results) {
@@ -109,7 +107,10 @@ public class ODataUtils {
     return lookups;
   }
 
-  public static JsonObject serializeFieldMetadata(Map<EdmElement, String> elements) {
+  public static JsonObject serializeFieldMetadataForLookupFields(Map<String, Set<EdmElement>> resourceFieldMap) {
+    //TODO: migrate to test file
+    final String LOOKUP_ANNOTATION_TERM = "RESO.OData.Metadata.LookupName";
+
     final String
         DESCRIPTION_KEY = "description", DESCRIPTION = "Lookup Resource Annotated Fields Metadata",
         VERSION_KEY = "version", VERSION = "1.7",
@@ -122,36 +123,33 @@ public class ODataUtils {
     metadataReport.addProperty(GENERATED_ON_KEY, Utils.getIsoTimestamp());
 
     JsonArray fieldsArray = new JsonArray();
-    elements.forEach((key, value) -> {
-      JsonObject fieldObject = new JsonObject();
-      fieldObject.addProperty("resourceName", key.getType().getKind().toString());
-      fieldObject.addProperty("fieldName:", key.getName());
-      fieldObject.addProperty("type", value);
-      fieldsArray.add(fieldObject);
-    });
-    metadataReport.add(FIELDS_KEY, fieldsArray) ;
+    resourceFieldMap.forEach((resourceName, fieldElements) -> fieldElements.forEach(
+        fieldElement -> {
+          JsonObject fieldObject = new JsonObject();
+          fieldObject.addProperty("resourceName", resourceName);
+          fieldObject.addProperty("fieldName:", fieldElement.getName());
+          fieldObject.addProperty("type", getAnnotationValue(fieldElement, LOOKUP_ANNOTATION_TERM));
+          fieldsArray.add(fieldObject);
+        }
+    ));
+
+    metadataReport.add(FIELDS_KEY, fieldsArray);
     return metadataReport;
   }
 
   /**
    * Returns a Map of EntityDataModel (Edm) elements and annotation value with the given annotation term.
    */
-  public final static BiFunction<Edm, String, Map<EdmElement, String>> getEdmElementsWithAnnotation = (edm, annotationTerm) ->
-      edm.getSchemas().parallelStream()
-          .filter(edmSchema -> edmSchema.getEntityContainer() != null && edmSchema.getEntityContainer().getEntitySets() != null)
-          .flatMap(edmSchema -> edmSchema.getEntityContainer().getEntitySets().parallelStream()
-              .flatMap(edmEntitySet -> edmEntitySet.getEntityTypeWithAnnotations().getPropertyNames().parallelStream()
-                  .map(fieldName ->
-                      getAnnotationValue(edmEntitySet.getEntityType().getProperty(fieldName), annotationTerm) != null ?
-                          edmEntitySet.getEntityTypeWithAnnotations().getProperty(fieldName) : null)))
-          .filter(Objects::nonNull)
-          .collect(Collectors.toMap(Functions.identity(), edmElement -> getAnnotationValue(edmElement, annotationTerm)));
-
-  /**
-   * Extracts a Set of String annotation names from Edm Elements.
-   */
-  public final static Function<Map<EdmElement, String>, Set<String>> extractAnnotationNamesFromEdmElements = edmElementStringMap
-      -> new HashSet<>(edmElementStringMap.values());
+  public static Map<String, Set<EdmElement>> getEdmElementsWithAnnotation(Edm edm, String annotationTerm) {
+    return edm.getSchemas().parallelStream()
+        .filter(edmSchema -> edmSchema != null && edmSchema.getEntityContainer() != null)
+        .flatMap(edmSchema -> edmSchema.getEntityContainer().getEntitySets().stream())
+        .collect(Collectors.toMap(edmEntitySet -> edmEntitySet.getEntityTypeWithAnnotations().getName(),
+            edmEntitySet -> edmEntitySet.getEntityTypeWithAnnotations().getPropertyNames().stream()
+                .map(propertyName -> edmEntitySet.getEntityTypeWithAnnotations().getProperty(propertyName))
+                .filter(edmElement -> getAnnotationValue(edmElement, annotationTerm) != null)
+                .collect(Collectors.toSet())));
+  }
 
   /**
    * Class to read OData internal annotation variables.
@@ -164,6 +162,7 @@ public class ODataUtils {
 
     /**
      * Allows the consumer to read internal annotations.
+     *
      * @param edmAnnotation the annotation to read from
      */
     public SneakyAnnotationReader(EdmAnnotation edmAnnotation) {
@@ -187,7 +186,7 @@ public class ODataUtils {
     }
 
     public String getTerm() {
-      return Optional.ofNullable(clientCsdlAnnotation.getTerm()).orElse(null);
+      return clientCsdlAnnotation.getTerm();
     }
   }
 
