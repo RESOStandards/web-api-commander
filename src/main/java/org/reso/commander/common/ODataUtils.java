@@ -143,9 +143,9 @@ public class ODataUtils {
   public static Map<String, Set<EdmElement>> getEdmElementsWithAnnotation(Edm edm, String annotationTerm) {
     return edm.getSchemas().parallelStream()
         .filter(edmSchema -> edmSchema != null && edmSchema.getEntityContainer() != null)
-        .flatMap(edmSchema -> edmSchema.getEntityContainer().getEntitySets().stream())
+        .flatMap(edmSchema -> edmSchema.getEntityContainer().getEntitySets().parallelStream())
         .collect(Collectors.toMap(edmEntitySet -> edmEntitySet.getEntityTypeWithAnnotations().getName(),
-            edmEntitySet -> edmEntitySet.getEntityTypeWithAnnotations().getPropertyNames().stream()
+            edmEntitySet -> edmEntitySet.getEntityTypeWithAnnotations().getPropertyNames().parallelStream()
                 .map(propertyName -> edmEntitySet.getEntityTypeWithAnnotations().getProperty(propertyName))
                 .filter(edmElement -> getAnnotationValue(edmElement, annotationTerm) != null)
                 .collect(Collectors.toSet())));

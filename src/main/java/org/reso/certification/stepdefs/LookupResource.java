@@ -172,13 +172,13 @@ public class LookupResource {
     final Map<String, Set<EdmElement>> filteredResourceFieldMap =
         ODataUtils.getEdmElementsWithAnnotation(container.get().getEdm(), annotationTerm);
 
-    final Set<String> lookupNamesFromLookupData = lookupResourceCache.get().values().stream()
-        .flatMap(Collection::stream)
+    final Set<String> lookupNamesFromLookupData = lookupResourceCache.get().values().parallelStream()
+        .flatMap(Collection::parallelStream)
         .map(clientEntity -> clientEntity.getProperty(LOOKUP_NAME_FIELD).getValue().toString())
         .collect(Collectors.toSet());
 
-    final Set<String> annotatedLookupNames = filteredResourceFieldMap.values().stream()
-        .flatMap(Collection::stream)
+    final Set<String> annotatedLookupNames = filteredResourceFieldMap.values().parallelStream()
+        .flatMap(Collection::parallelStream)
         .map(edmElement -> getAnnotationValue(edmElement, annotationTerm))
         .collect(Collectors.toSet());
 
