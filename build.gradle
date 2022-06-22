@@ -163,11 +163,18 @@ task testDataDictionary_1_7() {
           'html:' + certReportsDir + '/' + reportName + '.html',
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0',
-          '--tags',
-          (systemProperties.get('cucumber.filter.tags', '').toString().trim().length() > 0
-              ? systemProperties.get('cucumber.filter.tags') : '')
+          'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
       ]
+
+      if (systemProperties.get('cucumber.filter.tags', '').trim().length() > 0) {
+        args.add('--tags')
+        args.add(systemProperties.get('cucumber.filter.tags'))
+      }
+
+      if (systemProperties.get('tags', '').trim().length() > 0) {
+        args.add('--tags')
+        args.add(systemProperties.get('tags'))
+      }
     }
   }
 }
