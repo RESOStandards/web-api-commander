@@ -166,14 +166,9 @@ task testDataDictionary_1_7() {
           'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
       ]
 
-      if (systemProperties.get('cucumber.filter.tags', '').trim().length() > 0) {
+      if (systemProperties.hasProperty('cucumber.filter.tags')) {
         args.add('--tags')
-        args.add(systemProperties.get('cucumber.filter.tags'))
-      }
-
-      if (systemProperties.get('tags', '').trim().length() > 0) {
-        args.add('--tags')
-        args.add(systemProperties.get('tags'))
+        args.add(systemProperties.get('cucumber.filter.tags').toString())
       }
     }
   }
