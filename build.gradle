@@ -87,6 +87,11 @@ final String certOutputDir = 'build/certification',
              certReportsDir = certOutputDir + '/reports'
 
 
+task prepareEnvironment() {
+  delete certOutputDir
+}
+
+
 task testWebApiCore_2_0_0() {
   group = 'RESO Certification'
   description = 'Web API Core 2.0.0 Acceptance Tests' +
@@ -99,7 +104,7 @@ task testWebApiCore_2_0_0() {
 
   String reportName = 'web-api-server.core.2.0.0'
 
-  dependsOn jar
+  dependsOn jar, prepareEnvironment
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
@@ -136,7 +141,7 @@ task testDataDictionary_1_7() {
 
   String reportName = 'data-dictionary-1.7'
 
-  dependsOn jar
+  dependsOn jar, prepareEnvironment
   doLast {
     javaexec {
       main = 'io.cucumber.core.cli.Main'
@@ -184,7 +189,7 @@ task testDataAvailability_1_7() {
 
   String reportName = 'data-availability.dd-1.7'
 
-  dependsOn jar
+  dependsOn jar, prepareEnvironment
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
@@ -216,7 +221,7 @@ task testIdxPayload_1_7() {
 
   String reportName = 'idx-payload.dd-1.7'
 
-  dependsOn jar
+  dependsOn jar, prepareEnvironment
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
@@ -274,4 +279,5 @@ test {
     }
   }
 }
+
 

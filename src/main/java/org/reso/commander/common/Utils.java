@@ -24,7 +24,7 @@ public class Utils {
    * @return date string in yyyyMMddHHMMssS format
    */
   public static String getTimestamp(Date date) {
-    DateFormat df = new SimpleDateFormat("yyyyMMddHHMMssS");
+    DateFormat df = new SimpleDateFormat("yyyyMMddHHmmssS");
     return df.format(date);
   }
 
