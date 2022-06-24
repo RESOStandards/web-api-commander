@@ -15,40 +15,42 @@ compileJava.options.encoding = 'UTF-8'
 repositories {
   // Use jcenter for resolving your dependencies.
   // You can declare any Maven/Ivy/file repository here.
-  jcenter()
+  mavenCentral()
 }
 
 dependencies {
-  compile 'com.google.guava:guava:30.1.1-jre'
-  compile 'com.google.inject:guice:5.0.1'
+  compile 'com.google.guava:guava:31.1-jre'
+  compile 'com.google.inject:guice:5.1.0'
   compile 'commons-cli:commons-cli:1.5.0'
 
-  compile 'org.apache.logging.log4j:log4j-api:2.17.1'
-  compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1'
-  compile 'org.apache.logging.log4j:log4j-1.2-api:2.17.1'
-  compile 'org.apache.logging.log4j:log4j-core:2.17.1'
+  compile 'org.apache.logging.log4j:log4j-api:2.17.2'
+  compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.2'
+  compile 'org.apache.logging.log4j:log4j-1.2-api:2.17.2'
+  compile 'org.apache.logging.log4j:log4j-core:2.17.2'
 
-  compile 'org.apache.olingo:odata-client-api:4.8.0'
-  compile 'org.apache.olingo:odata-commons-core:4.8.0'
-  compile 'org.apache.olingo:odata-client-core:4.8.0'
+  compile 'org.apache.olingo:odata-client-api:4.9.0'
+  compile 'org.apache.olingo:odata-commons-core:4.9.0'
+  compile 'org.apache.olingo:odata-client-core:4.9.0'
 
-  compile 'org.apache.poi:poi:5.0.0'
-  compile 'org.apache.poi:poi-ooxml:5.0.0'
+  compile 'org.apache.poi:poi:5.2.2'
+  compile 'org.apache.poi:poi-ooxml:5.2.2'
 
-  compile 'io.rest-assured:rest-assured:4.4.0'
-  compile 'io.rest-assured:json-path:4.4.0'
-  compile 'io.rest-assured:json-schema-validator:4.4.0'
+  compile 'io.rest-assured:rest-assured:5.1.1'
+  compile 'io.rest-assured:json-path:5.1.1'
+  compile 'io.rest-assured:json-schema-validator:5.1.1'
 
-  compile 'io.cucumber:cucumber-java8:7.1.0'
+  compile 'io.cucumber:cucumber-java8:7.3.3'
   compile 'io.cucumber:cucumber-java:7.1.0'
-  compile 'io.cucumber:cucumber-junit:7.1.0'
-  compile 'io.cucumber:cucumber-guice:7.1.0'
-  compile 'io.cucumber:cucumber-core:7.1.0'
+  compile 'io.cucumber:cucumber-junit:7.3.3'
+  compile 'io.cucumber:cucumber-guice:7.3.3'
+  compile 'io.cucumber:cucumber-core:7.3.3'
 
   //TODO: choose one schema validator between this and rest-assured
-  compile 'com.networknt:json-schema-validator:1.0.63'
-  compile 'com.google.code.gson:gson:2.8.9'
+  compile 'com.networknt:json-schema-validator:1.0.70'
+  compile 'com.google.code.gson:gson:2.9.0'
   compile 'org.apache.commons:commons-text:1.9'
+
+  compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.13.3'
 
 }
 
@@ -87,6 +89,11 @@ final String certOutputDir = 'build/certification',
              certReportsDir = certOutputDir + '/reports'
 
 
+task prepareEnvironment() {
+  delete certOutputDir
+}
+
+
 task testWebApiCore_2_0_0() {
   group = 'RESO Certification'
   description = 'Web API Core 2.0.0 Acceptance Tests' +
@@ -99,7 +106,7 @@ task testWebApiCore_2_0_0() {
 
   String reportName = 'web-api-server.core.2.0.0'
 
-  dependsOn jar
+  dependsOn jar, prepareEnvironment
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
@@ -136,7 +143,7 @@ task testDataDictionary_1_7() {
 
   String reportName = 'data-dictionary-1.7'
 
-  dependsOn jar
+  dependsOn jar, prepareEnvironment
   doLast {
     javaexec {
       main = 'io.cucumber.core.cli.Main'
@@ -184,7 +191,7 @@ task testDataAvailability_1_7() {
 
   String reportName = 'data-availability.dd-1.7'
 
-  dependsOn jar
+  dependsOn jar, prepareEnvironment
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
@@ -216,7 +223,7 @@ task testIdxPayload_1_7() {
 
   String reportName = 'idx-payload.dd-1.7'
 
-  dependsOn jar
+  dependsOn jar, prepareEnvironment
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
@@ -274,4 +281,5 @@ test {
     }
   }
 }
+
 
