@@ -91,7 +91,7 @@ public class DataAvailability {
   private static final String SAMPLING_REQUEST_URI_TEMPLATE = "?$filter="
       + (USE_ORIGINATING_ID_NAME_QUERY ? ORIGINATING_SYSTEM_ID_QUERY + " and "
         : (USE_ORIGINATING_SYSTEM_NAME_QUERY ? ORIGINATING_SYSTEM_NAME_QUERY + " and " : EMPTY_STRING))
-      + "%s" + " gt %s&$orderby=%s asc&$top=" + TOP_COUNT;
+      + "%s" + " lt %s&$orderby=%s desc&$top=" + TOP_COUNT;
 
   private static final String COUNT_REQUEST_URI_TEMPLATE = "?"
       + (USE_ORIGINATING_ID_NAME_QUERY ? "$filter=" + ORIGINATING_SYSTEM_ID_QUERY + "&"
@@ -247,7 +247,7 @@ public class DataAvailability {
    * @return a list of PayloadSample items
    */
   List<PayloadSample> fetchAndProcessRecords(String resourceName, int targetRecordCount, String encodedResultsDirectoryName) {
-    final AtomicReference<OffsetDateTime> lastFetchedDate = new AtomicReference<>(OffsetDateTime.now().minus(1, ChronoUnit.YEARS));
+    final AtomicReference<OffsetDateTime> lastFetchedDate = new AtomicReference<>(OffsetDateTime.now());
     final List<String> timestampCandidateFields = new LinkedList<>();
     final AtomicReference<EdmEntityType> entityType = new AtomicReference<>();
     final AtomicReference<Map<String, String>> encodedSample = new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
@@ -467,7 +467,7 @@ public class DataAvailability {
                 encodedSample.get().put(property.getName(), value);
 
                 if (property.getName().contentEquals(MODIFICATION_TIMESTAMP_FIELD)) {
-                  if (OffsetDateTime.parse(property.getValue().toString()).isAfter(lastFetchedDate.get())) {
+                  if (OffsetDateTime.parse(property.getValue().toString()).isBefore(lastFetchedDate.get())) {
                     lastFetchedDate.set(OffsetDateTime.parse(property.getValue().toString()));
                   }
                 }
