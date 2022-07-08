@@ -1,18 +1,34 @@
 package org.reso.commander.common;
 
+import com.google.common.base.Functions;
+import com.google.gson.*;
+import io.cucumber.gherkin.internal.com.eclipsesource.json.Json;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.olingo.client.api.ODataClient;
+import org.apache.olingo.client.api.domain.ClientEntity;
+import org.apache.olingo.client.api.serialization.ODataSerializerException;
+import org.apache.olingo.client.core.edm.xml.ClientCsdlAnnotation;
+import org.apache.olingo.client.core.serialization.JsonSerializer;
+import org.apache.olingo.commons.api.edm.Edm;
+import org.apache.olingo.commons.api.edm.EdmAnnotation;
+import org.apache.olingo.commons.api.edm.EdmElement;
+import org.apache.olingo.commons.api.format.ContentType;
+import org.apache.olingo.commons.core.edm.EdmAnnotationImpl;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Utils {
   private static final Logger LOG = LogManager.getLogger(Utils.class);
@@ -30,6 +46,7 @@ public class Utils {
 
   /**
    * Gets the current timestamp
+   *
    * @return the current timestamp returned as a string
    */
   public static String getTimestamp() {
@@ -38,9 +55,10 @@ public class Utils {
 
   /**
    * Creates a file in the given directory with the given content
+   *
    * @param directoryName the directory name to create the file in
-   * @param fileName the name of the file to create
-   * @param content the content to write to the file
+   * @param fileName      the name of the file to create
+   * @param content       the content to write to the file
    */
   public static File createFile(String directoryName, String fileName, String content) {
     if (directoryName == null || fileName == null) return null;
@@ -66,6 +84,7 @@ public class Utils {
 
   /**
    * Creates a file in the given directory with the given content
+   *
    * @param content the content to write to the file
    */
   public static File createFile(String outputPath, String content) {
@@ -88,9 +107,10 @@ public class Utils {
 
   /**
    * Removes a directory at the given pathToDirectory.
-   *
+   * <p>
    * If current user has write access then directory creation will result in True being returned.
    * Otherwise will return false if the directory couldn't be created for some reason.
+   *
    * @param pathToDirectory
    * @return
    */
@@ -143,4 +163,17 @@ public class Utils {
     return OffsetDateTime.from(fromDate.toInstant()).format(DateTimeFormatter.ISO_INSTANT);
   }
 
+  /**
+   * Gets the difference of two generic sets.
+   * @param a the minuend set
+   * @param b the subtrahend set
+   * @param <T> the type of set
+   * @return Set of type T that contains A \ B
+   */
+  public static <T> Set<T> getDifference(Set<T> a, Set<T> b) {
+    return a.parallelStream()
+        .filter(item -> !b.contains(item))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
+  }
 }

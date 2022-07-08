@@ -198,11 +198,11 @@ public class EDMXProcessor extends WorksheetProcessor {
     standardFieldsMap.forEach((resourceName, standardFieldMap) -> {
       standardFieldMap.forEach((standardName, referenceStandardField) -> {
         if (referenceStandardField.isSingleEnumeration()) {
-          markupMap.putIfAbsent(referenceStandardField.getLookupStandardName(), buildSingleEnumTypeMarkup(referenceStandardField));
+          markupMap.putIfAbsent(referenceStandardField.getLookupName(), buildSingleEnumTypeMarkup(referenceStandardField));
         }
 
         if (referenceStandardField.isMultipleEnumeration()) {
-          markupMap.putIfAbsent(referenceStandardField.getLookupStandardName(), buildMultipleEnumTypeMarkup(referenceStandardField));
+          markupMap.putIfAbsent(referenceStandardField.getLookupName(), buildMultipleEnumTypeMarkup(referenceStandardField));
         }
       });
     });
@@ -241,11 +241,11 @@ public class EDMXProcessor extends WorksheetProcessor {
   private String buildSingleEnumTypeMarkup(ReferenceStandardField standardField) {
     StringBuilder content = new StringBuilder();
 
-    if (getEnumerations().get(standardField.getLookupStandardName()) != null) {
-      content.append("<EnumType Name=\"").append(standardField.getLookupStandardName()).append("\">");
+    if (getEnumerations().get(standardField.getLookupName()) != null) {
+      content.append("<EnumType Name=\"").append(standardField.getLookupName()).append("\">");
 
       //iterate through each of the lookup values and generate their edm:EnumType content
-      getEnumerations().get(standardField.getLookupStandardName()).forEach(lookup -> {
+      getEnumerations().get(standardField.getLookupName()).forEach(lookup -> {
         content
             .append("<Member Name=\"").append(lookup.getLookupValue()).append("\">")
             .append(EDMXTemplates.buildDisplayNameAnnotation(lookup.getLookupDisplayName()))
@@ -258,9 +258,9 @@ public class EDMXProcessor extends WorksheetProcessor {
     } else {
       content
           .append("<!-- TODO: implement if you are using the single-valued enumeration \"")
-          .append(standardField.getLookupStandardName()).append("\" -->")
-          .append("<EnumType Name=\"").append(standardField.getLookupStandardName()).append("\">")
-          .append("<Member Name=\"Sample").append(standardField.getLookupStandardName()).append("EnumValue").append("\"/>")
+          .append(standardField.getLookupName()).append("\" -->")
+          .append("<EnumType Name=\"").append(standardField.getLookupName()).append("\">")
+          .append("<Member Name=\"Sample").append(standardField.getLookupName()).append("EnumValue").append("\"/>")
           .append("</EnumType>");
     }
     return content.toString();
@@ -269,11 +269,11 @@ public class EDMXProcessor extends WorksheetProcessor {
   private String buildMultipleEnumTypeMarkup(ReferenceStandardField standardField) {
     StringBuilder content = new StringBuilder();
 
-    if (getEnumerations().get(standardField.getLookupStandardName()) != null) {
-      content.append("<EnumType Name=\"").append(standardField.getLookupStandardName()).append("\">");
+    if (getEnumerations().get(standardField.getLookupName()) != null) {
+      content.append("<EnumType Name=\"").append(standardField.getLookupName()).append("\">");
 
       //iterate through each of the lookup values and generate their edm:EnumType content
-      getEnumerations().get(standardField.getLookupStandardName()).forEach(lookup -> {
+      getEnumerations().get(standardField.getLookupName()).forEach(lookup -> {
         content
             .append("<Member Name=\"").append(lookup.getLookupValue()).append("\">")
             .append(EDMXTemplates.buildDisplayNameAnnotation(lookup.getLookupDisplayName()))
@@ -285,8 +285,8 @@ public class EDMXProcessor extends WorksheetProcessor {
       content.append("</EnumType>");
     } else {
       content
-          .append("<!-- TODO: implement if you are using the multi-valued enumeration \"").append(standardField.getLookupStandardName()).append("\" -->")
-          .append("<EnumType Name=\"").append(standardField.getLookupStandardName()).append("\">")
+          .append("<!-- TODO: implement if you are using the multi-valued enumeration \"").append(standardField.getLookupName()).append("\" -->")
+          .append("<EnumType Name=\"").append(standardField.getLookupName()).append("\">")
           .append(EDMXTemplates.buildDDWikiUrlAnnotation(standardField.getWikiPageUrl()))
           .append(EDMXTemplates.buildDescriptionAnnotation(standardField.getDefinition()))
           .append("<Member Name=\"Sample").append(standardField.getStandardName()).append("EnumValue").append("\"/>")
@@ -394,7 +394,7 @@ public class EDMXProcessor extends WorksheetProcessor {
       if (!field.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
       return ""
           + "<Property Name=\"" + field.getStandardName()
-          + "\" Type=\"Collection(" + RESO_NAMESPACE + ".enums." + field.getLookupStandardName() + ")\">"
+          + "\" Type=\"Collection(" + RESO_NAMESPACE + ".enums." + field.getLookupName() + ")\">"
           + buildDisplayNameAnnotation(field.getDisplayName())
           + buildDDWikiUrlAnnotation(field.getWikiPageUrl())
           + buildDescriptionAnnotation(field.getDefinition())

@@ -18,6 +18,7 @@ import org.apache.olingo.commons.api.edm.EdmMember;
 import org.apache.olingo.commons.api.edm.EdmNamed;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlEnumMember;
+import org.junit.AfterClass;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.Commander;
 import org.reso.commander.common.TestUtils;
@@ -114,13 +115,12 @@ public class DataDictionary {
   public void aRESOScriptFileIsProvided() {
     if (isUsingRESOScript) {
       if (container.getPathToRESOScript() == null) {
-        container.setPathToRESOScript(System.getProperty("pathToRESOScript"));
+        container.setPathToRESOScript(System.getProperty(PATH_TO_RESOSCRIPT_ARG));
       }
 
       if (container.getPathToRESOScript() == null) {
         failAndExitWithErrorMessage("pathToRESOScript must be present in command arguments, see README.", scenario);
       }
-      LOG.debug("Using RESOScript: " + container.getPathToRESOScript());
     }
   }
 
@@ -128,7 +128,7 @@ public class DataDictionary {
   public void clientSettingsAndParametersCanBeReadFromTheRESOScript() {
     if (isUsingRESOScript) {
       if (container.getSettings() == null) {
-        container.setSettings(Settings.loadFromRESOScript(new File(System.getProperty("pathToRESOScript"))));
+        container.setSettings(Settings.loadFromRESOScript(new File(System.getProperty(PATH_TO_RESOSCRIPT_ARG))));
         if (container.getPathToRESOScript() == null) {
           failAndExitWithErrorMessage("Settings could not be loaded!", scenario);
         }
@@ -206,9 +206,9 @@ public class DataDictionary {
       }
 
       //metadata validation tests
-      TestUtils.assertValidXMLMetadata(container);
-      TestUtils.assertXmlMetadataContainsEdm(container);
-      TestUtils.assertXMLMetadataHasValidServiceDocument(container);
+      TestUtils.assertValidXMLMetadata(container, scenario);
+      TestUtils.assertXmlMetadataContainsEdm(container, scenario);
+      TestUtils.assertXMLMetadataHasValidServiceDocument(container, scenario);
 
       //build field map and ensure it's not null
       assertNotNull(container.getFieldMap());

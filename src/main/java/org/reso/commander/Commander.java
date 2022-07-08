@@ -19,7 +19,7 @@ import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.auth.OAuth2HttpClientFactory;
 import org.reso.auth.TokenHttpClientFactory;
 import org.reso.commander.common.TestUtils;
-import org.reso.models.MetadataReport;
+import org.reso.commander.jsonSerializers.MetadataReport;
 import org.reso.models.ODataTransportWrapper;
 import org.reso.models.Request;
 import org.xml.sax.*;

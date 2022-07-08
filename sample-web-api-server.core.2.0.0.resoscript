@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <!--
-  >>> To be used as a template for Web API Server Core 1.0.2 Certification <<<
+  >>> To be used as a template for Web API Server Core 2.0.0 Certification <<<
 
   NOTES:
     * Anything marked REQUIRED should be filled in.
@@ -46,6 +46,7 @@
   <!-- The current version of this RESOScript -->
   <RESOScriptVersion>3.1.0</RESOScriptVersion>
 
+
   <!--
   ############################################################
     Client Settings
@@ -53,7 +54,7 @@
   ############################################################-->
   <ClientSettings>
     <!-- URLS -->
-    <WebAPIURI>https://api.reso.org/OData</WebAPIURI>
+    <WebAPIURI><!--REQUIRED: URI of your Web API Service Root goes here --></WebAPIURI>
 
     <!-- Credentials -->
 
@@ -69,9 +70,20 @@
 
     <!-- Grant Type: authorization_code -->
     <AuthenticationType>authorization_code</AuthenticationType>
-    <BearerToken>testTokenValue</BearerToken>
+    <BearerToken><!-- REQUIRED: Your BearerToken goes here if using Access Tokens --></BearerToken>
+
+    <!-- Grant Type: client_credentials -->
+    <AuthenticationType>client_credentials</AuthenticationType>
+    <ClientIdentification><!-- REQUIRED: Your client_id value if using Client Credentials--></ClientIdentification>
+    <ClientSecret><!-- REQUIRED: Your client_secret value if using Client Credentials--></ClientSecret>
+    <TokenURI><!-- REQUIRED: Your token endpoint URI--></TokenURI>
+    <ClientScope>
+
+      <!--OPTIONAL - your client scope. See: https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/ -->
+    </ClientScope>
 
   </ClientSettings>
+
 
   <!--
   ############################################################
@@ -121,7 +133,7 @@
 
     <!-- REQUIRED: Core - Date Field for comparisons. Should be Type="Edm.Date" -->
     <Parameter Name="DateField" Value="ListingContractDate"/>
-    <Parameter Name="TimestampField" Value="ModificationTimestamp"/>
+    <Parameter Name="TimestampField" Value="OriginalEntryTimestamp"/>
 
     <!--
     ############################################################
@@ -169,9 +181,6 @@
     <Parameter Name="TopCount" Value="5"/>
     <Parameter Name="SortCount" Value="20"/>
 
-    <!-- New Values for WS103 Testing -->
-    <Parameter Name="CastFieldType" Value="Edm.String"/>
-
     <!-- Required resource lists for Standard Resource Names requirement -->
     <Parameter Name="WebAPI102_RequiredResourceList" Value="Property,Member,Office,Media"/>
 
@@ -193,10 +202,6 @@
                Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue1*'"/>
     <Parameter Name="MultipleValueLookupValue2"
                Value="*Parameter_MultipleValueLookupNamespace*'*Parameter_MultipleLookupValue2*'"/>
-
-    <!-- OPTIONAL: Useful for testing the OData Format Parameter - Value="?$format=application/xml" -->
-    <Parameter Name="OptionalMetadataFormatParameter" Value=""/>
-
   </Parameters>
 
   <!--
@@ -209,7 +214,7 @@
     <Request
         RequestId="metadata-request"
         OutputFile="metadata-request.xml"
-        Url="*ClientSettings_WebAPIURI*/$metadata*Parameter_OptionalMetadataFormatParameter*"
+        Url="*ClientSettings_WebAPIURI*/$metadata?$format=application/xml"
     />
 
     <Request

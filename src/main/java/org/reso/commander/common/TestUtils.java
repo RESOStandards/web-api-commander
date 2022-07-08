@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.cucumber.java.Scenario;
 import org.apache.http.Header;
+import org.apache.http.NameValuePair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
@@ -18,6 +19,8 @@ import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDate;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmTimeOfDay;
+import org.reso.certification.codegen.DDCacheProcessor;
+import org.reso.certification.codegen.DataDictionaryCodeGenerator;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.Commander;
 import org.reso.models.Settings;
@@ -564,14 +567,9 @@ public final class TestUtils {
    * @return the value of the header with key, or null
    */
   public static String getHeaderData(String key, Collection<Header> headers) {
-    String data = null;
-
-    for (Header header : headers) {
-      if (header.getName().toLowerCase().contains(key.toLowerCase())) {
-        data = header.getValue();
-      }
-    }
-    return data;
+    return headers.stream()
+        .filter(header -> header.getName().toLowerCase().contains(key.toLowerCase()))
+          .findFirst().map(NameValuePair::getValue).orElse(null);
   }
 
   /**
@@ -583,14 +581,7 @@ public final class TestUtils {
    */
   public static String getHeaderData(String key, ODataResponse oDataResponse) {
     if (key == null || oDataResponse.getHeader(key) == null) return null;
-    ArrayList<String> result = new ArrayList<>(oDataResponse.getHeader(key));
-
-    if (result.size() > 0) {
-      return result.get(0);
-    } else {
-      return null;
-    }
-
+    return oDataResponse.getHeader(key).stream().reduce(String::concat).orElse(null);
   }
 
   /**
@@ -768,42 +759,39 @@ public final class TestUtils {
 
   /**
    * Asserts that metadata in the given container are valid. Fetches metadata if not present in the container.
+   *
    * @param container a test container with a valid config that metadata can be fetched into
    */
-  public static void assertValidXMLMetadata(WebAPITestContainer container) {
+  public static void assertValidXMLMetadata(WebAPITestContainer container, Scenario scenario) {
     try {
       if (!container.getHaveMetadataBeenRequested()) {
         //will lazy-load metadata from the server if not yet requested
         container.fetchXMLMetadata();
       }
       container.validateMetadata();
-      assertTrue("XML Metadata at the given service root is not valid! " + container.getServiceRoot(),
-          container.getIsValidXMLMetadata());
+      if (!container.getIsValidXMLMetadata()) {
+        failAndExitWithErrorMessage("Invalid XML Metadata! Service root: " + container.getServiceRoot(), scenario);
+      }
     } catch (Exception ex) {
-      fail(getDefaultErrorMessage(ex));
+      failAndExitWithErrorMessage(getDefaultErrorMessage(ex), scenario);
     }
   }
 
   /**
    * Asserts that the given container has XML Metadata that contains an Entity Data Model (Edm)
+   *
    * @param container the container with XML metadata to validate
    */
-  public static void assertXmlMetadataContainsEdm(WebAPITestContainer container) {
+  public static void assertXmlMetadataContainsEdm(WebAPITestContainer container, Scenario scenario) {
     container.setEdm(Commander.deserializeEdm(container.getXMLResponseData(), container.getCommander().getClient()));
-    assertNotNull(getDefaultErrorMessage("Edm de-serialized to an empty object!"), container.getEdm());
-  }
-
-  /**
-   * Asserts that the Edm in the given container are valid
-   * @param container the container with the XML Metadata to check
-   */
-  public static void assertValidEdm(WebAPITestContainer container) {
-    assertTrue("Edm Metadata at the given service root is not valid! " + container.getServiceRoot(),
-        container.getIsValidEdm());
+    if (container.getEdm() == null) {
+      failAndExitWithErrorMessage(getDefaultErrorMessage("Edm de-serialized to an empty object!"), scenario);
+    }
   }
 
   /**
    * Asserts that XML Metadata are retrieved from the server
+   *
    * @param container the container to retrieve metadata with
    */
   public static void assertXMLMetadataAreRequestedFromTheServer(WebAPITestContainer container, Scenario scenario) {
@@ -834,34 +822,27 @@ public final class TestUtils {
   }
 
   /**
-   * Asserts that the XML Response in the given container is valid XML
-   * @param container the container with the XML response to validate
-   */
-  public static void assertXMLResponseIsValidXML(WebAPITestContainer container) {
-    assertNotNull(getDefaultErrorMessage("no XML Response data were found!"), container.getXMLResponseData());
-    container.validateXMLMetadataXML();
-    assertTrue(getDefaultErrorMessage("invalid XML response!"), container.getIsValidXMLMetadataXML());
-  }
-
-  /**
    * Asserts that the XML metadata in the given container has a valid service document
+   *
    * @param container the container with XML Metadata to validate
    */
-  public static void assertXMLMetadataHasValidServiceDocument(WebAPITestContainer container) {
+  public static void assertXMLMetadataHasValidServiceDocument(WebAPITestContainer container, Scenario scenario) {
     try {
-      assertNotNull("ERROR: could not find default entity container for given service root: " +
-          container.getServiceRoot(), container.getEdm().getEntityContainer());
+      if (container == null || container.getEdm() == null || container.getEdm().getEntityContainer() == null) {
+        failAndExitWithErrorMessage("Could not find default entity container for given service root: " + container.getServiceRoot(), scenario);
+      }
       LOG.info("Found Default Entity Container: '" + container.getEdm().getEntityContainer().getNamespace() + "'");
     } catch (ODataClientErrorException cex) {
       container.setResponseCode(cex.getStatusLine().getStatusCode());
-      fail(cex.toString());
+      failAndExitWithErrorMessage(cex.toString(), scenario);
     } catch (Exception ex) {
-      fail(getDefaultErrorMessage(ex));
+      failAndExitWithErrorMessage(getDefaultErrorMessage(ex), scenario);
     }
   }
 
   /**
    * Asserts that valid Metadata have been retrieved. Fetches metadata if not present.
+   *
    * @param container a test container to validate
    */
   public static void assertValidMetadataHaveBeenRetrieved(WebAPITestContainer container) {
@@ -880,6 +861,7 @@ public final class TestUtils {
 
   /**
    * Validates that the given response data have a valid OData count
+   *
    * @param responseData the data to check for a count against
    * @return true if the there is a count present and it's greater than or equal to the number of results
    */
@@ -902,21 +884,21 @@ public final class TestUtils {
    * Contains the list of supported operators for use in query expressions.
    */
   public static class Operators {
-      public static final String
-          AND = "and",
-          OR = "or",
-          NE = "ne",
-          EQ = "eq",
-          GREATER_THAN = "gt",
-          GREATER_THAN_OR_EQUAL = "ge",
-          HAS = "has",
-          LESS_THAN = "lt",
-          LESS_THAN_OR_EQUAL = "le",
-          CONTAINS = "contains",
-          ENDS_WITH = "endswith",
-          STARTS_WITH = "startswith",
-          TO_LOWER = "tolower",
-          TO_UPPER = "toupper";
+    public static final String
+        AND = "and",
+        OR = "or",
+        NE = "ne",
+        EQ = "eq",
+        GREATER_THAN = "gt",
+        GREATER_THAN_OR_EQUAL = "ge",
+        HAS = "has",
+        LESS_THAN = "lt",
+        LESS_THAN_OR_EQUAL = "le",
+        CONTAINS = "contains",
+        ENDS_WITH = "endswith",
+        STARTS_WITH = "startswith",
+        TO_LOWER = "tolower",
+        TO_UPPER = "toupper";
   }
 
   public static final class DateParts {
@@ -964,6 +946,20 @@ public final class TestUtils {
       scenario.log(getDefaultErrorMessage(msg));
     }
     System.exit(NOT_OK);
+  }
+
+  /**
+   * Builds a Data Dictionary Cache
+   *
+   * @return a DDProcessor Cache object
+   */
+  public static DDCacheProcessor buildDataDictionaryCache() {
+    LOG.info("Creating standard field cache...");
+    final DDCacheProcessor cache = new DDCacheProcessor();
+    DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(cache);
+    generator.processWorksheets();
+    LOG.info("Standard field cache created!");
+    return cache;
   }
 }
 

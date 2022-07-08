@@ -7,6 +7,7 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
+import io.cucumber.java.bs.A;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,6 +23,7 @@ import org.apache.olingo.client.api.uri.QueryOption;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.format.ContentType;
+import org.reso.certification.codegen.DDCacheProcessor;
 import org.reso.commander.Commander;
 import org.reso.commander.common.DataDictionaryMetadata;
 import org.reso.commander.common.TestUtils;
@@ -82,6 +84,7 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicBoolean isDataSystemValid = new AtomicBoolean(false);
   private final AtomicReference<Set<ValidationMessage>> schemaValidationErrors = new AtomicReference<>();
   private final AtomicBoolean isUsingMetadataFile = new AtomicBoolean(false);
+  private final AtomicBoolean useEdmEnabledClient = new AtomicBoolean(true);
 
   // request instance variables - these get resetMarkupBuffer with every request
   //TODO: refactor underlying response properties to use a ODataTransportWrapper (or any TransportWrapper)
@@ -101,6 +104,8 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicReference<ODataEntitySetRequest<ClientEntitySet>> clientEntitySetRequest = new AtomicReference<>();
   private final AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
   private final AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
+  private final AtomicReference<DDCacheProcessor> ddCacheProcessor = new AtomicReference<>();
+
   private static final String WEB_API_CORE_REFERENCE_REQUESTS = "reference-web-api-core-requests.xml";
 
   //singleton variables
@@ -111,9 +116,11 @@ public final class WebAPITestContainer implements TestContainer {
    */
   public void initialize() {
     if (getIsInitialized()) return;
-    Commander.Builder builder = new Commander.Builder().useEdmEnabledClient(true);
 
-    if (!isUsingMetadataFile.get()) {
+    LOG.info("Using Edm Enabled Client: " + useEdmEnabledClient.get());
+    Commander.Builder builder = new Commander.Builder().useEdmEnabledClient(useEdmEnabledClient.get());
+
+    if (getSettings() != null) {
       //overwrite any requests loaded with the reference queries
       //TODO: make the reference requests something that can be passed in during initialization
       getSettings().setRequests(loadFromRESOScript(new File(Objects.requireNonNull(
@@ -208,19 +215,31 @@ public final class WebAPITestContainer implements TestContainer {
    */
   private void buildFieldMap() {
     try {
-      if (fieldMap.get() == null) fieldMap.set(new LinkedHashMap<>());
+      if (fieldMap.get() == null) {
+        fieldMap.set(new LinkedHashMap<>());
+      }
 
       LOG.debug("Building Field Map...");
 
-      assertNotNull(getDefaultErrorMessage("no XML Metadata found in the container!"), fetchXMLMetadata());
-      assertNotNull(getDefaultErrorMessage("no Entity Data Model (edm) found in the container!"), getEdm());
+      //if settings exist
+      if (getXMLMetadata() == null) {
+        if (getSettings() != null) {
+          LOG.info("No XML Metadata found in the container but settings exist. Trying to fetch it from the server...");
+          assertNotNull(getDefaultErrorMessage("No XML Metadata was fetched from the server!"), fetchXMLMetadata());
+          assertNotNull(getDefaultErrorMessage("No Entity Data Model (edm) found in the container!"), getEdm());
+          LOG.info("Metadata fetched!");
+        } else {
+          LOG.debug("Metadata does not exist in the container!");
+          return;
+        }
+      }
 
       //build a map of all of the discovered fields on the server for the given resource by field name
       //TODO: add multiple Data Dictionary version support
       DataDictionaryMetadata.v1_7.WELL_KNOWN_RESOURCES.forEach(resourceName -> {
         List<CsdlProperty> csdlProperties = null;
         try {
-          csdlProperties = TestUtils.findEntityTypesForEntityTypeName(getEdm(), fetchXMLMetadata(), resourceName);
+          csdlProperties = TestUtils.findEntityTypesForEntityTypeName(getEdm(), getXMLMetadata(), resourceName);
         } catch (Exception e) {
           LOG.error(e);
         }
@@ -341,7 +360,7 @@ public final class WebAPITestContainer implements TestContainer {
    */
   public Edm getEdm() {
     if (edm.get() == null) {
-      assertNotNull(getDefaultErrorMessage("no XML response data found, cannot return Edm!"), xmlResponseData.get());
+      assertNotNull(getDefaultErrorMessage("No XML response data found, cannot return Edm!"), xmlResponseData.get());
       edm.set(Commander.deserializeEdm(xmlResponseData.get(), getCommander().getClient()));
     }
     return edm.get();
@@ -363,7 +382,7 @@ public final class WebAPITestContainer implements TestContainer {
    * @implNote the data in this item are cached in the test container once fetched
    */
   public XMLMetadata fetchXMLMetadata() throws Exception {
-    if (xmlMetadata.get() == null) {
+    if (getSettings() != null && xmlMetadata.get() == null) {
       try {
         Request request = getSettings().getRequest(Request.WELL_KNOWN.METADATA_ENDPOINT);
         setRequest(request);
@@ -414,6 +433,7 @@ public final class WebAPITestContainer implements TestContainer {
    * @return the local Commander instance
    */
   public Commander getCommander() {
+    if (commander.get() == null) initialize();
     return commander.get();
   }
 
@@ -872,6 +892,13 @@ public final class WebAPITestContainer implements TestContainer {
 
   public void setIsInitialized(boolean value) {
     isInitialized.set(value);
+  }
+
+  public DDCacheProcessor getDDCacheProcessor() {
+    if (ddCacheProcessor.get() == null) {
+      ddCacheProcessor.set(TestUtils.buildDataDictionaryCache());
+    }
+    return ddCacheProcessor.get();
   }
 
   public static final class ODATA_QUERY_PARAMS {

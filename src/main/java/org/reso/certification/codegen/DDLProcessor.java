@@ -205,7 +205,7 @@ public class DDLProcessor extends WorksheetProcessor {
       standardFieldMap.forEach((standardName, referenceStandardField) -> {
         String inserts = buildLookupValueInserts(referenceStandardField);
         if (inserts.length() > 0) {
-          markupMap.putIfAbsent(referenceStandardField.getLookupStandardName(),
+          markupMap.putIfAbsent(referenceStandardField.getLookupName(),
               (markupMap.keySet().size() > 0 ? ", " : EMPTY_STRING) + PADDING + inserts);
         }
       });
@@ -219,16 +219,16 @@ public class DDLProcessor extends WorksheetProcessor {
   private String buildLookupValueInserts(ReferenceStandardField standardField) {
     StringBuilder content = new StringBuilder();
 
-    if (getEnumerations().get(standardField.getLookupStandardName()) != null) {
+    if (getEnumerations().get(standardField.getLookupName()) != null) {
       AtomicReference<String> fieldHash = new AtomicReference<>();
 
       //iterate through each of the lookup values and generate their edm:EnumType content
-      getEnumerations().get(standardField.getLookupStandardName()).forEach(lookup -> {
+      getEnumerations().get(standardField.getLookupName()).forEach(lookup -> {
 
         // key is the sha256 of the following values
         fieldHash.set(sha256()
             .hashString(
-                standardField.getLookupStandardName()
+                standardField.getLookupName()
                     + lookup.getLookupDisplayName()
                     + lookup.getLookupValue(), StandardCharsets.UTF_8)
             .toString());
@@ -237,7 +237,7 @@ public class DDLProcessor extends WorksheetProcessor {
             .append(content.length() > 0 ? ", " : EMPTY_STRING).append("\n")
             .append(PADDING).append("(")
             .append("\"").append(fieldHash.get()).append("\"")
-            .append(", ").append("\"").append(standardField.getLookupStandardName()).append("\"")
+            .append(", ").append("\"").append(standardField.getLookupName()).append("\"")
             .append(", ").append("\"").append(lookup.getLookupDisplayName()).append("\"")
             .append(", ").append("\"").append(lookup.getLookupDisplayName()).append("\"")
             .append(", ").append("\"").append(lookup.getLookupValue()).append("\"")

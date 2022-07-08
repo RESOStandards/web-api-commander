@@ -22,7 +22,6 @@ import org.apache.olingo.commons.api.edm.EdmNamed;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.codegen.DDCacheProcessor;
-import org.reso.certification.codegen.DataDictionaryCodeGenerator;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.DataDictionaryMetadata;
 import org.reso.commander.common.Utils;
@@ -63,34 +62,44 @@ public class DataAvailability {
 
   private static final String BUILD_DIRECTORY_PATH = "build";
   private static final String CERTIFICATION_PATH = BUILD_DIRECTORY_PATH + File.separator + "certification";
-  private static final String DATA_AVAILABILITY_REPORT_PATH = BUILD_DIRECTORY_PATH + File.separator + "certification" + File.separator + "results";
+  public static final String CERTIFICATION_RESULTS_PATH = BUILD_DIRECTORY_PATH + File.separator + "certification" + File.separator + "results";
   private static final String SAMPLES_DIRECTORY_TEMPLATE = BUILD_DIRECTORY_PATH + File.separator + "%s";
-  private static final String PATH_TO_RESOSCRIPT_KEY = "pathToRESOScript";
+
+  private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
+
+  // strict mode is enabled by default
   private static final String USE_STRICT_MODE_ARG = "strict";
+  private final boolean STRICT_MODE_ENABLED = Boolean.parseBoolean(System.getProperty(USE_STRICT_MODE_ARG, "true"));
+
+  // abTesting mode is disabled by default
   private static final String A_B_TESTING_MODE_ARG = "abTesting";
+  private static final boolean AB_TESTING_MODE_ENABLED = Boolean.parseBoolean(System.getProperty(A_B_TESTING_MODE_ARG, "false"));
 
-  //strict mode is enabled by default
-  private final boolean strictMode =
-      System.getProperty(USE_STRICT_MODE_ARG) == null || Boolean.parseBoolean(System.getProperty(USE_STRICT_MODE_ARG));
+  // OriginatingSystemName query
+  private static final String ORIGINATING_SYSTEM_NAME_FIELD_ARG = "OriginatingSystemName";
+  private static final String ORIGINATING_SYSTEM_NAME_FIELD_VALUE = System.getProperty(ORIGINATING_SYSTEM_NAME_FIELD_ARG, EMPTY_STRING);
+  private static final String ORIGINATING_SYSTEM_NAME_QUERY = ORIGINATING_SYSTEM_NAME_FIELD_ARG + " eq '" + ORIGINATING_SYSTEM_NAME_FIELD_VALUE + "'";
+  private static final boolean USE_ORIGINATING_SYSTEM_NAME_QUERY = ORIGINATING_SYSTEM_NAME_FIELD_VALUE.length() > 0;
 
-  //abTesting mode is disabled by default
-  private final boolean abTestingMode =
-      System.getProperty(A_B_TESTING_MODE_ARG) != null && Boolean.parseBoolean(System.getProperty(A_B_TESTING_MODE_ARG));
+  // OriginatingSystemID query
+  private static final String ORIGINATING_SYSTEM_ID_FIELD_ARG = "OriginatingSystemID";
+  private static final String ORIGINATING_SYSTEM_ID_FIELD_VALUE = System.getProperty(ORIGINATING_SYSTEM_ID_FIELD_ARG, EMPTY_STRING);;
+  private static final String ORIGINATING_SYSTEM_ID_QUERY = ORIGINATING_SYSTEM_NAME_FIELD_ARG + " eq '" + ORIGINATING_SYSTEM_NAME_FIELD_VALUE + "'";
+  private static final boolean USE_ORIGINATING_ID_NAME_QUERY = ORIGINATING_SYSTEM_ID_FIELD_VALUE.length() > 0;
 
-  //TODO: read from params
-  final String ORIGINATING_SYSTEM_FIELD = "OriginatingSystemName";
-  final String ORIGINATING_SYSTEM_FIELD_VALUE = EMPTY_STRING;
-
-  final boolean USE_ORIGINATING_SYSTEM_QUERY = ORIGINATING_SYSTEM_FIELD.length() > 0 && ORIGINATING_SYSTEM_FIELD_VALUE.length() > 0;
-  final String ORIGINATING_SYSTEM_QUERY = ORIGINATING_SYSTEM_FIELD + " eq '" + ORIGINATING_SYSTEM_FIELD_VALUE + "'";
-  final String REQUEST_URI_TEMPLATE = "?$filter="
-      + (USE_ORIGINATING_SYSTEM_QUERY ? ORIGINATING_SYSTEM_QUERY + " and " : EMPTY_STRING)
+  // Query Templates - prefer OriginatingSystemID if both are passed
+  private static final String SAMPLING_REQUEST_URI_TEMPLATE = "?$filter="
+      + (USE_ORIGINATING_ID_NAME_QUERY ? ORIGINATING_SYSTEM_ID_QUERY + " and "
+        : (USE_ORIGINATING_SYSTEM_NAME_QUERY ? ORIGINATING_SYSTEM_NAME_QUERY + " and " : EMPTY_STRING))
       + "%s" + " lt %s&$orderby=%s desc&$top=" + TOP_COUNT;
 
-  final String COUNT_REQUEST_URI_TEMPLATE = "?" + (USE_ORIGINATING_SYSTEM_QUERY ? "$filter=" + ORIGINATING_SYSTEM_QUERY + "&": EMPTY_STRING) + "$count=true";
+  private static final String COUNT_REQUEST_URI_TEMPLATE = "?"
+      + (USE_ORIGINATING_ID_NAME_QUERY ? "$filter=" + ORIGINATING_SYSTEM_ID_QUERY + "&"
+      : (USE_ORIGINATING_SYSTEM_NAME_QUERY ? "$filter=" + ORIGINATING_SYSTEM_NAME_QUERY + "&" : EMPTY_STRING))
+      + "$count=true";
 
-  //TODO: get this from the parameters
-  private final static boolean DEBUG = false;
+  private static final String DEBUG_ARG = "debug";
+  private static final boolean DEBUG_MODE_ENABLED = Boolean.parseBoolean(System.getProperty(DEBUG_ARG, "false"));
 
   private static Scenario scenario;
 
@@ -105,36 +114,30 @@ public class DataAvailability {
   private final static AtomicReference<Map<String, List<PayloadSample>>> resourcePayloadSampleMap =
       new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
 
-  private final static AtomicReference<Map<String, Map<String, ReferenceStandardField>>> resourceFieldMap =
-      new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
-
   private final static AtomicReference<Map<String, Integer>> resourceCounts =
       new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
 
-  //resourceName, fieldName, lookupName, lookupValue, tally
   private final static AtomicReference<Map<LookupValue, Integer>> resourceFieldLookupTallies =
       new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
-
-  private final static AtomicReference<DDCacheProcessor> processor = new AtomicReference<>();
 
   @Inject
   public DataAvailability(WebAPITestContainer c) {
     if (container.get() == null) {
       container.set(c);
-      LOG.info("Using strict mode: " + strictMode);
+      LOG.info("Using strict mode: " + STRICT_MODE_ENABLED);
     }
   }
 
   @Before
   public void beforeStep(Scenario scenario) {
-    final String pathToRESOScript = System.getProperty(PATH_TO_RESOSCRIPT_KEY, null);
+    final String pathToRESOScript = System.getProperty(PATH_TO_RESOSCRIPT_ARG, null);
 
     if (pathToRESOScript == null) return;
 
     DataAvailability.scenario = scenario;
 
     if (!container.get().getIsInitialized()) {
-      container.get().setSettings(Settings.loadFromRESOScript(new File(System.getProperty(PATH_TO_RESOSCRIPT_KEY))));
+      container.get().setSettings(Settings.loadFromRESOScript(new File(System.getProperty(PATH_TO_RESOSCRIPT_ARG))));
       container.get().initialize();
     }
   }
@@ -153,7 +156,7 @@ public class DataAvailability {
     GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting();
     gsonBuilder.registerTypeAdapter(PayloadSampleReport.class, payloadSampleReport);
 
-    Utils.createFile(DATA_AVAILABILITY_REPORT_PATH, reportName, gsonBuilder.create().toJson(payloadSampleReport));
+    Utils.createFile(CERTIFICATION_RESULTS_PATH, reportName, gsonBuilder.create().toJson(payloadSampleReport));
 
   }
 
@@ -182,7 +185,7 @@ public class DataAvailability {
         .newURIBuilder(container.get().getServiceRoot())
         .appendEntitySetSegment(resourceName).build().toString();
 
-    requestUri += String.format(REQUEST_URI_TEMPLATE, timestampField,
+    requestUri += String.format(SAMPLING_REQUEST_URI_TEMPLATE, timestampField,
         lastFetchedDate.format(DateTimeFormatter.ISO_INSTANT), timestampField);
 
     return requestUri;
@@ -254,8 +257,8 @@ public class DataAvailability {
     final AtomicReference<String> timestampField = new AtomicReference<>();
     final AtomicBoolean hasRecords = new AtomicBoolean(true);
     final AtomicReference<PayloadSample> payloadSample = new AtomicReference<>();
-    final AtomicReference<List<PayloadSample>> payloadSamples =
-        new AtomicReference<>(Collections.synchronizedList(new LinkedList<>()));
+    final AtomicReference<Set<PayloadSample>> payloadSamples =
+        new AtomicReference<>(Collections.synchronizedSet(new LinkedHashSet<>()));
 
     boolean hasStandardTimestampField = false;
     String requestUri;
@@ -279,7 +282,12 @@ public class DataAvailability {
           if (entityType.get().getProperty(propertyName).getType().getFullQualifiedName().getFullQualifiedNameAsString()
               .contentEquals(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName().getFullQualifiedNameAsString())) {
             scenario.log("Found Edm.DateTimeOffset field " + propertyName + " in the " + resourceName + " resource!\n");
-            timestampCandidateFields.add(propertyName);
+
+            if (propertyName.toLowerCase(Locale.ROOT).contains("modificationtimestamp")) {
+              timestampCandidateFields.add(0, propertyName);
+            } else {
+              timestampCandidateFields.add (propertyName);
+            }
           }
         } catch (Exception ex) {
           LOG.error(ex);
@@ -295,14 +303,18 @@ public class DataAvailability {
     scenario.log("Keys found: " + keyFields.stream().map(EdmKeyPropertyRef::getName).collect(Collectors.joining(", ")));
 
     //loop and fetch records as long as items are available and we haven't reached our target count yet
+    //TODO: switch to OData Fetch API
     while (hasRecords.get() && recordsProcessed < targetRecordCount) {
+
       if (hasStandardTimestampField) {
         timestampField.set(MODIFICATION_TIMESTAMP_FIELD);
       } else if (timestampCandidateFields.size() > 0 && lastTimestampCandidateIndex < timestampCandidateFields.size()) {
         timestampField.set(timestampCandidateFields.get(lastTimestampCandidateIndex++));
       } else {
-        scenario.log(getDefaultErrorMessage("Could not find a suitable timestamp field in the "
-            + resourceName + " resource to sample with..."));
+        if (recordsProcessed == 0) {
+          scenario.log(getDefaultErrorMessage("Could not find a suitable timestamp field in the "
+              + resourceName + " resource to sample with..."));
+        }
 
         //skip this resource since no suitable fields were found
         break;
@@ -319,7 +331,7 @@ public class DataAvailability {
 
       // retries. sometimes requests can time out and fail and we don't want to stop sampling
       // immediately, but retry a couple of times before we bail
-      if (recordsProcessed == 0 && transportWrapper.get().getResponseData() == null) {
+      if (recordsProcessed == 0 || transportWrapper.get().getResponseData() == null) {
         //only count retries if we're constantly making requests and not getting anything
         numTimestampRetries += 1;
       } else {
@@ -383,7 +395,7 @@ public class DataAvailability {
                     || property.isGeospatial() && property.asGeospatial() != null)
                     ? property.getValue().toString() : null;
 
-                if (DEBUG) {
+                if (DEBUG_MODE_ENABLED) {
                   if (property.isCollection() && property.asCollection().size() > 0) {
                     LOG.info("Found Collection for field: " + property.getName() + ", value: " + property.asCollection());
                   }
@@ -401,12 +413,12 @@ public class DataAvailability {
                   }
                 }
 
-
                 //if the field is a lookup field, collect the frequency of each unique set of enumerations for the field
-                if (property.isEnum() || (processor.get().getStandardFieldCache().containsKey(resourceName)
-                    && processor.get().getStandardFieldCache().get(resourceName).containsKey(property.getName()))) {
-                  ReferenceStandardField standardField = processor.get().getStandardFieldCache().get(resourceName).get(property.getName());
-                  //if the field is declared as an OData Edm.EnumType or String List, Single or Multii in the DD, then collect its value
+                if (property.isEnum() || (container.get().getDDCacheProcessor().getStandardFieldCache().containsKey(resourceName)
+                    && container.get().getDDCacheProcessor().getStandardFieldCache().get(resourceName).containsKey(property.getName()))) {
+                  ReferenceStandardField standardField = container.get().getDDCacheProcessor().getStandardFieldCache().get(resourceName).get(property.getName());
+
+                  //if the field is declared as an OData Edm.EnumType or String List, Single or Multi in the DD, then collect its value
                   if (property.isEnum() || (standardField.getSimpleDataType().contentEquals(STRING_LIST_SINGLE)
                       || standardField.getSimpleDataType().contentEquals(STRING_LIST_MULTI))) {
 
@@ -443,7 +455,7 @@ public class DataAvailability {
                 }
 
                 //turn off hashing when DEBUG is true
-                if (!DEBUG && value != null) {
+                if (!DEBUG_MODE_ENABLED && value != null) {
                   if (!(property.getName().contentEquals(timestampField.get())
                       || property.getName().equals(POSTAL_CODE_FIELD)
                       || keyFields.stream().reduce(true, (acc, f) -> acc && f.getName().contentEquals(property.getName()), Boolean::logicalAnd))) {
@@ -469,7 +481,7 @@ public class DataAvailability {
 
             payloadSample.get().setResponseTimeMillis(transportWrapper.get().getElapsedTimeMillis());
 
-            if (abTestingMode && encodedResultsDirectoryName != null) {
+            if (AB_TESTING_MODE_ENABLED && encodedResultsDirectoryName != null) {
               //serialize results once resource processing has finished
               Utils.createFile(String.format(SAMPLES_DIRECTORY_TEMPLATE, encodedResultsDirectoryName),
                   resourceName + "-" + Utils.getTimestamp() + ".json",
@@ -478,48 +490,35 @@ public class DataAvailability {
 
             payloadSamples.get().add(payloadSample.get());
           } else {
-            scenario.log("All available records fetched! Total: " + recordsProcessed);
+            scenario.log("All available records fetched! Unique Records Processed: " + recordsProcessed);
             hasRecords.set(false);
           }
         } catch (Exception ex) {
           scenario.log("Error in fetchAndProcessRecords: " + getDefaultErrorMessage(ex.toString()));
           scenario.log("Skipping sample...");
-          lastFetchedDate.set(lastFetchedDate.get().minus(1, ChronoUnit.WEEKS));
+
+          //try adding some time to get unstuck, if possible
+          lastFetchedDate.set(lastFetchedDate.get().plus(1, ChronoUnit.DAYS));
         }
       }
     }
-    return payloadSamples.get();
-  }
-
-  /**
-   * fetches and processes records in cases where only sampling is required and encoding is not necessary
-   *
-   * @param resourceName      the resource name to sample from
-   * @param targetRecordCount the target record count for the resource (will stop if the end of the records is reached)
-   * @return a list of PayloadSample items
-   */
-  List<PayloadSample> fetchAndProcessRecords(String resourceName, int targetRecordCount) {
-    return fetchAndProcessRecords(resourceName, targetRecordCount, null);
+    return payloadSamples.get().parallelStream().collect(Collectors.toList());
   }
 
 
   /*==================================== TESTS START HERE ====================================*/
 
-
-  @Given("that valid metadata have been requested from the server")
-  public void thatValidMetadataHaveBeenRequestedFromTheServer() {
+  @Given("that metadata have been retrieved from the server and validated")
+  public void thatValidMetadataHaveBeenRetrievedFromTheServerAndValidated() {
     try {
-      if (container.get().hasValidMetadata()) {
-        if (processor.get() == null || processor.get().getStandardFieldCache().size() == 0) {
-          LOG.info("Creating standard field cache...");
-          processor.set(new DDCacheProcessor());
-          DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(processor.get());
-          generator.processWorksheets();
-          LOG.info("Standard field cache created!");
-        }
-      } else {
+      if (!container.get().hasValidMetadata()) {
         failAndExitWithErrorMessage("Valid metadata was not retrieved from the server. Exiting!", scenario);
       }
+
+      if (container.get().getDDCacheProcessor() == null) {
+        failAndExitWithErrorMessage("Could not initialize standard field cache!", scenario);
+      }
+
     } catch (Exception ex) {
       failAndExitWithErrorMessage(ex.toString(), scenario);
     }
@@ -527,11 +526,9 @@ public class DataAvailability {
 
   @And("the metadata contains RESO Standard Resources")
   public void theMetadataContainsRESOStandardResources() {
-    Set<String> resources = container.get().getEdm().getSchemas().stream().map(schema ->
-        schema.getEntityTypes().stream().map(EdmNamed::getName)
-            .collect(Collectors.toSet()))
-        .flatMap(Collection::stream)
-        .collect(Collectors.toSet());
+    Set<String> resources = container.get().getEdm().getSchemas().stream().flatMap(schema ->
+        schema.getEntityTypes().stream().map(EdmNamed::getName))
+            .collect(Collectors.toSet());
 
     standardResources.set(resources.stream()
         .filter(DataDictionaryMetadata.v1_7.WELL_KNOWN_RESOURCES::contains).collect(Collectors.toSet()));
@@ -630,7 +627,7 @@ public class DataAvailability {
       createDataAvailabilityReport(resourcePayloadSampleMap.get(), reportFileName, resourceCounts.get(), resourceFieldLookupTallies.get());
     } catch (Exception ex) {
       final String errorMsg = "Data Availability Report could not be created.\n" + ex;
-      if (strictMode) {
+      if (STRICT_MODE_ENABLED) {
         failAndExitWithErrorMessage(errorMsg, scenario);
       } else {
         LOG.error(errorMsg);
