@@ -39,18 +39,16 @@ dependencies {
   compile 'io.rest-assured:json-path:5.1.1'
   compile 'io.rest-assured:json-schema-validator:5.1.1'
 
-  compile 'io.cucumber:cucumber-java8:7.3.3'
+  compile 'io.cucumber:cucumber-java8:7.1.0'
   compile 'io.cucumber:cucumber-java:7.1.0'
-  compile 'io.cucumber:cucumber-junit:7.3.3'
-  compile 'io.cucumber:cucumber-guice:7.3.3'
-  compile 'io.cucumber:cucumber-core:7.3.3'
+  compile 'io.cucumber:cucumber-junit:7.1.0'
+  compile 'io.cucumber:cucumber-guice:7.1.0'
+  compile 'io.cucumber:cucumber-core:7.1.0'
 
   //TODO: choose one schema validator between this and rest-assured
   compile 'com.networknt:json-schema-validator:1.0.70'
   compile 'com.google.code.gson:gson:2.9.0'
   compile 'org.apache.commons:commons-text:1.9'
-
-  compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.13.3'
 
 }
 
@@ -89,11 +87,6 @@ final String certOutputDir = 'build/certification',
              certReportsDir = certOutputDir + '/reports'
 
 
-task prepareEnvironment() {
-  delete certOutputDir
-}
-
-
 task testWebApiCore_2_0_0() {
   group = 'RESO Certification'
   description = 'Web API Core 2.0.0 Acceptance Tests' +
@@ -106,7 +99,7 @@ task testWebApiCore_2_0_0() {
 
   String reportName = 'web-api-server.core.2.0.0'
 
-  dependsOn jar, prepareEnvironment
+  dependsOn jar
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
@@ -143,7 +136,7 @@ task testDataDictionary_1_7() {
 
   String reportName = 'data-dictionary-1.7'
 
-  dependsOn jar, prepareEnvironment
+  dependsOn jar
   doLast {
     javaexec {
       main = 'io.cucumber.core.cli.Main'
@@ -191,7 +184,7 @@ task testDataAvailability_1_7() {
 
   String reportName = 'data-availability.dd-1.7'
 
-  dependsOn jar, prepareEnvironment
+  dependsOn jar
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
@@ -223,7 +216,7 @@ task testIdxPayload_1_7() {
 
   String reportName = 'idx-payload.dd-1.7'
 
-  dependsOn jar, prepareEnvironment
+  dependsOn jar
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
@@ -272,14 +265,12 @@ test {
       main = "io.cucumber.core.cli.Main"
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       args = [
-              '--plugin',
-              'pretty',
-              '--glue',
-              'org.reso.commander.test.stepdefs',
-              'src/test/java/org/reso/commander/test/features'
+          '--plugin',
+          'pretty',
+          '--glue',
+          'org.reso.commander.test.stepdefs',
+          'src/test/java/org/reso/commander/test/features'
       ]
     }
   }
 }
-
-
