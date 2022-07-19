@@ -213,7 +213,7 @@ public final class WebAPITestContainer implements TestContainer {
   /**
    * Creates a metadata field map for the given resource name and each set of fields found for that resource, if present
    */
-  private void buildFieldMap() {
+  public void buildFieldMap() {
     try {
       if (fieldMap.get() == null) {
         fieldMap.set(new LinkedHashMap<>());
