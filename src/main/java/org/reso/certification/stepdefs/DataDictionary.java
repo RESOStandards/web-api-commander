@@ -189,6 +189,9 @@ public class DataDictionary {
         //create metadata report
         Commander.generateMetadataReport(container.getEdm());
 
+        //the container needs a field map built when the metadata is being loaded from a file
+        container.buildFieldMap();
+
       } catch (IOException e) {
         failAndExitWithErrorMessage(getDefaultErrorMessage(e), scenario);
       }
