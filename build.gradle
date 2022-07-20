@@ -257,6 +257,16 @@ task testDataDictionaryReferenceMetadata_1_7() {
   }
 }
 
+task copyResults(type: Exec) {
+  group = "RESO Certification"
+  description = 'Runs Data Dictionary tests against reference metadata'
+  workingDir "${buildDir}"
+  commandLine 'ls', '-al', System.getProperty('path')
+  doLast {
+    println "Task succeeded!"
+  }
+}
+
 //used for internal Commander Web API acceptance testing
 test {
   dependsOn assemble, compileTestJava, testDataDictionaryReferenceMetadata_1_7

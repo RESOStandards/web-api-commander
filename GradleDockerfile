@@ -6,6 +6,7 @@ RUN apk add --update bash ca-certificates openjdk8-jre-base nss git "gradle=5.4.
     rm -rf /var/cache/apk/*
 
 RUN git clone https://github.com/RESOStandards/web-api-commander.git
+RUN git checkout 129-create-file-copy-gradle-tasks-for-automated-testing
 
 WORKDIR web-api-commander
 
