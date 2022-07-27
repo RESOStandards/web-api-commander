@@ -7,5 +7,9 @@ RUN git clone --single-branch --branch 129-create-file-copy-gradle-tasks-for-aut
 
 WORKDIR web-api-commander
 
-ENTRYPOINT ["/bin/sh"]
-CMD ["pathToShellScript"]
+ADD runCommander.sh /usr/local/bin/runCommander.sh
+
+RUN ["chmod", "+x", "/usr/local/bin/runCommander.sh"]
+
+ENTRYPOINT ["/usr/local/bin/runCommander.sh"]
+CMD ["certificationRequestId"]
