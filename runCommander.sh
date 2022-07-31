@@ -18,6 +18,10 @@ if [ -n "$1" ]; then
   ls /certification
   echo
 
+  echo "ls /certification/$1/config.xml"
+  ls "/certification/$1/config.xml"
+  echo
+
   cd /web-api-commander || exit
 
   echo "./gradlew -DpathToRESOScript=$certificationPath/config.xml"
