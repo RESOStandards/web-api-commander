@@ -18,7 +18,7 @@ if [ -n "$1" ]; then
   ls /certification
   echo
 
-  cd web-api-commander || exit
+  cd /web-api-commander || exit
 
   echo "./gradlew -DpathToRESOScript=$certificationPath/config.xml"
   ./gradlew jar
