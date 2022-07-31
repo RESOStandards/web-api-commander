@@ -19,6 +19,7 @@ if [ -n "$1" ]; then
   echo
 
   echo "./gradle -DpathToRESOScript=$certificationPath/config.xml"
+  ./gradew jar
   ./gradlew testDataDictionaryReferenceMetadata_1_7
   echo
 
