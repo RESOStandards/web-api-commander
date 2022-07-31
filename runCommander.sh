@@ -3,25 +3,37 @@ echo "Started at: " date
 echo "Args: $*"
 env
 echo "Running Commander..."
-#echo "jobId: $AWS_BATCH_JOB_ID"
-#echo "jobQueue: $AWS_BATCH_JQ_NAME"
 echo "certificationRequestId: $1"
 
 certificationPath="/certification/$1"
 
 if [ -n "$1" ]; then
-  echo "gradle -DpathToRESOScript=$certificationPath/config.xml"
-  gradle testDataDictionaryReferenceMetadata_1_7
+#  gradle jar
+
+  echo "Mounts"
+  df -h
+  echo
+
+  echo "ls /certification"
+  ls /certification
+  echo
+
+  echo "./gradle -DpathToRESOScript=$certificationPath/config.xml"
+  ./gradlew testDataDictionaryReferenceMetadata_1_7
+  echo
 
   status=$?
   if [ $status -eq 1 ]; then
-    echo "failed"
+    echo "Testing failed for certificationRequestId: $1"
   else
-    echo "passed"
+    echo "Testing succeeded for certificationRequestId: $1"
   fi
+  echo
 
   echo "cp -R commander.log build/certification $certificationPath"
   ls -alh "$certificationPath"
+  echo
+
 else
   echo "ERROR: certificationRequestId parameter missing from args!"
   return 1

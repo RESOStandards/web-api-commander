@@ -1,6 +1,6 @@
 FROM alpine:3.10
 
-RUN apk add --update bash ca-certificates openjdk8 openjdk8-jre-base nss git "gradle=5.4.1-r0" && \
+RUN apk add --update bash ca-certificates openjdk8 openjdk8-jre-base nss git && \
     rm -rf /var/cache/apk/*
 
 RUN git clone --single-branch --branch 129-create-file-copy-gradle-tasks-for-automated-testing https://github.com/RESOStandards/web-api-commander.git
