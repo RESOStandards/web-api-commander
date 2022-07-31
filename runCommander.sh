@@ -18,8 +18,10 @@ if [ -n "$1" ]; then
   ls /certification
   echo
 
-  echo "./gradle -DpathToRESOScript=$certificationPath/config.xml"
-  ./gradew jar
+  cd web-api-commander || exit
+
+  echo "./gradlew -DpathToRESOScript=$certificationPath/config.xml"
+  ./gradlew jar
   ./gradlew testDataDictionaryReferenceMetadata_1_7
   echo
 

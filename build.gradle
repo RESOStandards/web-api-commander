@@ -247,12 +247,14 @@ task testDataDictionaryReferenceMetadata_1_7() {
       System.setProperty('pathToMetadata', 'src/main/resources/RESODataDictionary-1.7.xml')
       systemProperties = System.getProperties()
       args = [
-          '--plugin',
-          'pretty',
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
           'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
       ]
+
+      if (System.hasProperty("pretty")) {
+        args.add("--plugin", "pretty")
+      }
     }
   }
 }
