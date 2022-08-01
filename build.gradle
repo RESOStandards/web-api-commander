@@ -154,22 +154,31 @@ task testDataDictionary_1_7() {
             .substring(Math.max(pathToRESOScript.lastIndexOf(File.separator) + 1, 0), pathToRESOScript.lastIndexOf('.'))
       }
 
-      args = [
-          '--plugin',
-          'pretty',
-          '--plugin',
-          'json:' + cucumberJsonPath + '/' + reportName + '.json',
-          '--plugin',
-          'html:' + certReportsDir + '/' + reportName + '.html',
-          '--glue',
-          'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
-      ]
+      def argsArray = []
+
+      def prettyPrint = System.getProperty('pretty', null)
+
+      if (prettyPrint) {
+        argsArray.add('--plugin')
+        argsArray.add('pretty')
+      }
+
+      argsArray.addAll(
+        '--plugin',
+        'json:' + cucumberJsonPath + '/' + reportName + '.json',
+        '--plugin',
+        'html:' + certReportsDir + '/' + reportName + '.html',
+        '--glue',
+        'org.reso.certification.stepdefs#DataDictionary',
+        'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
+      )
 
       if (systemProperties.hasProperty('cucumber.filter.tags')) {
-        args.add('--tags')
-        args.add(systemProperties.get('cucumber.filter.tags').toString())
+        argsArray.add('--tags')
+        argsArray.add(systemProperties.get('cucumber.filter.tags').toString())
       }
+
+      args = argsArray
     }
   }
 }

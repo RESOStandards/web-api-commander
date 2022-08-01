@@ -8,46 +8,32 @@ echo "certificationRequestId: $1"
 certificationPath="/certification/$1"
 
 if [ -n "$1" ]; then
-#  gradle jar
+  gradle jar
+  echo ""
 
-  echo "Root directory"
-  ls "/"
-  echo
-
-  echo "DF"
-  df -h
-  echo
-
-  echo "mnt"
-  ls "/mnt"
-  echo
-
-  echo "ls /certification"
-  ls "/certification"
-  echo
-
-  echo "ls /certification/$1/config.xml"
+  echo "Checking for config file: /certification/$1/config.xml"
   ls "/certification/$1/config.xml"
-  echo
+  echo ""
 
+  echo "Changing to Commander Directory"
   cd "/web-api-commander" || exit
 
-  echo "gradle -DpathToRESOScript=$certificationPath/config.xml"
+  echo "Running Metadata Tests. Command: gradle -DpathToRESOScript=$certificationPath/config.xml"
   gradle jar
-  #gradle testDataDictionaryReferenceMetadata_1_7
-  echo
-
+  gradle testDataDictionary_1_7 "-DpathToRESOScript=$certificationPath/config.xml" > "$certificationPath/data-dictionary.log"
+  
   status=$?
   if [ $status -eq 1 ]; then
     echo "Testing failed for certificationRequestId: $1"
   else
     echo "Testing succeeded for certificationRequestId: $1"
   fi
-  echo
+  echo ""
 
-  echo "cp -R commander.log build/certification $certificationPath"
+  echo "Copying files: cp -R commander.log build/certification $certificationPath"
+  cp -R "commander.log build/certification" "$certificationPath"
   ls -alh "$certificationPath"
-  echo
+  echo "Copying complete!"
 
 else
   echo "ERROR: certificationRequestId parameter missing from args!"
