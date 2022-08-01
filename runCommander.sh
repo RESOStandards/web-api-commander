@@ -21,7 +21,7 @@ if [ -n "$1" ]; then
   echo "Running Metadata Tests. Command: gradle -DpathToRESOScript=$certificationPath/config.xml"
   gradle jar
   gradle testDataDictionary_1_7 "-DpathToRESOScript=$certificationPath/config.xml" > "$certificationPath/data-dictionary.log"
-  
+
   status=$?
   if [ $status -eq 1 ]; then
     echo "Testing failed for certificationRequestId: $1"
@@ -31,7 +31,7 @@ if [ -n "$1" ]; then
   echo ""
 
   echo "Copying files: cp -R commander.log build/certification $certificationPath"
-  cp -R "commander.log build/certification" "$certificationPath"
+  cp -R "commander.log" "build/certification" "$certificationPath"
   ls -alh "$certificationPath"
   echo "Copying complete!"
 
