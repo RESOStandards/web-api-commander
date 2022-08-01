@@ -8,7 +8,6 @@ echo "certificationRequestId: $1"
 certificationPath="/certification/$1"
 
 if [ -n "$1" ]; then
-  gradle jar
   echo ""
 
   echo "Checking for config file: /certification/$1/config.xml"
@@ -19,14 +18,24 @@ if [ -n "$1" ]; then
   cd "/web-api-commander" || exit
 
   echo "Running Metadata Tests. Command: gradle -DpathToRESOScript=$certificationPath/config.xml"
-  gradle jar
   gradle testDataDictionary_1_7 "-DpathToRESOScript=$certificationPath/config.xml" > "$certificationPath/data-dictionary.log"
 
   status=$?
   if [ $status -eq 1 ]; then
-    echo "Testing failed for certificationRequestId: $1"
+    echo "Data Dictionary testing failed for certificationRequestId: $1"
   else
-    echo "Testing succeeded for certificationRequestId: $1"
+    echo "Data Dictionary testing succeeded for certificationRequestId: $1"
+  fi
+  echo ""
+
+  echo "Running Data Availability Tests. Command: gradle testDataAvailability_1_7 -DpathToRESOScript=$certificationPath/config.xml"
+  gradle testDataAvailability_1_7 "-DpathToRESOScript=$certificationPath/config.xml" > "$certificationPath/data-availability.log"
+
+  status=$?
+  if [ $status -eq 1 ]; then
+    echo "Data Availability testing failed for certificationRequestId: $1"
+  else
+    echo "Data Availability testing succeeded for certificationRequestId: $1"
   fi
   echo ""
 

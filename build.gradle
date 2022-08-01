@@ -200,9 +200,16 @@ task testDataAvailability_1_7() {
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
 
-      args = [
-          '--plugin',
-          'pretty',
+      def argsArray = []
+
+      def prettyPrint = System.getProperty('pretty', null)
+
+      if (prettyPrint) {
+        argsArray.add('--plugin')
+        argsArray.add('pretty')
+      }
+
+      argsArray.addAll(
           '--plugin',
           'json:' + cucumberJsonPath + '/' + reportName + '.json',
           '--plugin',
@@ -210,7 +217,10 @@ task testDataAvailability_1_7() {
           '--glue',
           'org.reso.certification.stepdefs#DataAvailability',
           'src/main/java/org/reso/certification/features/payloads/data-availability.feature'
-      ]
+      )
+
+      args = argsArray
+
     }
   }
 }
