@@ -10,23 +10,31 @@ certificationPath="/certification/$1"
 if [ -n "$1" ]; then
 #  gradle jar
 
-  echo "Mounts"
+  echo "Root directory"
+  ls "/"
+  echo
+
+  echo "DF"
   df -h
   echo
 
+  echo "mnt"
+  ls "/mnt"
+  echo
+
   echo "ls /certification"
-  ls /certification
+  ls "/certification"
   echo
 
   echo "ls /certification/$1/config.xml"
   ls "/certification/$1/config.xml"
   echo
 
-  cd /web-api-commander || exit
+  cd "/web-api-commander" || exit
 
-  echo "./gradlew -DpathToRESOScript=$certificationPath/config.xml"
-  ./gradlew jar
-  ./gradlew testDataDictionaryReferenceMetadata_1_7
+  echo "gradle -DpathToRESOScript=$certificationPath/config.xml"
+  gradle jar
+  #gradle testDataDictionaryReferenceMetadata_1_7
   echo
 
   status=$?

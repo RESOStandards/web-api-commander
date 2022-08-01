@@ -240,6 +240,7 @@ task testIdxPayload_1_7() {
 
 task testDataDictionaryReferenceMetadata_1_7() {
   description = 'Runs Data Dictionary tests against reference metadata'
+  dependsOn jar
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
