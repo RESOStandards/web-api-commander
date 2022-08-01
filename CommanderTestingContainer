@@ -12,4 +12,4 @@ ADD runCommander.sh /usr/local/bin/runCommander.sh
 RUN ["chmod", "+x", "/usr/local/bin/runCommander.sh"]
 
 ENTRYPOINT ["/usr/local/bin/runCommander.sh"]
-CMD ["certificationRequestId"]
+CMD ["certificationCommand", "certificationRequestId"]
