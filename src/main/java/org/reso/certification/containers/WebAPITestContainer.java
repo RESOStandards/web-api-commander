@@ -40,8 +40,7 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.*;
 import static org.reso.commander.Commander.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
-import static org.reso.commander.common.TestUtils.HEADER_ODATA_VERSION;
-import static org.reso.commander.common.TestUtils.JSON_VALUE_PATH;
+import static org.reso.commander.common.TestUtils.*;
 import static org.reso.models.Request.loadFromRESOScript;
 
 /**
@@ -390,7 +389,8 @@ public final class WebAPITestContainer implements TestContainer {
 
         URI pathToMetadata = getCommander().getPathToMetadata(request.getRequestUrl());
         if (pathToMetadata != null) {
-          LOG.info("Requesting XML Metadata from: " + pathToMetadata.toString());
+          LOG.info("Requesting XML Metadata from: " + pathToMetadata);
+
           ODataTransportWrapper wrapper = getCommander().executeODataGetRequest(pathToMetadata.toString());
           setODataRawResponse(wrapper.getODataRawResponse());
           responseCode.set(wrapper.getHttpResponseCode());
@@ -404,8 +404,8 @@ public final class WebAPITestContainer implements TestContainer {
           xmlResponseData.set(wrapper.getResponseData());
           xmlMetadata.set(Commander.deserializeXMLMetadata(xmlResponseData.get(), getCommander().getClient()));
         } else {
-          LOG.error(getDefaultErrorMessage("could not create metadata URI from given requestUri:", request.getRequestUrl()));
-          System.exit(NOT_OK);
+          failAndExitWithErrorMessage(getDefaultErrorMessage("Could not create metadata URI from given requestUri:",
+              request.getRequestUrl()), LOG);
         }
       } finally {
         haveMetadataBeenRequested.set(true);
@@ -706,22 +706,21 @@ public final class WebAPITestContainer implements TestContainer {
   }
 
   private void processODataRequestException(ODataClientErrorException exception) {
-    LOG.debug("ODataClientErrorException caught. Check tests for asserted conditions...");
-    LOG.debug(exception);
+    LOG.error("ODataClientErrorException caught. Check tests for asserted conditions...");
+    LOG.error(exception);
     setODataClientErrorException(exception);
     setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, Arrays.asList(exception.getHeaderInfo())));
     setResponseCode(exception.getStatusLine().getStatusCode());
   }
 
   private void processODataRequestException(ODataServerErrorException exception) {
-    LOG.debug("ODataServerErrorException thrown in executeGetRequest. Check tests for asserted conditions...");
+    LOG.error("ODataServerErrorException thrown in executeGetRequest. Check tests for asserted conditions...");
     //TODO: look for better ways to do this in Olingo or open PR
     if (exception.getMessage().contains(Integer.toString(HttpStatus.SC_NOT_IMPLEMENTED))) {
       setResponseCode(HttpStatus.SC_NOT_IMPLEMENTED);
     }
     setODataServerErrorException(exception);
   }
-
 
   public boolean getIsValidXMLMetadata() {
     return isValidXMLMetadata.get();
@@ -769,7 +768,7 @@ public final class WebAPITestContainer implements TestContainer {
         && edm.get() != null && getIsValidEdm();
   }
 
-  public final WebAPITestContainer validateMetadata() {
+  public WebAPITestContainer validateMetadata() {
     try {
       if (!haveMetadataBeenRequested.get()) fetchXMLMetadata();
       assertNotNull(getDefaultErrorMessage("no XML response data found!"), getXMLResponseData());

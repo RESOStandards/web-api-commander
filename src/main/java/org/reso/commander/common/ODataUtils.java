@@ -80,22 +80,33 @@ public class ODataUtils {
   /**
    * Serializes a list of OData ClientEntity items in a JSON Array with those properties.
    *
-   * @param results list of OData ClientEntity results
+   * @param lookups list of OData ClientEntity results
    * @param client  OData client to use as serializer
    * @return a JsonArray of results
    */
-  public static JsonArray serializeLookupMetadata(ODataClient client, List<ClientEntity> results) {
-    final JsonArray lookups = new JsonArray();
+  public static JsonObject serializeLookupMetadata(ODataClient client, List<ClientEntity> lookups) {
+    final String
+        DESCRIPTION_KEY = "description", DESCRIPTION = "Data Dictionary Lookup Resource Metadata",
+        VERSION_KEY = "version", VERSION = "1.7",
+        GENERATED_ON_KEY = "generatedOn",
+        LOOKUPS_KEY = "lookups";
+
+    JsonObject metadataReport = new JsonObject();
+    metadataReport.addProperty(DESCRIPTION_KEY, DESCRIPTION);
+    metadataReport.addProperty(VERSION_KEY, VERSION);
+    metadataReport.addProperty(GENERATED_ON_KEY, Utils.getIsoTimestamp());
+
+    final JsonArray lookupsArray = new JsonArray();
 
     try {
       final Gson gson = new Gson();
       final JsonSerializer jsonSerializer = new JsonSerializer(false, ContentType.APPLICATION_JSON);
-      results.forEach(clientEntity -> {
+      lookups.forEach(clientEntity -> {
         try {
           StringWriter writer = new StringWriter();
           jsonSerializer.write(writer, client.getBinder().getEntity(clientEntity));
           Optional<JsonElement> element = Optional.ofNullable(gson.fromJson(writer.toString(), JsonElement.class));
-          element.ifPresent(lookups::add);
+          element.ifPresent(lookupsArray::add);
         } catch (ODataSerializerException e) {
           LOG.error("ERROR: could not deserialize. Exception: " + e);
         }
@@ -104,15 +115,17 @@ public class ODataUtils {
       LOG.error(exception);
     }
 
-    return lookups;
+    metadataReport.add(LOOKUPS_KEY, lookupsArray);
+    return metadataReport;
   }
 
+  //TODO: Only output the field metadata in DEBUG mode
   public static JsonObject serializeFieldMetadataForLookupFields(Map<String, Set<EdmElement>> resourceFieldMap) {
     //TODO: migrate to test file
     final String LOOKUP_ANNOTATION_TERM = "RESO.OData.Metadata.LookupName";
 
     final String
-        DESCRIPTION_KEY = "description", DESCRIPTION = "Lookup Resource Annotated Fields Metadata",
+        DESCRIPTION_KEY = "description", DESCRIPTION = "Data Dictionary Lookup Resource Annotated Fields Metadata",
         VERSION_KEY = "version", VERSION = "1.7",
         GENERATED_ON_KEY = "generatedOn",
         FIELDS_KEY = "fields";

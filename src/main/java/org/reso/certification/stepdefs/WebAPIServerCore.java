@@ -36,7 +36,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
@@ -49,7 +48,6 @@ import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.DateParts.FRACTIONAL;
 import static org.reso.commander.common.TestUtils.*;
 import static org.reso.commander.common.TestUtils.Operators.*;
-import static org.reso.models.Request.loadFromRESOScript;
 
 /**
  * Contains the glue code for Web API Core 2.0.0 Certification as well as previous Platinum tests,
@@ -89,13 +87,6 @@ public class WebAPIServerCore implements En {
 
     if (!container.get().getIsInitialized()) {
       container.get().setSettings(Settings.loadFromRESOScript(new File(System.getProperty(PATH_TO_RESOSCRIPT_KEY))));
-
-      //moved to container initialization
-      //      //overwrite any requests loaded with the reference queries
-      //      container.get().getSettings().setRequests(loadFromRESOScript(new File(Objects.requireNonNull(
-      //          getClass().getClassLoader().getResource(WEB_API_CORE_REFERENCE_REQUESTS)).getPath()))
-      //          .stream().map(request -> Settings.resolveParameters(request, container.get().getSettings())).collect(Collectors.toList()));
-
       container.get().initialize();
     }
   }
@@ -261,11 +252,10 @@ public class WebAPIServerCore implements En {
      *      Rather than returning an integer response, this implementation expects the @odata.count property to be
      *      available when requested, and a $top=0 may be used to restrict the number of items returned as results.
      */
-    And("^the \"([^\"]*)\" value is greater than or equal to the number of results$", (String field) -> {
-      assertTrue(getDefaultErrorMessage("the @odata.count value MUST be present",
-          "and contain a non-zero value greater than or equal to the number of results!"),
-          TestUtils.validateODataCount(container.get().getResponseData()));
-    });
+    And("^the \"([^\"]*)\" value is greater than or equal to the number of results$", (String field) ->
+        assertTrue(getDefaultErrorMessage("the @odata.count value MUST be present",
+        "and contain a non-zero value greater than or equal to the number of results!"),
+        TestUtils.validateODataCount(container.get().getResponseData())));
 
     And("^data in the \"([^\"]*)\" fields are different in the second request than in the first$", (String parameterUniqueId) -> {
       try {
@@ -469,7 +459,7 @@ public class WebAPIServerCore implements En {
         String op = andOrOp.toLowerCase();
         boolean isAndOp = op.contains(AND);
 
-        //these should default to true when And and false when Or for the purpose of boolean comparisons
+        //these should default to true when And, and false when Or for the purpose of boolean comparisons
         AtomicBoolean lhsResult = new AtomicBoolean(isAndOp);
         AtomicBoolean rhsResult = new AtomicBoolean(isAndOp);
         AtomicBoolean itemResult = new AtomicBoolean(isAndOp);
@@ -620,7 +610,7 @@ public class WebAPIServerCore implements En {
 
         from(container.get().getResponseData()).getList(JSON_VALUE_PATH, ObjectNode.class).forEach(item -> {
           fieldValue.set(item.get(fieldName).toString());
-          String assertMessage = EMPTY_STRING;
+          String assertMessage;
           if (useCollections) {
             if (item.get(fieldName).isArray()) {
               result.set(result.get() && TestUtils.testAnyOperator(item, fieldName, assertedValue.get()));
@@ -795,16 +785,16 @@ public class WebAPIServerCore implements En {
 
     /*
      * Ensures that the server metadata for the given resource in parameterResourceName contains
-     * all of the fields in the given parameterSelectList.
+     * each of the fields in the given parameterSelectList.
      */
     And("^resource metadata for \"([^\"]*)\" contains the fields in the given select list$", (String parameterResourceName) -> {
       assertTrue(getDefaultErrorMessage("no $select list found for requestId:", container.get().getRequest().getRequestId()),
           container.get().getSelectList().size() > 0);
 
       try {
-        LOG.info("Searching metadata for fields in given select list: " + container.get().getSelectList().toString());
+        LOG.info("Searching metadata for fields in given select list: " + container.get().getSelectList());
         container.get().getSelectList().forEach(fieldName -> {
-          //need to skip the expand field when looking through the metadata
+          //need to skip the expanded field when looking through the metadata
           if (container.get().getExpandField() != null && !fieldName.contentEquals(container.get().getExpandField())) {
             try {
               assertNotNull(getDefaultErrorMessage("Field name '" + fieldName + "' is not present in server metadata!"),
@@ -850,16 +840,13 @@ public class WebAPIServerCore implements En {
       try {
         if (container.get().fetchXMLMetadata() == null) {
           //force exit rather than allowing the tests to finish
-          LOG.error(getDefaultErrorMessage("could not retrieve valid XML Metadata for given service root:", serviceRoot));
-          System.exit(NOT_OK);
+          failAndExitWithErrorMessage("Could not retrieve valid XML Metadata for given service root: " + serviceRoot, LOG);
         }
       } catch (ODataClientErrorException cex) {
         container.get().setResponseCode(cex.getStatusLine().getStatusCode());
-        LOG.error(getDefaultErrorMessage(cex));
-        System.exit(NOT_OK);
+        failAndExitWithErrorMessage(getDefaultErrorMessage(cex), LOG);
       } catch (Exception ex) {
-        LOG.error(getDefaultErrorMessage(ex));
-        System.exit(NOT_OK);
+        failAndExitWithErrorMessage(getDefaultErrorMessage(ex), LOG);
       }
     });
 
@@ -1107,7 +1094,7 @@ public class WebAPIServerCore implements En {
    */
   void prepareAndExecuteRawGetRequest(String requestId) {
     try {
-      //reset local state each time a get request request is run
+      //reset local state each time a get request is run
       container.get().resetState();
 
       assertNotNull(getDefaultErrorMessage("request Id cannot be null!"), requestId);
@@ -1130,10 +1117,9 @@ public class WebAPIServerCore implements En {
       //execute request
       container.get().executePreparedRawGetRequest();
     } catch (MalformedURLException urlException) {
-      LOG.info("Malformed URL was thrown in " + this.getClass() + ": " + urlException.toString()
-          + "\nSkipping Request!");
+      LOG.info("Malformed URL was thrown in " + this.getClass() + ": " + urlException + "\nSkipping Request!");
     } catch (Exception ex) {
-      LOG.info("Exception was thrown in " + this.getClass() + "!\n" + ex.toString());
+      LOG.info("Exception was thrown in " + this.getClass() + "!\n" + ex);
     }
   }
 

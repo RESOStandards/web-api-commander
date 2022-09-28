@@ -65,7 +65,7 @@ public final class TestUtils {
     return URI.create(
         queryString.replace(" ", "%20")
         /* add other handlers here */
-    );
+    ).normalize();
   }
 
   /**
@@ -560,7 +560,7 @@ public final class TestUtils {
   }
 
   /**
-   * Helper method to find headers with a given key in an an array of headers
+   * Helper method to find headers with a given key in an array of headers
    *
    * @param key     the header to get
    * @param headers an array containing Header objects
@@ -701,7 +701,7 @@ public final class TestUtils {
    */
   public static String convertInputStreamToString(InputStream inputStream) {
     try {
-      InputStreamReader isReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8.name());
+      InputStreamReader isReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
       BufferedReader reader = new BufferedReader(isReader);
       StringBuilder sb = new StringBuilder();
       String str;
@@ -796,27 +796,29 @@ public final class TestUtils {
    */
   public static void assertXMLMetadataAreRequestedFromTheServer(WebAPITestContainer container, Scenario scenario) {
     if (container == null || container.getCommander() == null) {
-      failAndExitWithErrorMessage("Cannot create Commander instance!", scenario);
+      failAndExitWithErrorMessage("Cannot create Commander instance!", LOG);
       return;
     }
 
     if (!container.getHaveMetadataBeenRequested()) {
       final String serviceRoot = Settings.resolveParametersString(container.getServiceRoot(), container.getSettings());
       if (!serviceRoot.contentEquals(container.getCommander().getServiceRoot())) {
-        failAndExitWithErrorMessage("given service root doesn't match the one configured in the Commander", scenario);
+        failAndExitWithErrorMessage("Given service root doesn't match the one configured in the Commander", scenario);
         return;
       }
 
       try {
         if (container.fetchXMLMetadata() == null) {
-          failAndExitWithErrorMessage("could not retrieve valid XML Metadata for given service root: " + serviceRoot, scenario);
+          failAndExitWithErrorMessage("Could not retrieve valid XML Metadata for given service root: "
+              + serviceRoot, LOG);
         }
-
       } catch (ODataClientErrorException cex) {
         container.setResponseCode(cex.getStatusLine().getStatusCode());
-        failAndExitWithErrorMessage(cex.getMessage(), scenario);
+        failAndExitWithErrorMessage("Could not retrieve valid XML Metadata for given service root: "
+            + serviceRoot + "\n\tException: " + cex.getMessage(), LOG);
       } catch (Exception ex) {
-        failAndExitWithErrorMessage(ex.toString(), scenario);
+        failAndExitWithErrorMessage("Could not retrieve valid XML Metadata for given service root: "
+            + serviceRoot + "\n\tException: " + ex, LOG);
       }
     }
   }
@@ -829,11 +831,17 @@ public final class TestUtils {
   public static void assertXMLMetadataHasValidServiceDocument(WebAPITestContainer container, Scenario scenario) {
     try {
       if (container == null || container.getEdm() == null || container.getEdm().getEntityContainer() == null) {
-        failAndExitWithErrorMessage("Could not find default entity container for given service root: " + container.getServiceRoot(), scenario);
+        final String serviceRoot = container != null && container.getServiceRoot() != null
+            ? container.getServiceRoot() : "<null>";
+
+        failAndExitWithErrorMessage("Could not find default entity container for given service root: " + serviceRoot, scenario);
+      } else {
+        LOG.info("Found Default Entity Container: '" + container.getEdm().getEntityContainer().getNamespace() + "'");
       }
-      LOG.info("Found Default Entity Container: '" + container.getEdm().getEntityContainer().getNamespace() + "'");
     } catch (ODataClientErrorException cex) {
-      container.setResponseCode(cex.getStatusLine().getStatusCode());
+      if (container != null) {
+        container.setResponseCode(cex.getStatusLine().getStatusCode());
+      }
       failAndExitWithErrorMessage(cex.toString(), scenario);
     } catch (Exception ex) {
       failAndExitWithErrorMessage(getDefaultErrorMessage(ex), scenario);
@@ -863,7 +871,7 @@ public final class TestUtils {
    * Validates that the given response data have a valid OData count
    *
    * @param responseData the data to check for a count against
-   * @return true if the there is a count present and it's greater than or equal to the number of results
+   * @return true if the there is a count present, and it's greater than or equal to the number of results
    */
   public static boolean validateODataCount(String responseData) {
     List<String> items = from(responseData).getList(JSON_VALUE_PATH);
@@ -944,6 +952,13 @@ public final class TestUtils {
   public static void failAndExitWithErrorMessage(String msg, Scenario scenario) {
     if (scenario != null) {
       scenario.log(getDefaultErrorMessage(msg));
+    }
+    System.exit(NOT_OK);
+  }
+
+  public static void failAndExitWithErrorMessage(String msg, Logger logger) {
+    if (logger != null) {
+      logger.error(getDefaultErrorMessage(msg));
     }
     System.exit(NOT_OK);
   }
