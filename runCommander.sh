@@ -36,7 +36,7 @@ echo "Changing to Commander Directory"
 cd "/web-api-commander" || exit 1
 
 echo "Running Tests! Command: gradle $certificationCommand -DpathToRESOScript=$certificationPath/config.xml"
-gradle "$certificationCommand" "-DpathToRESOScript=$certificationPath/config.xml" #> "$certificationPath/$certificationCommand.log"
+gradle "$certificationCommand" "-DpathToRESOScript=$certificationPath/config.xml" > "$certificationPath/$certificationCommand.log"
 
 status=$?
 if [ $status -eq 1 ]; then
