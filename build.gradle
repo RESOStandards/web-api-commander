@@ -23,10 +23,10 @@ dependencies {
   compile 'com.google.inject:guice:5.1.0'
   compile 'commons-cli:commons-cli:1.5.0'
 
-  compile 'org.apache.logging.log4j:log4j-api:2.17.2'
-  compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.2'
-  compile 'org.apache.logging.log4j:log4j-1.2-api:2.17.2'
-  compile 'org.apache.logging.log4j:log4j-core:2.17.2'
+  compile 'org.apache.logging.log4j:log4j-api:2.18.0'
+  compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.18.0'
+  compile 'org.apache.logging.log4j:log4j-1.2-api:2.18.0'
+  compile 'org.apache.logging.log4j:log4j-core:2.18.0'
 
   compile 'org.apache.olingo:odata-client-api:4.9.0'
   compile 'org.apache.olingo:odata-commons-core:4.9.0'
@@ -82,10 +82,24 @@ String pathToMetadata = null,
        pathToRESOScript = null,
        certFileName = null
 
-final String certOutputDir = 'build/certification',
-             cucumberJsonPath = certOutputDir + '/cucumberJson',
-             certReportsDir = certOutputDir + '/reports'
+final String certOutputDir = 'build' + File.separator + 'certification',
+             cucumberJsonPath = certOutputDir + File.separator + 'cucumberJson',
+             certReportsDir = certOutputDir + File.separator + 'reports',
+             certResultsDir = certOutputDir + File.separator + 'results'
 
+task prepareCertificationEnvironment() {
+ doLast {
+  def folder = new File(certOutputDir)
+  if (folder.exists()) {
+    delete certOutputDir
+  }
+  
+    mkdir certOutputDir
+    mkdir cucumberJsonPath
+    mkdir certReportsDir
+    mkdir certResultsDir
+  }
+}
 
 task testWebApiCore_2_0_0() {
   group = 'RESO Certification'
@@ -99,7 +113,7 @@ task testWebApiCore_2_0_0() {
 
   String reportName = 'web-api-server.core.2.0.0'
 
-  dependsOn jar
+  dependsOn jar, prepareCertificationEnvironment
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
@@ -136,7 +150,7 @@ task testDataDictionary_1_7() {
 
   String reportName = 'data-dictionary-1.7'
 
-  dependsOn jar
+  dependsOn jar, prepareCertificationEnvironment
   doLast {
     javaexec {
       main = 'io.cucumber.core.cli.Main'
@@ -154,22 +168,31 @@ task testDataDictionary_1_7() {
             .substring(Math.max(pathToRESOScript.lastIndexOf(File.separator) + 1, 0), pathToRESOScript.lastIndexOf('.'))
       }
 
-      args = [
-          '--plugin',
-          'pretty',
-          '--plugin',
-          'json:' + cucumberJsonPath + '/' + reportName + '.json',
-          '--plugin',
-          'html:' + certReportsDir + '/' + reportName + '.html',
-          '--glue',
-          'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
-      ]
+      def argsArray = []
+
+      def prettyPrint = System.getProperty('pretty', null)
+
+      if (prettyPrint) {
+        argsArray.add('--plugin')
+        argsArray.add('pretty')
+      }
+
+      argsArray.addAll(
+        '--plugin',
+        'json:' + cucumberJsonPath + '/' + reportName + '.json',
+        '--plugin',
+        'html:' + certReportsDir + '/' + reportName + '.html',
+        '--glue',
+        'org.reso.certification.stepdefs#DataDictionary',
+        'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
+      )
 
       if (systemProperties.hasProperty('cucumber.filter.tags')) {
-        args.add('--tags')
-        args.add(systemProperties.get('cucumber.filter.tags').toString())
+        argsArray.add('--tags')
+        argsArray.add(systemProperties.get('cucumber.filter.tags').toString())
       }
+
+      args = argsArray
     }
   }
 }
@@ -191,9 +214,16 @@ task testDataAvailability_1_7() {
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
 
-      args = [
-          '--plugin',
-          'pretty',
+      def argsArray = []
+
+      def prettyPrint = System.getProperty('pretty', null)
+
+      if (prettyPrint) {
+        argsArray.add('--plugin')
+        argsArray.add('pretty')
+      }
+
+      argsArray.addAll(
           '--plugin',
           'json:' + cucumberJsonPath + '/' + reportName + '.json',
           '--plugin',
@@ -201,7 +231,10 @@ task testDataAvailability_1_7() {
           '--glue',
           'org.reso.certification.stepdefs#DataAvailability',
           'src/main/java/org/reso/certification/features/payloads/data-availability.feature'
-      ]
+      )
+
+      args = argsArray
+
     }
   }
 }
@@ -240,6 +273,7 @@ task testIdxPayload_1_7() {
 
 task testDataDictionaryReferenceMetadata_1_7() {
   description = 'Runs Data Dictionary tests against reference metadata'
+  dependsOn jar
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
@@ -247,12 +281,14 @@ task testDataDictionaryReferenceMetadata_1_7() {
       System.setProperty('pathToMetadata', 'src/main/resources/RESODataDictionary-1.7.xml')
       systemProperties = System.getProperties()
       args = [
-          '--plugin',
-          'pretty',
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
           'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
       ]
+
+      if (System.hasProperty("pretty")) {
+        args.add("--plugin", "pretty")
+      }
     }
   }
 }
