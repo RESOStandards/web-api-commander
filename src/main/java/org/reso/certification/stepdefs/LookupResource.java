@@ -24,8 +24,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.reso.certification.stepdefs.DataAvailability.CERTIFICATION_RESULTS_PATH;
+import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.ODataUtils.*;
 import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
 import static org.reso.commander.common.Utils.wrapColumns;
@@ -164,8 +166,11 @@ public class LookupResource {
     });
 
     if (fieldsWithMissingAnnotations.size() > 0) {
-      failAndExitWithErrorMessage("The following fields are missing the required '" + annotationTerm + "' annotation: "
-          + wrapColumns("\t" + String.join(", ", fieldsWithMissingAnnotations)), LOG);
+      final String msg = "The following fields are missing the required '" + annotationTerm + "' annotation: "
+          + wrapColumns(String.join(", ", fieldsWithMissingAnnotations)) + "\n";
+
+      LOG.error(getDefaultErrorMessage(msg));
+      fail(msg);
     }
   }
 
@@ -188,21 +193,14 @@ public class LookupResource {
     final Set<String> missingLookupNames = Utils.getDifference(annotatedLookupNames, lookupNamesFromLookupData);
 
     if (missingLookupNames.size() > 0) {
-      failAndExitWithErrorMessage("The following fields have LookupName annotations but are missing from the Lookup Resource: "
-          + wrapColumns("\t" + String.join(", ", missingLookupNames)), LOG);
-    }
+      final String msg = "The following fields have LookupName annotations but are missing from the Lookup Resource: "
+          + wrapColumns(String.join(", ", missingLookupNames)) + "\n";
 
-    if (filteredResourceFieldMap.size() > 0) {
+      LOG.error(getDefaultErrorMessage(msg));
+      fail(msg);
+    } else {
       scenario.log("Found all annotated LookupName elements in the Lookup data. Unique count: " + annotatedLookupNames.size());
       scenario.log("LookupNames: " + wrapColumns(String.join(", ", annotatedLookupNames)));
-
-      /*
-        TODO: only produce the field JSON file in DEBUG mode
-            Utils.createFile(CERTIFICATION_RESULTS_PATH, LOOKUP_RESOURCE_FIELD_METADATA_FILE_NAME,
-                ODataUtils.serializeFieldMetadataForLookupFields(filteredResourceFieldMap).toString());
-       */
-    } else {
-      failAndExitWithErrorMessage("No annotated lookup names found in the OData XML Metadata.", LOG);
     }
   }
 }

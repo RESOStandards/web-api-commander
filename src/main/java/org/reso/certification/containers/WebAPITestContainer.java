@@ -706,15 +706,23 @@ public final class WebAPITestContainer implements TestContainer {
   }
 
   private void processODataRequestException(ODataClientErrorException exception) {
-    LOG.error("ODataClientErrorException caught. Check tests for asserted conditions...");
-    LOG.error(exception);
+    /*
+      TODO: determine whether these additional lines are needed or whether the bubbled error is sufficient
+      LOG.error("ODataClientErrorException caught. Check tests for asserted conditions...");
+      LOG.error(exception);
+     */
+
     setODataClientErrorException(exception);
     setServerODataHeaderVersion(TestUtils.getHeaderData(HEADER_ODATA_VERSION, Arrays.asList(exception.getHeaderInfo())));
     setResponseCode(exception.getStatusLine().getStatusCode());
   }
 
   private void processODataRequestException(ODataServerErrorException exception) {
-    LOG.error("ODataServerErrorException thrown in executeGetRequest. Check tests for asserted conditions...");
+    /*
+      TODO: determine whether these additional lines are needed or whether the bubbled error is sufficient
+      LOG.error("ODataServerErrorException thrown in executeGetRequest. Check tests for asserted conditions...");
+     */
+
     //TODO: look for better ways to do this in Olingo or open PR
     if (exception.getMessage().contains(Integer.toString(HttpStatus.SC_NOT_IMPLEMENTED))) {
       setResponseCode(HttpStatus.SC_NOT_IMPLEMENTED);
