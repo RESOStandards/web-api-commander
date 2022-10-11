@@ -549,27 +549,24 @@ public class Commander {
    * @return a URI with the metadata path included
    */
   public URI getPathToMetadata(String requestUri) {
-    if (requestUri == null) {
-      LOG.error(getDefaultErrorMessage("service root is null!"));
-      System.exit(NOT_OK);
-    }
-
-    try {
-      String uri = requestUri;
-      if (!requestUri.contains(METADATA_PATH)) {
-        uri += METADATA_PATH;
+    if (requestUri == null || requestUri.length() == 0) {
+      TestUtils.failAndExitWithErrorMessage("OData service root is missing!", LOG);
+    } else {
+      try {
+        String uri = requestUri;
+        if (!requestUri.contains(METADATA_PATH)) {
+          uri += METADATA_PATH;
+        }
+        return new URI(uri).normalize();
+      } catch (Exception ex) {
+        TestUtils.failAndExitWithErrorMessage("Could not create metadata URI.\n\t" + ex, LOG);
       }
-      return new URI(uri);
-    } catch (Exception ex) {
-      LOG.error(getDefaultErrorMessage("could not create path to metadata.\n" + ex.toString()));
-      System.exit(NOT_OK);
     }
-
     return null;
   }
 
   /**
-   * Executes an OData GET Request w ith the current Commander instance
+   * Executes an OData GET Request with the current Commander instance
    * @param wrapper the OData transport wrapper to use for the request
    * @return and OData transport wrapper with the response, or exception if one was thrown
    */

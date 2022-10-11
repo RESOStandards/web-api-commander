@@ -24,8 +24,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.reso.certification.stepdefs.DataAvailability.CERTIFICATION_RESULTS_PATH;
+import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.ODataUtils.*;
 import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
 import static org.reso.commander.common.Utils.wrapColumns;
@@ -37,7 +39,9 @@ public class LookupResource {
   private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final AtomicReference<Map<String, List<ClientEntity>>> lookupResourceCache = new AtomicReference<>(new LinkedHashMap<>());
   private static final String LOOKUP_RESOURCE_LOOKUP_METADATA_FILE_NAME = "lookup-resource-lookup-metadata.json";
-  private static final String LOOKUP_RESOURCE_FIELD_METADATA_FILE_NAME = "lookup-resource-field-metadata.json";
+
+  //TODO: only output file in DEBUG mode
+  //private static final String LOOKUP_RESOURCE_FIELD_METADATA_FILE_NAME = "lookup-resource-field-metadata.json";
 
   private static final String LOOKUP_NAME_FIELD = "LookupName";
 
@@ -78,9 +82,8 @@ public class LookupResource {
 
         lookupResourceCache.get().get(resourceName).addAll(results);
 
-        final JsonObject metadata = new JsonObject();
-        metadata.add("lookups", ODataUtils.serializeLookupMetadata(container.get().getCommander().getClient(), results));
-        Utils.createFile(CERTIFICATION_RESULTS_PATH, LOOKUP_RESOURCE_LOOKUP_METADATA_FILE_NAME, metadata.toString());
+        Utils.createFile(CERTIFICATION_RESULTS_PATH, LOOKUP_RESOURCE_LOOKUP_METADATA_FILE_NAME,
+            ODataUtils.serializeLookupMetadata(container.get().getCommander().getClient(), results).toString());
 
       } catch (Exception exception) {
         failAndExitWithErrorMessage("Unable to retrieve data from the Lookup Resource! " + exception.getMessage(), scenario);
@@ -145,6 +148,7 @@ public class LookupResource {
         standardLookupFieldCache.get(resourceName).values().stream()
             .filter(referenceStandardField -> referenceStandardField.getLookupName() != null)).collect(Collectors.toSet());
 
+    final ArrayList<String> fieldsWithMissingAnnotations = new ArrayList<>();
     lookupFields.forEach(referenceStandardField -> {
       LOG.debug("Standard Field: { "
           + "resourceName: \"" + referenceStandardField.getParentResourceName() + "\""
@@ -155,15 +159,19 @@ public class LookupResource {
       final boolean isStringDataType = foundElement != null &&
           foundElement.getType().getFullQualifiedName().toString().contentEquals(EdmPrimitiveTypeKind.String.getFullQualifiedName().toString());
 
-      if (foundElement != null && isStringDataType) {
-        if (!hasAnnotationTerm(foundElement, annotationTerm)) {
-          final String message = "Could not find required annotation with term \"" + annotationTerm + "\" for field: "
-              + referenceStandardField.getStandardName();
-          LOG.info("WARN: " + message);
-          failAndExitWithErrorMessage(message, scenario);
-        }
+
+      if (foundElement != null && isStringDataType && !hasAnnotationTerm(foundElement, annotationTerm)) {
+        fieldsWithMissingAnnotations.add(referenceStandardField.getStandardName());
       }
     });
+
+    if (fieldsWithMissingAnnotations.size() > 0) {
+      final String msg = "The following fields are missing the required '" + annotationTerm + "' annotation: "
+          + wrapColumns(String.join(", ", fieldsWithMissingAnnotations)) + "\n";
+
+      LOG.error(getDefaultErrorMessage(msg));
+      fail(msg);
+    }
   }
 
   @And("fields with the annotation term {string} MUST have a LookupName in the Lookup Resource")
@@ -185,18 +193,14 @@ public class LookupResource {
     final Set<String> missingLookupNames = Utils.getDifference(annotatedLookupNames, lookupNamesFromLookupData);
 
     if (missingLookupNames.size() > 0) {
-      failAndExitWithErrorMessage("LookupName elements missing from LookupMetadata: "
-          + wrapColumns(String.join(", ", missingLookupNames)), scenario);
-    } else {
-      if (filteredResourceFieldMap.size() > 0) {
-        scenario.log("Found all annotated LookupName elements in the Lookup data. Unique count: " + annotatedLookupNames.size());
-        scenario.log("LookupNames: " + wrapColumns(String.join(", ", annotatedLookupNames)));
+      final String msg = "The following fields have LookupName annotations but are missing from the Lookup Resource: "
+          + wrapColumns(String.join(", ", missingLookupNames)) + "\n";
 
-        Utils.createFile(CERTIFICATION_RESULTS_PATH, LOOKUP_RESOURCE_FIELD_METADATA_FILE_NAME,
-            ODataUtils.serializeFieldMetadataForLookupFields(filteredResourceFieldMap).toString());
-      } else {
-        scenario.log("No annotated lookup names found in the OData XML Metadata.");
-      }
+      LOG.error(getDefaultErrorMessage(msg));
+      fail(msg);
+    } else {
+      scenario.log("Found all annotated LookupName elements in the Lookup data. Unique count: " + annotatedLookupNames.size());
+      scenario.log("LookupNames: " + wrapColumns(String.join(", ", annotatedLookupNames)));
     }
   }
 }
