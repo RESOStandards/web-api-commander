@@ -121,25 +121,23 @@ Pass -DuseCollections=false if using OData IsFlags.
 ```
  
 ## Automated RESO Web API Core Testing
-Automated Web API Core automated testing tools are currently in development. See [Issue 34](https://github.com/RESOStandards/web-api-commander/issues/34) for progress.
-
 To use the automated RESO testing tools, you must have a [JDK installed](#java-and-the-jdk).
 
 ### Web API Core RESOScript Template
 To use the Commander for automated Web API Core testing, you need a RESOScript.
 
-For Web API 2.0.0 Server Core Certification, use [this resoscript](sample-web-api-server.core.2.0.0.resoscript) as a template. 
+For Web API 2.0.0 Server Core Certification, use [this resoscript](https://github.com/RESOStandards/web-api-commander/blob/main/sample-web-api-server.core.2.0.0.resoscript) as a template. 
 
-For more information regarding Parameters and Client Settings, see the [Web API Walkthrough](https://github.com/RESOStandards/web-api-commander/wiki/Walkthrough:-Automated-Web-API-Certification-Using-the-RESO-Commander#configuring-the-resoscript-file) (in-progress).
+For more information regarding Parameters and Client Settings, see the [Web API Walkthrough](https://github.com/RESOStandards/web-api-commander/wiki/Configuring-the-RESO-Commander-for-Automated-Web-API-Core-Testing).
 
 ### Web API Cucumber Acceptance Tests
-The Cucumber BDD acceptance tests for Web API 2.0.0 Core certification are [here](https://github.com/RESOStandards/web-api-commander/blob/issue-37-data-dictionary-testing/src/main/java/org/reso/certification/features/web-api/web-api-server.core.2.0.0.feature).  If you have any questions, please [send us an email](mailto:dev@reso.org).
+The Cucumber BDD acceptance tests for Web API 2.0.0 Core certification are [here](https://github.com/RESOStandards/web-api-commander/blob/main/src/main/java/org/reso/certification/features/web-api/web-api-server.core.feature).  If you have any questions, please [send us an email](mailto:dev@reso.org).
 
 ### Gradle Tasks for Web API 2.0.0 Server Certification
 While you may use tags to filter tests as you choose, explained in the next section, it's convenient
 to be able to run a predefined set of tests Web API Core Certification. 
 
-These tasks will also produce reports in the local `build` directory, named according to which test you ran. 
+These tasks will also produce reports in the local `/build/certification` directory, relative to the project root, named according to which test you ran. 
 
 #### Core Certification
 
@@ -245,14 +243,14 @@ To use the RESO Commander for Data Dictionary testing, you must have the JDK ins
 ### Data Dictionary RESOScript Template
 To use the Commander for automated Data Dictionary testing, you need a RESOScript.
 
-For Data Dictionary 1.7 Certification, use [this resoscript](sample-data-dictionary.1.7.0.resoscript) as a template. 
+For Data Dictionary 1.7 Certification, use [this resoscript](https://github.com/RESOStandards/web-api-commander/blob/main/sample-data-dictionary.1.7.0.resoscript) as a template. 
 
 ### Data Dictionary Acceptance Tests
 RESO Data Dictionary Certification is driven off of the official Data Dictionary spreadsheet for each version of the dictionary, [currently DD 1.7](https://docs.google.com/spreadsheets/d/1SZ0b6T4_lz6ti6qB2Je7NSz_9iNOaV_v9dbfhPwWgXA/edit?usp=sharing). 
 
-Cucumber BDD acceptance tests are [automatically generated](#generating-reso-data-dictionary-acceptance-tests) from the [local copy of the approved spreadsheet](src/main/resources/RESODataDictionary-1.7.xlsx). 
+Cucumber BDD acceptance tests are [automatically generated](#generating-reso-data-dictionary-acceptance-tests) from the [local copy of the approved spreadsheet](https://github.com/RESOStandards/web-api-commander/blob/main/src/main/resources/RESODataDictionary-1.7.xlsx). 
 
-The generated Data Dictionary 1.7 Cucumber BDD tests are [located in this directory](https://github.com/RESOStandards/web-api-commander/tree/issue-37-data-dictionary-testing/src/main/java/org/reso/certification/features/data-dictionary/v1-7-0).  See the [property.feature file](src/main/java/org/reso/certification/features/data-dictionary/v1-7-0/property.feature), for example, for the RESO Property Resource acceptance tests.
+The generated Data Dictionary 1.7 Cucumber BDD tests are [located in this directory](https://github.com/RESOStandards/web-api-commander/tree/main/src/main/java/org/reso/certification/features/data-dictionary/v1-7-0).  See the [property.feature file](https://github.com/RESOStandards/web-api-commander/blob/main/src/main/java/org/reso/certification/features/data-dictionary/v1-7-0/property.feature), for example, for the RESO Property Resource acceptance tests.
 
 If you have any questions, please [send us an email](mailto:dev@reso.org).
 
@@ -288,7 +286,7 @@ A raw report will be generated in a timestamped directory, and a `commander.log`
 ##### Data Dictionary Testing using a Data Dictionary RESOScript
 During Certification, metadata are retrieved directly from an applicant's Web API server using either OAuth2 Bearer Tokens or Client Credentials. Either authentication option is currently available for RESO Certification, depending on configuration, and the applicant will provide working RESOScripts when they apply for certification.
 
-An example Data Dictionary RESOScript template can be found [here](sample-data-dictionary.1.7.0.resoscript).
+An example Data Dictionary RESOScript template can be found [here](https://github.com/RESOStandards/web-api-commander/blob/main/sample-data-dictionary.1.7.0.resoscript).
 
 Once a RESOScript file has been created, it may be used with the following command:
 
@@ -302,7 +300,7 @@ A raw report will be generated in a timestamped directory, and a `commander.log`
 ### Data Dictionary Testing Output
 To see examples of Data Dictionary testing output, you may use the `./gradlew testDataDictionaryReferenceMetadata_1_7` command to run the Data Dictionary acceptance tests on the RESO reference metadata. 
 
-There is additional documentation about how Data Dictionary testing works, including sample output, in the [RESO Data Dictionary 1.7 Testing Specification](https://docs.google.com/document/d/15DFf9kDX_mlGCJVOch2fztl8W5h-yd18N0_03Sb4HwM/edit#heading=h.rib4osorsdcx).
+There is additional documentation about how Data Dictionary testing works, including sample output, in the [RESO Data Dictionary 1.7 Specification](https://github.com/RESOStandards/transport/blob/main/data-dictionary.md).
 
 ## Advanced feature: Tag Filtering 
 You may filter by tags in any of the Web API or Data Dictionary tests. These are the items in the Cucumber .feature files prefixed by an `@` symbol. Expressions may also be used with tags. This README doen't cover how to use tags, but the Commander supports them. For more information, see the [Cucumber Documentation](https://cucumber.io/docs/cucumber/api/#tags).
