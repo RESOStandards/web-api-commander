@@ -1,11 +1,11 @@
-FROM gradle:6.2.1-jdk8 AS builder
+FROM gradle:6.9.2-jdk8 AS builder
 
 FROM alpine:3.10
 
-RUN apk add --update bash ca-certificates openjdk8-jre-base nss git "gradle=5.4.1-r0"   && \
+RUN apk add --update bash ca-certificates openjdk8-jre-base nss git "gradle=6.9.1"   && \
     rm -rf /var/cache/apk/*
 
-RUN git clone --single-branch --branch main https://github.com/RESOStandards/web-api-commander.git
+RUN git clone --single-branch --branch 145-add-support-for-apple-silicon https://github.com/RESOStandards/web-api-commander.git
 
 WORKDIR web-api-commander
 
