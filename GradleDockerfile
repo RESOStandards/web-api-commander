@@ -1,8 +1,8 @@
-FROM gradle:6.2.1-jdk8 AS builder
+FROM gradle:6.9.2-jdk8 AS builder
 
-FROM alpine:3.10
+FROM alpine:3.14.8
 
-RUN apk add --update bash ca-certificates openjdk8-jre-base nss git "gradle=5.4.1-r0"   && \
+RUN apk add --update bash ca-certificates openjdk8-jre-base nss git gradle   && \
     rm -rf /var/cache/apk/*
 
 RUN git clone --single-branch --branch main https://github.com/RESOStandards/web-api-commander.git
