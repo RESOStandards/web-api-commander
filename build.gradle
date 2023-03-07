@@ -1,6 +1,6 @@
 plugins {
   // Apply the java plugin to add support for Java
-  id 'java'
+  id 'java-library'
 
   // Apply the application plugin to add support for building an application
   id 'application'
@@ -13,8 +13,6 @@ targetCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
 
 repositories {
-  // Use jcenter for resolving your dependencies.
-  // You can declare any Maven/Ivy/file repository here.
   mavenCentral()
 }
 
@@ -63,12 +61,11 @@ jar {
     attributes "Main-Class": mainClassName
   }
 
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
   from {
-    configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
   }
-  exclude 'META-INF/*.RSA'
-  exclude 'META-INF/*.SF'
-  exclude 'META-INF/*.DSA'
 }
 
 
@@ -104,12 +101,12 @@ tasks.register('prepareCertificationEnvironment') {
 tasks.register('testWebApiCore_2_0_0') {
   group = 'RESO Certification'
   description = 'Web API Core 2.0.0 Acceptance Tests' +
-          '\nExample: ' +
-          '\n  ./gradlew testWebApiCore_2_0_0 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript -DshowResponses=true' +
-          '\n\nNote: by default the Web API tests assume Collection(Edm.EnumType).' +
-          '\nPass -DuseCollections=false if using OData IsFlags.' +
-          '\n\n[Report location: ' + certReportsDir + ']' +
-          '\n\n'
+      '\nExample: ' +
+      '\n  ./gradlew testWebApiCore_2_0_0 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript -DshowResponses=true' +
+      '\n\nNote: by default the Web API tests assume Collection(Edm.EnumType).' +
+      '\nPass -DuseCollections=false if using OData IsFlags.' +
+      '\n\n[Report location: ' + certReportsDir + ']' +
+      '\n\n'
 
   String reportName = 'web-api-server.core.2.0.0'
 
@@ -121,17 +118,17 @@ tasks.register('testWebApiCore_2_0_0') {
       systemProperties = System.getProperties()
 
       args = [
-              '--plugin',
-              'pretty',
-              '--plugin',
-              'json:' + cucumberJsonPath + '/' + reportName + '.json',
-              '--plugin',
-              'html:' + certReportsDir + '/' + reportName + '.html',
-              '--glue',
-              'org.reso.certification.stepdefs#WebAPIServerCore',
-              'src/main/java/org/reso/certification/features/web-api',
-              '--tags',
-              '@core-endorsement'
+          '--plugin',
+          'pretty',
+          '--plugin',
+          'json:' + cucumberJsonPath + '/' + reportName + '.json',
+          '--plugin',
+          'html:' + certReportsDir + '/' + reportName + '.html',
+          '--glue',
+          'org.reso.certification.stepdefs#WebAPIServerCore',
+          'src/main/java/org/reso/certification/features/web-api',
+          '--tags',
+          '@core-endorsement'
       ]
     }
   }
@@ -140,13 +137,13 @@ tasks.register('testWebApiCore_2_0_0') {
 tasks.register('testDataDictionary_1_7') {
   group = 'RESO Certification'
   description = 'Data Dictionary 1.7 Acceptance Tests' +
-          '\nRESOScript Example:' +
-          '\n  ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dstrict=true' +
-          '\n\nMetadata File Example:' +
-          '\n  ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml' +
-          '\n\nTo disable strict mode, remove the -Dstrict=true parameter. All applicants MUST pass strict mode tests to be certified!' +
-          '\n\n[Report location: ' + certReportsDir + ']' +
-          '\n\n'
+      '\nRESOScript Example:' +
+      '\n  ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dstrict=true' +
+      '\n\nMetadata File Example:' +
+      '\n  ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml' +
+      '\n\nTo disable strict mode, remove the -Dstrict=true parameter. All applicants MUST pass strict mode tests to be certified!' +
+      '\n\n[Report location: ' + certReportsDir + ']' +
+      '\n\n'
 
   String reportName = 'data-dictionary-1.7'
 
@@ -162,10 +159,10 @@ tasks.register('testDataDictionary_1_7') {
 
       if (pathToMetadata != null) {
         certFileName = pathToMetadata
-                .substring(Math.max(pathToMetadata.lastIndexOf(File.separator) + 1, 0), pathToMetadata.lastIndexOf('.'))
+            .substring(Math.max(pathToMetadata.lastIndexOf(File.separator) + 1, 0), pathToMetadata.lastIndexOf('.'))
       } else if (pathToRESOScript != null) {
         certFileName = pathToRESOScript
-                .substring(Math.max(pathToRESOScript.lastIndexOf(File.separator) + 1, 0), pathToRESOScript.lastIndexOf('.'))
+            .substring(Math.max(pathToRESOScript.lastIndexOf(File.separator) + 1, 0), pathToRESOScript.lastIndexOf('.'))
       }
 
       def argsArray = []
@@ -178,13 +175,13 @@ tasks.register('testDataDictionary_1_7') {
       }
 
       argsArray.addAll(
-              '--plugin',
-              'json:' + cucumberJsonPath + '/' + reportName + '.json',
-              '--plugin',
-              'html:' + certReportsDir + '/' + reportName + '.html',
-              '--glue',
-              'org.reso.certification.stepdefs#DataDictionary',
-              'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
+          '--plugin',
+          'json:' + cucumberJsonPath + '/' + reportName + '.json',
+          '--plugin',
+          'html:' + certReportsDir + '/' + reportName + '.html',
+          '--glue',
+          'org.reso.certification.stepdefs#DataDictionary',
+          'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
       )
 
       if (systemProperties.hasProperty('cucumber.filter.tags')) {
@@ -200,10 +197,10 @@ tasks.register('testDataDictionary_1_7') {
 tasks.register('testDataAvailability_1_7') {
   group = 'RESO Certification'
   description = 'Data Dictionary 1.7 Data Availability Tests' +
-          '\nExample:' +
-          '\n  ./gradlew testDataAvailability_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript' +
-          '\n\n[Report location: ' + certReportsDir + ']' +
-          '\n\n'
+      '\nExample:' +
+      '\n  ./gradlew testDataAvailability_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript' +
+      '\n\n[Report location: ' + certReportsDir + ']' +
+      '\n\n'
 
   String reportName = 'data-availability.dd-1.7'
 
@@ -224,13 +221,13 @@ tasks.register('testDataAvailability_1_7') {
       }
 
       argsArray.addAll(
-              '--plugin',
-              'json:' + cucumberJsonPath + '/' + reportName + '.json',
-              '--plugin',
-              'html:' + certReportsDir + '/' + reportName + '.html',
-              '--glue',
-              'org.reso.certification.stepdefs#DataAvailability',
-              'src/main/java/org/reso/certification/features/payloads/data-availability.feature'
+          '--plugin',
+          'json:' + cucumberJsonPath + '/' + reportName + '.json',
+          '--plugin',
+          'html:' + certReportsDir + '/' + reportName + '.html',
+          '--glue',
+          'org.reso.certification.stepdefs#DataAvailability',
+          'src/main/java/org/reso/certification/features/payloads/data-availability.feature'
       )
 
       args = argsArray
@@ -242,10 +239,10 @@ tasks.register('testDataAvailability_1_7') {
 tasks.register('testIdxPayload_1_7') {
   group = 'RESO Certification'
   description = 'Data Dictionary 1.7 Payloads Sampling Tests' +
-          '\nExample:' +
-          '\n  ./gradlew testIdxPayload_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript' +
-          '\n\n[Report location: ' + certReportsDir + ']' +
-          '\n\n'
+      '\nExample:' +
+      '\n  ./gradlew testIdxPayload_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript' +
+      '\n\n[Report location: ' + certReportsDir + ']' +
+      '\n\n'
 
   String reportName = 'idx-payload.dd-1.7'
 
@@ -257,15 +254,15 @@ tasks.register('testIdxPayload_1_7') {
       systemProperties = System.getProperties()
 
       args = [
-              '--plugin',
-              'pretty',
-              '--plugin',
-              'json:' + cucumberJsonPath + '/' + reportName + '.json',
-              '--plugin',
-              'html:' + certReportsDir + '/' + reportName + '.html',
-              '--glue',
-              'org.reso.certification.stepdefs#IdxPayload',
-              'src/main/java/org/reso/certification/features/payloads/idx-payload.feature'
+          '--plugin',
+          'pretty',
+          '--plugin',
+          'json:' + cucumberJsonPath + '/' + reportName + '.json',
+          '--plugin',
+          'html:' + certReportsDir + '/' + reportName + '.html',
+          '--glue',
+          'org.reso.certification.stepdefs#IdxPayload',
+          'src/main/java/org/reso/certification/features/payloads/idx-payload.feature'
       ]
     }
   }
@@ -281,9 +278,9 @@ tasks.register('testDataDictionaryReferenceMetadata_1_7') {
       System.setProperty('pathToMetadata', 'src/main/resources/RESODataDictionary-1.7.xml')
       systemProperties = System.getProperties()
       args = [
-              '--glue',
-              'org.reso.certification.stepdefs#DataDictionary',
-              'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
+          '--glue',
+          'org.reso.certification.stepdefs#DataDictionary',
+          'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
       ]
 
       if (System.hasProperty("pretty")) {
