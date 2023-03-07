@@ -113,7 +113,7 @@ tasks.register('testWebApiCore_2_0_0') {
   dependsOn jar, prepareCertificationEnvironment
   doLast {
     javaexec {
-      main = "io.cucumber.core.cli.Main"
+      mainClass = "io.cucumber.core.cli.Main"
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
 
@@ -207,7 +207,7 @@ tasks.register('testDataAvailability_1_7') {
   dependsOn jar
   doLast {
     javaexec {
-      main = "io.cucumber.core.cli.Main"
+      mainClass = "io.cucumber.core.cli.Main"
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
 
@@ -249,7 +249,7 @@ tasks.register('testIdxPayload_1_7') {
   dependsOn jar
   doLast {
     javaexec {
-      main = "io.cucumber.core.cli.Main"
+      mainClass = "io.cucumber.core.cli.Main"
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
 
@@ -273,7 +273,7 @@ tasks.register('testDataDictionaryReferenceMetadata_1_7') {
   dependsOn jar
   doLast {
     javaexec {
-      main = "io.cucumber.core.cli.Main"
+      mainClass = "io.cucumber.core.cli.Main"
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       System.setProperty('pathToMetadata', 'src/main/resources/RESODataDictionary-1.7.xml')
       systemProperties = System.getProperties()
@@ -295,7 +295,7 @@ test {
   dependsOn assemble, compileTestJava, testDataDictionaryReferenceMetadata_1_7
   doLast {
     javaexec {
-      main = "io.cucumber.core.cli.Main"
+      mainClass = "io.cucumber.core.cli.Main"
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       args = [
           '--plugin',
