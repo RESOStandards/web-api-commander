@@ -19,42 +19,42 @@ repositories {
 }
 
 dependencies {
-  compile 'com.google.guava:guava:31.1-jre'
-  compile 'com.google.inject:guice:5.1.0'
-  compile 'commons-cli:commons-cli:1.5.0'
+  implementation 'com.google.guava:guava:31.1-jre'
+  implementation 'com.google.inject:guice:5.1.0'
+  implementation 'commons-cli:commons-cli:1.5.0'
 
-  compile 'org.apache.logging.log4j:log4j-api:2.18.0'
-  compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.18.0'
-  compile 'org.apache.logging.log4j:log4j-1.2-api:2.18.0'
-  compile 'org.apache.logging.log4j:log4j-core:2.18.0'
+  implementation 'org.apache.logging.log4j:log4j-api:2.18.0'
+  implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.18.0'
+  implementation 'org.apache.logging.log4j:log4j-1.2-api:2.18.0'
+  implementation 'org.apache.logging.log4j:log4j-core:2.18.0'
 
-  compile 'org.apache.olingo:odata-client-api:4.9.0'
-  compile 'org.apache.olingo:odata-commons-core:4.9.0'
-  compile 'org.apache.olingo:odata-client-core:4.9.0'
+  implementation 'org.apache.olingo:odata-client-api:4.9.0'
+  implementation 'org.apache.olingo:odata-commons-core:4.9.0'
+  implementation 'org.apache.olingo:odata-client-core:4.9.0'
 
-  compile 'org.apache.poi:poi:5.2.2'
-  compile 'org.apache.poi:poi-ooxml:5.2.2'
+  implementation 'org.apache.poi:poi:5.2.2'
+  implementation 'org.apache.poi:poi-ooxml:5.2.2'
 
-  compile 'io.rest-assured:rest-assured:5.1.1'
-  compile 'io.rest-assured:json-path:5.1.1'
-  compile 'io.rest-assured:json-schema-validator:5.1.1'
+  implementation 'io.rest-assured:rest-assured:5.1.1'
+  implementation 'io.rest-assured:json-path:5.1.1'
+  implementation 'io.rest-assured:json-schema-validator:5.1.1'
 
-  compile 'io.cucumber:cucumber-java8:7.1.0'
-  compile 'io.cucumber:cucumber-java:7.1.0'
-  compile 'io.cucumber:cucumber-junit:7.1.0'
-  compile 'io.cucumber:cucumber-guice:7.1.0'
-  compile 'io.cucumber:cucumber-core:7.1.0'
+  implementation 'io.cucumber:cucumber-java8:7.1.0'
+  implementation 'io.cucumber:cucumber-java:7.1.0'
+  implementation 'io.cucumber:cucumber-junit:7.1.0'
+  implementation 'io.cucumber:cucumber-guice:7.1.0'
+  implementation 'io.cucumber:cucumber-core:7.1.0'
 
   //TODO: choose one schema validator between this and rest-assured
-  compile 'com.networknt:json-schema-validator:1.0.70'
-  compile 'com.google.code.gson:gson:2.9.0'
-  compile 'org.apache.commons:commons-text:1.9'
+  implementation 'com.networknt:json-schema-validator:1.0.70'
+  implementation 'com.google.code.gson:gson:2.9.0'
+  implementation 'org.apache.commons:commons-text:1.9'
 
 }
 
 configurations {
   cucumberRuntime {
-    extendsFrom compile
+    extendsFrom implementation
   }
 }
 
@@ -73,7 +73,7 @@ jar {
 
 
 // don't suppress warnings or deprecation notices
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
   options.compilerArgs << '-Xlint:unchecked'
   options.deprecation = true
 }
@@ -87,13 +87,13 @@ final String certOutputDir = 'build' + File.separator + 'certification',
              certReportsDir = certOutputDir + File.separator + 'reports',
              certResultsDir = certOutputDir + File.separator + 'results'
 
-task prepareCertificationEnvironment() {
- doLast {
-  def folder = new File(certOutputDir)
-  if (folder.exists()) {
-    delete certOutputDir
-  }
-  
+tasks.register('prepareCertificationEnvironment') {
+  doLast {
+    def folder = new File(certOutputDir)
+    if (folder.exists()) {
+      delete certOutputDir
+    }
+
     mkdir certOutputDir
     mkdir cucumberJsonPath
     mkdir certReportsDir
@@ -101,15 +101,15 @@ task prepareCertificationEnvironment() {
   }
 }
 
-task testWebApiCore_2_0_0() {
+tasks.register('testWebApiCore_2_0_0') {
   group = 'RESO Certification'
   description = 'Web API Core 2.0.0 Acceptance Tests' +
-      '\nExample: ' +
-      '\n  ./gradlew testWebApiCore_2_0_0 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript -DshowResponses=true' +
-      '\n\nNote: by default the Web API tests assume Collection(Edm.EnumType).' +
-      '\nPass -DuseCollections=false if using OData IsFlags.' +
-      '\n\n[Report location: ' + certReportsDir + ']' +
-      '\n\n'
+          '\nExample: ' +
+          '\n  ./gradlew testWebApiCore_2_0_0 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript -DshowResponses=true' +
+          '\n\nNote: by default the Web API tests assume Collection(Edm.EnumType).' +
+          '\nPass -DuseCollections=false if using OData IsFlags.' +
+          '\n\n[Report location: ' + certReportsDir + ']' +
+          '\n\n'
 
   String reportName = 'web-api-server.core.2.0.0'
 
@@ -121,32 +121,32 @@ task testWebApiCore_2_0_0() {
       systemProperties = System.getProperties()
 
       args = [
-          '--plugin',
-          'pretty',
-          '--plugin',
-          'json:' + cucumberJsonPath + '/' + reportName + '.json',
-          '--plugin',
-          'html:' + certReportsDir + '/' + reportName + '.html',
-          '--glue',
-          'org.reso.certification.stepdefs#WebAPIServerCore',
-          'src/main/java/org/reso/certification/features/web-api',
-          '--tags',
-          '@core-endorsement'
+              '--plugin',
+              'pretty',
+              '--plugin',
+              'json:' + cucumberJsonPath + '/' + reportName + '.json',
+              '--plugin',
+              'html:' + certReportsDir + '/' + reportName + '.html',
+              '--glue',
+              'org.reso.certification.stepdefs#WebAPIServerCore',
+              'src/main/java/org/reso/certification/features/web-api',
+              '--tags',
+              '@core-endorsement'
       ]
     }
   }
 }
 
-task testDataDictionary_1_7() {
+tasks.register('testDataDictionary_1_7') {
   group = 'RESO Certification'
   description = 'Data Dictionary 1.7 Acceptance Tests' +
-      '\nRESOScript Example:' +
-      '\n  ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dstrict=true' +
-      '\n\nMetadata File Example:' +
-      '\n  ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml' +
-      '\n\nTo disable strict mode, remove the -Dstrict=true parameter. All applicants MUST pass strict mode tests to be certified!' +
-      '\n\n[Report location: ' + certReportsDir + ']' +
-      '\n\n'
+          '\nRESOScript Example:' +
+          '\n  ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dstrict=true' +
+          '\n\nMetadata File Example:' +
+          '\n  ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml' +
+          '\n\nTo disable strict mode, remove the -Dstrict=true parameter. All applicants MUST pass strict mode tests to be certified!' +
+          '\n\n[Report location: ' + certReportsDir + ']' +
+          '\n\n'
 
   String reportName = 'data-dictionary-1.7'
 
@@ -162,10 +162,10 @@ task testDataDictionary_1_7() {
 
       if (pathToMetadata != null) {
         certFileName = pathToMetadata
-            .substring(Math.max(pathToMetadata.lastIndexOf(File.separator) + 1, 0), pathToMetadata.lastIndexOf('.'))
+                .substring(Math.max(pathToMetadata.lastIndexOf(File.separator) + 1, 0), pathToMetadata.lastIndexOf('.'))
       } else if (pathToRESOScript != null) {
         certFileName = pathToRESOScript
-            .substring(Math.max(pathToRESOScript.lastIndexOf(File.separator) + 1, 0), pathToRESOScript.lastIndexOf('.'))
+                .substring(Math.max(pathToRESOScript.lastIndexOf(File.separator) + 1, 0), pathToRESOScript.lastIndexOf('.'))
       }
 
       def argsArray = []
@@ -178,13 +178,13 @@ task testDataDictionary_1_7() {
       }
 
       argsArray.addAll(
-        '--plugin',
-        'json:' + cucumberJsonPath + '/' + reportName + '.json',
-        '--plugin',
-        'html:' + certReportsDir + '/' + reportName + '.html',
-        '--glue',
-        'org.reso.certification.stepdefs#DataDictionary',
-        'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
+              '--plugin',
+              'json:' + cucumberJsonPath + '/' + reportName + '.json',
+              '--plugin',
+              'html:' + certReportsDir + '/' + reportName + '.html',
+              '--glue',
+              'org.reso.certification.stepdefs#DataDictionary',
+              'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
       )
 
       if (systemProperties.hasProperty('cucumber.filter.tags')) {
@@ -197,13 +197,13 @@ task testDataDictionary_1_7() {
   }
 }
 
-task testDataAvailability_1_7() {
+tasks.register('testDataAvailability_1_7') {
   group = 'RESO Certification'
   description = 'Data Dictionary 1.7 Data Availability Tests' +
-      '\nExample:' +
-      '\n  ./gradlew testDataAvailability_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript' +
-      '\n\n[Report location: ' + certReportsDir + ']' +
-      '\n\n'
+          '\nExample:' +
+          '\n  ./gradlew testDataAvailability_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript' +
+          '\n\n[Report location: ' + certReportsDir + ']' +
+          '\n\n'
 
   String reportName = 'data-availability.dd-1.7'
 
@@ -224,13 +224,13 @@ task testDataAvailability_1_7() {
       }
 
       argsArray.addAll(
-          '--plugin',
-          'json:' + cucumberJsonPath + '/' + reportName + '.json',
-          '--plugin',
-          'html:' + certReportsDir + '/' + reportName + '.html',
-          '--glue',
-          'org.reso.certification.stepdefs#DataAvailability',
-          'src/main/java/org/reso/certification/features/payloads/data-availability.feature'
+              '--plugin',
+              'json:' + cucumberJsonPath + '/' + reportName + '.json',
+              '--plugin',
+              'html:' + certReportsDir + '/' + reportName + '.html',
+              '--glue',
+              'org.reso.certification.stepdefs#DataAvailability',
+              'src/main/java/org/reso/certification/features/payloads/data-availability.feature'
       )
 
       args = argsArray
@@ -239,13 +239,13 @@ task testDataAvailability_1_7() {
   }
 }
 
-task testIdxPayload_1_7() {
+tasks.register('testIdxPayload_1_7') {
   group = 'RESO Certification'
   description = 'Data Dictionary 1.7 Payloads Sampling Tests' +
-      '\nExample:' +
-      '\n  ./gradlew testIdxPayload_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript' +
-      '\n\n[Report location: ' + certReportsDir + ']' +
-      '\n\n'
+          '\nExample:' +
+          '\n  ./gradlew testIdxPayload_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript' +
+          '\n\n[Report location: ' + certReportsDir + ']' +
+          '\n\n'
 
   String reportName = 'idx-payload.dd-1.7'
 
@@ -257,21 +257,21 @@ task testIdxPayload_1_7() {
       systemProperties = System.getProperties()
 
       args = [
-          '--plugin',
-          'pretty',
-          '--plugin',
-          'json:' + cucumberJsonPath + '/' + reportName + '.json',
-          '--plugin',
-          'html:' + certReportsDir + '/' + reportName + '.html',
-          '--glue',
-          'org.reso.certification.stepdefs#IdxPayload',
-          'src/main/java/org/reso/certification/features/payloads/idx-payload.feature'
+              '--plugin',
+              'pretty',
+              '--plugin',
+              'json:' + cucumberJsonPath + '/' + reportName + '.json',
+              '--plugin',
+              'html:' + certReportsDir + '/' + reportName + '.html',
+              '--glue',
+              'org.reso.certification.stepdefs#IdxPayload',
+              'src/main/java/org/reso/certification/features/payloads/idx-payload.feature'
       ]
     }
   }
 }
 
-task testDataDictionaryReferenceMetadata_1_7() {
+tasks.register('testDataDictionaryReferenceMetadata_1_7') {
   description = 'Runs Data Dictionary tests against reference metadata'
   dependsOn jar
   doLast {
@@ -281,9 +281,9 @@ task testDataDictionaryReferenceMetadata_1_7() {
       System.setProperty('pathToMetadata', 'src/main/resources/RESODataDictionary-1.7.xml')
       systemProperties = System.getProperties()
       args = [
-          '--glue',
-          'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
+              '--glue',
+              'org.reso.certification.stepdefs#DataDictionary',
+              'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
       ]
 
       if (System.hasProperty("pretty")) {
