@@ -31,41 +31,28 @@ public class DataDictionaryCodeGenerator {
 
   /**
    * Generates Data Dictionary references for local workbook instance using the configured WorksheetProcessor
-   *
-   *  TODO: convert to .parallelStream()
    */
   public void processWorksheets() {
-    Sheet currentWorksheet, standardResourcesWorksheet;
-    int sheetIndex, rowIndex;
-    final int ROW_HEADER_INDEX = 0, FIRST_ROW_INDEX = 1;
-    final String STANDARD_RELATIONSHIPS_WORKSHEET = "Standard Relationships";
+    Sheet fieldsWorksheet;
+    final int FIRST_ROW_INDEX = 1;
+    final String FIELDS_WORKSHEET = "Fields";
 
     try {
-      standardResourcesWorksheet = workbook.getSheet(STANDARD_RELATIONSHIPS_WORKSHEET);
-      assert standardResourcesWorksheet != null;
+      fieldsWorksheet = workbook.getSheet(FIELDS_WORKSHEET);
+      assert fieldsWorksheet != null;
+      processor.beforeResourceSheetProcessed(fieldsWorksheet);
 
-      processor.buildStandardRelationships(standardResourcesWorksheet);
+      processor.wellKnownStandardFieldHeaderMap = buildWellKnownStandardFieldHeaderMap(fieldsWorksheet);
+      processor.processResourceSheet(fieldsWorksheet);
 
-      //workbook consists of many sheets, process only the ones that have the name of a well-known resource
-      for (sheetIndex = ROW_HEADER_INDEX; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++) {
-        currentWorksheet = workbook.getSheetAt(sheetIndex);
-
-        if (DataDictionaryMetadata.v1_7.WELL_KNOWN_RESOURCES.contains(currentWorksheet.getSheetName()) && currentWorksheet.getPhysicalNumberOfRows() > 1) {
-          processor.beforeResourceSheetProcessed(currentWorksheet);
-
-          processor.wellKnownStandardFieldHeaderMap = buildWellKnownStandardFieldHeaderMap(currentWorksheet);
-          processor.processResourceSheet(currentWorksheet);
-
-          //starts at row 1 to skip header row
-          for (rowIndex = FIRST_ROW_INDEX; rowIndex < currentWorksheet.getPhysicalNumberOfRows(); rowIndex++) {
-            if (currentWorksheet.getRow(rowIndex) != null) {
-              processor.processResourceRow(currentWorksheet.getRow(rowIndex));
-            }
-          }
-
-          processor.afterResourceSheetProcessed(currentWorksheet);
+      //starts at row 1 to skip header row
+      for (int rowIndex = FIRST_ROW_INDEX; rowIndex < fieldsWorksheet.getPhysicalNumberOfRows(); rowIndex++) {
+        if (fieldsWorksheet.getRow(rowIndex) != null) {
+          processor.processResourceRow(fieldsWorksheet.getRow(rowIndex));
         }
       }
+
+      processor.afterResourceSheetProcessed(fieldsWorksheet);
       processor.generateOutput();
     } catch (Exception ex) {
       LOG.info(ex);

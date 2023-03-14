@@ -3,35 +3,38 @@ package org.reso.models;
 import java.util.List;
 
 /**
+ *  Defines a standard field according to the Data Dictionary specification
+ *  Matches the format of the Data Dictionary worksheet:
+ *  @see <a href="https://docs.google.com/spreadsheets/d/1_59Iqr7AQ51rEFa7p0ND-YhJjEru8gY-D_HM1yy5c6w/edit#gid=544946974" />
  *
  */
 public class ReferenceStandardField {
+  private String resourceName;
   private String standardName;
   private String displayName;
-  private String parentResourceName;
   private String definition;
   private List<String> groups;
   private String simpleDataType;
+  private String sourceResource;
   private Integer suggestedMaxLength;
-  private List<String> synonyms;
-  private String elementStatus;
-  private String bedes;
-  private String certificationLevel;
-  private Integer recordId;
-  private String lookupStatus;
-  private String lookup;
-  private String collection;
   private Integer suggestedMaxPrecision;
+  private List<String> synonyms;
+  private String frenchCanadianDisplayName;
+  private String spanishDisplayName;
+  private String elementStatus;
+  private String recordId;
+  private String lookupStatus;
+  private String lookupName;
   private Boolean repeatingElement;
   private List<String> propertyTypes;
   private List<String> payloads;
-  private String spanishStandardName;
   private String statusChangeDate;
   private String revisedDate;
   private String addedInVersion;
   private String wikiPageTitle;
   private String wikiPageUrl;
   private Integer wikiPageId;
+  private String bedes;
 
 
   private ReferenceStandardField() { /* private constructor use Builder instead */ }
@@ -54,8 +57,8 @@ public class ReferenceStandardField {
     return displayName;
   }
 
-  public String getParentResourceName(){
-    return parentResourceName;
+  public String getResourceName(){
+    return resourceName;
   }
 
   public String getDefinition() {
@@ -86,11 +89,7 @@ public class ReferenceStandardField {
     return bedes;
   }
 
-  public String getCertificationLevel() {
-    return certificationLevel;
-  }
-
-  public Integer getRecordId() {
+  public String getRecordId() {
     return recordId;
   }
 
@@ -98,22 +97,16 @@ public class ReferenceStandardField {
     return lookupStatus;
   }
 
-  public String getLookup() {
-    return lookup;
-  }
-
   public String getLookupName() {
-    String lookupName = getLookup()
+    String parsedLookupName = lookupName
         .replace("<n/a>", "")
         .replace("Lookups", "").trim();
 
-    if (lookupName.length() == 0) return null;
-
-    return lookupName;
-  }
-
-  public String getCollection() {
-    return collection;
+    if (parsedLookupName.length() == 0) {
+      return null;
+    } else {
+      return parsedLookupName;
+    }
   }
 
   public Integer getSuggestedMaxPrecision() {
@@ -132,8 +125,12 @@ public class ReferenceStandardField {
     return payloads;
   }
 
-  public String getSpanishStandardName() {
-    return spanishStandardName;
+  public String getSpanishDisplayName() {
+    return spanishDisplayName;
+  }
+
+  public String getFrenchCanadianDisplayName() {
+    return frenchCanadianDisplayName;
   }
 
   public String getStatusChangeDate() {
@@ -160,8 +157,8 @@ public class ReferenceStandardField {
     return wikiPageId;
   }
 
-  public void setParentResourceName(String parentResourceName) {
-    this.parentResourceName = parentResourceName;
+  public void setResourceName() {
+    this.resourceName = resourceName;
   }
 
   public static class Builder {
@@ -177,8 +174,8 @@ public class ReferenceStandardField {
       return this;
     }
 
-    public Builder setParentResourceName(String parentResourceName) {
-      referenceStandardField.parentResourceName = parentResourceName;
+    public Builder setResourceName(String resourceName) {
+      referenceStandardField.resourceName = resourceName;
       return this;
     }
 
@@ -217,28 +214,18 @@ public class ReferenceStandardField {
       return this;
     }
 
-    public Builder setCertificationLevel(String certificationLevel) {
-      referenceStandardField.certificationLevel = certificationLevel;
-      return this;
-    }
-
-    public Builder setRecordId(Integer recordId) {
+    public Builder setRecordId(String recordId) {
       referenceStandardField.recordId = recordId;
       return this;
     }
 
-    public Builder setLookup(String lookup) {
-      referenceStandardField.lookup = lookup;
+    public Builder setLookupName(String lookupName) {
+      referenceStandardField.lookupName = lookupName;
       return this;
     }
 
     public Builder setLookupStatus(String lookupStatus) {
       referenceStandardField.lookupStatus = lookupStatus;
-      return this;
-    }
-
-    public Builder setCollection(String collection) {
-      referenceStandardField.collection = collection;
       return this;
     }
 
@@ -262,8 +249,8 @@ public class ReferenceStandardField {
       return this;
     }
 
-    public Builder setSpanishStandardName(String spanishStandardName) {
-      referenceStandardField.spanishStandardName = spanishStandardName;
+    public Builder setSpanishDisplayName(String spanishDisplayName) {
+      referenceStandardField.spanishDisplayName = spanishDisplayName;
       return this;
     }
 
@@ -294,6 +281,16 @@ public class ReferenceStandardField {
 
     public Builder setWikiPageID(Integer wikiPageId) {
       referenceStandardField.wikiPageId = wikiPageId;
+      return this;
+    }
+
+    public Builder setSourceResource(String sourceResource) {
+      referenceStandardField.sourceResource = sourceResource;
+      return this;
+    }
+
+    public Builder setFrenchCanadianDisplayName(String frenchCanadianDisplayName) {
+      referenceStandardField.frenchCanadianDisplayName = frenchCanadianDisplayName;
       return this;
     }
 

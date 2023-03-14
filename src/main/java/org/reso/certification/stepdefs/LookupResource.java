@@ -151,11 +151,11 @@ public class LookupResource {
     final ArrayList<String> fieldsWithMissingAnnotations = new ArrayList<>();
     lookupFields.forEach(referenceStandardField -> {
       LOG.debug("Standard Field: { "
-          + "resourceName: \"" + referenceStandardField.getParentResourceName() + "\""
+          + "resourceName: \"" + referenceStandardField.getResourceName() + "\""
           + ", standardName: \"" + referenceStandardField.getStandardName() + "\""
           + ", lookupName: \"" + referenceStandardField.getLookupName() + "\" }");
 
-      EdmElement foundElement = getEdmElement(container.get().getEdm(), referenceStandardField.getParentResourceName(), referenceStandardField.getStandardName());
+      EdmElement foundElement = getEdmElement(container.get().getEdm(), referenceStandardField.getResourceName(), referenceStandardField.getStandardName());
       final boolean isStringDataType = foundElement != null &&
           foundElement.getType().getFullQualifiedName().toString().contentEquals(EdmPrimitiveTypeKind.String.getFullQualifiedName().toString());
 

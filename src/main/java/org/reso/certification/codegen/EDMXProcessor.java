@@ -175,7 +175,7 @@ public class EDMXProcessor extends WorksheetProcessor {
     StringBuilder content = new StringBuilder();
     content.append("<Schema xmlns=\"http://docs.oasis-open.org/odata/ns/edm\" Namespace=\"" + RESO_NAMESPACE + "\">");
 
-    //iterate through each of the found resources and generate their edm:EntityType content content
+    //iterate through each of the found resources and generate their edm:EntityType content
     resourceTemplates.forEach((resourceName, templateContent) -> {
       content.append(templateContent);
     });
@@ -377,10 +377,10 @@ public class EDMXProcessor extends WorksheetProcessor {
     }
 
     public static String buildEnumTypeSingleMember(ReferenceStandardField field) {
-      if (field == null || field.getLookup() == null) return EMPTY_STRING;
-      if (!field.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
+      if (field == null || field.getLookupName() == null) return EMPTY_STRING;
+      if (!field.getLookupName().toLowerCase().contains("lookups")) return EMPTY_STRING;
 
-      String lookupName = field.getLookup().replace("Lookups", "").trim();
+      String lookupName = field.getLookupName().replace("Lookups", "").trim();
       return ""
           + "<Property Name=\"" + field.getStandardName() + "\" Type=\"" + RESO_NAMESPACE + ".enums." + lookupName + "\" >"
           + buildDisplayNameAnnotation(field.getDisplayName())
@@ -390,8 +390,8 @@ public class EDMXProcessor extends WorksheetProcessor {
     }
 
     public static String buildEnumTypeMultiMember(ReferenceStandardField field) {
-      if (field == null || field.getLookup() == null) return EMPTY_STRING;
-      if (!field.getLookup().toLowerCase().contains("lookups")) return EMPTY_STRING;
+      if (field == null || field.getLookupName() == null) return EMPTY_STRING;
+      if (!field.getLookupName().toLowerCase().contains("lookups")) return EMPTY_STRING;
       return ""
           + "<Property Name=\"" + field.getStandardName()
           + "\" Type=\"Collection(" + RESO_NAMESPACE + ".enums." + field.getLookupName() + ")\">"

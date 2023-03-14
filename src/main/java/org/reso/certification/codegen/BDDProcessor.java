@@ -112,8 +112,8 @@ public class BDDProcessor extends WorksheetProcessor {
       //use this to add each field name tag
       //tags.add(field.getStandardName());
 
-      if (field.getParentResourceName() != null && field.getParentResourceName().length() > 0) {
-        tags.add(field.getParentResourceName());
+      if (field.getResourceName() != null && field.getResourceName().length() > 0) {
+        tags.add(field.getResourceName());
       }
 
       tags.addAll(field.getPropertyTypes());
@@ -133,7 +133,7 @@ public class BDDProcessor extends WorksheetProcessor {
 
       if (field.getSynonyms().size() > 0) {
         template += "    Given that the following synonyms for \"" + field.getStandardName()
-            + "\" DO NOT exist in the \"" + field.getParentResourceName() + "\" metadata\n" +
+            + "\" DO NOT exist in the \"" + field.getResourceName() + "\" metadata\n" +
             field.getSynonyms().stream()
                 .map(synonym -> padLeft("| " + synonym + " |\n", EXAMPLES_PADDING_AMOUNT)).collect(Collectors.joining());
       }
@@ -146,7 +146,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
           "  Scenario: " + field.getStandardName() + "\n" +
           generateSynonymsMarkup(field) +
-          "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+          "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getResourceName() + "\" metadata\n" +
           "    Then \"" + field.getStandardName() + "\" MUST be \"Boolean\" data type\n";
     }
 
@@ -156,7 +156,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
           "  Scenario: " + field.getStandardName() + "\n" +
           generateSynonymsMarkup(field) +
-          "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+          "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getResourceName() + "\" metadata\n" +
           "    Then \"" + field.getStandardName() + "\" MUST be \"Date\" data type\n";
     }
 
@@ -179,7 +179,7 @@ public class BDDProcessor extends WorksheetProcessor {
           "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               generateSynonymsMarkup(field) +
-              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getResourceName() + "\" metadata\n" +
               "    Then \"" + field.getStandardName() + "\" MUST be \"Decimal\" data type\n";
 
       //TODO Length is actually scale for Decimal fields by the DD! :/
@@ -203,7 +203,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
           "  Scenario: " + field.getStandardName() + "\n" +
           generateSynonymsMarkup(field) +
-          "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+          "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getResourceName() + "\" metadata\n" +
           "    Then \"" + field.getStandardName() + "\" MUST be \"Integer\" data type\n";
     }
 
@@ -231,7 +231,7 @@ public class BDDProcessor extends WorksheetProcessor {
           "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               generateSynonymsMarkup(field) +
-              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getResourceName() + "\" metadata\n" +
               "    Then \"" + field.getStandardName() + "\" MUST be \"Multiple Enumeration\" data type\n";
     }
 
@@ -242,7 +242,7 @@ public class BDDProcessor extends WorksheetProcessor {
           "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               generateSynonymsMarkup(field) +
-              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getResourceName() + "\" metadata\n" +
               "    Then \"" + field.getStandardName() + "\" MUST be \"Single Enumeration\" data type\n";
     }
 
@@ -252,7 +252,7 @@ public class BDDProcessor extends WorksheetProcessor {
           "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +
               generateSynonymsMarkup(field) +
-              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+              "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getResourceName() + "\" metadata\n" +
               "    Then \"" + field.getStandardName() + "\" MUST be \"String\" data type\n";
 
       if (field.getSuggestedMaxLength() != null)
@@ -268,7 +268,7 @@ public class BDDProcessor extends WorksheetProcessor {
       return "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
           "  Scenario: " + field.getStandardName() + "\n" +
           generateSynonymsMarkup(field) +
-          "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getParentResourceName() + "\" metadata\n" +
+          "    When \"" + field.getStandardName() + "\" exists in the \"" + field.getResourceName() + "\" metadata\n" +
           "    Then \"" + field.getStandardName() + "\" MUST be \"Timestamp\" data type\n";
     }
   }
