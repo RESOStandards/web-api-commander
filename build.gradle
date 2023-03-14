@@ -21,10 +21,10 @@ dependencies {
   implementation 'com.google.inject:guice:5.1.0'
   implementation 'commons-cli:commons-cli:1.5.0'
 
-  implementation 'org.apache.logging.log4j:log4j-api:2.18.0'
-  implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.18.0'
-  implementation 'org.apache.logging.log4j:log4j-1.2-api:2.18.0'
-  implementation 'org.apache.logging.log4j:log4j-core:2.18.0'
+  implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
+  implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.20.0'
+  implementation 'org.apache.logging.log4j:log4j-1.2-api:2.20.0'
+  implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
 
   implementation 'org.apache.olingo:odata-client-api:4.9.0'
   implementation 'org.apache.olingo:odata-commons-core:4.9.0'
@@ -57,15 +57,20 @@ configurations {
 }
 
 jar {
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
   manifest {
     attributes "Main-Class": mainClassName
+    attributes "Multi-Release": true
   }
-
-  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
   from {
     configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
   }
+
+  exclude 'META-INF/*.RSA'
+  exclude 'META-INF/*.SF'
+  exclude 'META-INF/*.DSA'
 }
 
 
