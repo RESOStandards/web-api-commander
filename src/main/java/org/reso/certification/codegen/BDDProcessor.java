@@ -2,7 +2,6 @@ package org.reso.certification.codegen;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.reso.commander.common.Utils;
 import org.reso.models.ReferenceStandardLookup;
 import org.reso.models.ReferenceStandardField;
@@ -17,63 +16,57 @@ import static org.reso.certification.containers.WebAPITestContainer.SINGLE_SPACE
 
 public class BDDProcessor extends WorksheetProcessor {
   private static final Logger LOG = LogManager.getLogger(BDDProcessor.class);
-  private static final String
-      FEATURE_EXTENSION = ".feature",
-      LOCKED_WITH_ENUMERATIONS_KEY = "Locked with Enumerations";
+  private static final String FEATURE_EXTENSION = ".feature";
   private static final int EXAMPLES_PADDING_AMOUNT = 6;
-
-  public void processResourceSheet(Sheet sheet) {
-    super.processResourceSheet(sheet);
-    markup.append(BDDTemplates.buildHeaderInfo(sheet.getSheetName(), startTimestamp));
-  }
 
   @Override
   void processNumber(ReferenceStandardField row) {
-    markup.append(BDDTemplates.buildNumberTest(row));
+    resourceTemplates.get(row.getResourceName()).append(BDDTemplates.buildNumberTest(row));
   }
 
   @Override
   void processStringListSingle(ReferenceStandardField row) {
-    markup.append(BDDTemplates.buildStringListSingleTest(row));
+    resourceTemplates.get(row.getResourceName()).append(BDDTemplates.buildStringListSingleTest(row));
   }
 
   @Override
   void processString(ReferenceStandardField row) {
-    markup.append(BDDTemplates.buildStringTest(row));
+    resourceTemplates.get(row.getResourceName()).append(BDDTemplates.buildStringTest(row));
   }
 
   @Override
   void processBoolean(ReferenceStandardField row) {
-    markup.append(BDDTemplates.buildBooleanTest(row));
+    resourceTemplates.get(row.getResourceName()).append(BDDTemplates.buildBooleanTest(row));
   }
 
   @Override
   void processStringListMulti(ReferenceStandardField row) {
-    markup.append(BDDTemplates.buildStringListMultiTest(row));
+    resourceTemplates.get(row.getResourceName()).append(BDDTemplates.buildStringListMultiTest(row));
   }
 
   @Override
   void processDate(ReferenceStandardField row) {
-    markup.append(BDDTemplates.buildDateTest(row));
+    resourceTemplates.get(row.getResourceName()).append(BDDTemplates.buildDateTest(row));
   }
 
   @Override
   void processTimestamp(ReferenceStandardField row) {
-    markup.append(BDDTemplates.buildTimestampTest(row));
+    resourceTemplates.get(row.getResourceName()).append(BDDTemplates.buildTimestampTest(row));
   }
 
   @Override
-  void processCollection(ReferenceStandardField row) {
-    LOG.debug("Collection Type is not supported!");
+  void processExpansion(ReferenceStandardField field) {
+    //TODO: DD 2.0
   }
 
   @Override
   void generateOutput() {
     LOG.info("Using reference worksheet: " + REFERENCE_WORKSHEET);
-    LOG.info("Generating BDD .feature files for the following resources: " + resourceTemplates.keySet().toString());
-    resourceTemplates.forEach((resourceName, content) -> {
+    LOG.info("Generating BDD .feature files for the following resources: " + resourceTemplates.keySet());
+    resourceTemplates.forEach((resourceName, buffer) -> {
       //put in local directory rather than relative to where the input file is
-      Utils.createFile(getDirectoryName(), resourceName.toLowerCase() + FEATURE_EXTENSION, content);
+      Utils.createFile(getDirectoryName(), resourceName.toLowerCase() + FEATURE_EXTENSION,
+          BDDTemplates.buildHeaderInfo(resourceName, startTimestamp) + buffer.toString());
     });
   }
 
@@ -215,7 +208,7 @@ public class BDDProcessor extends WorksheetProcessor {
           markup
               .append(padLeft("| ", EXAMPLES_PADDING_AMOUNT))
               .append(lookup.getLookupValue()).append(" | ")
-              .append(lookup.getLookupDisplayName()).append(" |\n");
+              .append(lookup.getLegacyODataValue()).append(" |\n");
         }
         if (markup.length() > 0) markup.insert(0,  padLeft("| lookupValue | lookupDisplayName |\n", EXAMPLES_PADDING_AMOUNT));
         return markup.toString();
@@ -227,6 +220,7 @@ public class BDDProcessor extends WorksheetProcessor {
 
     public static String buildStringListMultiTest(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
+
       return
           "\n  " + buildTags(field).stream().map(tag -> "@" + tag).collect(Collectors.joining(SINGLE_SPACE)) + "\n" +
               "  Scenario: " + field.getStandardName() + "\n" +

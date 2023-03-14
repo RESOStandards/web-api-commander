@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.reso.commander.common.DataDictionaryMetadata;
 
 import static org.reso.certification.codegen.WorksheetProcessor.REFERENCE_WORKSHEET;
 import static org.reso.certification.codegen.WorksheetProcessor.buildWellKnownStandardFieldHeaderMap;
@@ -24,7 +23,7 @@ public class DataDictionaryCodeGenerator {
    */
   public DataDictionaryCodeGenerator(WorksheetProcessor processor) {
     this.processor = processor;
-    processor.setReferenceResource(REFERENCE_WORKSHEET);
+    processor.setDataDictionarySpecification(REFERENCE_WORKSHEET);
     workbook = processor.getReferenceWorkbook();
     processor.buildEnumerationMap();
   }
@@ -33,17 +32,15 @@ public class DataDictionaryCodeGenerator {
    * Generates Data Dictionary references for local workbook instance using the configured WorksheetProcessor
    */
   public void processWorksheets() {
-    Sheet fieldsWorksheet;
+    final Sheet fieldsWorksheet;
     final int FIRST_ROW_INDEX = 1;
     final String FIELDS_WORKSHEET = "Fields";
 
     try {
       fieldsWorksheet = workbook.getSheet(FIELDS_WORKSHEET);
       assert fieldsWorksheet != null;
-      processor.beforeResourceSheetProcessed(fieldsWorksheet);
 
       processor.wellKnownStandardFieldHeaderMap = buildWellKnownStandardFieldHeaderMap(fieldsWorksheet);
-      processor.processResourceSheet(fieldsWorksheet);
 
       //starts at row 1 to skip header row
       for (int rowIndex = FIRST_ROW_INDEX; rowIndex < fieldsWorksheet.getPhysicalNumberOfRows(); rowIndex++) {
@@ -52,10 +49,9 @@ public class DataDictionaryCodeGenerator {
         }
       }
 
-      processor.afterResourceSheetProcessed(fieldsWorksheet);
       processor.generateOutput();
     } catch (Exception ex) {
-      LOG.info(ex);
+      LOG.error(ex);
     }
   }
 }

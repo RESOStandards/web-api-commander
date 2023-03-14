@@ -18,17 +18,6 @@ New Cucumber BDD acceptance tests will be generated and placed in a timestamped 
 
 To update the current tests, copy the newly generated ones into the [Data Dictionary BDD `.features` directory](src/main/java/org/reso/certification/features/data-dictionary/v1-7-0), run the `./gradlew build` task, and if everything works as expected, commit the newly generated tests. 
 
-## Generating RESO Web API Reference Server Data Models
-The RESO Commander can be used to generate data models for the Web API Reference server from the currently approved [Data Dictionary Spreadsheet](src/main/resources/RESODataDictionary-1.7.xlsx). 
-
-The Commander project's copy of the sheet needs to be updated with a copy of the [DD Google Sheet](https://docs.google.com/spreadsheets/d/1SZ0b6T4_lz6ti6qB2Je7NSz_9iNOaV_v9dbfhPwWgXA/edit?usp=sharing) prior to generating reference metadata.
-
-```
-$ java -jar path/to/web-api-commander.jar --generateResourceInfoModels
-```
-New ResourceInfo Models for the Web API Reference Server will be generated and placed in a timestamped directory relative to your current path.
-
-
 ## Generating RESO Data Dictionary Reference Metadata
 In addition to generating DD acceptance tests, the RESO Commander can generate reference metadata based on the current reference [Data Dictionary Spreadsheet](src/main/resources/RESODataDictionary-1.7.xlsx). 
 

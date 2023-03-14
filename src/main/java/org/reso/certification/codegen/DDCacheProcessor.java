@@ -54,8 +54,8 @@ public class DDCacheProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void processCollection(ReferenceStandardField field) {
-    addToFieldCache(field);
+  void processExpansion(ReferenceStandardField field) {
+    //TODO: DD 2.0
   }
 
   @Override

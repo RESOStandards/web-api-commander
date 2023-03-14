@@ -61,9 +61,6 @@ usage: java -jar web-api-commander
                                    using numeric keys.
     --generateReferenceEDMX        Generates reference metadata in EDMX
                                    format.
-    --generateResourceInfoModels   Generates Java Models for the Web API
-                                   Reference Server in the current
-                                   directory.
     --getMetadata                  Fetches metadata from <serviceRoot>
                                    using <bearerToken> and saves results
                                    in <outputFile>.

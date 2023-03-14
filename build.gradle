@@ -73,7 +73,6 @@ jar {
   exclude 'META-INF/*.DSA'
 }
 
-
 // don't suppress warnings or deprecation notices
 tasks.withType(JavaCompile).configureEach {
   options.compilerArgs << '-Xlint:unchecked'

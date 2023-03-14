@@ -14,6 +14,8 @@ public class DataDictionaryMetadata {
   private static final Logger LOG = LogManager.getLogger(DataDictionaryMetadata.class);
 
   public static final class v1_7 {
+    public static final String LOOKUPS = "Lookups";
+
     //TODO: clean up
     public static final Set<String> WELL_KNOWN_RESOURCES = new LinkedHashSet<>(Arrays.asList(
         PROPERTY,
@@ -43,7 +45,6 @@ public class DataDictionaryMetadata {
         FIELD,
         LOOKUP
     ));
-    public static final String LOOKUP_FIELDS_AND_VALUES = "Lookup Fields and Values";
 
     //TODO: clean up
     public static class WELL_KNOWN_RESOURCE_KEYS {

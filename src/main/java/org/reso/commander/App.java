@@ -29,7 +29,7 @@ import static org.reso.commander.common.XMLMetadataToJSONSchemaSerializer.conver
  * - Bearer Tokens
  * - Client Credentials (in-progress)
  * <p>
- * Exposes several different actions for working with OData-based WebAPI servers.
+ * Exposes several actions for working with OData-based WebAPI servers.
  * This application is structured so that the App class is an OData WebAPI consumer
  * using the Commander class, which contains the actual methods for working with OData.
  * <p>
@@ -52,7 +52,7 @@ public class App {
     String serviceRoot = null, bearerToken = null, clientId = null, clientSecret = null,
         authorizationUri = null, tokenUri = null, redirectUri = null, scope = null;
     String inputFilename, outputFile, uri;
-    boolean useEdmEnabledClient = false, useKeyNumeric = false;
+    boolean useEdmEnabledClient, useKeyNumeric;
     int pageLimit, pageSize;
 
     //created with the commanderBuilder throughout the initialization body
@@ -80,7 +80,7 @@ public class App {
       }
 
       //if we're running a batch, initialize variables from the settings file rather than from command line options
-      Settings settings = null;
+      Settings settings;
 
       LOG.debug("Service Root is: " + commanderBuilder.serviceRoot);
 
@@ -124,15 +124,15 @@ public class App {
                 .substring(inputFilename.contains(File.separator) ? inputFilename.lastIndexOf(File.separator) : 0)
                 .replace(RESOSCRIPT_EXTENSION, "") + "-" + getTimestamp(new Date());
 
-        String resolvedUrl = null;
+        String resolvedUrl;
 
-        Request request = null;
+        Request request;
 
-        //this is an integer so it can be nullable in cases where we don't care about the response code assertion
+        //this is an integer, so it can be nullable in cases where we don't care about the response code assertion
         Integer responseCode = null;
 
         String outputFilePath;
-        ODataTransportWrapper wrapper = null;
+        ODataTransportWrapper wrapper;
 
         for (int i = 0; i < numRequests; i++) {
           try {
@@ -170,7 +170,7 @@ public class App {
               LOG.info("Request " + request.getRequestId() + " has an empty URL. Skipping...");
             }
           } catch (Exception ex) {
-            LOG.error("Exception thrown in RUN_RESOSCRIPT Action. Exception is: \n" + ex.toString());
+            LOG.error("Exception thrown in RUN_RESOSCRIPT Action. Exception is: \n" + ex);
             LOG.error("Stack trace:");
             Arrays.stream(ex.getStackTrace()).forEach(stackTraceElement -> LOG.error(stackTraceElement.toString()));
           }
@@ -205,7 +205,8 @@ public class App {
           }
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT);
-          LOG.info(generateMetadataReport(deserializeEdmFromPath(inputFilename, commander.getClient()), inputFilename));
+          generateMetadataReport(deserializeEdmFromPath(inputFilename, commander.getClient()), inputFilename);
+          LOG.info("Metadata report generated!");
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.VALIDATE_METADATA)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.VALIDATE_METADATA);
 
@@ -218,14 +219,6 @@ public class App {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS);
           try {
             DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new BDDProcessor());
-            generator.processWorksheets();
-          } catch (Exception ex) {
-            LOG.error(getDefaultErrorMessage(ex));
-          }
-        } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_RESOURCE_INFO_MODELS)) {
-          APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_RESOURCE_INFO_MODELS);
-          try {
-            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new ResourceInfoProcessor());
             generator.processWorksheets();
           } catch (Exception ex) {
             LOG.error(getDefaultErrorMessage(ex));
@@ -270,8 +263,8 @@ public class App {
           LOG.info("RESOScript: " + inputFilename);
           LOG.info(REPORT_DIVIDER + "\n\n");
 
-          String resolvedUrl = null;
-          Request request = null;
+          String resolvedUrl;
+          Request request;
           for (int i = 0; i < numRequests; i++) {
             try {
               request = settings.getRequestsAsList().get(i);
@@ -293,7 +286,7 @@ public class App {
                 LOG.info("Request " + request.getRequestId() + " has an empty URL. Skipping...");
               }
             } catch (Exception ex) {
-              LOG.error("Exception thrown in RUN_RESOSCRIPT Action. Exception is: \n" + ex.toString());
+              LOG.error("Exception thrown in RUN_RESOSCRIPT Action. Exception is: \n" + ex);
               LOG.error("Stack trace:");
               Arrays.stream(ex.getStackTrace()).forEach(stackTraceElement -> LOG.error(stackTraceElement.toString()));
             }
@@ -319,7 +312,7 @@ public class App {
       return false;
     }
 
-    /**
+    /*
      * Validates the metadata in inputFilename in the following ways:
      *    - de-serializes it into a native Edm object, which will fail if given metadata isn't valid
      *    - verifies whether the given EDMX file is a valid service document
@@ -537,8 +530,6 @@ public class App {
               .desc("Generates acceptance tests in the current directory.").build())
           .addOption(Option.builder().argName("j").longOpt(ACTIONS.GENERATE_JSON_SCHEMAS_FROM_XML_METADATA)
               .desc("Generates JSON Schema documents from the given XML metadata.").build())
-          .addOption(Option.builder().argName("i").longOpt(ACTIONS.GENERATE_RESOURCE_INFO_MODELS)
-              .desc("Generates Java Models for the Web API Reference Server in the current directory.").build())
           .addOption(Option.builder().argName("r").longOpt(ACTIONS.GENERATE_REFERENCE_EDMX)
               .desc("Generates reference metadata in EDMX format.").build())
           .addOption(Option.builder().argName("k").longOpt(ACTIONS.GENERATE_REFERENCE_DDL)
@@ -582,7 +573,6 @@ public class App {
       public static final String VALIDATE_METADATA = "validateMetadata";
       public static final String SAVE_GET_REQUEST = "saveGetRequest";
       public static final String GENERATE_METADATA_REPORT = "generateMetadataReport";
-      public static final String GENERATE_RESOURCE_INFO_MODELS = "generateResourceInfoModels";
     }
   }
 }

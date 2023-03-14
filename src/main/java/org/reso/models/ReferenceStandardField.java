@@ -49,6 +49,10 @@ public class ReferenceStandardField {
     return getSimpleDataType().trim().contentEquals(DATA_TYPE_NAME);
   }
 
+  public Boolean isExpansion() {
+    return getSourceResource() != null && getSourceResource().trim().length() > 0;
+  }
+
   public String getStandardName() {
     return standardName;
   }
@@ -71,6 +75,10 @@ public class ReferenceStandardField {
 
   public String getSimpleDataType() {
     return simpleDataType;
+  }
+
+  public String getSourceResource() {
+    return sourceResource;
   }
 
   public Integer getSuggestedMaxLength() {

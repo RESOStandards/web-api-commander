@@ -3,17 +3,17 @@ package org.reso.models;
 import java.util.List;
 
 public class ReferenceStandardLookup {
-  private String lookupField;
+  private String lookupName;
   private String lookupValue;
-  private String lookupDisplayName;
+  private String legacyODataValue;
   private String definition;
   List<String> lookupDisplayNameSynonyms;
   private String bedes;
   private List<String> references;
   private String elementStatus;
-  private Integer lookupId;
-  private Integer lookupFieldId;
-  private String spanishLookupField;
+  private String lookupId;
+  private String lookupNameId;
+  private String frenchCanadianLookupValue;
   private String spanishLookupValue;
   private String statusChangeDate;
   private String revisedDate;
@@ -25,16 +25,16 @@ public class ReferenceStandardLookup {
     //default constructor is private, use Builder instead
   }
 
-  public String getLookupField() {
-    return lookupField;
+  public String getLookupName() {
+    return lookupName;
   }
 
   public String getLookupValue() {
     return lookupValue;
   }
 
-  public String getLookupDisplayName() {
-    return lookupDisplayName;
+  public String getLegacyODataValue() {
+    return legacyODataValue;
   }
 
   public String getDefinition() {
@@ -57,16 +57,16 @@ public class ReferenceStandardLookup {
     return elementStatus;
   }
 
-  public Integer getLookupId() {
+  public String getLookupId() {
     return lookupId;
   }
 
-  public Integer getLookupFieldId() {
-    return lookupFieldId;
+  public String getLookupNameId() {
+    return lookupNameId;
   }
 
-  public String getSpanishLookupField() {
-    return spanishLookupField;
+  public String getFrenchCanadianLookupValue() {
+    return frenchCanadianLookupValue;
   }
 
   public String getSpanishLookupValue() {
@@ -96,8 +96,8 @@ public class ReferenceStandardLookup {
   public static class Builder {
     ReferenceStandardLookup referenceStandardLookup = new ReferenceStandardLookup();
 
-    public Builder setLookupField(String lookupField) {
-      referenceStandardLookup.lookupField = lookupField;
+    public Builder setLookupName(String lookupName) {
+      referenceStandardLookup.lookupName = lookupName;
       return this;
     }
 
@@ -106,8 +106,8 @@ public class ReferenceStandardLookup {
       return this;
     }
 
-    public Builder setLookupDisplayName(String lookupDisplayName) {
-      referenceStandardLookup.lookupDisplayName = lookupDisplayName;
+    public Builder setLegacyODataValue(String legacyODataValue) {
+      referenceStandardLookup.legacyODataValue = legacyODataValue;
       return this;
     }
 
@@ -136,18 +136,18 @@ public class ReferenceStandardLookup {
       return this;
     }
 
-    public Builder setLookupId(Integer lookupId) {
+    public Builder setLookupId(String lookupId) {
       referenceStandardLookup.lookupId = lookupId;
       return this;
     }
 
-    public Builder setLookupFieldId(Integer lookupFieldId) {
-      referenceStandardLookup.lookupFieldId = lookupFieldId;
+    public Builder setLookupNameId(String lookupNameId) {
+      referenceStandardLookup.lookupNameId = lookupNameId;
       return this;
     }
 
-    public Builder setSpanishLookupField(String spanishLookupField) {
-      referenceStandardLookup.spanishLookupField = spanishLookupField;
+    public Builder setFrenchCanadianLookupValue(String frenchCanadianLookupValue) {
+      referenceStandardLookup.frenchCanadianLookupValue = frenchCanadianLookupValue;
       return this;
     }
 
