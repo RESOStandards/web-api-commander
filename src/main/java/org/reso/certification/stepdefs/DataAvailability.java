@@ -329,7 +329,7 @@ public class DataAvailability {
       LOG.info("Making request to: " + requestUri);
       transportWrapper.set(container.get().getCommander().executeODataGetRequest(requestUri));
 
-      // retries. sometimes requests can time out and fail and we don't want to stop sampling
+      // retries. sometimes requests can time out and fail, and we don't want to stop sampling
       // immediately, but retry a couple of times before we bail
       if (recordsProcessed == 0 || transportWrapper.get().getResponseData() == null) {
         //only count retries if we're constantly making requests and not getting anything
@@ -530,8 +530,10 @@ public class DataAvailability {
         schema.getEntityTypes().stream().map(EdmNamed::getName))
             .collect(Collectors.toSet());
 
+    final DDCacheProcessor cache = new DDCacheProcessor();
+
     standardResources.set(resources.stream()
-        .filter(DataDictionaryMetadata.v1_7.WELL_KNOWN_RESOURCES::contains).collect(Collectors.toSet()));
+        .filter(cache.getStandardFieldCache().keySet()::contains).collect(Collectors.toSet()));
     localResources.set(Sets.difference(resources, standardResources.get()));
     hasStandardResources.set(standardResources.get().size() > 0);
     hasLocalResources.set(localResources.get().size() > 0);

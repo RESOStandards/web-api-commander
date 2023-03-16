@@ -1,9 +1,6 @@
-# This feature implements the change proposal outlined in
-# section 2.2 of the RESO Data Dictionary 1.7 specification.
-#
-# The tests for the Lookup resource model is in ../resources/lookup.feature
-#
-# See: https://github.com/RESOStandards/reso-transport-specifications/blob/cd8bbd2038955e5380598d509fa2245bc98cbfdd/DATA-DICTIONARY.md#lookup-resource
+# Additional Lookup Resource tests outside of metadata validation
+# See: https://github.com/RESOStandards/transport/blob/main/data-dictionary.md#lookup-resource-1
+
 Feature: Lookup Acceptance Tests (RCP-032)
 
   Background:
@@ -15,7 +12,7 @@ Feature: Lookup Acceptance Tests (RCP-032)
     When the "Lookup" Resource exists in the metadata
     Then valid data is replicated from the "Lookup" Resource
 
-  @dd-1.7 @rcp-032 @lookup-resource
+  @dd-1.7 @dd-2.0 @rcp-032 @lookup-resource
   Scenario: Ensure That Required Lookup Resource Fields Are Present in Server Metadata
     Given that metadata have been retrieved from the server and validated
     When the "Lookup" Resource exists in the metadata
@@ -35,7 +32,7 @@ Feature: Lookup Acceptance Tests (RCP-032)
   #  <Property Name="ExteriorFeatures" Type="Collection(Edm.String)">
   #  <Annotation Term="RESO.OData.Metadata.LookupName" String="ExteriorFeatures" />
   #  </Property>
-  @dd-1.7 @rcp-032 @lookup-resource
+  @dd-1.7 @dd-2.0 @rcp-032 @lookup-resource
   Scenario: Check Required Annotations and LookupName Data
     Given that metadata have been retrieved from the server and validated
     When the "Lookup" Resource exists in the metadata

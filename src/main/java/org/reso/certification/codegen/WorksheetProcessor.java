@@ -16,14 +16,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.*;
-import static org.reso.commander.common.DataDictionaryMetadata.v1_7.LOOKUPS;
+
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public abstract class WorksheetProcessor {
   private static final Logger LOG = LogManager.getLogger(WorksheetProcessor.class);
 
   //TODO: make this a dynamic property based on DD version
-  public static final String REFERENCE_WORKSHEET = "RESODataDictionary-1.7.xlsx";
+  public static final String REFERENCE_WORKSHEET = "RESODataDictionary-2.0.xlsx";
 
   static final Map<String, StringBuffer> resourceTemplates = new LinkedHashMap<>();
 
@@ -281,7 +281,7 @@ public abstract class WorksheetProcessor {
   }
 
   public void buildEnumerationMap() {
-    Sheet sheet = getReferenceWorkbook().getSheet(LOOKUPS);
+    Sheet sheet = getReferenceWorkbook().getSheet("Lookups");
     buildWellKnownStandardEnumerationHeaderMap(sheet);
 
     AtomicReference<ReferenceStandardLookup> standardEnumeration = new AtomicReference<>();
@@ -367,8 +367,8 @@ public abstract class WorksheetProcessor {
         STATUS_CHANGE_DATE = "StatusChangeDate",
         REVISED_DATE = "RevisedDate",
         ADDED_IN_VERSION = "AddedInVersion",
-        WIKI_PAGE_TITLE = "Wiki Page Title",
-        WIKI_PAGE_URL = "Wiki Page URL",
+        WIKI_PAGE_TITLE = "WikiPageTitle",
+        WIKI_PAGE_URL = "WikiPageUrl",
         BEDES = "BEDES";
   }
 }

@@ -24,6 +24,7 @@ import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.codegen.DDCacheProcessor;
+import org.reso.certification.codegen.WorksheetProcessor;
 import org.reso.commander.Commander;
 import org.reso.commander.common.DataDictionaryMetadata;
 import org.reso.commander.common.TestUtils;
@@ -233,9 +234,7 @@ public final class WebAPITestContainer implements TestContainer {
         }
       }
 
-      //build a map of all of the discovered fields on the server for the given resource by field name
-      //TODO: add multiple Data Dictionary version support
-      DataDictionaryMetadata.v1_7.WELL_KNOWN_RESOURCES.forEach(resourceName -> {
+      getDDCacheProcessor().getStandardFieldCache().keySet().forEach(resourceName -> {
         List<CsdlProperty> csdlProperties = null;
         try {
           csdlProperties = TestUtils.findEntityTypesForEntityTypeName(getEdm(), getXMLMetadata(), resourceName);
@@ -251,7 +250,7 @@ public final class WebAPITestContainer implements TestContainer {
           });
         }
       });
-      assertTrue("ERROR: No field were found in the server's metadata!", fieldMap.get().size() > 0);
+      assertTrue("ERROR: No fields were found in the server's metadata!", fieldMap.get().size() > 0);
       LOG.debug("Metadata Field Map created!");
 
     } catch (Exception ex) {

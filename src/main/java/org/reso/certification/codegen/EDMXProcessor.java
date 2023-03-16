@@ -18,9 +18,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
-import static org.reso.commander.common.DataDictionaryMetadata.v1_7.getKeyFieldForResource;
+import static org.reso.commander.common.DataDictionaryMetadata.getKeyFieldForResource;
 import static org.reso.commander.common.Utils.wrapColumns;
 
 //TODO: switch to build an XML document rather than creating it as a string

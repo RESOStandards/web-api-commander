@@ -233,7 +233,7 @@ public class App {
           }
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_DDL)) {
           try {
-            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new DDLProcessor(useKeyNumeric));
+            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new DDLProcessor());
             generator.processWorksheets();
           } catch (Exception ex) {
             LOG.error(getDefaultErrorMessage(ex));

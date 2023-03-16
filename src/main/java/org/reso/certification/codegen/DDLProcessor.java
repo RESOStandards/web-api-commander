@@ -14,7 +14,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import static com.google.common.hash.Hashing.sha256;
 import static org.reso.certification.codegen.EDMXProcessor.EMPTY_STRING;
 import static org.reso.certification.containers.WebAPITestContainer.SINGLE_SPACE;
-import static org.reso.commander.common.DataDictionaryMetadata.v1_7.*;
+import static org.reso.commander.common.DataDictionaryMetadata.getKeyFieldForResource;
+import static org.reso.commander.common.DataDictionaryMetadata.isPrimaryKeyField;
 
 public class DDLProcessor extends WorksheetProcessor {
   private static final Logger LOG = LogManager.getLogger(DDLProcessor.class);
@@ -22,17 +23,11 @@ public class DDLProcessor extends WorksheetProcessor {
   private static final int STRING_KEY_SIZE = 64;
   private static final int DEFAULT_VARCHAR_SIZE = 255;
 
-  private final boolean useKeyNumeric;
-
-  public DDLProcessor(boolean useKeyNumeric) {
-    this.useKeyNumeric = useKeyNumeric;
-  }
-
   public static String buildDbTableName(String resourceName) {
     return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, resourceName).replace("o_u_i_d", "ouid");
   }
 
-  private static String buildCreateLookupStatement(boolean useKeyNumeric) {
+  private static String buildCreateLookupStatement() {
     return
         "\n\n/**\n" +
             " This creates the Lookup resource, as described in RESO RCP-032, \n" +
@@ -47,7 +42,7 @@ public class DDLProcessor extends WorksheetProcessor {
             "  StandardLookupValue VARCHAR(255) DEFAULT NULL, \n" +
             "  LegacyODataValue VARCHAR(128) DEFAULT NULL, \n" +
             "  ModificationTimestamp DATETIME DEFAULT CURRENT_TIMESTAMP, \n" +
-            "    PRIMARY KEY (LookupKey" + (useKeyNumeric ? "Numeric" : EMPTY_STRING) + ")\n" +
+            "    PRIMARY KEY (LookupKey)\n" +
             ") ENGINE=MyISAM DEFAULT CHARSET=utf8;";
   }
 
@@ -79,9 +74,7 @@ public class DDLProcessor extends WorksheetProcessor {
         .append(typeMarkup);
 
     //if the current field is a key field then append NOT NULL depending on which key it is
-    if ((useKeyNumeric && isPrimaryKeyNumericField(resourceName, fieldName))) {
-      fieldMarkup.append(SINGLE_SPACE).append("NOT NULL AUTO_INCREMENT");
-    } else if (isPrimaryKeyField(field.getResourceName(), fieldName)) {
+    if (isPrimaryKeyField(field.getResourceName(), fieldName)) {
       fieldMarkup.append(SINGLE_SPACE).append("NOT NULL");
     } else if (!typeMarkup.contains("DEFAULT")) {
       fieldMarkup.append(SINGLE_SPACE).append("DEFAULT NULL");
@@ -91,8 +84,7 @@ public class DDLProcessor extends WorksheetProcessor {
   }
 
   private String buildPrimaryKeyMarkup(String resourceName) {
-    return "PRIMARY KEY (" +
-        (useKeyNumeric ? getKeyNumericFieldForResource(resourceName) : getKeyFieldForResource(resourceName)) + ")";
+    return "PRIMARY KEY (" + getKeyFieldForResource(resourceName) + ")";
   }
 
   @Override
@@ -119,7 +111,7 @@ public class DDLProcessor extends WorksheetProcessor {
 
   @Override
   void processStringListSingle(ReferenceStandardField field) {
-    String typeMarkup = useKeyNumeric ? "BIGINT" : "VARCHAR(" + STRING_KEY_SIZE + ")";
+    String typeMarkup = "VARCHAR(" + STRING_KEY_SIZE + ")";
     resourceTemplates.get(field.getResourceName()).append(buildFieldMarkup(field, typeMarkup));
   }
 
@@ -139,7 +131,7 @@ public class DDLProcessor extends WorksheetProcessor {
 
   @Override
   void processStringListMulti(ReferenceStandardField field) {
-    String typeMarkup = useKeyNumeric ? "BIGINT" : "VARCHAR(" + STRING_KEY_SIZE + ")";
+    String typeMarkup = "VARCHAR(" + STRING_KEY_SIZE + ")";
     resourceTemplates.get(field.getResourceName()).append(buildFieldMarkup(field, typeMarkup));
   }
 
@@ -188,7 +180,7 @@ public class DDLProcessor extends WorksheetProcessor {
     LOG.info(sanitizeSql(content.toString()));
 
     //create the lookup resource so we can populate it with the enum definitions
-    LOG.info(sanitizeSql(buildCreateLookupStatement(useKeyNumeric)));
+    LOG.info(sanitizeSql(buildCreateLookupStatement()));
 
     LOG.info(this::buildInsertLookupsStatement);
   }

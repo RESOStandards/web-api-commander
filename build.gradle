@@ -185,12 +185,72 @@ tasks.register('testDataDictionary_1_7') {
           'html:' + certReportsDir + '/' + reportName + '.html',
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
+          'src/main/java/org/reso/certification/features/data-dictionary/v1-7'
       )
 
       if (systemProperties.hasProperty('cucumber.filter.tags')) {
         argsArray.add('--tags')
         argsArray.add(systemProperties.get('cucumber.filter.tags').toString())
+      }
+
+      args = argsArray
+    }
+  }
+}
+
+tasks.register('testDataDictionary_2_0') {
+  group = 'RESO Certification'
+  description = 'Data Dictionary 2.0 Acceptance Tests' +
+      '\nRESOScript Example:' +
+      '\n  ./gradlew testDataDictionary_2_0 -DpathToRESOScript=/path/to/dd20.resoscript -DshowResponses=true -Dstrict=true' +
+      '\n\nMetadata File Example:' +
+      '\n  ./gradlew testDataDictionary_2_0 -DpathToMetadata=/path/to/RESODataDictionary-2.0.xml' +
+      '\n\nTo disable strict mode, remove the -Dstrict=true parameter. All applicants MUST pass strict mode tests to be certified!' +
+      '\n\n[Report location: ' + certReportsDir + ']' +
+      '\n\n'
+
+  String reportName = 'data-dictionary-2.0'
+
+  dependsOn jar, prepareCertificationEnvironment
+  doLast {
+    javaexec {
+      main = 'io.cucumber.core.cli.Main'
+      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      systemProperties = System.getProperties()
+
+      pathToMetadata = System.getProperty('pathToMetadata', null)
+      pathToRESOScript = System.getProperty('pathToRESOScript', null)
+
+      if (pathToMetadata != null) {
+        certFileName = pathToMetadata
+            .substring(Math.max(pathToMetadata.lastIndexOf(File.separator) + 1, 0), pathToMetadata.lastIndexOf('.'))
+      } else if (pathToRESOScript != null) {
+        certFileName = pathToRESOScript
+            .substring(Math.max(pathToRESOScript.lastIndexOf(File.separator) + 1, 0), pathToRESOScript.lastIndexOf('.'))
+      }
+
+      def argsArray = []
+
+      def prettyPrint = System.getProperty('pretty', null)
+
+      if (prettyPrint) {
+        argsArray.add('--plugin')
+        argsArray.add('pretty')
+      }
+
+      argsArray.addAll(
+          '--plugin',
+          'json:' + cucumberJsonPath + '/' + reportName + '.json',
+          '--plugin',
+          'html:' + certReportsDir + '/' + reportName + '.html',
+          '--glue',
+          'org.reso.certification.stepdefs#DataDictionary',
+          'src/main/java/org/reso/certification/features/data-dictionary/v2-0'
+      )
+
+      if (System.hasProperty('cucumber.filter.tags')) {
+        argsArray.add('--tags')
+        argsArray.add(System.getProperty('cucumber.filter.tags').toString())
       }
 
       args = argsArray
@@ -240,38 +300,6 @@ tasks.register('testDataAvailability_1_7') {
   }
 }
 
-tasks.register('testIdxPayload_1_7') {
-  group = 'RESO Certification'
-  description = 'Data Dictionary 1.7 Payloads Sampling Tests' +
-      '\nExample:' +
-      '\n  ./gradlew testIdxPayload_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript' +
-      '\n\n[Report location: ' + certReportsDir + ']' +
-      '\n\n'
-
-  String reportName = 'idx-payload.dd-1.7'
-
-  dependsOn jar
-  doLast {
-    javaexec {
-      mainClass = "io.cucumber.core.cli.Main"
-      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-      systemProperties = System.getProperties()
-
-      args = [
-          '--plugin',
-          'pretty',
-          '--plugin',
-          'json:' + cucumberJsonPath + '/' + reportName + '.json',
-          '--plugin',
-          'html:' + certReportsDir + '/' + reportName + '.html',
-          '--glue',
-          'org.reso.certification.stepdefs#IdxPayload',
-          'src/main/java/org/reso/certification/features/payloads/idx-payload.feature'
-      ]
-    }
-  }
-}
-
 tasks.register('testDataDictionaryReferenceMetadata_1_7') {
   description = 'Runs Data Dictionary tests against reference metadata'
   dependsOn jar
@@ -284,7 +312,29 @@ tasks.register('testDataDictionaryReferenceMetadata_1_7') {
       args = [
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
+          'src/main/java/org/reso/certification/features/data-dictionary/v1-7'
+      ]
+
+      if (System.hasProperty("pretty")) {
+        args.add("--plugin", "pretty")
+      }
+    }
+  }
+}
+
+tasks.register('testDataDictionaryReferenceMetadata_2_0') {
+  description = 'Runs Data Dictionary tests against reference metadata'
+  dependsOn jar
+  doLast {
+    javaexec {
+      mainClass = "io.cucumber.core.cli.Main"
+      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      System.setProperty('pathToMetadata', 'src/main/resources/RESODataDictionary-2.0.xml')
+      systemProperties = System.getProperties()
+      args = [
+          '--glue',
+          'org.reso.certification.stepdefs#DataDictionary',
+          'src/main/java/org/reso/certification/features/data-dictionary/v2-0'
       ]
 
       if (System.hasProperty("pretty")) {
@@ -296,7 +346,7 @@ tasks.register('testDataDictionaryReferenceMetadata_1_7') {
 
 //used for internal Commander Web API acceptance testing
 test {
-  dependsOn assemble, compileTestJava, testDataDictionaryReferenceMetadata_1_7
+  dependsOn assemble, compileTestJava, testDataDictionaryReferenceMetadata_1_7, testDataDictionaryReferenceMetadata_2_0
   doLast {
     javaexec {
       mainClass = "io.cucumber.core.cli.Main"
