@@ -1,7 +1,7 @@
 {
   "description": "RESO Data Dictionary Metadata Report",
-  "version": "1.7",
-  "generatedOn": "2023-03-16T02:53:02.203681Z",
+  "version": "2.0",
+  "generatedOn": "2023-03-19T21:41:25.590002Z",
   "fields": [
     {
       "resourceName": "Property",
@@ -31,6 +31,7 @@
       "resourceName": "Property",
       "fieldName": "AboveGradeFinishedAreaSource",
       "type": "org.reso.metadata.enums.AreaSource",
+      "typeName": "AreaSource",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -53,6 +54,7 @@
       "resourceName": "Property",
       "fieldName": "AboveGradeFinishedAreaUnits",
       "type": "org.reso.metadata.enums.AreaUnits",
+      "typeName": "AreaUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -98,6 +100,7 @@
       "resourceName": "Property",
       "fieldName": "AccessibilityFeatures",
       "type": "org.reso.metadata.enums.AccessibilityFeatures",
+      "typeName": "AccessibilityFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -188,6 +191,7 @@
       "resourceName": "Property",
       "fieldName": "Appliances",
       "type": "org.reso.metadata.enums.Appliances",
+      "typeName": "Appliances",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -210,6 +214,7 @@
       "resourceName": "Property",
       "fieldName": "ArchitecturalStyle",
       "type": "org.reso.metadata.enums.ArchitecturalStyle",
+      "typeName": "ArchitecturalStyle",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -232,6 +237,7 @@
       "resourceName": "Property",
       "fieldName": "AssociationAmenities",
       "type": "org.reso.metadata.enums.AssociationAmenities",
+      "typeName": "AssociationAmenities",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -302,6 +308,7 @@
       "resourceName": "Property",
       "fieldName": "AssociationFee2Frequency",
       "type": "org.reso.metadata.enums.FeeFrequency",
+      "typeName": "FeeFrequency",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -324,6 +331,7 @@
       "resourceName": "Property",
       "fieldName": "AssociationFeeFrequency",
       "type": "org.reso.metadata.enums.FeeFrequency",
+      "typeName": "FeeFrequency",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -346,6 +354,7 @@
       "resourceName": "Property",
       "fieldName": "AssociationFeeIncludes",
       "type": "org.reso.metadata.enums.AssociationFeeIncludes",
+      "typeName": "AssociationFeeIncludes",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -526,6 +535,7 @@
       "resourceName": "Property",
       "fieldName": "Basement",
       "type": "org.reso.metadata.enums.Basement",
+      "typeName": "Basement",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -770,6 +780,7 @@
       "resourceName": "Property",
       "fieldName": "BelowGradeFinishedAreaSource",
       "type": "org.reso.metadata.enums.AreaSource",
+      "typeName": "AreaSource",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -792,6 +803,7 @@
       "resourceName": "Property",
       "fieldName": "BelowGradeFinishedAreaUnits",
       "type": "org.reso.metadata.enums.AreaUnits",
+      "typeName": "AreaUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -814,6 +826,7 @@
       "resourceName": "Property",
       "fieldName": "BodyType",
       "type": "org.reso.metadata.enums.BodyType",
+      "typeName": "BodyType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -882,6 +895,7 @@
       "resourceName": "Property",
       "fieldName": "BuildingAreaSource",
       "type": "org.reso.metadata.enums.AreaSource",
+      "typeName": "AreaSource",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -928,6 +942,7 @@
       "resourceName": "Property",
       "fieldName": "BuildingAreaUnits",
       "type": "org.reso.metadata.enums.AreaUnits",
+      "typeName": "AreaUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -950,6 +965,7 @@
       "resourceName": "Property",
       "fieldName": "BuildingFeatures",
       "type": "org.reso.metadata.enums.BuildingFeatures",
+      "typeName": "BuildingFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -1018,6 +1034,7 @@
       "resourceName": "Property",
       "fieldName": "BusinessType",
       "type": "org.reso.metadata.enums.BusinessType",
+      "typeName": "BusinessType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -1040,6 +1057,7 @@
       "resourceName": "Property",
       "fieldName": "BuyerAgentAOR",
       "type": "org.reso.metadata.enums.AOR",
+      "typeName": "AOR",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -1062,6 +1080,7 @@
       "resourceName": "Property",
       "fieldName": "BuyerAgentDesignation",
       "type": "org.reso.metadata.enums.BuyerAgentDesignation",
+      "typeName": "BuyerAgentDesignation",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -1613,6 +1632,7 @@
       "resourceName": "Property",
       "fieldName": "BuyerFinancing",
       "type": "org.reso.metadata.enums.BuyerFinancing",
+      "typeName": "BuyerFinancing",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -1635,6 +1655,7 @@
       "resourceName": "Property",
       "fieldName": "BuyerOfficeAOR",
       "type": "org.reso.metadata.enums.AOR",
+      "typeName": "AOR",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -2026,6 +2047,7 @@
       "resourceName": "Property",
       "fieldName": "City",
       "type": "org.reso.metadata.enums.City",
+      "typeName": "City",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -2117,6 +2139,7 @@
       "resourceName": "Property",
       "fieldName": "CoBuyerAgentAOR",
       "type": "org.reso.metadata.enums.AOR",
+      "typeName": "AOR",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -2139,6 +2162,7 @@
       "resourceName": "Property",
       "fieldName": "CoBuyerAgentDesignation",
       "type": "org.reso.metadata.enums.CoBuyerAgentDesignation",
+      "typeName": "CoBuyerAgentDesignation",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -2690,6 +2714,7 @@
       "resourceName": "Property",
       "fieldName": "CoBuyerOfficeAOR",
       "type": "org.reso.metadata.enums.AOR",
+      "typeName": "AOR",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -2896,6 +2921,7 @@
       "resourceName": "Property",
       "fieldName": "CoListAgentAOR",
       "type": "org.reso.metadata.enums.AOR",
+      "typeName": "AOR",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -2918,6 +2944,7 @@
       "resourceName": "Property",
       "fieldName": "CoListAgentDesignation",
       "type": "org.reso.metadata.enums.CoListAgentDesignation",
+      "typeName": "CoListAgentDesignation",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -3469,6 +3496,7 @@
       "resourceName": "Property",
       "fieldName": "CoListOfficeAOR",
       "type": "org.reso.metadata.enums.AOR",
+      "typeName": "AOR",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -3675,6 +3703,7 @@
       "resourceName": "Property",
       "fieldName": "CommonInterest",
       "type": "org.reso.metadata.enums.CommonInterest",
+      "typeName": "CommonInterest",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -3697,6 +3726,7 @@
       "resourceName": "Property",
       "fieldName": "CommonWalls",
       "type": "org.reso.metadata.enums.CommonWalls",
+      "typeName": "CommonWalls",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -3719,6 +3749,7 @@
       "resourceName": "Property",
       "fieldName": "CommunityFeatures",
       "type": "org.reso.metadata.enums.CommunityFeatures",
+      "typeName": "CommunityFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -3741,6 +3772,7 @@
       "resourceName": "Property",
       "fieldName": "Concessions",
       "type": "org.reso.metadata.enums.Concessions",
+      "typeName": "Concessions",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -3808,6 +3840,7 @@
       "resourceName": "Property",
       "fieldName": "ConstructionMaterials",
       "type": "org.reso.metadata.enums.ConstructionMaterials",
+      "typeName": "ConstructionMaterials",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -3920,6 +3953,7 @@
       "resourceName": "Property",
       "fieldName": "Cooling",
       "type": "org.reso.metadata.enums.Cooling",
+      "typeName": "Cooling",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -3987,6 +4021,7 @@
       "resourceName": "Property",
       "fieldName": "Country",
       "type": "org.reso.metadata.enums.Country",
+      "typeName": "Country",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -4032,6 +4067,7 @@
       "resourceName": "Property",
       "fieldName": "CountyOrParish",
       "type": "org.reso.metadata.enums.CountyOrParish",
+      "typeName": "CountyOrParish",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -4169,6 +4205,7 @@
       "resourceName": "Property",
       "fieldName": "CurrentFinancing",
       "type": "org.reso.metadata.enums.CurrentFinancing",
+      "typeName": "CurrentFinancing",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -4191,6 +4228,7 @@
       "resourceName": "Property",
       "fieldName": "CurrentUse",
       "type": "org.reso.metadata.enums.CurrentOrPossibleUse",
+      "typeName": "CurrentOrPossibleUse",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -4304,6 +4342,7 @@
       "resourceName": "Property",
       "fieldName": "DevelopmentStatus",
       "type": "org.reso.metadata.enums.DevelopmentStatus",
+      "typeName": "DevelopmentStatus",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -4326,6 +4365,7 @@
       "resourceName": "Property",
       "fieldName": "DirectionFaces",
       "type": "org.reso.metadata.enums.DirectionFaces",
+      "typeName": "DirectionFaces",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -4394,6 +4434,7 @@
       "resourceName": "Property",
       "fieldName": "Disclosures",
       "type": "org.reso.metadata.enums.Disclosures",
+      "typeName": "Disclosures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -4461,6 +4502,7 @@
       "resourceName": "Property",
       "fieldName": "DistanceToBusUnits",
       "type": "org.reso.metadata.enums.LinearUnits",
+      "typeName": "LinearUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -4528,6 +4570,7 @@
       "resourceName": "Property",
       "fieldName": "DistanceToElectricUnits",
       "type": "org.reso.metadata.enums.LinearUnits",
+      "typeName": "LinearUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -4595,6 +4638,7 @@
       "resourceName": "Property",
       "fieldName": "DistanceToFreewayUnits",
       "type": "org.reso.metadata.enums.LinearUnits",
+      "typeName": "LinearUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -4662,6 +4706,7 @@
       "resourceName": "Property",
       "fieldName": "DistanceToGasUnits",
       "type": "org.reso.metadata.enums.LinearUnits",
+      "typeName": "LinearUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -4729,6 +4774,7 @@
       "resourceName": "Property",
       "fieldName": "DistanceToPhoneServiceUnits",
       "type": "org.reso.metadata.enums.LinearUnits",
+      "typeName": "LinearUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -4796,6 +4842,7 @@
       "resourceName": "Property",
       "fieldName": "DistanceToPlaceofWorshipUnits",
       "type": "org.reso.metadata.enums.LinearUnits",
+      "typeName": "LinearUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -4863,6 +4910,7 @@
       "resourceName": "Property",
       "fieldName": "DistanceToSchoolBusUnits",
       "type": "org.reso.metadata.enums.LinearUnits",
+      "typeName": "LinearUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -4930,6 +4978,7 @@
       "resourceName": "Property",
       "fieldName": "DistanceToSchoolsUnits",
       "type": "org.reso.metadata.enums.LinearUnits",
+      "typeName": "LinearUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -4997,6 +5046,7 @@
       "resourceName": "Property",
       "fieldName": "DistanceToSewerUnits",
       "type": "org.reso.metadata.enums.LinearUnits",
+      "typeName": "LinearUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -5064,6 +5114,7 @@
       "resourceName": "Property",
       "fieldName": "DistanceToShoppingUnits",
       "type": "org.reso.metadata.enums.LinearUnits",
+      "typeName": "LinearUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -5131,6 +5182,7 @@
       "resourceName": "Property",
       "fieldName": "DistanceToStreetUnits",
       "type": "org.reso.metadata.enums.LinearUnits",
+      "typeName": "LinearUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -5198,6 +5250,7 @@
       "resourceName": "Property",
       "fieldName": "DistanceToWaterUnits",
       "type": "org.reso.metadata.enums.LinearUnits",
+      "typeName": "LinearUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -5220,6 +5273,7 @@
       "resourceName": "Property",
       "fieldName": "DocumentsAvailable",
       "type": "org.reso.metadata.enums.DocumentsAvailable",
+      "typeName": "DocumentsAvailable",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -5287,6 +5341,7 @@
       "resourceName": "Property",
       "fieldName": "DoorFeatures",
       "type": "org.reso.metadata.enums.DoorFeatures",
+      "typeName": "DoorFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -5309,6 +5364,7 @@
       "resourceName": "Property",
       "fieldName": "Electric",
       "type": "org.reso.metadata.enums.Electric",
+      "typeName": "Electric",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -5377,6 +5433,7 @@
       "resourceName": "Property",
       "fieldName": "ElementarySchool",
       "type": "org.reso.metadata.enums.ElementarySchool",
+      "typeName": "ElementarySchool",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -5399,6 +5456,7 @@
       "resourceName": "Property",
       "fieldName": "ElementarySchoolDistrict",
       "type": "org.reso.metadata.enums.ElementarySchoolDistrict",
+      "typeName": "ElementarySchoolDistrict",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -5443,6 +5501,7 @@
       "resourceName": "Property",
       "fieldName": "ElevationUnits",
       "type": "org.reso.metadata.enums.LinearUnits",
+      "typeName": "LinearUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -5533,6 +5592,7 @@
       "resourceName": "Property",
       "fieldName": "ExistingLeaseType",
       "type": "org.reso.metadata.enums.ExistingLeaseType",
+      "typeName": "ExistingLeaseType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -5577,6 +5637,7 @@
       "resourceName": "Property",
       "fieldName": "ExteriorFeatures",
       "type": "org.reso.metadata.enums.ExteriorFeatures",
+      "typeName": "ExteriorFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -5621,6 +5682,7 @@
       "resourceName": "Property",
       "fieldName": "FarmLandAreaSource",
       "type": "org.reso.metadata.enums.AreaSource",
+      "typeName": "AreaSource",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -5643,6 +5705,7 @@
       "resourceName": "Property",
       "fieldName": "FarmLandAreaUnits",
       "type": "org.reso.metadata.enums.AreaUnits",
+      "typeName": "AreaUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -5665,6 +5728,7 @@
       "resourceName": "Property",
       "fieldName": "Fencing",
       "type": "org.reso.metadata.enums.Fencing",
+      "typeName": "Fencing",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -5687,6 +5751,7 @@
       "resourceName": "Property",
       "fieldName": "FinancialDataSource",
       "type": "org.reso.metadata.enums.FinancialDataSource",
+      "typeName": "FinancialDataSource",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -5709,6 +5774,7 @@
       "resourceName": "Property",
       "fieldName": "FireplaceFeatures",
       "type": "org.reso.metadata.enums.FireplaceFeatures",
+      "typeName": "FireplaceFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -5775,6 +5841,7 @@
       "resourceName": "Property",
       "fieldName": "Flooring",
       "type": "org.reso.metadata.enums.Flooring",
+      "typeName": "Flooring",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -5821,6 +5888,7 @@
       "resourceName": "Property",
       "fieldName": "FoundationDetails",
       "type": "org.reso.metadata.enums.FoundationDetails",
+      "typeName": "FoundationDetails",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -5866,6 +5934,7 @@
       "resourceName": "Property",
       "fieldName": "FrontageType",
       "type": "org.reso.metadata.enums.FrontageType",
+      "typeName": "FrontageType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -5912,6 +5981,7 @@
       "resourceName": "Property",
       "fieldName": "Furnished",
       "type": "org.reso.metadata.enums.Furnished",
+      "typeName": "Furnished",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -6094,6 +6164,7 @@
       "resourceName": "Property",
       "fieldName": "GreenBuildingVerificationType",
       "type": "org.reso.metadata.enums.GreenBuildingVerificationType",
+      "typeName": "GreenBuildingVerificationType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -6116,6 +6187,7 @@
       "resourceName": "Property",
       "fieldName": "GreenEnergyEfficient",
       "type": "org.reso.metadata.enums.GreenEnergyEfficient",
+      "typeName": "GreenEnergyEfficient",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -6138,6 +6210,7 @@
       "resourceName": "Property",
       "fieldName": "GreenEnergyGeneration",
       "type": "org.reso.metadata.enums.GreenEnergyGeneration",
+      "typeName": "GreenEnergyGeneration",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -6160,6 +6233,7 @@
       "resourceName": "Property",
       "fieldName": "GreenIndoorAirQuality",
       "type": "org.reso.metadata.enums.GreenIndoorAirQuality",
+      "typeName": "GreenIndoorAirQuality",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -6182,6 +6256,7 @@
       "resourceName": "Property",
       "fieldName": "GreenLocation",
       "type": "org.reso.metadata.enums.GreenLocation",
+      "typeName": "GreenLocation",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -6204,6 +6279,7 @@
       "resourceName": "Property",
       "fieldName": "GreenSustainability",
       "type": "org.reso.metadata.enums.GreenSustainability",
+      "typeName": "GreenSustainability",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -6226,6 +6302,7 @@
       "resourceName": "Property",
       "fieldName": "GreenWaterConservation",
       "type": "org.reso.metadata.enums.GreenWaterConservation",
+      "typeName": "GreenWaterConservation",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -6318,6 +6395,7 @@
       "resourceName": "Property",
       "fieldName": "Heating",
       "type": "org.reso.metadata.enums.Heating",
+      "typeName": "Heating",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -6362,6 +6440,7 @@
       "resourceName": "Property",
       "fieldName": "HighSchool",
       "type": "org.reso.metadata.enums.HighSchool",
+      "typeName": "HighSchool",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -6384,6 +6463,7 @@
       "resourceName": "Property",
       "fieldName": "HighSchoolDistrict",
       "type": "org.reso.metadata.enums.HighSchoolDistrict",
+      "typeName": "HighSchoolDistrict",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -6428,6 +6508,7 @@
       "resourceName": "Property",
       "fieldName": "HorseAmenities",
       "type": "org.reso.metadata.enums.HorseAmenities",
+      "typeName": "HorseAmenities",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -6472,6 +6553,7 @@
       "resourceName": "Property",
       "fieldName": "HoursDaysOfOperation",
       "type": "org.reso.metadata.enums.HoursDaysOfOperation",
+      "typeName": "HoursDaysOfOperation",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -6540,6 +6622,7 @@
       "resourceName": "Property",
       "fieldName": "IncomeIncludes",
       "type": "org.reso.metadata.enums.IncomeIncludes",
+      "typeName": "IncomeIncludes",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -6586,6 +6669,7 @@
       "resourceName": "Property",
       "fieldName": "InteriorFeatures",
       "type": "org.reso.metadata.enums.InteriorOrRoomFeatures",
+      "typeName": "InteriorOrRoomFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -6696,6 +6780,7 @@
       "resourceName": "Property",
       "fieldName": "IrrigationSource",
       "type": "org.reso.metadata.enums.IrrigationSource",
+      "typeName": "IrrigationSource",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -6764,6 +6849,7 @@
       "resourceName": "Property",
       "fieldName": "LaborInformation",
       "type": "org.reso.metadata.enums.LaborInformation",
+      "typeName": "LaborInformation",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -6810,6 +6896,7 @@
       "resourceName": "Property",
       "fieldName": "LandLeaseAmountFrequency",
       "type": "org.reso.metadata.enums.FeeFrequency",
+      "typeName": "FeeFrequency",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -6900,6 +6987,7 @@
       "resourceName": "Property",
       "fieldName": "LaundryFeatures",
       "type": "org.reso.metadata.enums.LaundryFeatures",
+      "typeName": "LaundryFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -6946,6 +7034,7 @@
       "resourceName": "Property",
       "fieldName": "LeasableAreaUnits",
       "type": "org.reso.metadata.enums.AreaUnits",
+      "typeName": "AreaUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -6992,6 +7081,7 @@
       "resourceName": "Property",
       "fieldName": "LeaseAmountFrequency",
       "type": "org.reso.metadata.enums.FeeFrequency",
+      "typeName": "FeeFrequency",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -7080,6 +7170,7 @@
       "resourceName": "Property",
       "fieldName": "LeaseRenewalCompensation",
       "type": "org.reso.metadata.enums.LeaseRenewalCompensation",
+      "typeName": "LeaseRenewalCompensation",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -7124,6 +7215,7 @@
       "resourceName": "Property",
       "fieldName": "LeaseTerm",
       "type": "org.reso.metadata.enums.LeaseTerm",
+      "typeName": "LeaseTerm",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -7146,6 +7238,7 @@
       "resourceName": "Property",
       "fieldName": "Levels",
       "type": "org.reso.metadata.enums.Levels",
+      "typeName": "Levels",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -7261,6 +7354,7 @@
       "resourceName": "Property",
       "fieldName": "ListAOR",
       "type": "org.reso.metadata.enums.AOR",
+      "typeName": "AOR",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -7283,6 +7377,7 @@
       "resourceName": "Property",
       "fieldName": "ListAgentAOR",
       "type": "org.reso.metadata.enums.AOR",
+      "typeName": "AOR",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -7305,6 +7400,7 @@
       "resourceName": "Property",
       "fieldName": "ListAgentDesignation",
       "type": "org.reso.metadata.enums.ListAgentDesignation",
+      "typeName": "ListAgentDesignation",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -7856,6 +7952,7 @@
       "resourceName": "Property",
       "fieldName": "ListOfficeAOR",
       "type": "org.reso.metadata.enums.AOR",
+      "typeName": "AOR",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -8156,6 +8253,7 @@
       "resourceName": "Property",
       "fieldName": "ListingAgreement",
       "type": "org.reso.metadata.enums.ListingAgreement",
+      "typeName": "ListingAgreement",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -8246,6 +8344,7 @@
       "resourceName": "Property",
       "fieldName": "ListingService",
       "type": "org.reso.metadata.enums.ListingService",
+      "typeName": "ListingService",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -8268,6 +8367,7 @@
       "resourceName": "Property",
       "fieldName": "ListingTerms",
       "type": "org.reso.metadata.enums.ListingTerms",
+      "typeName": "ListingTerms",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -8314,6 +8414,7 @@
       "resourceName": "Property",
       "fieldName": "LivingAreaSource",
       "type": "org.reso.metadata.enums.AreaSource",
+      "typeName": "AreaSource",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -8336,6 +8437,7 @@
       "resourceName": "Property",
       "fieldName": "LivingAreaUnits",
       "type": "org.reso.metadata.enums.AreaUnits",
+      "typeName": "AreaUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -8404,6 +8506,7 @@
       "resourceName": "Property",
       "fieldName": "LockBoxType",
       "type": "org.reso.metadata.enums.LockBoxType",
+      "typeName": "LockBoxType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -8450,6 +8553,7 @@
       "resourceName": "Property",
       "fieldName": "LotDimensionsSource",
       "type": "org.reso.metadata.enums.LotDimensionsSource",
+      "typeName": "LotDimensionsSource",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -8472,6 +8576,7 @@
       "resourceName": "Property",
       "fieldName": "LotFeatures",
       "type": "org.reso.metadata.enums.LotFeatures",
+      "typeName": "LotFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -8565,6 +8670,7 @@
       "resourceName": "Property",
       "fieldName": "LotSizeSource",
       "type": "org.reso.metadata.enums.LotSizeSource",
+      "typeName": "LotSizeSource",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -8611,6 +8717,7 @@
       "resourceName": "Property",
       "fieldName": "LotSizeUnits",
       "type": "org.reso.metadata.enums.LotSizeUnits",
+      "typeName": "LotSizeUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -8633,6 +8740,7 @@
       "resourceName": "Property",
       "fieldName": "MLSAreaMajor",
       "type": "org.reso.metadata.enums.MLSAreaMajor",
+      "typeName": "MLSAreaMajor",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -8655,6 +8763,7 @@
       "resourceName": "Property",
       "fieldName": "MLSAreaMinor",
       "type": "org.reso.metadata.enums.MLSAreaMinor",
+      "typeName": "MLSAreaMinor",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -8768,6 +8877,7 @@
       "resourceName": "Property",
       "fieldName": "MajorChangeType",
       "type": "org.reso.metadata.enums.ChangeType",
+      "typeName": "ChangeType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -8906,6 +9016,7 @@
       "resourceName": "Property",
       "fieldName": "MiddleOrJuniorSchool",
       "type": "org.reso.metadata.enums.MiddleOrJuniorSchool",
+      "typeName": "MiddleOrJuniorSchool",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -8928,6 +9039,7 @@
       "resourceName": "Property",
       "fieldName": "MiddleOrJuniorSchoolDistrict",
       "type": "org.reso.metadata.enums.MiddleOrJuniorSchoolDistrict",
+      "typeName": "MiddleOrJuniorSchoolDistrict",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -8950,6 +9062,7 @@
       "resourceName": "Property",
       "fieldName": "MlsStatus",
       "type": "org.reso.metadata.enums.MlsStatus",
+      "typeName": "MlsStatus",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -8972,6 +9085,7 @@
       "resourceName": "Property",
       "fieldName": "MobileDimUnits",
       "type": "org.reso.metadata.enums.LinearUnits",
+      "typeName": "LinearUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -9508,6 +9622,7 @@
       "resourceName": "Property",
       "fieldName": "OccupantType",
       "type": "org.reso.metadata.enums.OccupantType",
+      "typeName": "OccupantType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -9690,6 +9805,7 @@
       "resourceName": "Property",
       "fieldName": "OperatingExpenseIncludes",
       "type": "org.reso.metadata.enums.OperatingExpenseIncludes",
+      "typeName": "OperatingExpenseIncludes",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -9828,6 +9944,7 @@
       "resourceName": "Property",
       "fieldName": "OtherEquipment",
       "type": "org.reso.metadata.enums.OtherEquipment",
+      "typeName": "OtherEquipment",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -9897,6 +10014,7 @@
       "resourceName": "Property",
       "fieldName": "OtherStructures",
       "type": "org.reso.metadata.enums.OtherStructures",
+      "typeName": "OtherStructures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -9942,6 +10060,7 @@
       "resourceName": "Property",
       "fieldName": "OwnerPays",
       "type": "org.reso.metadata.enums.OwnerPays",
+      "typeName": "OwnerPays",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -10010,6 +10129,7 @@
       "resourceName": "Property",
       "fieldName": "OwnershipType",
       "type": "org.reso.metadata.enums.OwnershipType",
+      "typeName": "OwnershipType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -10124,6 +10244,7 @@
       "resourceName": "Property",
       "fieldName": "ParkingFeatures",
       "type": "org.reso.metadata.enums.ParkingFeatures",
+      "typeName": "ParkingFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -10194,6 +10315,7 @@
       "resourceName": "Property",
       "fieldName": "PatioAndPorchFeatures",
       "type": "org.reso.metadata.enums.PatioAndPorchFeatures",
+      "typeName": "PatioAndPorchFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -10263,6 +10385,7 @@
       "resourceName": "Property",
       "fieldName": "PetsAllowed",
       "type": "org.reso.metadata.enums.PetsAllowed",
+      "typeName": "PetsAllowed",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -10354,6 +10477,7 @@
       "resourceName": "Property",
       "fieldName": "PoolFeatures",
       "type": "org.reso.metadata.enums.PoolFeatures",
+      "typeName": "PoolFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -10398,6 +10522,7 @@
       "resourceName": "Property",
       "fieldName": "Possession",
       "type": "org.reso.metadata.enums.Possession",
+      "typeName": "Possession",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -10420,6 +10545,7 @@
       "resourceName": "Property",
       "fieldName": "PossibleUse",
       "type": "org.reso.metadata.enums.CurrentOrPossibleUse",
+      "typeName": "CurrentOrPossibleUse",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -10442,6 +10568,7 @@
       "resourceName": "Property",
       "fieldName": "PostalCity",
       "type": "org.reso.metadata.enums.PostalCity",
+      "typeName": "PostalCity",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -10510,6 +10637,7 @@
       "resourceName": "Property",
       "fieldName": "PowerProductionType",
       "type": "org.reso.metadata.enums.PowerProductionType",
+      "typeName": "PowerProductionType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -10671,6 +10799,7 @@
       "resourceName": "Property",
       "fieldName": "PropertyCondition",
       "type": "org.reso.metadata.enums.PropertyCondition",
+      "typeName": "PropertyCondition",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -10693,6 +10822,7 @@
       "resourceName": "Property",
       "fieldName": "PropertySubType",
       "type": "org.reso.metadata.enums.PropertySubType",
+      "typeName": "PropertySubType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -10715,6 +10845,7 @@
       "resourceName": "Property",
       "fieldName": "PropertyType",
       "type": "org.reso.metadata.enums.PropertyType",
+      "typeName": "PropertyType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -10920,6 +11051,7 @@
       "resourceName": "Property",
       "fieldName": "RentIncludes",
       "type": "org.reso.metadata.enums.RentIncludes",
+      "typeName": "RentIncludes",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -10942,6 +11074,7 @@
       "resourceName": "Property",
       "fieldName": "RoadFrontageType",
       "type": "org.reso.metadata.enums.RoadFrontageType",
+      "typeName": "RoadFrontageType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -10964,6 +11097,7 @@
       "resourceName": "Property",
       "fieldName": "RoadResponsibility",
       "type": "org.reso.metadata.enums.RoadResponsibility",
+      "typeName": "RoadResponsibility",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -10986,6 +11120,7 @@
       "resourceName": "Property",
       "fieldName": "RoadSurfaceType",
       "type": "org.reso.metadata.enums.RoadSurfaceType",
+      "typeName": "RoadSurfaceType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -11008,6 +11143,7 @@
       "resourceName": "Property",
       "fieldName": "Roof",
       "type": "org.reso.metadata.enums.Roof",
+      "typeName": "Roof",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -11030,6 +11166,7 @@
       "resourceName": "Property",
       "fieldName": "RoomType",
       "type": "org.reso.metadata.enums.RoomType",
+      "typeName": "RoomType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -11096,6 +11233,7 @@
       "resourceName": "Property",
       "fieldName": "SecurityFeatures",
       "type": "org.reso.metadata.enums.SecurityFeatures",
+      "typeName": "SecurityFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -11209,6 +11347,7 @@
       "resourceName": "Property",
       "fieldName": "Sewer",
       "type": "org.reso.metadata.enums.Sewer",
+      "typeName": "Sewer",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -11344,6 +11483,7 @@
       "resourceName": "Property",
       "fieldName": "ShowingContactType",
       "type": "org.reso.metadata.enums.ShowingContactType",
+      "typeName": "ShowingContactType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -11366,6 +11506,7 @@
       "resourceName": "Property",
       "fieldName": "ShowingDays",
       "type": "org.reso.metadata.enums.ShowingDays",
+      "typeName": "ShowingDays",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -11434,6 +11575,7 @@
       "resourceName": "Property",
       "fieldName": "ShowingRequirements",
       "type": "org.reso.metadata.enums.ShowingRequirements",
+      "typeName": "ShowingRequirements",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -11501,6 +11643,7 @@
       "resourceName": "Property",
       "fieldName": "Skirt",
       "type": "org.reso.metadata.enums.Skirt",
+      "typeName": "Skirt",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -11592,6 +11735,7 @@
       "resourceName": "Property",
       "fieldName": "SpaFeatures",
       "type": "org.reso.metadata.enums.SpaFeatures",
+      "typeName": "SpaFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -11636,6 +11780,7 @@
       "resourceName": "Property",
       "fieldName": "SpecialLicenses",
       "type": "org.reso.metadata.enums.SpecialLicenses",
+      "typeName": "SpecialLicenses",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -11658,6 +11803,7 @@
       "resourceName": "Property",
       "fieldName": "SpecialListingConditions",
       "type": "org.reso.metadata.enums.SpecialListingConditions",
+      "typeName": "SpecialListingConditions",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -11680,6 +11826,7 @@
       "resourceName": "Property",
       "fieldName": "StandardStatus",
       "type": "org.reso.metadata.enums.StandardStatus",
+      "typeName": "StandardStatus",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -11702,6 +11849,7 @@
       "resourceName": "Property",
       "fieldName": "StateOrProvince",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -11837,6 +11985,7 @@
       "resourceName": "Property",
       "fieldName": "StreetDirPrefix",
       "type": "org.reso.metadata.enums.StreetDirection",
+      "typeName": "StreetDirection",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -11859,6 +12008,7 @@
       "resourceName": "Property",
       "fieldName": "StreetDirSuffix",
       "type": "org.reso.metadata.enums.StreetDirection",
+      "typeName": "StreetDirection",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -11949,6 +12099,7 @@
       "resourceName": "Property",
       "fieldName": "StreetSuffix",
       "type": "org.reso.metadata.enums.StreetSuffix",
+      "typeName": "StreetSuffix",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -11994,6 +12145,7 @@
       "resourceName": "Property",
       "fieldName": "StructureType",
       "type": "org.reso.metadata.enums.StructureType",
+      "typeName": "StructureType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -12039,6 +12191,7 @@
       "resourceName": "Property",
       "fieldName": "SubAgencyCompensationType",
       "type": "org.reso.metadata.enums.CompensationType",
+      "typeName": "CompensationType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -12108,6 +12261,7 @@
       "resourceName": "Property",
       "fieldName": "SyndicateTo",
       "type": "org.reso.metadata.enums.SyndicateTo",
+      "typeName": "SyndicateTo",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -12361,6 +12515,7 @@
       "resourceName": "Property",
       "fieldName": "TaxStatusCurrent",
       "type": "org.reso.metadata.enums.TaxStatusCurrent",
+      "typeName": "TaxStatusCurrent",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -12428,6 +12583,7 @@
       "resourceName": "Property",
       "fieldName": "TenantPays",
       "type": "org.reso.metadata.enums.TenantPays",
+      "typeName": "TenantPays",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -12543,6 +12699,7 @@
       "resourceName": "Property",
       "fieldName": "TransactionBrokerCompensationType",
       "type": "org.reso.metadata.enums.CompensationType",
+      "typeName": "CompensationType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -12612,6 +12769,7 @@
       "resourceName": "Property",
       "fieldName": "UnitTypeType",
       "type": "org.reso.metadata.enums.UnitTypeType",
+      "typeName": "UnitTypeType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -12634,6 +12792,7 @@
       "resourceName": "Property",
       "fieldName": "UnitsFurnished",
       "type": "org.reso.metadata.enums.UnitsFurnished",
+      "typeName": "UnitsFurnished",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -12725,6 +12884,7 @@
       "resourceName": "Property",
       "fieldName": "Utilities",
       "type": "org.reso.metadata.enums.Utilities",
+      "typeName": "Utilities",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -12793,6 +12953,7 @@
       "resourceName": "Property",
       "fieldName": "Vegetation",
       "type": "org.reso.metadata.enums.Vegetation",
+      "typeName": "Vegetation",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -12860,6 +13021,7 @@
       "resourceName": "Property",
       "fieldName": "View",
       "type": "org.reso.metadata.enums.View",
+      "typeName": "View",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -13019,6 +13181,7 @@
       "resourceName": "Property",
       "fieldName": "WaterSource",
       "type": "org.reso.metadata.enums.WaterSource",
+      "typeName": "WaterSource",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -13041,6 +13204,7 @@
       "resourceName": "Property",
       "fieldName": "WaterfrontFeatures",
       "type": "org.reso.metadata.enums.WaterfrontFeatures",
+      "typeName": "WaterfrontFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -13085,6 +13249,7 @@
       "resourceName": "Property",
       "fieldName": "WindowFeatures",
       "type": "org.reso.metadata.enums.WindowFeatures",
+      "typeName": "WindowFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -13244,6 +13409,7 @@
       "resourceName": "Property",
       "fieldName": "YearBuiltSource",
       "type": "org.reso.metadata.enums.YearBuiltSource",
+      "typeName": "YearBuiltSource",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -13378,6 +13544,7 @@
       "resourceName": "Property",
       "fieldName": "AboveGradeUnfinishedAreaSource",
       "type": "org.reso.metadata.enums.AreaSource",
+      "typeName": "AreaSource",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -13400,6 +13567,7 @@
       "resourceName": "Property",
       "fieldName": "AboveGradeUnfinishedAreaUnits",
       "type": "org.reso.metadata.enums.AreaUnits",
+      "typeName": "AreaUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -13444,6 +13612,7 @@
       "resourceName": "Property",
       "fieldName": "AvailableLeaseType",
       "type": "org.reso.metadata.enums.ExistingLeaseType",
+      "typeName": "ExistingLeaseType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -13510,6 +13679,7 @@
       "resourceName": "Property",
       "fieldName": "BelowGradeUnfinishedAreaSource",
       "type": "org.reso.metadata.enums.AreaSource",
+      "typeName": "AreaSource",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -13532,6 +13702,7 @@
       "resourceName": "Property",
       "fieldName": "BelowGradeUnfinishedAreaUnits",
       "type": "org.reso.metadata.enums.AreaUnits",
+      "typeName": "AreaUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -13600,6 +13771,7 @@
       "resourceName": "Property",
       "fieldName": "BuyerBrokerageCompensationType",
       "type": "org.reso.metadata.enums.CompensationType",
+      "typeName": "CompensationType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -13803,6 +13975,7 @@
       "resourceName": "Property",
       "fieldName": "FhaEligibility",
       "type": "org.reso.metadata.enums.FhaEligibility",
+      "typeName": "FhaEligibility",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -13893,6 +14066,7 @@
       "resourceName": "Property",
       "fieldName": "ListingURLDescription",
       "type": "org.reso.metadata.enums.ListingURLDescription",
+      "typeName": "ListingURLDescription",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -14023,6 +14197,446 @@
       ]
     },
     {
+      "resourceName": "OriginatingSystem",
+      "fieldName": "OriginatingSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Originating System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/OriginatingSystem+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The originating system of the Property record."
+        }
+      ]
+    },
+    {
+      "resourceName": "BuyerAgent",
+      "fieldName": "BuyerAgent",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Member",
+      "typeName": "Member",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Buyer Agent"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/BuyerAgent+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The buyer\u0027s agent involved in the transaction."
+        }
+      ]
+    },
+    {
+      "resourceName": "BuyerOffice",
+      "fieldName": "BuyerOffice",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Office",
+      "typeName": "Office",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Buyer Office"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/BuyerOffice+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The buyer agent\u0027s office."
+        }
+      ]
+    },
+    {
+      "resourceName": "CoBuyerAgent",
+      "fieldName": "CoBuyerAgent",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Member",
+      "typeName": "Member",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Co-Buyer Agent"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/CoBuyerAgent+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The co-buyer\u0027s agent involved in the transaction."
+        }
+      ]
+    },
+    {
+      "resourceName": "CoBuyerOffice",
+      "fieldName": "CoBuyerOffice",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Office",
+      "typeName": "Office",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Co-Buyer Office"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/CoBuyerOffice+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The co-buyer agent\u0027s office."
+        }
+      ]
+    },
+    {
+      "resourceName": "CoListAgent",
+      "fieldName": "CoListAgent",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Member",
+      "typeName": "Member",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Co-List Agent"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/CoListAgent+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The co-listing agent involved in the transaction."
+        }
+      ]
+    },
+    {
+      "resourceName": "CoListOffice",
+      "fieldName": "CoListOffice",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Office",
+      "typeName": "Office",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Co-List Office"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/CoListOffice+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The co-listing agent\u0027s office."
+        }
+      ]
+    },
+    {
+      "resourceName": "ListAgent",
+      "fieldName": "ListAgent",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Member",
+      "typeName": "Member",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "List Agent"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/ListAgent+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The listing agent involved in the transaction."
+        }
+      ]
+    },
+    {
+      "resourceName": "ListOffice",
+      "fieldName": "ListOffice",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Office",
+      "typeName": "Office",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "List Office"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/ListOffice+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The listing agent\u0027s office."
+        }
+      ]
+    },
+    {
+      "resourceName": "BuyerTeam",
+      "fieldName": "BuyerTeam",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Teams",
+      "typeName": "Teams",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Buyer Team"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/BuyerTeam+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "Two or more agents working on the buyer agent\u0027s team."
+        }
+      ]
+    },
+    {
+      "resourceName": "ListTeam",
+      "fieldName": "ListTeam",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Teams",
+      "typeName": "Teams",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "List Team"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/ListTeam+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "Two or more agents working on the listing agent\u0027s team."
+        }
+      ]
+    },
+    {
+      "resourceName": "SourceSystem",
+      "fieldName": "SourceSystem",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Source System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/SourceSystem+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The source system of the Property record."
+        }
+      ]
+    },
+    {
+      "resourceName": "GreenBuildingVerification",
+      "fieldName": "GreenBuildingVerification",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.PropertyGreenVerification",
+      "typeName": "PropertyGreenVerification",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Green Building Verification"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/GreenBuildingVerification+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "A collection of verifications or certifications awarded to a new or pre-existing residential or commercial structure. For example: LEED, Energy Star, ICC-700. The collection includes information about the type, year, rating and other details about the awarded performance verification."
+        }
+      ]
+    },
+    {
+      "resourceName": "PowerProduction",
+      "fieldName": "PowerProduction",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.PropertyPowerProduction",
+      "typeName": "PropertyPowerProduction",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Power Production"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/PowerProduction+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "A collection of the types of power production system(s) available on the property. The collection includes the type of system and other details about the power produced and age of the system."
+        }
+      ]
+    },
+    {
+      "resourceName": "Rooms",
+      "fieldName": "Rooms",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.PropertyRooms",
+      "typeName": "PropertyRooms",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Rooms"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/Rooms+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "A collection of types of rooms and details/features about the given room."
+        }
+      ]
+    },
+    {
+      "resourceName": "UnitTypes",
+      "fieldName": "UnitTypes",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.PropertyUnitTypes",
+      "typeName": "PropertyUnitTypes",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Unit Types"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/UnitTypes+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "A collection of types of units included in the income (multi-family) property. The collection includes a type, beds, baths and other aspects of the type of unit behind described."
+        }
+      ]
+    },
+    {
+      "resourceName": "HistoryTransactional",
+      "fieldName": "HistoryTransactional",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.HistoryTransactional",
+      "typeName": "HistoryTransactional",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "History Transactional"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/HistoryTransactional+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "A collection of history items related to the Property record."
+        }
+      ]
+    },
+    {
+      "resourceName": "Media",
+      "fieldName": "Media",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.Media",
+      "typeName": "Media",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Media"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/Media+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "A collection of media items related to the Property record."
+        }
+      ]
+    },
+    {
+      "resourceName": "SocialMedia",
+      "fieldName": "SocialMedia",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.SocialMedia",
+      "typeName": "SocialMedia",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Social Media"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/SocialMedia+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "A collection of social media items related to the Property record."
+        }
+      ]
+    },
+    {
+      "resourceName": "OpenHouse",
+      "fieldName": "OpenHouse",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.OpenHouse",
+      "typeName": "OpenHouse",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Open House"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/OpenHouse+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "A collection of open house items related to the Property record."
+        }
+      ]
+    },
+    {
       "resourceName": "Member",
       "fieldName": "JobTitle",
       "type": "Edm.String",
@@ -14072,6 +14686,7 @@
       "resourceName": "Member",
       "fieldName": "MemberAOR",
       "type": "org.reso.metadata.enums.AOR",
+      "typeName": "AOR",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -14255,6 +14870,7 @@
       "resourceName": "Member",
       "fieldName": "MemberCountry",
       "type": "org.reso.metadata.enums.Country",
+      "typeName": "Country",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -14277,6 +14893,7 @@
       "resourceName": "Member",
       "fieldName": "MemberCountyOrParish",
       "type": "org.reso.metadata.enums.CountyOrParish",
+      "typeName": "CountyOrParish",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -14299,6 +14916,7 @@
       "resourceName": "Member",
       "fieldName": "MemberDesignation",
       "type": "org.reso.metadata.enums.MemberDesignation",
+      "typeName": "MemberDesignation",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -14505,6 +15123,7 @@
       "resourceName": "Member",
       "fieldName": "MemberLanguages",
       "type": "org.reso.metadata.enums.Languages",
+      "typeName": "Languages",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -14641,6 +15260,7 @@
       "resourceName": "Member",
       "fieldName": "MemberMlsSecurityClass",
       "type": "org.reso.metadata.enums.MemberMlsSecurityClass",
+      "typeName": "MemberMlsSecurityClass",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -14824,6 +15444,7 @@
       "resourceName": "Member",
       "fieldName": "MemberOtherPhoneType",
       "type": "org.reso.metadata.enums.MemberOtherPhoneType",
+      "typeName": "MemberOtherPhoneType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -15030,6 +15651,7 @@
       "resourceName": "Member",
       "fieldName": "MemberStateLicenseState",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -15052,6 +15674,7 @@
       "resourceName": "Member",
       "fieldName": "MemberStateOrProvince",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -15074,6 +15697,7 @@
       "resourceName": "Member",
       "fieldName": "MemberStatus",
       "type": "org.reso.metadata.enums.MemberStatus",
+      "typeName": "MemberStatus",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -15119,6 +15743,7 @@
       "resourceName": "Member",
       "fieldName": "MemberType",
       "type": "org.reso.metadata.enums.MemberType",
+      "typeName": "MemberType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -15371,6 +15996,7 @@
       "resourceName": "Member",
       "fieldName": "SocialMediaType",
       "type": "org.reso.metadata.enums.SocialMediaType",
+      "typeName": "SocialMediaType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -15462,6 +16088,7 @@
       "resourceName": "Member",
       "fieldName": "SyndicateTo",
       "type": "org.reso.metadata.enums.SyndicateTo",
+      "typeName": "SyndicateTo",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -15507,6 +16134,7 @@
       "resourceName": "Member",
       "fieldName": "MemberBillingPreference",
       "type": "org.reso.metadata.enums.BillingPreference",
+      "typeName": "BillingPreference",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -15595,6 +16223,7 @@
       "resourceName": "Member",
       "fieldName": "MemberPreferredMail",
       "type": "org.reso.metadata.enums.PreferredMail",
+      "typeName": "PreferredMail",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -15617,6 +16246,7 @@
       "resourceName": "Member",
       "fieldName": "MemberPreferredMedia",
       "type": "org.reso.metadata.enums.PreferredMedia",
+      "typeName": "PreferredMedia",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -15639,6 +16269,7 @@
       "resourceName": "Member",
       "fieldName": "MemberPreferredPublication",
       "type": "org.reso.metadata.enums.PreferredPublication",
+      "typeName": "PreferredPublication",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -15818,6 +16449,160 @@
     },
     {
       "resourceName": "Office",
+      "fieldName": "Office",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Office",
+      "typeName": "Office",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Office"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/Office+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The office the member belongs to."
+        }
+      ]
+    },
+    {
+      "resourceName": "OriginatingSystem",
+      "fieldName": "OriginatingSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Originating System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1124881"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The originating system of the Member record."
+        }
+      ]
+    },
+    {
+      "resourceName": "SourceSystem",
+      "fieldName": "SourceSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Source System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1124884"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The source system of the Member record."
+        }
+      ]
+    },
+    {
+      "resourceName": "MemberOtherPhone",
+      "fieldName": "MemberOtherPhone",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.OtherPhone",
+      "typeName": "OtherPhone",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Member Other Phone"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/MemberOtherPhone+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "A collection of the types of other phone fields available for this member. The collection includes the type of system and other details pertinent about other phone numbers"
+        }
+      ]
+    },
+    {
+      "resourceName": "MemberSocialMedia",
+      "fieldName": "MemberSocialMedia",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.SocialMedia",
+      "typeName": "SocialMedia",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Member Social Media"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/MemberSocialMedia+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "A collection of the types of social media fields available for this member. The collection includes the type of system and other details pertinent about social media"
+        }
+      ]
+    },
+    {
+      "resourceName": "HistoryTransactional",
+      "fieldName": "HistoryTransactional",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.HistoryTransactional",
+      "typeName": "HistoryTransactional",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "History Transactional"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1124894"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The history of the Member record."
+        }
+      ]
+    },
+    {
+      "resourceName": "Media",
+      "fieldName": "Media",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.Media",
+      "typeName": "Media",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Media"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1124897"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The media for the Member record."
+        }
+      ]
+    },
+    {
+      "resourceName": "Office",
       "fieldName": "FranchiseAffiliation",
       "type": "Edm.String",
       "nullable": true,
@@ -15934,6 +16719,7 @@
       "resourceName": "Office",
       "fieldName": "OfficeAOR",
       "type": "org.reso.metadata.enums.AOR",
+      "typeName": "AOR",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -16071,6 +16857,7 @@
       "resourceName": "Office",
       "fieldName": "OfficeBranchType",
       "type": "org.reso.metadata.enums.OfficeBranchType",
+      "typeName": "OfficeBranchType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -16185,6 +16972,7 @@
       "resourceName": "Office",
       "fieldName": "OfficeCountyOrParish",
       "type": "org.reso.metadata.enums.CountyOrParish",
+      "typeName": "CountyOrParish",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -16483,6 +17271,7 @@
       "resourceName": "Office",
       "fieldName": "OfficeStateOrProvince",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -16505,6 +17294,7 @@
       "resourceName": "Office",
       "fieldName": "OfficeStatus",
       "type": "org.reso.metadata.enums.OfficeStatus",
+      "typeName": "OfficeStatus",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -16527,6 +17317,7 @@
       "resourceName": "Office",
       "fieldName": "OfficeType",
       "type": "org.reso.metadata.enums.OfficeType",
+      "typeName": "OfficeType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -16641,6 +17432,7 @@
       "resourceName": "Office",
       "fieldName": "SocialMediaType",
       "type": "org.reso.metadata.enums.SocialMediaType",
+      "typeName": "SocialMediaType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -16732,6 +17524,7 @@
       "resourceName": "Office",
       "fieldName": "SyndicateAgentOption",
       "type": "org.reso.metadata.enums.SyndicateAgentOption",
+      "typeName": "SyndicateAgentOption",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -16754,6 +17547,7 @@
       "resourceName": "Office",
       "fieldName": "SyndicateTo",
       "type": "org.reso.metadata.enums.SyndicateTo",
+      "typeName": "SyndicateTo",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -17164,6 +17958,7 @@
       "resourceName": "Office",
       "fieldName": "OfficePreferredMedia",
       "type": "org.reso.metadata.enums.PreferredMedia",
+      "typeName": "PreferredMedia",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -17209,6 +18004,7 @@
       "resourceName": "Office",
       "fieldName": "OfficePrimaryStateOrProvince",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -17269,6 +18065,182 @@
         {
           "term": "Core.Description",
           "value": "Indicates whether or not this is a Virtual Office Website (VOW)."
+        }
+      ]
+    },
+    {
+      "resourceName": "MainOffice",
+      "fieldName": "MainOffice",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Office",
+      "typeName": "Office",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Main Office"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/MainOffice+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The main office for the office record."
+        }
+      ]
+    },
+    {
+      "resourceName": "OfficeBroker",
+      "fieldName": "OfficeBroker",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Member",
+      "typeName": "Member",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Office Broker"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/OfficeBroker+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The broker for the office."
+        }
+      ]
+    },
+    {
+      "resourceName": "OfficeManager",
+      "fieldName": "OfficeManager",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Member",
+      "typeName": "Member",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Office Manager"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/OfficeManager+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The office manager for the office."
+        }
+      ]
+    },
+    {
+      "resourceName": "OriginatingSystem",
+      "fieldName": "OriginatingSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Originating System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1124783"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The originating system of the Office record."
+        }
+      ]
+    },
+    {
+      "resourceName": "SourceSystem",
+      "fieldName": "SourceSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Source System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1124786"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The source system of the Office record."
+        }
+      ]
+    },
+    {
+      "resourceName": "HistoryTransactional",
+      "fieldName": "HistoryTransactional",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.HistoryTransactional",
+      "typeName": "HistoryTransactional",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "History Transactional"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1124789"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The history of the Office record."
+        }
+      ]
+    },
+    {
+      "resourceName": "Media",
+      "fieldName": "Media",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.Media",
+      "typeName": "Media",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Media"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1124793"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The media for the Office record."
+        }
+      ]
+    },
+    {
+      "resourceName": "OfficeSocialMedia",
+      "fieldName": "OfficeSocialMedia",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.SocialMedia",
+      "typeName": "SocialMedia",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Office Social Media"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/OfficeSocialMedia+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "A collection of the types of social media fields available for this office. The collection includes the type of system and other details pertinent about social media"
         }
       ]
     },
@@ -17550,6 +18522,7 @@
       "resourceName": "Contacts",
       "fieldName": "ContactStatus",
       "type": "org.reso.metadata.enums.ContactStatus",
+      "typeName": "ContactStatus",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -17572,6 +18545,7 @@
       "resourceName": "Contacts",
       "fieldName": "ContactType",
       "type": "org.reso.metadata.enums.ContactType",
+      "typeName": "ContactType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -17847,6 +18821,7 @@
       "resourceName": "Contacts",
       "fieldName": "HomeCountry",
       "type": "org.reso.metadata.enums.Country",
+      "typeName": "Country",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -17869,6 +18844,7 @@
       "resourceName": "Contacts",
       "fieldName": "HomeCountyOrParish",
       "type": "org.reso.metadata.enums.CountyOrParish",
+      "typeName": "CountyOrParish",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -17983,6 +18959,7 @@
       "resourceName": "Contacts",
       "fieldName": "HomeStateOrProvince",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -18028,6 +19005,7 @@
       "resourceName": "Contacts",
       "fieldName": "Language",
       "type": "org.reso.metadata.enums.Languages",
+      "typeName": "Languages",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -18487,6 +19465,7 @@
       "resourceName": "Contacts",
       "fieldName": "OtherCountry",
       "type": "org.reso.metadata.enums.Country",
+      "typeName": "Country",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -18509,6 +19488,7 @@
       "resourceName": "Contacts",
       "fieldName": "OtherCountyOrParish",
       "type": "org.reso.metadata.enums.CountyOrParish",
+      "typeName": "CountyOrParish",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -18531,6 +19511,7 @@
       "resourceName": "Contacts",
       "fieldName": "OtherPhoneType",
       "type": "org.reso.metadata.enums.OtherPhoneType",
+      "typeName": "OtherPhoneType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -18599,6 +19580,7 @@
       "resourceName": "Contacts",
       "fieldName": "OtherStateOrProvince",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -18713,6 +19695,7 @@
       "resourceName": "Contacts",
       "fieldName": "PreferredAddress",
       "type": "org.reso.metadata.enums.PreferredAddress",
+      "typeName": "PreferredAddress",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -18735,6 +19718,7 @@
       "resourceName": "Contacts",
       "fieldName": "PreferredPhone",
       "type": "org.reso.metadata.enums.PreferredPhone",
+      "typeName": "PreferredPhone",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -18780,6 +19764,7 @@
       "resourceName": "Contacts",
       "fieldName": "SocialMediaType",
       "type": "org.reso.metadata.enums.SocialMediaType",
+      "typeName": "SocialMediaType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -19055,6 +20040,7 @@
       "resourceName": "Contacts",
       "fieldName": "WorkCountry",
       "type": "org.reso.metadata.enums.Country",
+      "typeName": "Country",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -19077,6 +20063,7 @@
       "resourceName": "Contacts",
       "fieldName": "WorkCountyOrParish",
       "type": "org.reso.metadata.enums.CountyOrParish",
+      "typeName": "CountyOrParish",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -19145,6 +20132,7 @@
       "resourceName": "Contacts",
       "fieldName": "WorkStateOrProvince",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -19182,6 +20170,160 @@
         {
           "term": "Core.Description",
           "value": "Reverse prospecting, a system that allows listing agents to see the agent/member whose client has a search criteria that found the agent\u0027s listing, has been enabled for the given client\u0027s saved searches."
+        }
+      ]
+    },
+    {
+      "resourceName": "OriginatingSystem",
+      "fieldName": "OriginatingSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Originating System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1124987"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The originating system of the Contacts record."
+        }
+      ]
+    },
+    {
+      "resourceName": "SourceSystem",
+      "fieldName": "SourceSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Source System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1124991"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The source system of the Contacts record."
+        }
+      ]
+    },
+    {
+      "resourceName": "OwnerMember",
+      "fieldName": "OwnerMember",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Member",
+      "typeName": "Member",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Owner Member"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/OwnerMember+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The member who owns the Contacts record."
+        }
+      ]
+    },
+    {
+      "resourceName": "HistoryTransactional",
+      "fieldName": "HistoryTransactional",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.HistoryTransactional",
+      "typeName": "HistoryTransactional",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "History Transactional"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125002"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The history of the Contacts record."
+        }
+      ]
+    },
+    {
+      "resourceName": "Media",
+      "fieldName": "Media",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.Media",
+      "typeName": "Media",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Media"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125004"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The media for the Contacts record."
+        }
+      ]
+    },
+    {
+      "resourceName": "ContactsOtherPhone",
+      "fieldName": "ContactsOtherPhone",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.OtherPhone",
+      "typeName": "OtherPhone",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Contacts Other Phone"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/ContactsOtherPhone+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "A collection of the types of other phone fields available for Contacts. The collection includes the type of system and other details pertinent about other phone numbers"
+        }
+      ]
+    },
+    {
+      "resourceName": "ContactsSocialMedia",
+      "fieldName": "ContactsSocialMedia",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.SocialMedia",
+      "typeName": "SocialMedia",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Contacts Social Media"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/ContactsSocialMedia+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "A collection of the types of social media fields available for this contact. The collection includes the type of system and other details pertinent about social media"
         }
       ]
     },
@@ -19235,6 +20377,7 @@
       "resourceName": "Media",
       "fieldName": "ClassName",
       "type": "org.reso.metadata.enums.ClassName",
+      "typeName": "ClassName",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -19279,6 +20422,7 @@
       "resourceName": "Media",
       "fieldName": "ImageOf",
       "type": "org.reso.metadata.enums.ImageOf",
+      "typeName": "ImageOf",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -19301,6 +20445,7 @@
       "resourceName": "Media",
       "fieldName": "ImageSizeDescription",
       "type": "org.reso.metadata.enums.ImageSizeDescription",
+      "typeName": "ImageSizeDescription",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -19368,6 +20513,7 @@
       "resourceName": "Media",
       "fieldName": "MediaCategory",
       "type": "org.reso.metadata.enums.MediaCategory",
+      "typeName": "MediaCategory",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -19482,6 +20628,7 @@
       "resourceName": "Media",
       "fieldName": "MediaStatus",
       "type": "org.reso.metadata.enums.MediaStatus",
+      "typeName": "MediaStatus",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -19504,6 +20651,7 @@
       "resourceName": "Media",
       "fieldName": "MediaType",
       "type": "org.reso.metadata.enums.MediaType",
+      "typeName": "MediaType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -19663,6 +20811,7 @@
       "resourceName": "Media",
       "fieldName": "Permission",
       "type": "org.reso.metadata.enums.Permission",
+      "typeName": "Permission",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -19707,6 +20856,7 @@
       "resourceName": "Media",
       "fieldName": "ResourceName",
       "type": "org.reso.metadata.enums.ResourceName",
+      "typeName": "ResourceName",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -19867,6 +21017,7 @@
       "resourceName": "HistoryTransactional",
       "fieldName": "ChangeType",
       "type": "org.reso.metadata.enums.ChangeType",
+      "typeName": "ChangeType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -20347,6 +21498,7 @@
       "resourceName": "ContactListings",
       "fieldName": "ClassName",
       "type": "org.reso.metadata.enums.ClassName",
+      "typeName": "ClassName",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -20392,6 +21544,7 @@
       "resourceName": "ContactListings",
       "fieldName": "ContactListingPreference",
       "type": "org.reso.metadata.enums.ContactListingPreference",
+      "typeName": "ContactListingPreference",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -20710,6 +21863,7 @@
       "resourceName": "ContactListings",
       "fieldName": "ResourceName",
       "type": "org.reso.metadata.enums.ResourceName",
+      "typeName": "ResourceName",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -20725,6 +21879,72 @@
         {
           "term": "Core.Description",
           "value": "The name of the resource where the listing record is located."
+        }
+      ]
+    },
+    {
+      "resourceName": "Contact",
+      "fieldName": "Contact",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Contacts",
+      "typeName": "Contacts",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Contact"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/Contact+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The contact for the ContactListings record."
+        }
+      ]
+    },
+    {
+      "resourceName": "Listing",
+      "fieldName": "Listing",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Property",
+      "typeName": "Property",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Listing"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/Listing+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The listing for the ContactListings record."
+        }
+      ]
+    },
+    {
+      "resourceName": "ListingNotes",
+      "fieldName": "ListingNotes",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.ContactListingNotes",
+      "typeName": "ContactListingNotes",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Listing Notes"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/ListingNotes+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The notes input by the Member and/or the Contact in reference to the given listing. This is a complex data type referencing the separate resource called ContactListingNotes."
         }
       ]
     },
@@ -21102,6 +22322,7 @@
       "resourceName": "InternetTracking",
       "fieldName": "ActorStateOrProvince",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -21124,6 +22345,7 @@
       "resourceName": "InternetTracking",
       "fieldName": "ActorType",
       "type": "org.reso.metadata.enums.ActorType",
+      "typeName": "ActorType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -21168,6 +22390,7 @@
       "resourceName": "InternetTracking",
       "fieldName": "DeviceType",
       "type": "org.reso.metadata.enums.DeviceType",
+      "typeName": "DeviceType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -21351,6 +22574,7 @@
       "resourceName": "InternetTracking",
       "fieldName": "EventTarget",
       "type": "org.reso.metadata.enums.EventTarget",
+      "typeName": "EventTarget",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -21396,6 +22620,7 @@
       "resourceName": "InternetTracking",
       "fieldName": "EventType",
       "type": "org.reso.metadata.enums.EventType",
+      "typeName": "EventType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -21441,6 +22666,7 @@
       "resourceName": "InternetTracking",
       "fieldName": "ObjectIdType",
       "type": "org.reso.metadata.enums.ObjectIdType",
+      "typeName": "ObjectIdType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -21578,6 +22804,7 @@
       "resourceName": "InternetTracking",
       "fieldName": "ObjectType",
       "type": "org.reso.metadata.enums.ObjectType",
+      "typeName": "ObjectType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -21986,6 +23213,7 @@
       "resourceName": "InternetTracking",
       "fieldName": "TrackingType",
       "type": "org.reso.metadata.enums.TrackingType",
+      "typeName": "TrackingType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -22031,6 +23259,7 @@
       "resourceName": "InternetTracking",
       "fieldName": "EventSource",
       "type": "org.reso.metadata.enums.EventSource",
+      "typeName": "EventSource",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -22336,9 +23565,142 @@
       ]
     },
     {
+      "resourceName": "ActorOriginatingSystem",
+      "fieldName": "ActorOriginatingSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Actor Originating System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/ActorOriginatingSystem+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The originating system of the Actor record."
+        }
+      ]
+    },
+    {
+      "resourceName": "ActorSourceSystem",
+      "fieldName": "ActorSourceSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Actor Source System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/ActorSourceSystem+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The source system of the Actor record."
+        }
+      ]
+    },
+    {
+      "resourceName": "EventOriginatingSystem",
+      "fieldName": "EventOriginatingSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Event Originating System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/EventOriginatingSystem+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The originating system of the InternetTracking event."
+        }
+      ]
+    },
+    {
+      "resourceName": "EventSourceSystem",
+      "fieldName": "EventSourceSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Event Source System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/EventSourceSystem+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The source system of the InternetTracking event."
+        }
+      ]
+    },
+    {
+      "resourceName": "ObjectOriginatingSystem",
+      "fieldName": "ObjectOriginatingSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Object Originating System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/ObjectOriginatingSystem+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The originating system of the InternetTracking object."
+        }
+      ]
+    },
+    {
+      "resourceName": "ObjectSourceSystem",
+      "fieldName": "ObjectSourceSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Object Source System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/ObjectSourceSystem+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The source system of the InternetTracking object."
+        }
+      ]
+    },
+    {
       "resourceName": "SavedSearch",
       "fieldName": "ClassName",
       "type": "org.reso.metadata.enums.ClassName",
+      "typeName": "ClassName",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -22568,6 +23930,7 @@
       "resourceName": "SavedSearch",
       "fieldName": "ResourceName",
       "type": "org.reso.metadata.enums.ResourceName",
+      "typeName": "ResourceName",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -22659,6 +24022,7 @@
       "resourceName": "SavedSearch",
       "fieldName": "SavedSearchType",
       "type": "org.reso.metadata.enums.SavedSearchType",
+      "typeName": "SavedSearchType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -22727,6 +24091,7 @@
       "resourceName": "SavedSearch",
       "fieldName": "SearchQueryExceptions",
       "type": "org.reso.metadata.enums.SearchQueryExceptions",
+      "typeName": "SearchQueryExceptions",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -22772,6 +24137,7 @@
       "resourceName": "SavedSearch",
       "fieldName": "SearchQueryType",
       "type": "org.reso.metadata.enums.SearchQueryType",
+      "typeName": "SearchQueryType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -22856,6 +24222,72 @@
         {
           "term": "Core.Description",
           "value": "The name of the Saved Search record provider. The system from which the record was directly received. The legal name of the company."
+        }
+      ]
+    },
+    {
+      "resourceName": "Member",
+      "fieldName": "Member",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Member",
+      "typeName": "Member",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Member"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/Member+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The member associated with the saved search."
+        }
+      ]
+    },
+    {
+      "resourceName": "OriginatingSystem",
+      "fieldName": "OriginatingSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Originating System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125099"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The originating system of the SavedSearch record."
+        }
+      ]
+    },
+    {
+      "resourceName": "SourceSystem",
+      "fieldName": "SourceSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Source System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125101"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The source system of the SavedSearch record."
         }
       ]
     },
@@ -22954,6 +24386,7 @@
       "resourceName": "OpenHouse",
       "fieldName": "OpenHouseAttendedBy",
       "type": "org.reso.metadata.enums.Attended",
+      "typeName": "Attended",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -23113,6 +24546,7 @@
       "resourceName": "OpenHouse",
       "fieldName": "OpenHouseStatus",
       "type": "org.reso.metadata.enums.OpenHouseStatus",
+      "typeName": "OpenHouseStatus",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -23135,6 +24569,7 @@
       "resourceName": "OpenHouse",
       "fieldName": "OpenHouseType",
       "type": "org.reso.metadata.enums.OpenHouseType",
+      "typeName": "OpenHouseType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -23635,6 +25070,7 @@
       "resourceName": "Prospecting",
       "fieldName": "DailySchedule",
       "type": "org.reso.metadata.enums.DailySchedule",
+      "typeName": "DailySchedule",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -23680,6 +25116,7 @@
       "resourceName": "Prospecting",
       "fieldName": "Language",
       "type": "org.reso.metadata.enums.Languages",
+      "typeName": "Languages",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -23932,6 +25369,7 @@
       "resourceName": "Prospecting",
       "fieldName": "ReasonActiveOrDisabled",
       "type": "org.reso.metadata.enums.ReasonActiveOrDisabled",
+      "typeName": "ReasonActiveOrDisabled",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -23977,6 +25415,7 @@
       "resourceName": "Prospecting",
       "fieldName": "ScheduleType",
       "type": "org.reso.metadata.enums.ScheduleType",
+      "typeName": "ScheduleType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -24045,6 +25484,7 @@
       "resourceName": "Queue",
       "fieldName": "ClassName",
       "type": "org.reso.metadata.enums.ClassName",
+      "typeName": "ClassName",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -24182,6 +25622,7 @@
       "resourceName": "Queue",
       "fieldName": "QueueTransactionType",
       "type": "org.reso.metadata.enums.QueueTransactionType",
+      "typeName": "QueueTransactionType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -24204,6 +25645,7 @@
       "resourceName": "Queue",
       "fieldName": "ResourceName",
       "type": "org.reso.metadata.enums.ResourceName",
+      "typeName": "ResourceName",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -24341,6 +25783,7 @@
       "resourceName": "Rule",
       "fieldName": "ClassName",
       "type": "org.reso.metadata.enums.ClassName",
+      "typeName": "ClassName",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -24524,6 +25967,7 @@
       "resourceName": "Rule",
       "fieldName": "ResourceName",
       "type": "org.reso.metadata.enums.ResourceName",
+      "typeName": "ResourceName",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -24660,6 +26104,7 @@
       "resourceName": "Rule",
       "fieldName": "RuleFormat",
       "type": "org.reso.metadata.enums.RuleFormat",
+      "typeName": "RuleFormat",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -24773,6 +26218,7 @@
       "resourceName": "Rule",
       "fieldName": "RuleType",
       "type": "org.reso.metadata.enums.RuleType",
+      "typeName": "RuleType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -24903,6 +26349,72 @@
         {
           "term": "Core.Description",
           "value": "The name of the Rule record provider. The system from which the record was directly received. The legal name of the company."
+        }
+      ]
+    },
+    {
+      "resourceName": "OriginatingSystem",
+      "fieldName": "OriginatingSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Originating System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125200"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The originating system of the Rules record."
+        }
+      ]
+    },
+    {
+      "resourceName": "SourceSystem",
+      "fieldName": "SourceSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Source System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125201"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The source system of the Rules record."
+        }
+      ]
+    },
+    {
+      "resourceName": "HistoryTransactional",
+      "fieldName": "HistoryTransactional",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.HistoryTransactional",
+      "typeName": "HistoryTransactional",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "History Transactional"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125210"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The history of the Rules record."
         }
       ]
     },
@@ -25574,6 +27086,248 @@
       ]
     },
     {
+      "resourceName": "AgentOriginatingSystem",
+      "fieldName": "AgentOriginatingSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Agent Originating System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/AgentOriginatingSystem+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The originating system of the member associated with the showing."
+        }
+      ]
+    },
+    {
+      "resourceName": "AgentSourceSystem",
+      "fieldName": "AgentSourceSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Agent Source System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/AgentSourceSystem+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The source system of the member associated with the showing."
+        }
+      ]
+    },
+    {
+      "resourceName": "ShowingAgent",
+      "fieldName": "ShowingAgent",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Member",
+      "typeName": "Member",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Showing Agent"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125145"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The showing agent."
+        }
+      ]
+    },
+    {
+      "resourceName": "Listing",
+      "fieldName": "Listing",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Property",
+      "typeName": "Property",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Listing"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125146"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The listing associated with the showing."
+        }
+      ]
+    },
+    {
+      "resourceName": "ListingOriginatingSystem",
+      "fieldName": "ListingOriginatingSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Listing Originating System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/ListingOriginatingSystem+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The originating system of the Listing record associated with the showing."
+        }
+      ]
+    },
+    {
+      "resourceName": "ListingSourceSystem",
+      "fieldName": "ListingSourceSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Listing Source System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/ListingSourceSystem+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The source system of the Listing record associated with the showing."
+        }
+      ]
+    },
+    {
+      "resourceName": "ShowingOriginatingSystem",
+      "fieldName": "ShowingOriginatingSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Showing Originating System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/ShowingOriginatingSystem+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The originating system of the Showing record."
+        }
+      ]
+    },
+    {
+      "resourceName": "ShowingSourceSystem",
+      "fieldName": "ShowingSourceSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Showing Source System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/ShowingSourceSystem+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The source system of the Showing record."
+        }
+      ]
+    },
+    {
+      "resourceName": "HistoryTransactional",
+      "fieldName": "HistoryTransactional",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.HistoryTransactional",
+      "typeName": "HistoryTransactional",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "History Transactional"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125207"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The history of the Showing record."
+        }
+      ]
+    },
+    {
+      "resourceName": "Media",
+      "fieldName": "Media",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.Media",
+      "typeName": "Media",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Media"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125211"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The media associated with the Showing record."
+        }
+      ]
+    },
+    {
+      "resourceName": "SocialMedia",
+      "fieldName": "SocialMedia",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.SocialMedia",
+      "typeName": "SocialMedia",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Social Media"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125213"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The social media associated with the Showing record."
+        }
+      ]
+    },
+    {
       "resourceName": "Teams",
       "fieldName": "ModificationTimestamp",
       "type": "Edm.DateTimeOffset",
@@ -25692,6 +27446,7 @@
       "resourceName": "Teams",
       "fieldName": "SocialMediaType",
       "type": "org.reso.metadata.enums.SocialMediaType",
+      "typeName": "SocialMediaType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -25875,6 +27630,7 @@
       "resourceName": "Teams",
       "fieldName": "TeamCountry",
       "type": "org.reso.metadata.enums.Country",
+      "typeName": "Country",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -25897,6 +27653,7 @@
       "resourceName": "Teams",
       "fieldName": "TeamCountyOrParish",
       "type": "org.reso.metadata.enums.CountyOrParish",
+      "typeName": "CountyOrParish",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -26149,6 +27906,7 @@
       "resourceName": "Teams",
       "fieldName": "TeamLeadStateLicenseState",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -26355,6 +28113,7 @@
       "resourceName": "Teams",
       "fieldName": "TeamStateOrProvince",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -26377,6 +28136,7 @@
       "resourceName": "Teams",
       "fieldName": "TeamStatus",
       "type": "org.reso.metadata.enums.TeamStatus",
+      "typeName": "TeamStatus",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -26461,6 +28221,138 @@
         {
           "term": "Core.Description",
           "value": "The extension of the given phone number (if applicable)."
+        }
+      ]
+    },
+    {
+      "resourceName": "OriginatingSystem",
+      "fieldName": "OriginatingSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Originating System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125300"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The originating system of the Teams record."
+        }
+      ]
+    },
+    {
+      "resourceName": "SourceSystem",
+      "fieldName": "SourceSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Source System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125303"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The source system of the Teams record."
+        }
+      ]
+    },
+    {
+      "resourceName": "TeamLead",
+      "fieldName": "TeamLead",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Member",
+      "typeName": "Member",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Team Lead"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/TeamLead+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The team lead for the given team."
+        }
+      ]
+    },
+    {
+      "resourceName": "HistoryTransactional",
+      "fieldName": "HistoryTransactional",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.HistoryTransactional",
+      "typeName": "HistoryTransactional",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "History Transactional"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125308"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The history of the Teams record."
+        }
+      ]
+    },
+    {
+      "resourceName": "Media",
+      "fieldName": "Media",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.Media",
+      "typeName": "Media",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Media"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125311"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The media associated with the Teams record."
+        }
+      ]
+    },
+    {
+      "resourceName": "TeamsSocialMedia",
+      "fieldName": "TeamsSocialMedia",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.SocialMedia",
+      "typeName": "SocialMedia",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Teams Social Media"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/TeamsSocialMedia+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "A collection of the types of social media fields available for this team. The collection includes the type of system and other details pertinent about social media"
         }
       ]
     },
@@ -26721,6 +28613,7 @@
       "resourceName": "TeamMembers",
       "fieldName": "TeamImpersonationLevel",
       "type": "org.reso.metadata.enums.TeamImpersonationLevel",
+      "typeName": "TeamImpersonationLevel",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -26835,6 +28728,7 @@
       "resourceName": "TeamMembers",
       "fieldName": "TeamMemberType",
       "type": "org.reso.metadata.enums.TeamMemberType",
+      "typeName": "TeamMemberType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -26850,6 +28744,94 @@
         {
           "term": "Core.Description",
           "value": "The role of the member within the team. i.e. team lead, principle, associate, assistant, etc."
+        }
+      ]
+    },
+    {
+      "resourceName": "Member",
+      "fieldName": "Member",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Member",
+      "typeName": "Member",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Member"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125226"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The member belonging to the TeamMembers record."
+        }
+      ]
+    },
+    {
+      "resourceName": "OriginatingSystem",
+      "fieldName": "OriginatingSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Originating System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125233"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The originating system of the TeamMembers record."
+        }
+      ]
+    },
+    {
+      "resourceName": "SourceSystem",
+      "fieldName": "SourceSystem",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.OUID",
+      "typeName": "OUID",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Source System"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125238"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The source system of the TeamMembers record."
+        }
+      ]
+    },
+    {
+      "resourceName": "HistoryTransactional",
+      "fieldName": "HistoryTransactional",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.HistoryTransactional",
+      "typeName": "HistoryTransactional",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "History Transactional"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125242"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The history of the TeamMembers record."
         }
       ]
     },
@@ -26926,6 +28908,7 @@
       "resourceName": "OUID",
       "fieldName": "OrganizationAOR",
       "type": "org.reso.metadata.enums.AOR",
+      "typeName": "AOR",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -27362,6 +29345,7 @@
       "resourceName": "OUID",
       "fieldName": "OrganizationCountry",
       "type": "org.reso.metadata.enums.Country",
+      "typeName": "Country",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -27384,6 +29368,7 @@
       "resourceName": "OUID",
       "fieldName": "OrganizationCountyOrParish",
       "type": "org.reso.metadata.enums.CountyOrParish",
+      "typeName": "CountyOrParish",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -27589,6 +29574,7 @@
       "resourceName": "OUID",
       "fieldName": "OrganizationSocialMediaType",
       "type": "org.reso.metadata.enums.SocialMediaType",
+      "typeName": "SocialMediaType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -27634,6 +29620,7 @@
       "resourceName": "OUID",
       "fieldName": "OrganizationStateLicenseState",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -27656,6 +29643,7 @@
       "resourceName": "OUID",
       "fieldName": "OrganizationStateOrProvince",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -27723,6 +29711,7 @@
       "resourceName": "OUID",
       "fieldName": "OrganizationType",
       "type": "org.reso.metadata.enums.OrganizationType",
+      "typeName": "OrganizationType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -27807,6 +29796,94 @@
         {
           "term": "Core.Description",
           "value": "Date/time the Organization record was originally input into the source system."
+        }
+      ]
+    },
+    {
+      "resourceName": "ChangedByMember",
+      "fieldName": "ChangedByMember",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Member",
+      "typeName": "Member",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Changed by Member"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125376"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The member who made the changes to the OUID record."
+        }
+      ]
+    },
+    {
+      "resourceName": "HistoryTransactional",
+      "fieldName": "HistoryTransactional",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.HistoryTransactional",
+      "typeName": "HistoryTransactional",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "History Transactional"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125381"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The history of the OUID record."
+        }
+      ]
+    },
+    {
+      "resourceName": "Media",
+      "fieldName": "Media",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.Media",
+      "typeName": "Media",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Media"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125382"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The media associated with the OUID record."
+        }
+      ]
+    },
+    {
+      "resourceName": "OrganizationSocialMedia",
+      "fieldName": "OrganizationSocialMedia",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.SocialMedia",
+      "typeName": "SocialMedia",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Organization Social Media"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/OrganizationSocialMedia+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "A collection of the types of social media fields available for this organization. The collection includes the type of system and other details pertinent about social media"
         }
       ]
     },
@@ -27952,6 +30029,7 @@
       "resourceName": "ContactListingNotes",
       "fieldName": "NotedBy",
       "type": "org.reso.metadata.enums.NotedBy",
+      "typeName": "NotedBy",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -27971,9 +30049,32 @@
       ]
     },
     {
+      "resourceName": "Contact",
+      "fieldName": "Contact",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Contacts",
+      "typeName": "Contacts",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Contact"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125248"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The contact associated with the ContactListingNotes record."
+        }
+      ]
+    },
+    {
       "resourceName": "OtherPhone",
       "fieldName": "ClassName",
       "type": "org.reso.metadata.enums.ClassName",
+      "typeName": "ClassName",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -28088,6 +30189,7 @@
       "resourceName": "OtherPhone",
       "fieldName": "OtherPhoneType",
       "type": "org.reso.metadata.enums.OtherPhoneType",
+      "typeName": "OtherPhoneType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -28110,6 +30212,7 @@
       "resourceName": "OtherPhone",
       "fieldName": "ResourceName",
       "type": "org.reso.metadata.enums.ResourceName",
+      "typeName": "ResourceName",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -28201,6 +30304,7 @@
       "resourceName": "PropertyGreenVerification",
       "fieldName": "GreenBuildingVerificationType",
       "type": "org.reso.metadata.enums.GreenBuildingVerificationType",
+      "typeName": "GreenBuildingVerificationType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -28291,6 +30395,7 @@
       "resourceName": "PropertyGreenVerification",
       "fieldName": "GreenVerificationSource",
       "type": "org.reso.metadata.enums.GreenVerificationSource",
+      "typeName": "GreenVerificationSource",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -28313,6 +30418,7 @@
       "resourceName": "PropertyGreenVerification",
       "fieldName": "GreenVerificationStatus",
       "type": "org.reso.metadata.enums.GreenVerificationStatus",
+      "typeName": "GreenVerificationStatus",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -28469,6 +30575,50 @@
       ]
     },
     {
+      "resourceName": "Listing",
+      "fieldName": "Listing",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Property",
+      "typeName": "Property",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Listing"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125297"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The listing associated with the PropertyGreenVerification record."
+        }
+      ]
+    },
+    {
+      "resourceName": "HistoryTransactional",
+      "fieldName": "HistoryTransactional",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.HistoryTransactional",
+      "typeName": "HistoryTransactional",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "History Transactional"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125302"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The history of the PropertyGreenVerification record."
+        }
+      ]
+    },
+    {
       "resourceName": "PropertyPowerProduction",
       "fieldName": "ListingId",
       "type": "Edm.String",
@@ -28563,6 +30713,7 @@
       "resourceName": "PropertyPowerProduction",
       "fieldName": "PowerProductionAnnualStatus",
       "type": "org.reso.metadata.enums.PowerProductionAnnualStatus",
+      "typeName": "PowerProductionAnnualStatus",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -28632,6 +30783,7 @@
       "resourceName": "PropertyPowerProduction",
       "fieldName": "PowerProductionType",
       "type": "org.reso.metadata.enums.PowerProductionType",
+      "typeName": "PowerProductionType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -28676,6 +30828,7 @@
       "resourceName": "PropertyPowerProduction",
       "fieldName": "PowerProductionOwnership",
       "type": "org.reso.metadata.enums.PowerProductionOwnership",
+      "typeName": "PowerProductionOwnership",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -28691,6 +30844,50 @@
         {
           "term": "Core.Description",
           "value": "The ownership of the power production system (e.g., Seller Owned or Third-Party Owned)."
+        }
+      ]
+    },
+    {
+      "resourceName": "Listing",
+      "fieldName": "Listing",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Property",
+      "typeName": "Property",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Listing"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125318"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The listing associated with the PropertyPowerProduction record."
+        }
+      ]
+    },
+    {
+      "resourceName": "HistoryTransactional",
+      "fieldName": "HistoryTransactional",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.HistoryTransactional",
+      "typeName": "HistoryTransactional",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "History Transactional"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125322"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The history of the PropertyPowerProduction record."
         }
       ]
     },
@@ -28791,6 +30988,7 @@
       "resourceName": "PropertyRooms",
       "fieldName": "RoomAreaSource",
       "type": "org.reso.metadata.enums.AreaSource",
+      "typeName": "AreaSource",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -28813,6 +31011,7 @@
       "resourceName": "PropertyRooms",
       "fieldName": "RoomAreaUnits",
       "type": "org.reso.metadata.enums.AreaUnits",
+      "typeName": "AreaUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -28881,6 +31080,7 @@
       "resourceName": "PropertyRooms",
       "fieldName": "RoomFeatures",
       "type": "org.reso.metadata.enums.InteriorOrRoomFeatures",
+      "typeName": "InteriorOrRoomFeatures",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -28950,6 +31150,7 @@
       "resourceName": "PropertyRooms",
       "fieldName": "RoomLengthWidthSource",
       "type": "org.reso.metadata.enums.RoomLengthWidthSource",
+      "typeName": "RoomLengthWidthSource",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -28972,6 +31173,7 @@
       "resourceName": "PropertyRooms",
       "fieldName": "RoomLengthWidthUnits",
       "type": "org.reso.metadata.enums.LinearUnits",
+      "typeName": "LinearUnits",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -28994,6 +31196,7 @@
       "resourceName": "PropertyRooms",
       "fieldName": "RoomLevel",
       "type": "org.reso.metadata.enums.RoomLevel",
+      "typeName": "RoomLevel",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -29016,6 +31219,7 @@
       "resourceName": "PropertyRooms",
       "fieldName": "RoomType",
       "type": "org.reso.metadata.enums.RoomType",
+      "typeName": "RoomType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -29055,6 +31259,50 @@
         {
           "term": "Core.Description",
           "value": "A numeric representation of the width of the given room. See the RoomLengthWidthUnits for the unit of measurement used for the length and width."
+        }
+      ]
+    },
+    {
+      "resourceName": "Listing",
+      "fieldName": "Listing",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Property",
+      "typeName": "Property",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Listing"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125369"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The listing associated with the PropertyRooms record."
+        }
+      ]
+    },
+    {
+      "resourceName": "HistoryTransactional",
+      "fieldName": "HistoryTransactional",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.HistoryTransactional",
+      "typeName": "HistoryTransactional",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "History Transactional"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125375"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The history of the PropertyRooms record."
         }
       ]
     },
@@ -29222,6 +31470,7 @@
       "resourceName": "PropertyUnitTypes",
       "fieldName": "UnitTypeFurnished",
       "type": "org.reso.metadata.enums.Furnished",
+      "typeName": "Furnished",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -29359,6 +31608,7 @@
       "resourceName": "PropertyUnitTypes",
       "fieldName": "UnitTypeType",
       "type": "org.reso.metadata.enums.UnitTypeType",
+      "typeName": "UnitTypeType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -29400,9 +31650,54 @@
       ]
     },
     {
+      "resourceName": "Listing",
+      "fieldName": "Listing",
+      "isExpansion": true,
+      "isCollection": false,
+      "type": "org.reso.metadata.Property",
+      "typeName": "Property",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Listing"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125377"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The listing associated with the PropertyUnitTypes record."
+        }
+      ]
+    },
+    {
+      "resourceName": "HistoryTransactional",
+      "fieldName": "HistoryTransactional",
+      "isExpansion": true,
+      "isCollection": true,
+      "type": "org.reso.metadata.HistoryTransactional",
+      "typeName": "HistoryTransactional",
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "History Transactional"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/pages/viewpage.action?pageId\u003d1125380"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The history of the PropertyUnitTypes record."
+        }
+      ]
+    },
+    {
       "resourceName": "SocialMedia",
       "fieldName": "ClassName",
       "type": "org.reso.metadata.enums.ClassName",
+      "typeName": "ClassName",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -29448,6 +31743,7 @@
       "resourceName": "SocialMedia",
       "fieldName": "ResourceName",
       "type": "org.reso.metadata.enums.ResourceName",
+      "typeName": "ResourceName",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -29539,6 +31835,7 @@
       "resourceName": "SocialMedia",
       "fieldName": "SocialMediaType",
       "type": "org.reso.metadata.enums.SocialMediaType",
+      "typeName": "SocialMediaType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -29942,6 +32239,7 @@
       "resourceName": "Association",
       "fieldName": "AssociationCountry",
       "type": "org.reso.metadata.enums.Country",
+      "typeName": "Country",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -29964,6 +32262,7 @@
       "resourceName": "Association",
       "fieldName": "AssociationCountyOrParish",
       "type": "org.reso.metadata.enums.CountyOrParish",
+      "typeName": "CountyOrParish",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -30124,6 +32423,7 @@
       "resourceName": "Association",
       "fieldName": "AssociationMailCountry",
       "type": "org.reso.metadata.enums.Country",
+      "typeName": "Country",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -30146,6 +32446,7 @@
       "resourceName": "Association",
       "fieldName": "AssociationMailCountyOrParish",
       "type": "org.reso.metadata.enums.CountyOrParish",
+      "typeName": "CountyOrParish",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -30214,6 +32515,7 @@
       "resourceName": "Association",
       "fieldName": "AssociationMailStateOfProvince",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -30374,6 +32676,7 @@
       "resourceName": "Association",
       "fieldName": "AssociationStateOrProvince",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -30396,6 +32699,7 @@
       "resourceName": "Association",
       "fieldName": "AssociationStatus",
       "type": "org.reso.metadata.enums.AssociationStatus",
+      "typeName": "AssociationStatus",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -30418,6 +32722,7 @@
       "resourceName": "Association",
       "fieldName": "AssociationType",
       "type": "org.reso.metadata.enums.AssociationType",
+      "typeName": "AssociationType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -30624,6 +32929,7 @@
       "resourceName": "Association",
       "fieldName": "SocialMediaType",
       "type": "org.reso.metadata.enums.SocialMediaType",
+      "typeName": "SocialMediaType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -30921,6 +33227,7 @@
       "resourceName": "LockOrBox",
       "fieldName": "ListingCountry",
       "type": "org.reso.metadata.enums.Country",
+      "typeName": "Country",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -31079,6 +33386,7 @@
       "resourceName": "LockOrBox",
       "fieldName": "ListingStateOrProvince",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -31147,6 +33455,7 @@
       "resourceName": "LockOrBox",
       "fieldName": "LockOrBoxAccessType",
       "type": "org.reso.metadata.enums.LockOrBoxAccessType",
+      "typeName": "LockOrBoxAccessType",
       "nullable": true,
       "isCollection": true,
       "unicode": true,
@@ -31392,6 +33701,29 @@
         {
           "term": "Core.Description",
           "value": "Notes or feedback about the property or showing."
+        }
+      ]
+    },
+    {
+      "resourceName": "LockOrBox",
+      "fieldName": "ShowingAgentAOR",
+      "type": "org.reso.metadata.enums.ShowingMemberAOR",
+      "typeName": "ShowingMemberAOR",
+      "nullable": true,
+      "isCollection": false,
+      "unicode": true,
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Showing Agent AOR"
+        },
+        {
+          "term": "RESO.DDWikiUrl",
+          "value": "https://ddwiki.reso.org/display/DDW20/ShowingAgentAOR+Field"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The showing contact\u0027s board or association of REALTORS®."
         }
       ]
     },
@@ -31743,6 +34075,7 @@
       "resourceName": "MemberAssociation",
       "fieldName": "MemberAssociationBillStatus",
       "type": "org.reso.metadata.enums.MemberAssociationBillStatus",
+      "typeName": "MemberAssociationBillStatus",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -31877,6 +34210,7 @@
       "resourceName": "MemberAssociation",
       "fieldName": "MemberAssociationStatus",
       "type": "org.reso.metadata.enums.MemberStatus",
+      "typeName": "MemberStatus",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -32354,6 +34688,7 @@
       "resourceName": "OfficeAssociation",
       "fieldName": "OfficeAssociationPrimaryIndicator",
       "type": "org.reso.metadata.enums.OfficeAssociationPrimaryIndicator",
+      "typeName": "OfficeAssociationPrimaryIndicator",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -32376,6 +34711,7 @@
       "resourceName": "OfficeAssociation",
       "fieldName": "OfficeAssociationStatus",
       "type": "org.reso.metadata.enums.OfficeStatus",
+      "typeName": "OfficeStatus",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -32718,6 +35054,7 @@
       "resourceName": "MemberStateLicense",
       "fieldName": "MemberStateLicenseType",
       "type": "org.reso.metadata.enums.MemberStateLicenseType",
+      "typeName": "MemberStateLicenseType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -32740,6 +35077,7 @@
       "resourceName": "MemberStateLicense",
       "fieldName": "MemberStateLicenseState",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -32877,6 +35215,7 @@
       "resourceName": "OfficeCorporateLicense",
       "fieldName": "OfficeCorporateLicenseState",
       "type": "org.reso.metadata.enums.StateOrProvince",
+      "typeName": "StateOrProvince",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -32921,6 +35260,7 @@
       "resourceName": "OfficeCorporateLicense",
       "fieldName": "OfficeCorporateLicenseType",
       "type": "org.reso.metadata.enums.OfficeCorporateLicenseType",
+      "typeName": "OfficeCorporateLicenseType",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -89771,8 +92111,8 @@
       ]
     },
     {
-      "lookupName": "org.reso.metadata.enums.null",
-      "lookupValue": "SamplenullEnumValue",
+      "lookupName": "org.reso.metadata.enums.ShowingMemberAOR",
+      "lookupValue": "SampleShowingMemberAOREnumValue",
       "type": "Edm.Int32"
     },
     {

@@ -111,8 +111,13 @@ public class EDMXProcessor extends WorksheetProcessor {
       LOG.error("ERROR: Unsupported simple data type for Expansion fields: '{}'", simpleDataType);
       return;
     }
+    content.append(">");
 
-    content.append(" />");
+    content.append(EDMXTemplates.buildDisplayNameAnnotation(field.getDisplayName()))
+        .append(EDMXTemplates.buildDDWikiUrlAnnotation(field.getWikiPageUrl()))
+        .append(EDMXTemplates.buildDescriptionAnnotation(field.getDefinition()));
+
+    content.append("</NavigationProperty>");
 
     resourceTemplates.get(field.getResourceName()).append(content);
   }

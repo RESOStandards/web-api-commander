@@ -192,7 +192,7 @@ public class DataDictionary {
         isMetadataValid = container.hasValidMetadata();
 
         //create metadata report
-        Commander.generateMetadataReport(container.getEdm());
+        Commander.generateMetadataReport(container.getEdm(), container.getDataDictionaryVersion());
 
         //the container needs a field map built when the metadata is being loaded from a file
         container.buildFieldMap();
@@ -236,7 +236,7 @@ public class DataDictionary {
           "metadata.xml", container.getXMLResponseData());
 
       //create metadata report
-      Commander.generateMetadataReport(container.getEdm());
+      Commander.generateMetadataReport(container.getEdm(), container.getDataDictionaryVersion());
     }
   }
 
@@ -349,7 +349,7 @@ public class DataDictionary {
   /**
    * Determines whether the given field name has the correct data type, according to the mappings in the
    * Data Dictionary specification and RCP-031.
-   * @apiNote SEE: https://docs.google.com/document/d/15DFf9kDX_mlGCJVOch2fztl8W5h-yd18N0_03Sb4HwM/edit#heading=h.dw8owdmv988f
+   * @apiNote SEE: <a href="https://docs.google.com/document/d/15DFf9kDX_mlGCJVOch2fztl8W5h-yd18N0_03Sb4HwM/edit#heading=h.dw8owdmv988f">...</a>
    * @param fieldName the field name of the field to assert the mapping for
    * @param assertedTypeName the asserted type name (from the BDD tests, usually)
    * @param foundTypeName the type name that was found in the metadata

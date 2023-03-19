@@ -16,13 +16,15 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
   private static final Logger LOG = LogManager.getLogger(MetadataReport.class);
 
   private Edm metadata;
+  private String ddVersion;
 
   private MetadataReport() {
     //private default constructor
   }
 
-  public MetadataReport(Edm metadata) {
+  public MetadataReport(Edm metadata, String ddVersion) {
     this.metadata = metadata;
+    this.ddVersion = ddVersion;
   }
 
   @Override
@@ -46,7 +48,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
   public JsonElement serialize(MetadataReport src, Type typeOfSrc, JsonSerializationContext context) {
     final String
         DESCRIPTION_KEY = "description", DESCRIPTION = "RESO Data Dictionary Metadata Report",
-        VERSION_KEY = "version", VERSION = "1.7",
+        VERSION_KEY = "version", VERSION = ddVersion,
         GENERATED_ON_KEY = "generatedOn",
         FIELDS_KEY = "fields",
         LOOKUPS_KEY = "lookups";
@@ -55,10 +57,17 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
     JsonArray lookups = new JsonArray();
 
     src.metadata.getSchemas().forEach(edmSchema -> {
-      //serialize entities (resources) and members (fields)
+      //serialize members (fields)
       edmSchema.getEntityTypes().forEach(edmEntityType -> {
         edmEntityType.getPropertyNames().forEach(propertyName -> {
           FieldJson fieldJson = new FieldJson(edmEntityType.getName(), edmEntityType.getProperty(propertyName));
+          fields.add(fieldJson.serialize(fieldJson, FieldJson.class, null));
+        });
+
+        //handle navigation properties (expansions)
+        edmEntityType.getNavigationPropertyNames().forEach(navigationPropertyTypeName -> {
+          EdmNavigationProperty navigationProperty = edmEntityType.getNavigationProperty(navigationPropertyTypeName);
+          FieldJson fieldJson = new FieldJson(navigationProperty.getName(), edmEntityType.getNavigationProperty(navigationProperty.getName()));
           fields.add(fieldJson.serialize(fieldJson, FieldJson.class, null));
         });
       });

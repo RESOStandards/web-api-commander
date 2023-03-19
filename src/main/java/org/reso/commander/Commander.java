@@ -182,11 +182,11 @@ public class Commander {
    *
    * @param metadata any metadata in Edm format
    */
-  public static String generateMetadataReport(Edm metadata, String fileName) {
+  public static String generateMetadataReport(Edm metadata, String ddVersion, String fileName) {
     final String DEFAULT_FILENAME = "metadata-report.json";
 
     try {
-      MetadataReport report = new MetadataReport(metadata);
+      MetadataReport report = new MetadataReport(metadata, ddVersion);
       GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting();
       gsonBuilder.registerTypeAdapter(MetadataReport.class, report);
 
@@ -209,8 +209,8 @@ public class Commander {
     return null;
   }
 
-  public static String generateMetadataReport(Edm metadata) {
-    return generateMetadataReport(metadata, null);
+  public static String generateMetadataReport(Edm metadata, String ddVersion) {
+    return generateMetadataReport(metadata, ddVersion, null);
   }
 
   /**
