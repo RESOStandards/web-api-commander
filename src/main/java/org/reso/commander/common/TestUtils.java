@@ -968,12 +968,12 @@ public final class TestUtils {
    *
    * @return a DDProcessor Cache object
    */
-  public static DDCacheProcessor buildDataDictionaryCache() {
+  public static DDCacheProcessor buildDataDictionaryCache(String version) {
     LOG.info("Creating standard field cache...");
-    final DDCacheProcessor cache = new DDCacheProcessor();
+    final DDCacheProcessor cache = new DDCacheProcessor(version);
     DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(cache);
     generator.processWorksheets();
-    LOG.info("Standard field cache created!");
+    LOG.info("Standard field cache created! Version: DD {}", version);
     return cache;
   }
 }

@@ -19,6 +19,10 @@ public class BDDProcessor extends WorksheetProcessor {
   private static final String FEATURE_EXTENSION = ".feature";
   private static final int EXAMPLES_PADDING_AMOUNT = 6;
 
+  public BDDProcessor(String version) {
+    super(version);
+  }
+
   @Override
   void processNumber(ReferenceStandardField row) {
     resourceTemplates.get(row.getResourceName()).append(BDDTemplates.buildNumberTest(row));
@@ -61,12 +65,12 @@ public class BDDProcessor extends WorksheetProcessor {
 
   @Override
   void generateOutput() {
-    LOG.info("Using reference worksheet: " + REFERENCE_WORKSHEET);
+    LOG.info("Using reference worksheet: " + getReferenceWorksheet(this.getVersion()));
     LOG.info("Generating BDD .feature files for the following resources: " + resourceTemplates.keySet());
     resourceTemplates.forEach((resourceName, buffer) -> {
       //put in local directory rather than relative to where the input file is
       Utils.createFile(getDirectoryName(), resourceName.toLowerCase() + FEATURE_EXTENSION,
-          BDDTemplates.buildHeaderInfo(resourceName, startTimestamp) + buffer.toString());
+          BDDTemplates.buildHeaderInfo(resourceName, startTimestamp, getVersion()) + buffer.toString());
     });
   }
 
@@ -75,7 +79,7 @@ public class BDDProcessor extends WorksheetProcessor {
      * Contains various templates used for test generation
      * TODO: add a formatter rather than using inline spaces
      */
-    public static String buildHeaderInfo(String resourceName, String generatedTimestamp) {
+    public static String buildHeaderInfo(String resourceName, String generatedTimestamp, String version) {
       if (resourceName == null) return null;
       if (generatedTimestamp == null) generatedTimestamp = Utils.getTimestamp(new Date());
       return

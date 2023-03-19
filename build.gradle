@@ -154,7 +154,7 @@ tasks.register('testDataDictionary_1_7') {
   dependsOn jar, prepareCertificationEnvironment
   doLast {
     javaexec {
-      main = 'io.cucumber.core.cli.Main'
+      mainClass = 'io.cucumber.core.cli.Main'
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
 
@@ -185,7 +185,8 @@ tasks.register('testDataDictionary_1_7') {
           'html:' + certReportsDir + '/' + reportName + '.html',
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary/v1-7'
+          'src/main/java/org/reso/certification/features/data-dictionary/v1-7',
+          'src/main/java/org/reso/certification/features/data-dictionary/metadata-resources'
       )
 
       if (systemProperties.hasProperty('cucumber.filter.tags')) {
@@ -214,7 +215,7 @@ tasks.register('testDataDictionary_2_0') {
   dependsOn jar, prepareCertificationEnvironment
   doLast {
     javaexec {
-      main = 'io.cucumber.core.cli.Main'
+      mainClass = 'io.cucumber.core.cli.Main'
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
 
@@ -245,7 +246,8 @@ tasks.register('testDataDictionary_2_0') {
           'html:' + certReportsDir + '/' + reportName + '.html',
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary/v2-0'
+          'src/main/java/org/reso/certification/features/data-dictionary/v2-0',
+          'src/main/java/org/reso/certification/features/data-dictionary/metadata-resources'
       )
 
       if (System.hasProperty('cucumber.filter.tags')) {
@@ -308,6 +310,7 @@ tasks.register('testDataDictionaryReferenceMetadata_1_7') {
       mainClass = "io.cucumber.core.cli.Main"
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       System.setProperty('pathToMetadata', 'src/main/resources/RESODataDictionary-1.7.xml')
+      System.setProperty('ddVersion', '1.7')
       systemProperties = System.getProperties()
       args = [
           '--glue',
@@ -330,6 +333,7 @@ tasks.register('testDataDictionaryReferenceMetadata_2_0') {
       mainClass = "io.cucumber.core.cli.Main"
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       System.setProperty('pathToMetadata', 'src/main/resources/RESODataDictionary-2.0.xml')
+      System.setProperty('ddVersion', '2.0')
       systemProperties = System.getProperties()
       args = [
           '--glue',

@@ -24798,9 +24798,9 @@
       "maxLength": 255,
       "isCollection": false,
       "unicode": true,
-      "annotations": [
+      "DisplayName": [
         {
-          "term": "RESO.OData.Metadata.StandardName",
+          "locale": "en-us",
           "value": "Team Key"
         },
         {

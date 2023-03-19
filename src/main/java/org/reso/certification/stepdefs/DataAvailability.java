@@ -22,6 +22,7 @@ import org.apache.olingo.commons.api.edm.EdmNamed;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.codegen.DDCacheProcessor;
+import org.reso.certification.codegen.WorksheetProcessor;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.DataDictionaryMetadata;
 import org.reso.commander.common.Utils;
@@ -45,6 +46,7 @@ import java.util.stream.Collectors;
 import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeTrue;
+import static org.reso.certification.codegen.WorksheetProcessor.DEFAULT_DATA_DICTIONARY_VERSION;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.STRING_LIST_MULTI;
 import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_TYPES.STRING_LIST_SINGLE;
 import static org.reso.certification.containers.WebAPITestContainer.EMPTY_STRING;
@@ -66,6 +68,11 @@ public class DataAvailability {
   private static final String SAMPLES_DIRECTORY_TEMPLATE = BUILD_DIRECTORY_PATH + File.separator + "%s";
 
   private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
+
+  //Data Dictionary Version
+  private static final String VERSION_ARG = "version";
+  private static final String DATA_DICTIONARY_VERSION =
+      System.getProperty(VERSION_ARG, DEFAULT_DATA_DICTIONARY_VERSION);
 
   // strict mode is enabled by default
   private static final String USE_STRICT_MODE_ARG = "strict";
@@ -530,7 +537,7 @@ public class DataAvailability {
         schema.getEntityTypes().stream().map(EdmNamed::getName))
             .collect(Collectors.toSet());
 
-    final DDCacheProcessor cache = new DDCacheProcessor();
+    final DDCacheProcessor cache = new DDCacheProcessor(DATA_DICTIONARY_VERSION);
 
     standardResources.set(resources.stream()
         .filter(cache.getStandardFieldCache().keySet()::contains).collect(Collectors.toSet()));

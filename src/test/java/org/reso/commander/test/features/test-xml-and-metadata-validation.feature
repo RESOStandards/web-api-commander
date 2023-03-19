@@ -12,6 +12,11 @@ Feature: Commander XML and Metadata Validation
     When XML validation is performed on the resource data
     Then XML validation succeeds
 
+  Scenario: XML Validation using OASIS reference XSDs
+    Given metadata were loaded from the sample resource "RESODataDictionary-2.0.xml"
+    When XML validation is performed on the resource data
+    Then XML validation succeeds
+
   Scenario: XML Validation fails when XML are malformed
     Given metadata were loaded from the sample resource "bad-edmx-unparsable-xml.xml"
     When XML validation is performed on the resource data
@@ -22,6 +27,11 @@ Feature: Commander XML and Metadata Validation
   #######################################
   Scenario: XML Metadata validation succeeds when XML Metadata are valid
     Given metadata were loaded from the sample resource "RESODataDictionary-1.7.xml"
+    When XML Metadata validation is performed on the resource data
+    Then XML Metadata validation succeeds
+
+  Scenario: XML Metadata validation succeeds when XML Metadata are valid
+    Given metadata were loaded from the sample resource "RESODataDictionary-2.0.xml"
     When XML Metadata validation is performed on the resource data
     Then XML Metadata validation succeeds
 

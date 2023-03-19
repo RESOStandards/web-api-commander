@@ -20,24 +20,37 @@ import static org.reso.certification.codegen.WorksheetProcessor.WELL_KNOWN_DATA_
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
 public abstract class WorksheetProcessor {
-  private static final Logger LOG = LogManager.getLogger(WorksheetProcessor.class);
-
   //TODO: make this a dynamic property based on DD version
-  public static final String REFERENCE_WORKSHEET = "RESODataDictionary-2.0.xlsx";
-
+  public static final String REFERENCE_WORKSHEET_TEMPLATE = "RESODataDictionary-%s.xlsx";
   static final Map<String, StringBuffer> resourceTemplates = new LinkedHashMap<>();
-
   static final Map<String, Set<ReferenceStandardLookup>> standardEnumerationsMap = new LinkedHashMap<>();
   static final Map<String, Map<String, ReferenceStandardField>> standardFieldsMap = new LinkedHashMap<>(new LinkedHashMap<>());
+  private static final Logger LOG = LogManager.getLogger(WorksheetProcessor.class);
+  public static final String DEFAULT_DATA_DICTIONARY_VERSION = "1.7";
 
+  String version;
   String dataDictionarySpecification = null;
   String startTimestamp;
   Map<String, Integer> wellKnownStandardFieldHeaderMap = new LinkedHashMap<>();
   Map<String, Integer> wellKnownStandardEnumerationHeaderMap = new LinkedHashMap<>();
 
-  public WorksheetProcessor() {
-    LOG.info("Using Data Dictionary Reference sheet: " + REFERENCE_WORKSHEET);
+  public WorksheetProcessor(String version) {
+    this.version = version;
+    LOG.info("Using Data Dictionary version: {}", getVersion());
+    LOG.info("Using Data Dictionary Reference sheet: {}", getReferenceWorksheet(getVersion()));
     startTimestamp = Utils.getTimestamp();
+  }
+
+  public WorksheetProcessor() {
+    this(DEFAULT_DATA_DICTIONARY_VERSION);
+  }
+
+  public String getVersion() {
+    return version;
+  }
+
+  public static String getReferenceWorksheet(String version) {
+    return String.format(REFERENCE_WORKSHEET_TEMPLATE, version);
   }
 
   public static Map<String, Integer> buildWellKnownStandardFieldHeaderMap(Sheet sheet) {

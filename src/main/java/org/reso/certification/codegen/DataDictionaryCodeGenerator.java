@@ -5,8 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import static org.reso.certification.codegen.WorksheetProcessor.REFERENCE_WORKSHEET;
-import static org.reso.certification.codegen.WorksheetProcessor.buildWellKnownStandardFieldHeaderMap;
+import static org.reso.certification.codegen.WorksheetProcessor.*;
 
 public class DataDictionaryCodeGenerator {
   private static final Logger LOG = LogManager.getLogger(DataDictionaryCodeGenerator.class);
@@ -23,7 +22,7 @@ public class DataDictionaryCodeGenerator {
    */
   public DataDictionaryCodeGenerator(WorksheetProcessor processor) {
     this.processor = processor;
-    processor.setDataDictionarySpecification(REFERENCE_WORKSHEET);
+    processor.setDataDictionarySpecification(WorksheetProcessor.getReferenceWorksheet(processor.getVersion()));
     workbook = processor.getReferenceWorkbook();
     processor.buildEnumerationMap();
   }

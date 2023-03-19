@@ -218,7 +218,8 @@ public class App {
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS);
           try {
-            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new BDDProcessor());
+            String ddVersion = cmd.getOptionValue(APP_OPTIONS.DD_VERSION, null);
+            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new BDDProcessor(ddVersion));
             generator.processWorksheets();
           } catch (Exception ex) {
             LOG.error(getDefaultErrorMessage(ex));
@@ -226,7 +227,8 @@ public class App {
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_EDMX)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_EDMX);
           try {
-            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new EDMXProcessor());
+            String ddVersion = cmd.getOptionValue(APP_OPTIONS.DD_VERSION, null);
+            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new EDMXProcessor(ddVersion));
             generator.processWorksheets();
           } catch (Exception ex) {
             LOG.error(getDefaultErrorMessage(ex));
@@ -394,6 +396,7 @@ public class App {
     static final String USE_KEY_NUMERIC = "useKeyNumeric";
     static final String CONTENT_TYPE = "contentType";
     static final String HELP = "help";
+    static final String DD_VERSION = "ddVersion";
 
     /**
      * Validates options for the various actions exposed in App.
@@ -523,6 +526,11 @@ public class App {
           .desc("print help")
           .build();
 
+      Option ddVersion = Option.builder()
+          .argName("v").longOpt(DD_VERSION).hasArg(true)
+          .desc("Data Dictionary or Web API version, e.g. 1.7, 2.0.0")
+          .build();
+
       OptionGroup actions = new OptionGroup()
           .addOption(Option.builder().argName("r").longOpt(ACTIONS.RUN_RESOSCRIPT)
               .desc("Runs commands in RESOScript file given as <inputFile>.").build())
@@ -558,6 +566,7 @@ public class App {
           .addOption(useKeyNumeric)
           .addOption(uriOption)
           .addOption(contentType)
+          .addOption(ddVersion)
           .addOptionGroup(actions);
     }
 

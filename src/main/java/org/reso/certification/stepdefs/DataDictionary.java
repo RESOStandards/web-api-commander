@@ -18,7 +18,6 @@ import org.apache.olingo.commons.api.edm.EdmMember;
 import org.apache.olingo.commons.api.edm.EdmNamed;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlEnumMember;
-import org.junit.AfterClass;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.Commander;
 import org.reso.commander.common.TestUtils;
@@ -39,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
+import static org.reso.certification.codegen.WorksheetProcessor.DEFAULT_DATA_DICTIONARY_VERSION;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
 import static org.reso.commander.common.Utils.pluralize;
@@ -74,9 +74,11 @@ public class DataDictionary {
   protected static final String PATH_TO_METADATA_ARG = "pathToMetadata";
   protected static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final String LOOKUP_VALUE = "lookupValue";
+  private static final String DD_VERSION_ARG = "ddVersion";
 
   //extract any params here
   private final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES_ARG));
+  private final String ddVersion = System.getProperty(DD_VERSION_ARG, DEFAULT_DATA_DICTIONARY_VERSION);
 
   //strict mode is enabled by default
   private final boolean strictMode = System.getProperty(USE_STRICT_MODE_ARG) == null || Boolean.parseBoolean(System.getProperty(USE_STRICT_MODE_ARG));
@@ -101,6 +103,7 @@ public class DataDictionary {
       container.initialize();
       container.setShowResponses(showResponses);
     }
+    container.setDataDictionaryVersion(ddVersion);
   }
 
   @And("a test container was successfully created from the given metadata file")
@@ -121,6 +124,8 @@ public class DataDictionary {
       if (container.getPathToRESOScript() == null) {
         failAndExitWithErrorMessage("pathToRESOScript must be present in command arguments, see README.", scenario);
       }
+    } else {
+      assumeTrue(true);
     }
   }
 

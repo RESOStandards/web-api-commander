@@ -7,7 +7,6 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
-import io.cucumber.java.bs.A;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,9 +23,7 @@ import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.reso.certification.codegen.DDCacheProcessor;
-import org.reso.certification.codegen.WorksheetProcessor;
 import org.reso.commander.Commander;
-import org.reso.commander.common.DataDictionaryMetadata;
 import org.reso.commander.common.TestUtils;
 import org.reso.models.*;
 
@@ -39,6 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
+import static org.reso.certification.codegen.WorksheetProcessor.DEFAULT_DATA_DICTIONARY_VERSION;
 import static org.reso.commander.Commander.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.*;
@@ -105,8 +103,14 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicReference<ODataRetrieveResponse<ClientEntitySet>> clientEntitySetResponse = new AtomicReference<>();
   private final AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
   private final AtomicReference<DDCacheProcessor> ddCacheProcessor = new AtomicReference<>();
+  private final AtomicReference<String> dataDictionaryVersion = new AtomicReference<>();
 
   private static final String WEB_API_CORE_REFERENCE_REQUESTS = "reference-web-api-core-requests.xml";
+
+  private static final Set<String> SUPPORTED_DD_VERSIONS = new HashSet<String>(){{
+    add("1.7");
+    add("2.0");
+  }};
 
   //singleton variables
   private static final AtomicReference<Map<String, Map<String, CsdlProperty>>> fieldMap = new AtomicReference<>();
@@ -902,9 +906,18 @@ public final class WebAPITestContainer implements TestContainer {
 
   public DDCacheProcessor getDDCacheProcessor() {
     if (ddCacheProcessor.get() == null) {
-      ddCacheProcessor.set(TestUtils.buildDataDictionaryCache());
+      ddCacheProcessor.set(TestUtils.buildDataDictionaryCache(this.getDataDictionaryVersion()));
     }
     return ddCacheProcessor.get();
+  }
+
+  public String getDataDictionaryVersion() {
+    return dataDictionaryVersion.get();
+  }
+
+  public void setDataDictionaryVersion(String version) {
+    String resolvedDDVersion = SUPPORTED_DD_VERSIONS.contains(version) ? version : DEFAULT_DATA_DICTIONARY_VERSION;
+    dataDictionaryVersion.set(resolvedDDVersion);
   }
 
   public static final class ODATA_QUERY_PARAMS {

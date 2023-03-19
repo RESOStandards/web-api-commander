@@ -18,6 +18,10 @@ Feature: Web API Container Tests
     When sample metadata from "RESODataDictionary-1.7.xml" are loaded into the test container
     Then metadata are valid
 
+  Scenario: Metadata validation returns true for known-good metadata
+    When sample metadata from "RESODataDictionary-2.0.xml" are loaded into the test container
+    Then metadata are valid
+
   Scenario: Metadata validation returns false for known-bad metadata
     When sample metadata from "bad-edmx-no-keyfield.xml" are loaded into the test container
     Then metadata are invalid
