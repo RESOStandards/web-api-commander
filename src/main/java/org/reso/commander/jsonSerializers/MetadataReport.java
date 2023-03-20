@@ -9,6 +9,7 @@ import org.reso.commander.common.Utils;
 import java.lang.reflect.Type;
 import java.util.Date;
 
+import static org.reso.commander.Commander.NOT_OK;
 import static org.reso.commander.Commander.REPORT_DIVIDER;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 
@@ -66,9 +67,18 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
 
         //handle navigation properties (expansions)
         edmEntityType.getNavigationPropertyNames().forEach(navigationPropertyTypeName -> {
-          EdmNavigationProperty navigationProperty = edmEntityType.getNavigationProperty(navigationPropertyTypeName);
-          FieldJson fieldJson = new FieldJson(navigationProperty.getName(), edmEntityType.getNavigationProperty(navigationProperty.getName()));
-          fields.add(fieldJson.serialize(fieldJson, FieldJson.class, null));
+          try {
+            FieldJson fieldJson = new FieldJson(edmEntityType.getName(), edmEntityType.getNavigationProperty(navigationPropertyTypeName));
+            fields.add(fieldJson.serialize(fieldJson, FieldJson.class, null));
+          } catch (Exception ex) {
+            LOG.warn("WARNING! Could not process expansion '{}'. Exception: {}", navigationPropertyTypeName, ex.getMessage());
+            if (ddVersion.compareTo("2.0") != 0) {
+              LOG.warn("WARNING! This will fail in Data Dictionary 2.0 and later!\n");
+            } else {
+              LOG.error("ERROR: Expanded types MUST be resolvable for Data Dictionary 2.0 and later!");
+              System.exit(NOT_OK);
+            }
+          }
         });
       });
 

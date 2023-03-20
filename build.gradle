@@ -156,6 +156,8 @@ tasks.register('testDataDictionary_1_7') {
     javaexec {
       mainClass = 'io.cucumber.core.cli.Main'
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      System.setProperty('ddVersion', '1.7')
+
       systemProperties = System.getProperties()
 
       pathToMetadata = System.getProperty('pathToMetadata', null)
@@ -185,8 +187,7 @@ tasks.register('testDataDictionary_1_7') {
           'html:' + certReportsDir + '/' + reportName + '.html',
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary/v1-7',
-          'src/main/java/org/reso/certification/features/data-dictionary/metadata-resources'
+          'src/main/java/org/reso/certification/features/data-dictionary/v1-7'
       )
 
       if (systemProperties.hasProperty('cucumber.filter.tags')) {
@@ -217,6 +218,9 @@ tasks.register('testDataDictionary_2_0') {
     javaexec {
       mainClass = 'io.cucumber.core.cli.Main'
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+
+      System.setProperty('ddVersion', '2.0')
+
       systemProperties = System.getProperties()
 
       pathToMetadata = System.getProperty('pathToMetadata', null)
@@ -246,8 +250,7 @@ tasks.register('testDataDictionary_2_0') {
           'html:' + certReportsDir + '/' + reportName + '.html',
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary/v2-0',
-          'src/main/java/org/reso/certification/features/data-dictionary/metadata-resources'
+          'src/main/java/org/reso/certification/features/data-dictionary/v2-0'
       )
 
       if (System.hasProperty('cucumber.filter.tags')) {
