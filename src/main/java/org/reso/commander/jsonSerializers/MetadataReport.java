@@ -72,7 +72,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
             fields.add(fieldJson.serialize(fieldJson, FieldJson.class, null));
           } catch (Exception ex) {
             LOG.warn("WARNING! Could not process expansion '{}'. Exception: {}", navigationPropertyTypeName, ex.getMessage());
-            if (ddVersion.compareTo("2.0") != 0) {
+            if (ddVersion.compareTo("1.7") == 0) {
               LOG.warn("WARNING! This will fail in Data Dictionary 2.0 and later!\n");
             } else {
               LOG.error("ERROR: Expanded types MUST be resolvable for Data Dictionary 2.0 and later!");
