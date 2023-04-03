@@ -187,12 +187,15 @@ tasks.register('testDataDictionary_1_7') {
           'html:' + certReportsDir + '/' + reportName + '.html',
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary/v1-7'
+          'src/main/java/org/reso/certification/features/data-dictionary'
       )
 
-      if (systemProperties.hasProperty('cucumber.filter.tags')) {
-        argsArray.add('--tags')
-        argsArray.add(systemProperties.get('cucumber.filter.tags').toString())
+      //handle versioning through tags
+      argsArray.add('--tags')
+      argsArray.add('@dd-1.7')
+
+      if (System.hasProperty('cucumber.filter.tags')) {
+        argsArray.add(System.getProperty('cucumber.filter.tags').toString())
       }
 
       args = argsArray
@@ -250,11 +253,14 @@ tasks.register('testDataDictionary_2_0') {
           'html:' + certReportsDir + '/' + reportName + '.html',
           '--glue',
           'org.reso.certification.stepdefs#DataDictionary',
-          'src/main/java/org/reso/certification/features/data-dictionary/v2-0'
+          'src/main/java/org/reso/certification/features/data-dictionary'
       )
 
+      //handle versioning through tags
+      argsArray.add('--tags')
+      argsArray.add('@dd-2.0')
+
       if (System.hasProperty('cucumber.filter.tags')) {
-        argsArray.add('--tags')
         argsArray.add(System.getProperty('cucumber.filter.tags').toString())
       }
 

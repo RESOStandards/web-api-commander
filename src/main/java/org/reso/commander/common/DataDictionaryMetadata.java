@@ -39,7 +39,7 @@ public class DataDictionaryMetadata {
         return "ProspectingKey";
       case "Queue":
         return "QueueTransactionKey";
-      case "Rule":
+      case "Rules":
         return "RuleKey";
       case "SavedSearch":
         return "SavedSearchKey";
@@ -71,9 +71,9 @@ public class DataDictionaryMetadata {
         return "MemberAssociationKey";
       case "OfficeAssociation":
         return "OfficeAssociationKey";
-      case "MemberStateLicense":
+      case "MemberStateLicenses":
         return "MemberStateLicenseKey";
-      case "OfficeCorporateLicense":
+      case "OfficeCorporateLicenses":
         return "OfficeCorporateLicenseKey";
       case "Field":
         return "FieldKey";

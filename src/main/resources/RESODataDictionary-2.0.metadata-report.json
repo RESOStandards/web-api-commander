@@ -1,7 +1,7 @@
 {
   "description": "RESO Data Dictionary Metadata Report",
   "version": "2.0",
-  "generatedOn": "2023-03-19T22:44:52.023777Z",
+  "generatedOn": "2023-04-03T22:40:31.727835Z",
   "fields": [
     {
       "resourceName": "Property",
@@ -14197,7 +14197,7 @@
       ]
     },
     {
-      "resourceName": "OriginatingSystem",
+      "resourceName": "Property",
       "fieldName": "OriginatingSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -14219,7 +14219,7 @@
       ]
     },
     {
-      "resourceName": "BuyerAgent",
+      "resourceName": "Property",
       "fieldName": "BuyerAgent",
       "isExpansion": true,
       "isCollection": false,
@@ -14241,7 +14241,7 @@
       ]
     },
     {
-      "resourceName": "BuyerOffice",
+      "resourceName": "Property",
       "fieldName": "BuyerOffice",
       "isExpansion": true,
       "isCollection": false,
@@ -14263,7 +14263,7 @@
       ]
     },
     {
-      "resourceName": "CoBuyerAgent",
+      "resourceName": "Property",
       "fieldName": "CoBuyerAgent",
       "isExpansion": true,
       "isCollection": false,
@@ -14285,7 +14285,7 @@
       ]
     },
     {
-      "resourceName": "CoBuyerOffice",
+      "resourceName": "Property",
       "fieldName": "CoBuyerOffice",
       "isExpansion": true,
       "isCollection": false,
@@ -14307,7 +14307,7 @@
       ]
     },
     {
-      "resourceName": "CoListAgent",
+      "resourceName": "Property",
       "fieldName": "CoListAgent",
       "isExpansion": true,
       "isCollection": false,
@@ -14329,7 +14329,7 @@
       ]
     },
     {
-      "resourceName": "CoListOffice",
+      "resourceName": "Property",
       "fieldName": "CoListOffice",
       "isExpansion": true,
       "isCollection": false,
@@ -14351,7 +14351,7 @@
       ]
     },
     {
-      "resourceName": "ListAgent",
+      "resourceName": "Property",
       "fieldName": "ListAgent",
       "isExpansion": true,
       "isCollection": false,
@@ -14373,7 +14373,7 @@
       ]
     },
     {
-      "resourceName": "ListOffice",
+      "resourceName": "Property",
       "fieldName": "ListOffice",
       "isExpansion": true,
       "isCollection": false,
@@ -14395,7 +14395,7 @@
       ]
     },
     {
-      "resourceName": "BuyerTeam",
+      "resourceName": "Property",
       "fieldName": "BuyerTeam",
       "isExpansion": true,
       "isCollection": false,
@@ -14417,7 +14417,7 @@
       ]
     },
     {
-      "resourceName": "ListTeam",
+      "resourceName": "Property",
       "fieldName": "ListTeam",
       "isExpansion": true,
       "isCollection": false,
@@ -14439,7 +14439,7 @@
       ]
     },
     {
-      "resourceName": "SourceSystem",
+      "resourceName": "Property",
       "fieldName": "SourceSystem",
       "isExpansion": true,
       "isCollection": true,
@@ -14461,7 +14461,7 @@
       ]
     },
     {
-      "resourceName": "GreenBuildingVerification",
+      "resourceName": "Property",
       "fieldName": "GreenBuildingVerification",
       "isExpansion": true,
       "isCollection": true,
@@ -14483,7 +14483,7 @@
       ]
     },
     {
-      "resourceName": "PowerProduction",
+      "resourceName": "Property",
       "fieldName": "PowerProduction",
       "isExpansion": true,
       "isCollection": true,
@@ -14505,7 +14505,7 @@
       ]
     },
     {
-      "resourceName": "Rooms",
+      "resourceName": "Property",
       "fieldName": "Rooms",
       "isExpansion": true,
       "isCollection": true,
@@ -14527,7 +14527,7 @@
       ]
     },
     {
-      "resourceName": "UnitTypes",
+      "resourceName": "Property",
       "fieldName": "UnitTypes",
       "isExpansion": true,
       "isCollection": true,
@@ -14549,7 +14549,7 @@
       ]
     },
     {
-      "resourceName": "HistoryTransactional",
+      "resourceName": "Property",
       "fieldName": "HistoryTransactional",
       "isExpansion": true,
       "isCollection": true,
@@ -14571,7 +14571,7 @@
       ]
     },
     {
-      "resourceName": "Media",
+      "resourceName": "Property",
       "fieldName": "Media",
       "isExpansion": true,
       "isCollection": true,
@@ -14593,7 +14593,7 @@
       ]
     },
     {
-      "resourceName": "SocialMedia",
+      "resourceName": "Property",
       "fieldName": "SocialMedia",
       "isExpansion": true,
       "isCollection": true,
@@ -14615,7 +14615,7 @@
       ]
     },
     {
-      "resourceName": "OpenHouse",
+      "resourceName": "Property",
       "fieldName": "OpenHouse",
       "isExpansion": true,
       "isCollection": true,
@@ -16448,7 +16448,7 @@
       ]
     },
     {
-      "resourceName": "Office",
+      "resourceName": "Member",
       "fieldName": "Office",
       "isExpansion": true,
       "isCollection": false,
@@ -16470,7 +16470,7 @@
       ]
     },
     {
-      "resourceName": "OriginatingSystem",
+      "resourceName": "Member",
       "fieldName": "OriginatingSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -16492,7 +16492,7 @@
       ]
     },
     {
-      "resourceName": "SourceSystem",
+      "resourceName": "Member",
       "fieldName": "SourceSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -16514,7 +16514,7 @@
       ]
     },
     {
-      "resourceName": "MemberOtherPhone",
+      "resourceName": "Member",
       "fieldName": "MemberOtherPhone",
       "isExpansion": true,
       "isCollection": true,
@@ -16536,7 +16536,7 @@
       ]
     },
     {
-      "resourceName": "MemberSocialMedia",
+      "resourceName": "Member",
       "fieldName": "MemberSocialMedia",
       "isExpansion": true,
       "isCollection": true,
@@ -16558,7 +16558,7 @@
       ]
     },
     {
-      "resourceName": "HistoryTransactional",
+      "resourceName": "Member",
       "fieldName": "HistoryTransactional",
       "isExpansion": true,
       "isCollection": true,
@@ -16580,7 +16580,7 @@
       ]
     },
     {
-      "resourceName": "Media",
+      "resourceName": "Member",
       "fieldName": "Media",
       "isExpansion": true,
       "isCollection": true,
@@ -18069,7 +18069,7 @@
       ]
     },
     {
-      "resourceName": "MainOffice",
+      "resourceName": "Office",
       "fieldName": "MainOffice",
       "isExpansion": true,
       "isCollection": false,
@@ -18091,7 +18091,7 @@
       ]
     },
     {
-      "resourceName": "OfficeBroker",
+      "resourceName": "Office",
       "fieldName": "OfficeBroker",
       "isExpansion": true,
       "isCollection": false,
@@ -18113,7 +18113,7 @@
       ]
     },
     {
-      "resourceName": "OfficeManager",
+      "resourceName": "Office",
       "fieldName": "OfficeManager",
       "isExpansion": true,
       "isCollection": false,
@@ -18135,7 +18135,7 @@
       ]
     },
     {
-      "resourceName": "OriginatingSystem",
+      "resourceName": "Office",
       "fieldName": "OriginatingSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -18157,7 +18157,7 @@
       ]
     },
     {
-      "resourceName": "SourceSystem",
+      "resourceName": "Office",
       "fieldName": "SourceSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -18179,7 +18179,7 @@
       ]
     },
     {
-      "resourceName": "HistoryTransactional",
+      "resourceName": "Office",
       "fieldName": "HistoryTransactional",
       "isExpansion": true,
       "isCollection": true,
@@ -18201,7 +18201,7 @@
       ]
     },
     {
-      "resourceName": "Media",
+      "resourceName": "Office",
       "fieldName": "Media",
       "isExpansion": true,
       "isCollection": true,
@@ -18223,7 +18223,7 @@
       ]
     },
     {
-      "resourceName": "OfficeSocialMedia",
+      "resourceName": "Office",
       "fieldName": "OfficeSocialMedia",
       "isExpansion": true,
       "isCollection": true,
@@ -20174,7 +20174,7 @@
       ]
     },
     {
-      "resourceName": "OriginatingSystem",
+      "resourceName": "Contacts",
       "fieldName": "OriginatingSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -20196,7 +20196,7 @@
       ]
     },
     {
-      "resourceName": "SourceSystem",
+      "resourceName": "Contacts",
       "fieldName": "SourceSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -20218,7 +20218,7 @@
       ]
     },
     {
-      "resourceName": "OwnerMember",
+      "resourceName": "Contacts",
       "fieldName": "OwnerMember",
       "isExpansion": true,
       "isCollection": false,
@@ -20240,7 +20240,7 @@
       ]
     },
     {
-      "resourceName": "HistoryTransactional",
+      "resourceName": "Contacts",
       "fieldName": "HistoryTransactional",
       "isExpansion": true,
       "isCollection": true,
@@ -20262,7 +20262,7 @@
       ]
     },
     {
-      "resourceName": "Media",
+      "resourceName": "Contacts",
       "fieldName": "Media",
       "isExpansion": true,
       "isCollection": true,
@@ -20284,7 +20284,7 @@
       ]
     },
     {
-      "resourceName": "ContactsOtherPhone",
+      "resourceName": "Contacts",
       "fieldName": "ContactsOtherPhone",
       "isExpansion": true,
       "isCollection": true,
@@ -20306,7 +20306,7 @@
       ]
     },
     {
-      "resourceName": "ContactsSocialMedia",
+      "resourceName": "Contacts",
       "fieldName": "ContactsSocialMedia",
       "isExpansion": true,
       "isCollection": true,
@@ -21883,7 +21883,7 @@
       ]
     },
     {
-      "resourceName": "Contact",
+      "resourceName": "ContactListings",
       "fieldName": "Contact",
       "isExpansion": true,
       "isCollection": false,
@@ -21905,7 +21905,7 @@
       ]
     },
     {
-      "resourceName": "Listing",
+      "resourceName": "ContactListings",
       "fieldName": "Listing",
       "isExpansion": true,
       "isCollection": false,
@@ -21927,7 +21927,7 @@
       ]
     },
     {
-      "resourceName": "ListingNotes",
+      "resourceName": "ContactListings",
       "fieldName": "ListingNotes",
       "isExpansion": true,
       "isCollection": true,
@@ -23565,7 +23565,7 @@
       ]
     },
     {
-      "resourceName": "ActorOriginatingSystem",
+      "resourceName": "InternetTracking",
       "fieldName": "ActorOriginatingSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -23587,7 +23587,7 @@
       ]
     },
     {
-      "resourceName": "ActorSourceSystem",
+      "resourceName": "InternetTracking",
       "fieldName": "ActorSourceSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -23609,7 +23609,7 @@
       ]
     },
     {
-      "resourceName": "EventOriginatingSystem",
+      "resourceName": "InternetTracking",
       "fieldName": "EventOriginatingSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -23631,7 +23631,7 @@
       ]
     },
     {
-      "resourceName": "EventSourceSystem",
+      "resourceName": "InternetTracking",
       "fieldName": "EventSourceSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -23653,7 +23653,7 @@
       ]
     },
     {
-      "resourceName": "ObjectOriginatingSystem",
+      "resourceName": "InternetTracking",
       "fieldName": "ObjectOriginatingSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -23675,7 +23675,7 @@
       ]
     },
     {
-      "resourceName": "ObjectSourceSystem",
+      "resourceName": "InternetTracking",
       "fieldName": "ObjectSourceSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -24226,7 +24226,7 @@
       ]
     },
     {
-      "resourceName": "Member",
+      "resourceName": "SavedSearch",
       "fieldName": "Member",
       "isExpansion": true,
       "isCollection": false,
@@ -24248,7 +24248,7 @@
       ]
     },
     {
-      "resourceName": "OriginatingSystem",
+      "resourceName": "SavedSearch",
       "fieldName": "OriginatingSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -24270,7 +24270,7 @@
       ]
     },
     {
-      "resourceName": "SourceSystem",
+      "resourceName": "SavedSearch",
       "fieldName": "SourceSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -25780,7 +25780,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "ClassName",
       "type": "org.reso.metadata.enums.ClassName",
       "typeName": "ClassName",
@@ -25803,7 +25803,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "FieldKey",
       "type": "Edm.String",
       "nullable": true,
@@ -25826,7 +25826,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "FieldName",
       "type": "Edm.String",
       "nullable": true,
@@ -25849,7 +25849,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "ModificationTimestamp",
       "type": "Edm.DateTimeOffset",
       "nullable": true,
@@ -25872,7 +25872,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "OriginalEntryTimestamp",
       "type": "Edm.DateTimeOffset",
       "nullable": true,
@@ -25895,7 +25895,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "OriginatingSystemID",
       "type": "Edm.String",
       "nullable": true,
@@ -25918,7 +25918,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "OriginatingSystemName",
       "type": "Edm.String",
       "nullable": true,
@@ -25941,7 +25941,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "OriginatingSystemRuleKey",
       "type": "Edm.String",
       "nullable": true,
@@ -25964,7 +25964,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "ResourceName",
       "type": "org.reso.metadata.enums.ResourceName",
       "typeName": "ResourceName",
@@ -25987,7 +25987,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "RuleAction",
       "type": "Edm.String",
       "nullable": true,
@@ -26010,7 +26010,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "RuleDescription",
       "type": "Edm.String",
       "nullable": true,
@@ -26033,7 +26033,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "RuleEnabledYN",
       "type": "Edm.Boolean",
       "nullable": true,
@@ -26055,7 +26055,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "RuleErrorText",
       "type": "Edm.String",
       "nullable": true,
@@ -26078,7 +26078,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "RuleExpression",
       "type": "Edm.String",
       "nullable": true,
@@ -26101,7 +26101,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "RuleFormat",
       "type": "org.reso.metadata.enums.RuleFormat",
       "typeName": "RuleFormat",
@@ -26124,7 +26124,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "RuleHelpText",
       "type": "Edm.String",
       "nullable": true,
@@ -26147,7 +26147,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "RuleKey",
       "type": "Edm.String",
       "nullable": true,
@@ -26170,7 +26170,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "RuleName",
       "type": "Edm.String",
       "nullable": true,
@@ -26193,7 +26193,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "RuleOrder",
       "type": "Edm.Int64",
       "nullable": true,
@@ -26215,7 +26215,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "RuleType",
       "type": "org.reso.metadata.enums.RuleType",
       "typeName": "RuleType",
@@ -26238,7 +26238,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "RuleVersion",
       "type": "Edm.String",
       "nullable": true,
@@ -26261,7 +26261,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "RuleWarningText",
       "type": "Edm.String",
       "nullable": true,
@@ -26284,7 +26284,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "SourceSystemHistoryKey",
       "type": "Edm.String",
       "nullable": true,
@@ -26307,7 +26307,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "SourceSystemID",
       "type": "Edm.String",
       "nullable": true,
@@ -26330,7 +26330,7 @@
       ]
     },
     {
-      "resourceName": "Rule",
+      "resourceName": "Rules",
       "fieldName": "SourceSystemName",
       "type": "Edm.String",
       "nullable": true,
@@ -26353,7 +26353,7 @@
       ]
     },
     {
-      "resourceName": "OriginatingSystem",
+      "resourceName": "Rules",
       "fieldName": "OriginatingSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -26375,7 +26375,7 @@
       ]
     },
     {
-      "resourceName": "SourceSystem",
+      "resourceName": "Rules",
       "fieldName": "SourceSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -26397,7 +26397,7 @@
       ]
     },
     {
-      "resourceName": "HistoryTransactional",
+      "resourceName": "Rules",
       "fieldName": "HistoryTransactional",
       "isExpansion": true,
       "isCollection": true,
@@ -27086,7 +27086,7 @@
       ]
     },
     {
-      "resourceName": "AgentOriginatingSystem",
+      "resourceName": "Showing",
       "fieldName": "AgentOriginatingSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -27108,7 +27108,7 @@
       ]
     },
     {
-      "resourceName": "AgentSourceSystem",
+      "resourceName": "Showing",
       "fieldName": "AgentSourceSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -27130,7 +27130,7 @@
       ]
     },
     {
-      "resourceName": "ShowingAgent",
+      "resourceName": "Showing",
       "fieldName": "ShowingAgent",
       "isExpansion": true,
       "isCollection": false,
@@ -27152,7 +27152,7 @@
       ]
     },
     {
-      "resourceName": "Listing",
+      "resourceName": "Showing",
       "fieldName": "Listing",
       "isExpansion": true,
       "isCollection": false,
@@ -27174,7 +27174,7 @@
       ]
     },
     {
-      "resourceName": "ListingOriginatingSystem",
+      "resourceName": "Showing",
       "fieldName": "ListingOriginatingSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -27196,7 +27196,7 @@
       ]
     },
     {
-      "resourceName": "ListingSourceSystem",
+      "resourceName": "Showing",
       "fieldName": "ListingSourceSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -27218,7 +27218,7 @@
       ]
     },
     {
-      "resourceName": "ShowingOriginatingSystem",
+      "resourceName": "Showing",
       "fieldName": "ShowingOriginatingSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -27240,7 +27240,7 @@
       ]
     },
     {
-      "resourceName": "ShowingSourceSystem",
+      "resourceName": "Showing",
       "fieldName": "ShowingSourceSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -27262,7 +27262,7 @@
       ]
     },
     {
-      "resourceName": "HistoryTransactional",
+      "resourceName": "Showing",
       "fieldName": "HistoryTransactional",
       "isExpansion": true,
       "isCollection": true,
@@ -27284,7 +27284,7 @@
       ]
     },
     {
-      "resourceName": "Media",
+      "resourceName": "Showing",
       "fieldName": "Media",
       "isExpansion": true,
       "isCollection": true,
@@ -27306,7 +27306,7 @@
       ]
     },
     {
-      "resourceName": "SocialMedia",
+      "resourceName": "Showing",
       "fieldName": "SocialMedia",
       "isExpansion": true,
       "isCollection": true,
@@ -28225,7 +28225,7 @@
       ]
     },
     {
-      "resourceName": "OriginatingSystem",
+      "resourceName": "Teams",
       "fieldName": "OriginatingSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -28247,7 +28247,7 @@
       ]
     },
     {
-      "resourceName": "SourceSystem",
+      "resourceName": "Teams",
       "fieldName": "SourceSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -28269,7 +28269,7 @@
       ]
     },
     {
-      "resourceName": "TeamLead",
+      "resourceName": "Teams",
       "fieldName": "TeamLead",
       "isExpansion": true,
       "isCollection": false,
@@ -28291,7 +28291,7 @@
       ]
     },
     {
-      "resourceName": "HistoryTransactional",
+      "resourceName": "Teams",
       "fieldName": "HistoryTransactional",
       "isExpansion": true,
       "isCollection": true,
@@ -28313,7 +28313,7 @@
       ]
     },
     {
-      "resourceName": "Media",
+      "resourceName": "Teams",
       "fieldName": "Media",
       "isExpansion": true,
       "isCollection": true,
@@ -28335,7 +28335,7 @@
       ]
     },
     {
-      "resourceName": "TeamsSocialMedia",
+      "resourceName": "Teams",
       "fieldName": "TeamsSocialMedia",
       "isExpansion": true,
       "isCollection": true,
@@ -28748,7 +28748,7 @@
       ]
     },
     {
-      "resourceName": "Member",
+      "resourceName": "TeamMembers",
       "fieldName": "Member",
       "isExpansion": true,
       "isCollection": false,
@@ -28770,7 +28770,7 @@
       ]
     },
     {
-      "resourceName": "OriginatingSystem",
+      "resourceName": "TeamMembers",
       "fieldName": "OriginatingSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -28792,7 +28792,7 @@
       ]
     },
     {
-      "resourceName": "SourceSystem",
+      "resourceName": "TeamMembers",
       "fieldName": "SourceSystem",
       "isExpansion": true,
       "isCollection": false,
@@ -28814,7 +28814,7 @@
       ]
     },
     {
-      "resourceName": "HistoryTransactional",
+      "resourceName": "TeamMembers",
       "fieldName": "HistoryTransactional",
       "isExpansion": true,
       "isCollection": true,
@@ -29800,7 +29800,7 @@
       ]
     },
     {
-      "resourceName": "ChangedByMember",
+      "resourceName": "OUID",
       "fieldName": "ChangedByMember",
       "isExpansion": true,
       "isCollection": false,
@@ -29822,7 +29822,7 @@
       ]
     },
     {
-      "resourceName": "HistoryTransactional",
+      "resourceName": "OUID",
       "fieldName": "HistoryTransactional",
       "isExpansion": true,
       "isCollection": true,
@@ -29844,7 +29844,7 @@
       ]
     },
     {
-      "resourceName": "Media",
+      "resourceName": "OUID",
       "fieldName": "Media",
       "isExpansion": true,
       "isCollection": true,
@@ -29866,7 +29866,7 @@
       ]
     },
     {
-      "resourceName": "OrganizationSocialMedia",
+      "resourceName": "OUID",
       "fieldName": "OrganizationSocialMedia",
       "isExpansion": true,
       "isCollection": true,
@@ -30049,7 +30049,7 @@
       ]
     },
     {
-      "resourceName": "Contact",
+      "resourceName": "ContactListingNotes",
       "fieldName": "Contact",
       "isExpansion": true,
       "isCollection": false,
@@ -30575,7 +30575,7 @@
       ]
     },
     {
-      "resourceName": "Listing",
+      "resourceName": "PropertyGreenVerification",
       "fieldName": "Listing",
       "isExpansion": true,
       "isCollection": false,
@@ -30597,7 +30597,7 @@
       ]
     },
     {
-      "resourceName": "HistoryTransactional",
+      "resourceName": "PropertyGreenVerification",
       "fieldName": "HistoryTransactional",
       "isExpansion": true,
       "isCollection": true,
@@ -30848,7 +30848,7 @@
       ]
     },
     {
-      "resourceName": "Listing",
+      "resourceName": "PropertyPowerProduction",
       "fieldName": "Listing",
       "isExpansion": true,
       "isCollection": false,
@@ -30870,7 +30870,7 @@
       ]
     },
     {
-      "resourceName": "HistoryTransactional",
+      "resourceName": "PropertyPowerProduction",
       "fieldName": "HistoryTransactional",
       "isExpansion": true,
       "isCollection": true,
@@ -31263,7 +31263,7 @@
       ]
     },
     {
-      "resourceName": "Listing",
+      "resourceName": "PropertyRooms",
       "fieldName": "Listing",
       "isExpansion": true,
       "isCollection": false,
@@ -31285,7 +31285,7 @@
       ]
     },
     {
-      "resourceName": "HistoryTransactional",
+      "resourceName": "PropertyRooms",
       "fieldName": "HistoryTransactional",
       "isExpansion": true,
       "isCollection": true,
@@ -31650,7 +31650,7 @@
       ]
     },
     {
-      "resourceName": "Listing",
+      "resourceName": "PropertyUnitTypes",
       "fieldName": "Listing",
       "isExpansion": true,
       "isCollection": false,
@@ -31672,7 +31672,7 @@
       ]
     },
     {
-      "resourceName": "HistoryTransactional",
+      "resourceName": "PropertyUnitTypes",
       "fieldName": "HistoryTransactional",
       "isExpansion": true,
       "isCollection": true,
@@ -33707,8 +33707,8 @@
     {
       "resourceName": "LockOrBox",
       "fieldName": "ShowingAgentAOR",
-      "type": "org.reso.metadata.enums.ShowingMemberAOR",
-      "typeName": "ShowingMemberAOR",
+      "type": "org.reso.metadata.enums.AOR",
+      "typeName": "AOR",
       "nullable": true,
       "isCollection": false,
       "unicode": true,
@@ -34960,7 +34960,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicense",
+      "resourceName": "MemberStateLicenses",
       "fieldName": "MemberMlsId",
       "type": "Edm.String",
       "nullable": true,
@@ -34983,7 +34983,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicense",
+      "resourceName": "MemberStateLicenses",
       "fieldName": "MemberKey",
       "type": "Edm.String",
       "nullable": true,
@@ -35006,7 +35006,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicense",
+      "resourceName": "MemberStateLicenses",
       "fieldName": "MemberStateLicense",
       "type": "Edm.String",
       "nullable": true,
@@ -35029,7 +35029,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicense",
+      "resourceName": "MemberStateLicenses",
       "fieldName": "MemberStateLicenseExpirationDate",
       "type": "Edm.Date",
       "nullable": true,
@@ -35051,7 +35051,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicense",
+      "resourceName": "MemberStateLicenses",
       "fieldName": "MemberStateLicenseType",
       "type": "org.reso.metadata.enums.MemberStateLicenseType",
       "typeName": "MemberStateLicenseType",
@@ -35074,7 +35074,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicense",
+      "resourceName": "MemberStateLicenses",
       "fieldName": "MemberStateLicenseState",
       "type": "org.reso.metadata.enums.StateOrProvince",
       "typeName": "StateOrProvince",
@@ -35097,7 +35097,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicense",
+      "resourceName": "MemberStateLicenses",
       "fieldName": "ModificationTimestamp",
       "type": "Edm.DateTimeOffset",
       "nullable": true,
@@ -35120,7 +35120,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicense",
+      "resourceName": "MemberStateLicenses",
       "fieldName": "MemberStateLicenseKey",
       "type": "Edm.String",
       "nullable": true,
@@ -35143,7 +35143,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicense",
+      "resourceName": "OfficeCorporateLicenses",
       "fieldName": "OfficeMlsId",
       "type": "Edm.String",
       "nullable": true,
@@ -35166,7 +35166,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicense",
+      "resourceName": "OfficeCorporateLicenses",
       "fieldName": "OfficeKey",
       "type": "Edm.String",
       "nullable": true,
@@ -35189,7 +35189,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicense",
+      "resourceName": "OfficeCorporateLicenses",
       "fieldName": "OfficeCorporateLicense",
       "type": "Edm.String",
       "nullable": true,
@@ -35212,7 +35212,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicense",
+      "resourceName": "OfficeCorporateLicenses",
       "fieldName": "OfficeCorporateLicenseState",
       "type": "org.reso.metadata.enums.StateOrProvince",
       "typeName": "StateOrProvince",
@@ -35235,7 +35235,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicense",
+      "resourceName": "OfficeCorporateLicenses",
       "fieldName": "OfficeCorporateLicenseExpirationDate",
       "type": "Edm.Date",
       "nullable": true,
@@ -35257,7 +35257,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicense",
+      "resourceName": "OfficeCorporateLicenses",
       "fieldName": "OfficeCorporateLicenseType",
       "type": "org.reso.metadata.enums.OfficeCorporateLicenseType",
       "typeName": "OfficeCorporateLicenseType",
@@ -35280,7 +35280,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicense",
+      "resourceName": "OfficeCorporateLicenses",
       "fieldName": "ModificationTimestamp",
       "type": "Edm.DateTimeOffset",
       "nullable": true,
@@ -35303,7 +35303,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicense",
+      "resourceName": "OfficeCorporateLicenses",
       "fieldName": "OfficeCorporateLicenseKey",
       "type": "Edm.String",
       "nullable": true,
@@ -91694,7 +91694,7 @@
     },
     {
       "lookupName": "org.reso.metadata.enums.RoomLengthWidthSource",
-      "lookupValue": "GISCalculated",
+      "lookupValue": "GisCalculated",
       "type": "Edm.Int32",
       "annotations": [
         {
@@ -92111,11 +92111,6 @@
       ]
     },
     {
-      "lookupName": "org.reso.metadata.enums.ShowingMemberAOR",
-      "lookupValue": "SampleShowingMemberAOREnumValue",
-      "type": "Edm.Int32"
-    },
-    {
       "lookupName": "org.reso.metadata.enums.MemberAssociationBillStatus",
       "lookupValue": "Billed",
       "type": "Edm.Int32",
@@ -92326,7 +92321,7 @@
     },
     {
       "lookupName": "org.reso.metadata.enums.OfficeCorporateLicenseType",
-      "lookupValue": "Appraiser",
+      "lookupValue": "Appraiser ",
       "type": "Edm.Int32",
       "annotations": [
         {
