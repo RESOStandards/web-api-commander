@@ -43,17 +43,16 @@ public class App {
 
   private static final String OUTPUT_DIR = "user.dir";
 
+  private static final String DEFAULT_DD_VERSION = "1.7";
+
   public static void main(String[] params) {
     // create the command line parser
     CommandLineParser parser = new org.apache.commons.cli.DefaultParser();
-    String metadata = null, ddVersion;
+    String ddVersion;
 
     //available Commander variables
-    String serviceRoot = null, bearerToken = null, clientId = null, clientSecret = null,
-        authorizationUri = null, tokenUri = null, redirectUri = null, scope = null;
     String inputFilename, outputFile, uri;
-    boolean useEdmEnabledClient, useKeyNumeric;
-    int pageLimit, pageSize;
+    boolean useEdmEnabledClient;
 
     //created with the commanderBuilder throughout the initialization body
     Commander commander;
@@ -67,12 +66,10 @@ public class App {
 
       // pre-load command line options for later use //
       useEdmEnabledClient = cmd.hasOption(APP_OPTIONS.USE_EDM_ENABLED_CLIENT);
-      useKeyNumeric = cmd.hasOption(APP_OPTIONS.USE_KEY_NUMERIC);
       inputFilename = cmd.getOptionValue(APP_OPTIONS.INPUT_FILE, null);
       outputFile = cmd.getOptionValue(APP_OPTIONS.OUTPUT_FILE, null);
       uri = cmd.getOptionValue(APP_OPTIONS.URI, null);
-      ContentType contentType = Commander.getContentType(cmd.getOptionValue(APP_OPTIONS.CONTENT_TYPE, null));
-      ddVersion = cmd.getOptionValue(APP_OPTIONS.DD_VERSION, null);
+      ddVersion = cmd.getOptionValue(APP_OPTIONS.DD_VERSION, DEFAULT_DD_VERSION);
 
       // using the edmEnabledClient requires the serviceRoot for schema validation, which is performed
       // against the payload each time the request is made when enabled.

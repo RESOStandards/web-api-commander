@@ -3,10 +3,14 @@ package org.reso.commander.jsonSerializers;
 import com.google.gson.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.olingo.client.api.domain.ClientComplexValue;
+import org.apache.olingo.client.api.domain.ClientValue;
+import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.edm.EdmAnnotation;
 import org.apache.olingo.commons.api.edm.EdmElement;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.commons.api.edm.EdmProperty;
+import org.apache.olingo.commons.core.edm.EdmPropertyImpl;
 import org.reso.commander.common.ODataUtils;
 
 import java.lang.reflect.Type;
@@ -26,8 +30,6 @@ import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
  * }
  */
 public final class FieldJson implements JsonSerializer<FieldJson> {
-  private static final Logger LOG = LogManager.getLogger(FieldJson.class);
-
   static final String
       RESOURCE_NAME_KEY = "resourceName",
       FIELD_NAME_KEY = "fieldName",
@@ -36,16 +38,16 @@ public final class FieldJson implements JsonSerializer<FieldJson> {
       PRECISION_KEY = "precision",
       SCALE_KEY = "scale",
       IS_COLLECTION_KEY = "isCollection",
+      IS_COMPLEX_TYPE_KEY = "isComplexType",
       IS_EXPANSION_KEY = "isExpansion",
       DEFAULT_VALUE_KEY = "defaultValue",
-      UNICODE_KEY = "unicode",
       TYPE_KEY = "type",
       TYPE_NAME_KEY = "typeName",
       TERM_KEY = "term",
       VALUE_KEY = "value",
       ANNOTATIONS_KEY = "annotations",
       FIELDS_KEY = "fields";
-
+  private static final Logger LOG = LogManager.getLogger(FieldJson.class);
   String resourceName;
   EdmElement edmElement;
   EdmNavigationProperty edmNavigationProperty;
@@ -53,6 +55,7 @@ public final class FieldJson implements JsonSerializer<FieldJson> {
   /**
    * Constructor which takes an edmElement and reads the type from it, then
    * uses it as the resource name.
+   *
    * @param edmElement edmElement to create FieldJson for
    */
   public FieldJson(EdmElement edmElement) {
@@ -68,8 +71,9 @@ public final class FieldJson implements JsonSerializer<FieldJson> {
   /**
    * Constructor which takes an edmElement and reads the type from it, then
    * uses it as the resource name.
+   *
    * @param resourceName the resourceName the element belongs to
-   * @param edmElement edmElement to create FieldJson for
+   * @param edmElement   edmElement to create FieldJson for
    */
   public FieldJson(String resourceName, EdmElement edmElement) {
     this.resourceName = resourceName;
@@ -83,6 +87,7 @@ public final class FieldJson implements JsonSerializer<FieldJson> {
 
   /**
    * Metadata Pretty Printer
+   *
    * @param metadataReport the metadata report
    * @return a human-friendly string version of the metadata report
    */
@@ -124,24 +129,36 @@ public final class FieldJson implements JsonSerializer<FieldJson> {
     JsonObject field = new JsonObject();
 
     String typeName = null;
-    List<EdmAnnotation> annotations = new ArrayList<>();
+    final List<EdmAnnotation> annotations = new ArrayList<>();
 
-    field.addProperty(RESOURCE_NAME_KEY, src.resourceName);
+    Optional.ofNullable(src.resourceName).ifPresent(value -> field.addProperty(RESOURCE_NAME_KEY, value));
 
     if (src.edmNavigationProperty != null) {
-      annotations = src.edmNavigationProperty.getAnnotations();
+      Optional.ofNullable(src.edmNavigationProperty.getAnnotations()).ifPresent(annotations::addAll);
 
-      field.addProperty(FIELD_NAME_KEY, src.edmNavigationProperty.getName());
-      field.addProperty(IS_EXPANSION_KEY, src.edmNavigationProperty != null && src.edmNavigationProperty.getName() != null);
-      field.addProperty(IS_COLLECTION_KEY, src.edmNavigationProperty.isCollection());
-      field.addProperty(TYPE_KEY, src.edmNavigationProperty.getType().getFullQualifiedName().getFullQualifiedNameAsString());
-      field.addProperty(TYPE_NAME_KEY, src.edmNavigationProperty.getType().getName());
+      Optional.ofNullable(src.edmNavigationProperty.getName()).ifPresent(
+          value -> field.addProperty(FIELD_NAME_KEY, value)
+      );
+
+      Optional.ofNullable(src.edmNavigationProperty.getName())
+          .ifPresent(value -> field.addProperty(IS_EXPANSION_KEY, true));
+
+      Optional.of(src.edmNavigationProperty.isCollection())
+          .ifPresent(value -> field.addProperty(IS_COLLECTION_KEY, value));
+
+      Optional.of(src.edmNavigationProperty.getType().getFullQualifiedName().getFullQualifiedNameAsString())
+          .ifPresent(value -> field.addProperty(TYPE_KEY, value));
+
+      Optional.of(src.edmNavigationProperty.getType().getName())
+          .ifPresent(value -> field.addProperty(TYPE_NAME_KEY, value));
 
     } else if (src.edmElement != null) {
-      annotations = ((EdmProperty) src.edmElement).getAnnotations();
-      field.addProperty(FIELD_NAME_KEY, src.edmElement.getName());
+      Optional.ofNullable(((EdmProperty)src.edmElement).getAnnotations()).ifPresent(annotations::addAll);
+
+      Optional.ofNullable(src.edmElement.getName()).ifPresent(value -> field.addProperty(FIELD_NAME_KEY, value));
+
       try {
-        typeName = src.edmElement.getType().getFullQualifiedName().getFullQualifiedNameAsString();
+        typeName = Optional.of(src.edmElement.getType().getFullQualifiedName().getFullQualifiedNameAsString()).orElse(null);
         field.addProperty(TYPE_KEY, typeName);
         if (!typeName.startsWith("Edm.")) {
           field.addProperty(TYPE_NAME_KEY, src.edmElement.getType().getName());
@@ -151,19 +168,34 @@ public final class FieldJson implements JsonSerializer<FieldJson> {
         field.addProperty(TYPE_KEY, "UNDEFINED");
       }
 
-      field.addProperty(NULLABLE_KEY, ((EdmProperty) src.edmElement).isNullable());
-      field.addProperty(MAX_LENGTH_KEY, ((EdmProperty) src.edmElement).getMaxLength());
-      field.addProperty(SCALE_KEY, ((EdmProperty) src.edmElement).getScale());
-      field.addProperty(PRECISION_KEY, ((EdmProperty) src.edmElement).getPrecision());
-      field.addProperty(DEFAULT_VALUE_KEY, ((EdmProperty) src.edmElement).getDefaultValue());
-      field.addProperty(IS_COLLECTION_KEY, src.edmElement.isCollection());
-      field.addProperty(UNICODE_KEY, ((EdmProperty) src.edmElement).isUnicode());
+      Optional.of(((EdmProperty) src.edmElement).isNullable())
+          .ifPresent(isNullable -> field.addProperty(NULLABLE_KEY, isNullable));
+
+      Optional.ofNullable(((EdmProperty) src.edmElement).getMaxLength())
+          .ifPresent(maxLength -> field.addProperty(MAX_LENGTH_KEY, maxLength));
+
+      Optional.ofNullable(((EdmProperty) src.edmElement).getScale())
+          .ifPresent(scale -> field.addProperty(SCALE_KEY, scale));
+
+      Optional.ofNullable(((EdmProperty) src.edmElement).getPrecision())
+          .ifPresent(precision -> field.addProperty(PRECISION_KEY, precision));
+
+      Optional.ofNullable(((EdmProperty) src.edmElement).getDefaultValue())
+              .ifPresent(value -> field.addProperty(DEFAULT_VALUE_KEY, value));
+
+      if (Optional.of(src.edmElement.isCollection()).orElse(false)) {
+        field.addProperty(IS_COLLECTION_KEY, true);
+      }
+
+      if (Optional.of(src.edmElement.getType().getKind().toString().contentEquals("COMPLEX")).orElse(false)) {
+        field.addProperty(IS_COMPLEX_TYPE_KEY, true);
+      }
     }
 
     //TODO: report issue to Apache
     // Can only get the annotation term using ((ClientCsdlAnnotation) ((EdmAnnotationImpl)edmAnnotation).annotatable).term
     // which a private member and cannot be accessed
-    if (annotations != null && annotations.size() > 0) {
+    if (annotations.size() > 0) {
       JsonArray annotationsJsonArray = new JsonArray();
       annotations.forEach(edmAnnotation -> {
         if (edmAnnotation.getExpression() != null) {
