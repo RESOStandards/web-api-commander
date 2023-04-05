@@ -229,7 +229,7 @@ public class EDMXProcessor extends WorksheetProcessor {
       //iterate through each of the lookup values and generate their edm:EnumType content
       getEnumerations().get(standardField.getLookupName()).forEach(lookup -> content
           .append("<Member Name=\"").append(lookup.getLegacyODataValue()).append("\">")
-          .append(EDMXTemplates.buildDisplayNameAnnotation(lookup.getLookupName()))
+          .append(EDMXTemplates.buildDisplayNameAnnotation(lookup.getLookupValue()))
           .append(EDMXTemplates.buildDDWikiUrlAnnotation(lookup.getWikiPageUrl()))
           .append(EDMXTemplates.buildDescriptionAnnotation(lookup.getDefinition()))
           .append("</Member>"));
@@ -255,7 +255,7 @@ public class EDMXProcessor extends WorksheetProcessor {
       //iterate through each of the lookup values and generate their edm:EnumType content
       getEnumerations().get(standardField.getLookupName()).forEach(lookup -> content
           .append("<Member Name=\"").append(lookup.getLegacyODataValue()).append("\">")
-          .append(EDMXTemplates.buildDisplayNameAnnotation(lookup.getLegacyODataValue()))
+          .append(EDMXTemplates.buildDisplayNameAnnotation(lookup.getLookupValue()))
           .append(EDMXTemplates.buildDDWikiUrlAnnotation(lookup.getWikiPageUrl()))
           .append(EDMXTemplates.buildDescriptionAnnotation(lookup.getDefinition()))
           .append("</Member>"));
