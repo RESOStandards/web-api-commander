@@ -1,4 +1,4 @@
-FROM gradle:8.0.2-jdk8 AS builder
+FROM gradle:8.0.2-jdk11 AS builder
 
 WORKDIR /home/gradle/project
 
@@ -10,7 +10,7 @@ RUN ls
 
 FROM alpine:latest
 
-RUN apk add --update bash ca-certificates openjdk8-jre-base nss git  && \
+RUN apk add --update bash ca-certificates openjdk11 nss git  && \
     rm -rf /var/cache/apk/*
 
 COPY --from=builder /home/gradle/project/build/libs/web-api-commander.jar ./
