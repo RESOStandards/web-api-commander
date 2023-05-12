@@ -7,5 +7,4 @@ build/
 *.log
 *.iml
 .run/
-
 .DS_Store
