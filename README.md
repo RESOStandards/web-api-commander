@@ -15,7 +15,6 @@ explains how to run the following tests:
 
 * Data Dictionary 1.7
 * Data Dictionary Availability Report
-* IDX Payload 1.7
 * Web API Core 2.0.0
 
 ## [Command-Line OData Web API Tools](/doc/CLI.md)

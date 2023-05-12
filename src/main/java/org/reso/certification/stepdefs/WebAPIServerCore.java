@@ -57,6 +57,7 @@ public class WebAPIServerCore implements En {
   private static final Logger LOG = LogManager.getLogger(WebAPIServerCore.class);
   private static final String
       SHOW_RESPONSES_PARAM = "showResponses",
+      USE_STRING_ENUMS_PARAM = "useStringEnums",
       USE_COLLECTIONS_PARAM = "useCollections";
 
   private static final String PATH_TO_RESOSCRIPT_KEY = "pathToRESOScript";
@@ -67,6 +68,7 @@ public class WebAPIServerCore implements En {
   // boolean used for indicating whether Web API tests are using collections of enums or not
   // defaults to useCollections=true since IsFlags is being deprecated
   private static final boolean useCollections = Boolean.parseBoolean(System.getProperty(USE_COLLECTIONS_PARAM, "true"));
+  private static final boolean useStringEnums = Boolean.parseBoolean(System.getProperty(USE_STRING_ENUMS_PARAM, "false"));
 
   /*
    * Used to store a static instance of the WebAPITestContainer class
@@ -287,8 +289,12 @@ public class WebAPIServerCore implements En {
       final Set<String> collectionRequestIds = new HashSet<>(Arrays.asList("filter-coll-enum-any", "filter-coll-enum-all"));
       final Set<String> isFlagsRequestIds = new HashSet<>(Arrays.asList("filter-enum-multi-has", "filter-enum-multi-has-and"));
 
+      if (useStringEnums) {
+        assumeFalse("Using string enumerations. Skipping Test: " + requestId, requestId.contentEquals("filter-enum-single-has"));
+      }
+
       if (useCollections) {
-        assumeFalse("Using Collection(Edm.EnumType). Skipping Test: " + requestId, isFlagsRequestIds.contains(requestId));
+        assumeFalse("Using Collections for enumerations. Skipping Test: " + requestId, isFlagsRequestIds.contains(requestId));
       } else {
         assumeFalse("Using IsFlags=\"true\". Skipping Test: " + requestId, collectionRequestIds.contains(requestId));
       }
