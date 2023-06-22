@@ -46,7 +46,7 @@ dependencies {
   //TODO: choose one schema validator between this and rest-assured
   implementation 'com.networknt:json-schema-validator:1.0.70'
   implementation 'com.google.code.gson:gson:2.9.0'
-  implementation 'org.apache.commons:commons-text:1.9'
+  implementation 'org.apache.commons:commons-text:1.10.0'
 
 }
 
@@ -156,7 +156,7 @@ tasks.register('testDataDictionary_1_7') {
   dependsOn jar, prepareCertificationEnvironment
   doLast {
     javaexec {
-      main = 'io.cucumber.core.cli.Main'
+      mainClass = 'io.cucumber.core.cli.Main'
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
 
