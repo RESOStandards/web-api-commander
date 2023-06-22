@@ -7,6 +7,7 @@ import org.apache.olingo.commons.api.edm.EdmAnnotation;
 import org.apache.olingo.commons.api.edm.EdmElement;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.reso.commander.common.ODataUtils;
+import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -122,8 +123,9 @@ public final class FieldJson implements JsonSerializer<FieldJson> {
       typeName = src.edmElement.getType().getFullQualifiedName().getFullQualifiedNameAsString();
       field.addProperty(TYPE_KEY, typeName);
     } catch (Exception ex) {
+      //Issue #162: Need to fail on serialization exceptions since Olingo metadata validation might not catch them
       LOG.error(getDefaultErrorMessage("Field Name:", src.edmElement.getName(), ex.toString()));
-      field.addProperty(TYPE_KEY, "UNDEFINED");
+      failAndExitWithErrorMessage(ex.toString(), LOG);
     }
 
     field.addProperty(NULLABLE_KEY, ((EdmProperty) src.edmElement).isNullable());
