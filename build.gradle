@@ -156,7 +156,7 @@ tasks.register('testDataDictionary_1_7') {
   dependsOn jar, prepareCertificationEnvironment
   doLast {
     javaexec {
-      main = 'io.cucumber.core.cli.Main'
+      mainClass = 'io.cucumber.core.cli.Main'
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
 
