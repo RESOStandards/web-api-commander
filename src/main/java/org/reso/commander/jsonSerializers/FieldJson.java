@@ -118,7 +118,7 @@ public final class FieldJson implements JsonSerializer<FieldJson> {
     field.addProperty(RESOURCE_NAME_KEY, src.resourceName);
     field.addProperty(FIELD_NAME_KEY, src.edmElement.getName());
 
-    String typeName = null;
+    String typeName;
     try {
       typeName = src.edmElement.getType().getFullQualifiedName().getFullQualifiedNameAsString();
       field.addProperty(TYPE_KEY, typeName);
