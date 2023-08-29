@@ -3,4 +3,6 @@ out/
 .git
 .DS_Store
 .idea
-
+.run
+.build-tmp
+odata-openapi/
