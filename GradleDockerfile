@@ -1,13 +1,14 @@
-FROM alpine:3.17.2
+FROM openjdk:11
 
-RUN apk add --update bash ca-certificates openjdk11 nss git gradle && \
-    rm -rf /var/cache/apk/*
+WORKDIR /home/gradle
 
-RUN git clone --single-branch --branch main https://github.com/RESOStandards/web-api-commander.git
+ADD ./ ./
 
-WORKDIR web-api-commander
+ENV GRADLE_USER_HOME /home/gradle/.gradle
 
-RUN gradle jar
+RUN ./gradlew --no-daemon clean jar --build-cache
 
-ENTRYPOINT ["gradle"]
+RUN chmod -R +rw /home/gradle
+
+ENTRYPOINT ["./gradlew", "--quiet", "--no-daemon"]
 CMD ["tasks"]
