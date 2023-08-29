@@ -1,14 +1,20 @@
 FROM openjdk:11
 
-WORKDIR /home/gradle
+ARG WORKING_PATH=/home/gradle
+ARG BUILD_DIR=${WORKING_PATH}/build
+ARG GRADLE_CACHE=${WORKING_PATH}/.gradle
+
+WORKDIR ${WORKING_PATH}
 
 ADD ./ ./
 
-ENV GRADLE_USER_HOME /home/gradle/.gradle
+ENV GRADLE_USER_HOME ${GRADLE_CACHE}
 
-RUN ./gradlew --no-daemon clean jar --build-cache
+RUN rm -rf ${BUILD_DIR}
 
-RUN chmod -R +rw /home/gradle
+RUN ./gradlew --quiet --no-daemon build clean jar --build-cache
+
+RUN chmod -R +rw ${WORKING_PATH}
 
 ENTRYPOINT ["./gradlew", "--quiet", "--no-daemon"]
 CMD ["tasks"]
