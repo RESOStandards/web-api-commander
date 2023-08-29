@@ -12,7 +12,7 @@ ENV GRADLE_USER_HOME ${GRADLE_CACHE}
 
 RUN rm -rf ${BUILD_DIR}
 
-RUN ./gradlew --quiet --no-daemon build clean jar --build-cache
+RUN ./gradlew --quiet --no-daemon clean jar --build-cache
 
 RUN chmod -R +rw ${WORKING_PATH}
 
