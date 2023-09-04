@@ -4,5 +4,4 @@ out/
 .DS_Store
 .idea
 .run
-.build-tmp
 odata-openapi/

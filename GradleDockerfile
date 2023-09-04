@@ -1,20 +1,20 @@
-FROM openjdk:11
+FROM sapmachine:jdk-headless-ubuntu-11
 
 ARG WORKING_PATH=/home/gradle
 ARG BUILD_DIR=${WORKING_PATH}/build
+ARG CERTIFICATION_RESULTS_PATH=${BUILD_DIR}/certification
 ARG GRADLE_CACHE=${WORKING_PATH}/.gradle
 
 WORKDIR ${WORKING_PATH}
 
 ADD ./ ./
 
-ENV GRADLE_USER_HOME ${GRADLE_CACHE}
+ENV GRADLE_USER_HOME=${GRADLE_CACHE}
 
-RUN rm -rf ${BUILD_DIR}
+RUN ./gradlew --no-daemon clean jar
 
-RUN ./gradlew --quiet --no-daemon clean jar
+RUN mkdir -p ${CERTIFICATION_RESULTS_PATH}
+RUN ln -s ${CERTIFICATION_RESULTS_PATH} /
 
-RUN chmod -R +rw ${WORKING_PATH}
-
-ENTRYPOINT ["./gradlew", "--quiet", "--no-daemon"]
+ENTRYPOINT ["./gradlew", "--no-daemon", "--quiet"]
 CMD ["tasks"]
