@@ -3,34 +3,61 @@ RESO automated testing tools and Commander utilities can both be run in a Docker
 The containers are slightly different in each case. 
 
 ### RESO Automated Testing Tools
-A [GradleDockerfile](../GradleDockerfile) has been provided in order to prepare a Gradle 
-environment for the Commander. The container builds itself from the main branch of the source code, so you don't need
-the entire repo checked out locally, just the file.
+A separate file called [GradleDockerfile](../GradleDockerfile) has been provided in order to prepare a Gradle environment for the Commander. This can also be used in CI/CD environments such as Jenkins or TravisCI.
 
-This can also be used in CI/CD environments such as Jenkins or TravisCI.
+#### Building the Docker Container
 
-Run the RESO Certification tests in a Docker container locally by issuing one of the following commands.
-Docker must be running on your local machine. 
+In order to build the Docker container for yourself, download the source code with: 
 
-One way to do this is to build the container first and then run it:
+```git clone https://github.com/RESOStandards/web-api-commander.git```
 
-```docker build --file GradleDockerfile -t web-api-commander-gradle .```
+You can [download Docker here](https://www.docker.com/) or [here](https://www.docker.com/products/docker-desktop/) if you prefer the desktop version. Make sure it's running before proceeding. 
 
-Once the container is built, you can use the Gradle commands normally with:
-```docker run -it web-api-commander-gradle testWebApiCore_2_0_0 -DpathToRESOScript=/home/gradle/project/resoscripts/your.resoscript -DshowResponses=true```
+To check, you can use:
 
-You can also build the container on the fly:
+```docker --version```
 
-```docker run --rm -it -v "$PWD":/home/gradle/project -v /path/to/your/resoscripts:/home/gradle/project/resoscripts -w /home/gradle/project -it $(docker build -f GradleDockerfile -q .) testWebApiCore_2_0_0 -DpathToRESOScript=/home/gradle/project/resoscripts/your.resoscript -DshowResponses=true```
+At this point, you can build the container: 
 
-Note that this will create a directory in your home directory for the project, and build artifacts and the log will be placed in that directory,
-which is also where you will end up after runtime.
+```docker build --file GradleDockerfile -t web-api-commander-gradle --no-cache .```
 
-You may need to adjust the path separators if using Windows.
+This will create a Docker container caled `web-api-commander-gradle`, which you should be able to see if you type `docker images`:
+
+```
+$ docker images
+REPOSITORY                 TAG       IMAGE ID       CREATED              SIZE
+web-api-commander-gradle   latest    341991b8d352   About a minute ago   1.06GB
+...
+```
+
+#### Available Tasks
+
+To see available tasks, issue the following command at the terminal:
+
+```
+$ docker run -it web-api-commander-gradle
+```
+
+#### Running Data Dictionary 1.7 Tests
+Now that the Docker container is working, you can run the Data Dictionary tests. 
+
+First you'll need to create the following:
+* An empty directory so the certification results may be viewed
+* A configuration (RESOScript) file that you can mount in the Docker container
+
+For example: 
+
+```
+$ docker run -it -v /path/to/test.resoscript:/test.resoscript -v /path/to/commander-build-tmp:/certification web-api-commander-gradle testDataDictionary_1_7 -DpathToRESOScript=/test.resoscript
+```
+
+In the example, replace `/path/to/test.resoscript` and `/path/to/commander-build-tmp` with your local paths. You can then pass the `pathToRESOScript` arg to the commander, as shown above.
 
 
-### Commander Utilities
-A [Dockerfile](../Dockerfile) has also been provided to Dockerize the application for Commander utilities.
+
+
+### Commander JAR and Utilities
+A [Dockerfile](../Dockerfile) has also been provided to Dockerize the application for the Commander utilities accessible through the JAR file.
 
 To run the Commander utilities, use the following commands:
 
@@ -38,7 +65,7 @@ To run the Commander utilities, use the following commands:
 $ docker build -t web-api-commander .
 ```
 
-The usage for the docker container is the same for `web-api-commander.jar` presented above.
+Once the container is built, you can see available tasks using the following command:
 
 ```
 $ docker run -it web-api-commander --help

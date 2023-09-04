@@ -84,7 +84,8 @@ String pathToMetadata = null,
        pathToRESOScript = null,
        certFileName = null
 
-final String certOutputDir = 'build' + File.separator + 'certification',
+final String buildDir = 'build',
+             certOutputDir = buildDir + File.separator + 'certification',
              cucumberJsonPath = certOutputDir + File.separator + 'cucumberJson',
              certReportsDir = certOutputDir + File.separator + 'reports',
              certResultsDir = certOutputDir + File.separator + 'results'
@@ -93,7 +94,7 @@ tasks.register('prepareCertificationEnvironment') {
   doLast {
     def folder = new File(certOutputDir)
     if (folder.exists()) {
-      delete certOutputDir
+      delete(fileTree(certOutputDir))
     }
 
     mkdir certOutputDir
@@ -288,10 +289,6 @@ tasks.register('testDataDictionaryReferenceMetadata_1_7') {
           'org.reso.certification.stepdefs#DataDictionary',
           'src/main/java/org/reso/certification/features/data-dictionary/v1-7-0'
       ]
-
-      if (System.hasProperty("pretty")) {
-        args.add("--plugin", "pretty")
-      }
     }
   }
 }

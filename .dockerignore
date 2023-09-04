@@ -1,1 +1,7 @@
 out/
+.github
+.git
+.DS_Store
+.idea
+.run
+odata-openapi/
