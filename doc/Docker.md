@@ -65,7 +65,7 @@ To run the Commander utilities, use the following commands:
 $ docker build -t web-api-commander .
 ```
 
-The usage for the docker container is the same for `web-api-commander.jar` presented above.
+Once the container is built, you can see available tasks using the following command:
 
 ```
 $ docker run -it web-api-commander --help
