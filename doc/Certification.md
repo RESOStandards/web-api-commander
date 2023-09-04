@@ -11,7 +11,11 @@ The RESO Commander is the basis for automated Data Dictionary, Payloads, and Web
 
 
 ## Java and the JDK
-To run the Commander as an _automated testing tool_, the Java JDK must be installed. The Commander has been tested with JDK 1.8 and 10 at this point. Those using JDK 11+, please [report issues](https://github.com/RESOStandards/web-api-commander/issues) if they arise.
+To run the Commander as an _automated testing tool_, a Java 64-bit JDK must be installed.
+
+The Commander has been tested with JDK 1.8 and 10 at this point. 
+
+Those using JDK 11+, please [report issues](https://github.com/RESOStandards/web-api-commander/issues) if they arise.
 
 To see whether you have the JDK installed, type the following using your local command line environment:
 ```
@@ -87,6 +91,7 @@ RESO Certification tasks
 testDataAvailability_1_7 - Data Dictionary 1.7 Data Availability Tests
 Example:
   ./gradlew testDataAvailability_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript
+
 [Report location: build/certification/reports]
 
 
@@ -114,6 +119,7 @@ Example:
   ./gradlew testWebApiCore_2_0_0 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript -DshowResponses=true
 
 Note: by default the Web API tests assume Collection(Edm.EnumType).
+Pass -DuseStringEnums=true if using string enumerations and the Lookup Resource.
 Pass -DuseCollections=false if using OData IsFlags.
 
 [Report location: build/certification/reports]
@@ -143,7 +149,8 @@ These tasks will also produce reports in the local `/build/certification` direct
 
 This will run the Core tests against the Web API 2.0.0 Server provided as `WebAPIURI` in your `web-api-server.core.2.0.0.resoscript` file.
 
-**Note**: by default, the Commander uses `Collection(Edm.EnumType)` for multiple enumerations testing. 
+**Note**: by default, the Commander assumes `Edm.EnumType` for single- and `Collection(Edm.EnumType)` for multiple-enumeration testing.
+Pass `-DuseStringEnums=true` if you are using string enumerations.
 Pass `-DuseCollections=false` if you are using `IsFlags="true"` instead.
 
 ##### MacOS or Linux

@@ -110,6 +110,7 @@ tasks.register('testWebApiCore_2_0_0') {
       '\nExample: ' +
       '\n  ./gradlew testWebApiCore_2_0_0 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript -DshowResponses=true' +
       '\n\nNote: by default the Web API tests assume Collection(Edm.EnumType).' +
+      '\nPass -DuseStringEnums=true if using string enumerations and the Lookup Resource.' +
       '\nPass -DuseCollections=false if using OData IsFlags.' +
       '\n\n[Report location: ' + certReportsDir + ']' +
       '\n\n'
