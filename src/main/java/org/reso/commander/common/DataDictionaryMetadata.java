@@ -12,73 +12,78 @@ public class DataDictionaryMetadata {
     return getKeyFieldForResource(resource).contentEquals(fieldName);
   }
 
+  private static String keyifyResourceName(String resourceName) {
+    if (resourceName == null || resourceName.trim().isEmpty()) {
+      return resourceName;
+    }
+    return resourceName + "Key";
+  };
+
   public static String getKeyFieldForResource(String resourceName) {
     switch (resourceName) {
       case "Property":
         return "ListingKey";
-      case "Member":
-        return "MemberKey";
-      case "Office":
-        return "OfficeKey";
       case "Contacts":
       case "ContactListingNotes":
         return "ContactKey";
-      case "ContactListings":
-        return "ContactListingsKey";
-      case "HistoryTransactional":
-        return "HistoryTransactionalKey";
       case "InternetTracking":
         return "EventKey";
-      case "Media":
-        return "MediaKey";
-      case "OpenHouse":
-        return "OpenHouseKey";
+      case "InternetTrackingSummary":
+        return "ListingId";
       case "OUID":
         return "OrganizationUniqueIdKey";
-      case "Prospecting":
-        return "ProspectingKey";
       case "Queue":
         return "QueueTransactionKey";
-      case "Rules":
-        return "RuleKey";
-      case "SavedSearch":
-        return "SavedSearchKey";
-      case "Showing":
-        return "ShowingKey";
-      case "Teams":
-        return "TeamKey";
-      case "TeamMembers":
-        return "TeamMemberKey";
-      case "OtherPhone":
-        return "OtherPhoneKey";
       case "PropertyGreenVerification":
         return "GreenBuildingVerificationKey";
-      case "PropertyPowerProduction":
-        return "PowerProductionKey";
       case "PropertyRooms":
         return "RoomKey";
       case "PropertyUnitTypes":
         return "UnitTypeKey";
-      case "SocialMedia":
-        return "SocialMediaKey";
-      case "Association":
-        return "AssociationKey";
       case "EntityEvent":
         return "EntityEventSequence";
       case "LockOrBox":
         return "LockOrBoxKey";
       case "MemberAssociation":
-        return "MemberAssociationKey";
       case "OfficeAssociation":
-        return "OfficeAssociationKey";
+        return "AssociationKey";
       case "MemberStateLicenses":
         return "MemberStateLicenseKey";
       case "OfficeCorporateLicenses":
         return "OfficeCorporateLicenseKey";
+      case "TransactionManagement":
+        return "TransactionKey";
+      case "Rules":
+        return "RuleKey";
+      case "Teams":
+        return "TeamKey";
+      case "TeamMembers":
+        return "TeamMemberKey";
+      case "PropertyPowerProduction":
+        return "PowerProductionKey";
+
+      /* The following items always have the key name appended */
+      case "Member":
+      case "Office":
+      case "Caravan":
+      case "CaravanStops":
+      case "ContactListings":
+      case "HistoryTransactional":
+      case "Media":
+      case "OpenHouse":
+      case "Prospecting":
+      case "SavedSearch":
+      case "Showing":
+      case "OtherPhone":
+      case "PowerStorage":
+      case "SocialMedia":
+      case "Association":
       case "Field":
-        return "FieldKey";
       case "Lookup":
-        return "LookupKey";
+      case "ShowingAppointment":
+      case "ShowingAvailability":
+      case "ShowingRequest":
+        return keyifyResourceName(resourceName);
       default:
         LOG.error("Cannot find key name for resource: " + resourceName);
         return EMPTY_STRING;
