@@ -3,15 +3,13 @@ package org.reso.commander.jsonSerializers;
 import com.google.gson.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.olingo.client.api.domain.ClientComplexValue;
-import org.apache.olingo.client.api.domain.ClientValue;
-import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.edm.EdmAnnotation;
 import org.apache.olingo.commons.api.edm.EdmElement;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.commons.api.edm.EdmProperty;
-import org.apache.olingo.commons.core.edm.EdmPropertyImpl;
 import org.reso.commander.common.ODataUtils;
+
+import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -103,7 +101,7 @@ public final class FieldJson implements JsonSerializer<FieldJson> {
 
       if (field.getAsJsonObject().get(ANNOTATIONS_KEY) != null) {
         JsonArray annotations = field.getAsJsonObject().get(ANNOTATIONS_KEY).getAsJsonArray();
-        if (annotations != null && annotations.size() > 0) {
+        if (annotations != null && !annotations.isEmpty()) {
           reportBuilder.append("\n");
           reportBuilder.append("Annotations:");
           annotations.forEach(annotation -> {
@@ -128,20 +126,35 @@ public final class FieldJson implements JsonSerializer<FieldJson> {
   public JsonElement serialize(FieldJson src, Type typeOfSrc, JsonSerializationContext context) {
     JsonObject field = new JsonObject();
 
-    String typeName = null;
     final List<EdmAnnotation> annotations = new ArrayList<>();
 
     Optional.ofNullable(src.resourceName).ifPresent(value -> field.addProperty(RESOURCE_NAME_KEY, value));
+    Optional.ofNullable(src.edmElement).ifPresent(value -> field.addProperty(FIELD_NAME_KEY, value.getName()));
 
-    if (src.edmNavigationProperty != null) {
+    String typeName;
+
+    if (Optional.ofNullable(src.edmElement).isPresent() && Optional.ofNullable(src.edmElement.getType()).isPresent()) {
+      try {
+        typeName = src.edmElement.getType().getFullQualifiedName().getFullQualifiedNameAsString();
+        field.addProperty(TYPE_KEY, typeName);
+      } catch (Exception ex) {
+        //Issue #162: Need to fail on serialization exceptions since Olingo metadata validation might not catch them
+        failAndExitWithErrorMessage(ex.toString(), LOG);
+      }
+    }
+
+    Optional.ofNullable(src.resourceName).ifPresent(value -> field.addProperty(RESOURCE_NAME_KEY, value));
+
+    if (Optional.ofNullable(src.edmNavigationProperty).isPresent()) {
+
       Optional.ofNullable(src.edmNavigationProperty.getAnnotations()).ifPresent(annotations::addAll);
 
       Optional.ofNullable(src.edmNavigationProperty.getName()).ifPresent(
-          value -> field.addProperty(FIELD_NAME_KEY, value)
+          value -> {
+            field.addProperty(FIELD_NAME_KEY, value);
+            field.addProperty(IS_EXPANSION_KEY, true);
+          }
       );
-
-      Optional.ofNullable(src.edmNavigationProperty.getName())
-          .ifPresent(value -> field.addProperty(IS_EXPANSION_KEY, true));
 
       Optional.of(src.edmNavigationProperty.isCollection())
           .ifPresent(value -> field.addProperty(IS_COLLECTION_KEY, value));
@@ -152,8 +165,8 @@ public final class FieldJson implements JsonSerializer<FieldJson> {
       Optional.of(src.edmNavigationProperty.getType().getName())
           .ifPresent(value -> field.addProperty(TYPE_NAME_KEY, value));
 
-    } else if (src.edmElement != null) {
-      Optional.ofNullable(((EdmProperty)src.edmElement).getAnnotations()).ifPresent(annotations::addAll);
+    } else if (Optional.ofNullable(src.edmElement).isPresent()) {
+      Optional.ofNullable(((EdmProperty) src.edmElement).getAnnotations()).ifPresent(annotations::addAll);
 
       Optional.ofNullable(src.edmElement.getName()).ifPresent(value -> field.addProperty(FIELD_NAME_KEY, value));
 
@@ -181,7 +194,7 @@ public final class FieldJson implements JsonSerializer<FieldJson> {
           .ifPresent(precision -> field.addProperty(PRECISION_KEY, precision));
 
       Optional.ofNullable(((EdmProperty) src.edmElement).getDefaultValue())
-              .ifPresent(value -> field.addProperty(DEFAULT_VALUE_KEY, value));
+          .ifPresent(value -> field.addProperty(DEFAULT_VALUE_KEY, value));
 
       if (Optional.of(src.edmElement.isCollection()).orElse(false)) {
         field.addProperty(IS_COLLECTION_KEY, true);
@@ -195,7 +208,7 @@ public final class FieldJson implements JsonSerializer<FieldJson> {
     //TODO: report issue to Apache
     // Can only get the annotation term using ((ClientCsdlAnnotation) ((EdmAnnotationImpl)edmAnnotation).annotatable).term
     // which a private member and cannot be accessed
-    if (annotations.size() > 0) {
+    if (!annotations.isEmpty()) {
       JsonArray annotationsJsonArray = new JsonArray();
       annotations.forEach(edmAnnotation -> {
         if (edmAnnotation.getExpression() != null) {
@@ -226,7 +239,7 @@ public final class FieldJson implements JsonSerializer<FieldJson> {
           }
         }
       });
-      if (annotationsJsonArray.size() > 0) field.add(ANNOTATIONS_KEY, annotationsJsonArray);
+      if (!annotationsJsonArray.isEmpty()) field.add(ANNOTATIONS_KEY, annotationsJsonArray);
     }
     return field;
   }

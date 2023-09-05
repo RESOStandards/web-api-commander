@@ -46,7 +46,7 @@ dependencies {
   //TODO: choose one schema validator between this and rest-assured
   implementation 'com.networknt:json-schema-validator:1.0.70'
   implementation 'com.google.code.gson:gson:2.9.0'
-  implementation 'org.apache.commons:commons-text:1.9'
+  implementation 'org.apache.commons:commons-text:1.10.0'
 
 }
 
@@ -83,7 +83,8 @@ String pathToMetadata = null,
        pathToRESOScript = null,
        certFileName = null
 
-final String certOutputDir = 'build' + File.separator + 'certification',
+final String buildDir = 'build',
+             certOutputDir = buildDir + File.separator + 'certification',
              cucumberJsonPath = certOutputDir + File.separator + 'cucumberJson',
              certReportsDir = certOutputDir + File.separator + 'reports',
              certResultsDir = certOutputDir + File.separator + 'results'
@@ -92,7 +93,7 @@ tasks.register('prepareCertificationEnvironment') {
   doLast {
     def folder = new File(certOutputDir)
     if (folder.exists()) {
-      delete certOutputDir
+      delete(fileTree(certOutputDir))
     }
 
     mkdir certOutputDir
@@ -350,10 +351,6 @@ tasks.register('testDataDictionaryReferenceMetadata_2_0') {
           'org.reso.certification.stepdefs#DataDictionary',
           'src/main/java/org/reso/certification/features/data-dictionary/v2-0'
       ]
-
-      if (System.hasProperty("pretty")) {
-        args.add("--plugin", "pretty")
-      }
     }
   }
 }

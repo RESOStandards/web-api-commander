@@ -12,6 +12,7 @@ import java.util.Date;
 import static org.reso.commander.Commander.NOT_OK;
 import static org.reso.commander.Commander.REPORT_DIVIDER;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
+import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
 
 public class MetadataReport implements JsonSerializer<MetadataReport> {
   private static final Logger LOG = LogManager.getLogger(MetadataReport.class);
@@ -71,12 +72,11 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
             FieldJson fieldJson = new FieldJson(edmEntityType.getName(), edmEntityType.getNavigationProperty(navigationPropertyTypeName));
             fields.add(fieldJson.serialize(fieldJson, FieldJson.class, null));
           } catch (Exception ex) {
-            LOG.warn("WARNING! Could not process expansion '{}'. Exception: {}", navigationPropertyTypeName, ex.getMessage());
+            LOG.warn("WARNING! Could not process expansion '{}'. Exception: {}", navigationPropertyTypeName, ex);
             if (ddVersion.compareTo("1.7") == 0) {
               LOG.warn("WARNING! This will fail in Data Dictionary 2.0 and later!\n");
             } else {
-              LOG.error("ERROR: Expanded types MUST be resolvable for Data Dictionary 2.0 and later!");
-              System.exit(NOT_OK);
+              failAndExitWithErrorMessage("Expanded types MUST be resolvable for Data Dictionary 2.0 and later!", LOG);
             }
           }
         });
