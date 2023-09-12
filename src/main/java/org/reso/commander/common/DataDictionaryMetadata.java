@@ -17,7 +17,7 @@ public class DataDictionaryMetadata {
       return resourceName;
     }
     return resourceName + "Key";
-  };
+  }
 
   public static String getKeyFieldForResource(String resourceName) {
     switch (resourceName) {
@@ -47,9 +47,9 @@ public class DataDictionaryMetadata {
       case "MemberAssociation":
       case "OfficeAssociation":
         return "AssociationKey";
-      case "MemberStateLicenses":
+      case "MemberStateLicense":
         return "MemberStateLicenseKey";
-      case "OfficeCorporateLicenses":
+      case "OfficeCorporateLicense":
         return "OfficeCorporateLicenseKey";
       case "TransactionManagement":
         return "TransactionKey";
@@ -61,33 +61,8 @@ public class DataDictionaryMetadata {
         return "TeamMemberKey";
       case "PropertyPowerProduction":
         return "PowerProductionKey";
-
-      /* The following items always have the key name appended */
-      case "Member":
-      case "Office":
-      case "Caravan":
-      case "CaravanStops":
-      case "ContactListings":
-      case "HistoryTransactional":
-      case "Media":
-      case "OpenHouse":
-      case "Prospecting":
-      case "SavedSearch":
-      case "Showing":
-      case "OtherPhone":
-      case "PowerStorage":
-      case "SocialMedia":
-      case "Association":
-      case "Field":
-      case "Lookup":
-      case "ShowingAppointment":
-      case "ShowingAvailability":
-      case "ShowingRequest":
-        return keyifyResourceName(resourceName);
       default:
-        LOG.error("Cannot find key name for resource: " + resourceName);
-        return EMPTY_STRING;
+        return keyifyResourceName(resourceName);
     }
   }
-
 }

@@ -1,7 +1,7 @@
 {
   "description": "RESO Data Dictionary Metadata Report",
   "version": "2.0",
-  "generatedOn": "2023-09-05T06:55:05.505591Z",
+  "generatedOn": "2023-09-12T01:27:01.647242Z",
   "fields": [
     {
       "resourceName": "Property",
@@ -24479,7 +24479,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicenses",
+      "resourceName": "MemberStateLicense",
       "fieldName": "MemberMlsId",
       "type": "Edm.String",
       "nullable": true,
@@ -24500,7 +24500,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicenses",
+      "resourceName": "MemberStateLicense",
       "fieldName": "MemberKey",
       "type": "Edm.String",
       "nullable": true,
@@ -24521,7 +24521,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicenses",
+      "resourceName": "MemberStateLicense",
       "fieldName": "MemberStateLicense",
       "type": "Edm.String",
       "nullable": true,
@@ -24542,7 +24542,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicenses",
+      "resourceName": "MemberStateLicense",
       "fieldName": "MemberStateLicenseExpirationDate",
       "type": "Edm.Date",
       "nullable": true,
@@ -24562,7 +24562,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicenses",
+      "resourceName": "MemberStateLicense",
       "fieldName": "MemberStateLicenseType",
       "type": "org.reso.metadata.enums.MemberStateLicenseType",
       "typeName": "MemberStateLicenseType",
@@ -24583,7 +24583,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicenses",
+      "resourceName": "MemberStateLicense",
       "fieldName": "MemberStateLicenseState",
       "type": "org.reso.metadata.enums.StateOrProvince",
       "typeName": "StateOrProvince",
@@ -24604,7 +24604,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicenses",
+      "resourceName": "MemberStateLicense",
       "fieldName": "ModificationTimestamp",
       "type": "Edm.DateTimeOffset",
       "nullable": true,
@@ -24625,7 +24625,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicenses",
+      "resourceName": "MemberStateLicense",
       "fieldName": "MemberStateLicenseKey",
       "type": "Edm.String",
       "nullable": true,
@@ -24646,7 +24646,7 @@
       ]
     },
     {
-      "resourceName": "MemberStateLicenses",
+      "resourceName": "MemberStateLicense",
       "fieldName": "Member",
       "isExpansion": true,
       "isCollection": false,
@@ -24659,12 +24659,12 @@
         },
         {
           "term": "Core.Description",
-          "value": "The member of the MemberStateLicenses record."
+          "value": "The member of the MemberStateLicense record."
         }
       ]
     },
     {
-      "resourceName": "MemberStateLicenses",
+      "resourceName": "MemberStateLicense",
       "fieldName": "HistoryTransactional",
       "isExpansion": true,
       "isCollection": true,
@@ -24677,7 +24677,7 @@
         },
         {
           "term": "Core.Description",
-          "value": "A collection of history items related to the MemberStateLicenses record."
+          "value": "A collection of history items related to the MemberStateLicense record."
         }
       ]
     },
@@ -26259,7 +26259,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicenses",
+      "resourceName": "OfficeCorporateLicense",
       "fieldName": "OfficeMlsId",
       "type": "Edm.String",
       "nullable": true,
@@ -26280,7 +26280,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicenses",
+      "resourceName": "OfficeCorporateLicense",
       "fieldName": "OfficeKey",
       "type": "Edm.String",
       "nullable": true,
@@ -26301,7 +26301,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicenses",
+      "resourceName": "OfficeCorporateLicense",
       "fieldName": "OfficeCorporateLicense",
       "type": "Edm.String",
       "nullable": true,
@@ -26322,7 +26322,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicenses",
+      "resourceName": "OfficeCorporateLicense",
       "fieldName": "OfficeCorporateLicenseState",
       "type": "org.reso.metadata.enums.StateOrProvince",
       "typeName": "StateOrProvince",
@@ -26343,7 +26343,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicenses",
+      "resourceName": "OfficeCorporateLicense",
       "fieldName": "OfficeCorporateLicenseExpirationDate",
       "type": "Edm.Date",
       "nullable": true,
@@ -26363,7 +26363,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicenses",
+      "resourceName": "OfficeCorporateLicense",
       "fieldName": "OfficeCorporateLicenseType",
       "type": "org.reso.metadata.enums.OfficeCorporateLicenseType",
       "typeName": "OfficeCorporateLicenseType",
@@ -26384,7 +26384,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicenses",
+      "resourceName": "OfficeCorporateLicense",
       "fieldName": "ModificationTimestamp",
       "type": "Edm.DateTimeOffset",
       "nullable": true,
@@ -26405,7 +26405,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicenses",
+      "resourceName": "OfficeCorporateLicense",
       "fieldName": "OfficeCorporateLicenseKey",
       "type": "Edm.String",
       "nullable": true,
@@ -26426,7 +26426,7 @@
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicenses",
+      "resourceName": "OfficeCorporateLicense",
       "fieldName": "Office",
       "isExpansion": true,
       "isCollection": false,
@@ -26439,12 +26439,12 @@
         },
         {
           "term": "Core.Description",
-          "value": "The Office of the OfficeCorporateLicenses record."
+          "value": "The Office of the OfficeCorporateLicense record."
         }
       ]
     },
     {
-      "resourceName": "OfficeCorporateLicenses",
+      "resourceName": "OfficeCorporateLicense",
       "fieldName": "HistoryTransactional",
       "isExpansion": true,
       "isCollection": true,
@@ -26457,7 +26457,7 @@
         },
         {
           "term": "Core.Description",
-          "value": "A collection of history items related to the OfficeCorporateLicenses record."
+          "value": "A collection of history items related to the OfficeCorporateLicense record."
         }
       ]
     },
@@ -33643,7 +33643,7 @@
         },
         {
           "term": "Core.Description",
-          "value": "The RESO UOI\u0027s OrganizationUniqueId of the originating record provider. The originating system is the system with authoritative control over the record (e.g., the name of the MLS where the CaravanStops were input). In cases where the originating system was not where the record originated (the authoritative system), see the Originating System fields."
+          "value": "The RESO UOI\u0027s OrganizationUniqueId of the originating record provider. The originating system is the system with authoritative control over the record (e.g., the name of the MLS where the CaravanStop was inputted). In cases where the originating system was not where the record originated (the authoritative system), see the Originating System fields."
         }
       ]
     },
@@ -33660,7 +33660,7 @@
         },
         {
           "term": "Core.Description",
-          "value": "The system key, a unique record identifier, from the originating system. The originating system is the system with authoritative control over the record (e.g., the MLS where the CaravanStops were input). There may be cases where the source system (how you received the record) is not the originating system. See Source System Key for more information."
+          "value": "The system key, a unique record identifier, from the originating system. The originating system is the system with authoritative control over the record (e.g., the MLS where the CaravanStop was inputted). There may be cases where the source system (how you received the record) is not the originating system. See Source System Key for more information."
         }
       ]
     },
@@ -33677,7 +33677,7 @@
         },
         {
           "term": "Core.Description",
-          "value": "The name of the originating record provider. Most commonly the name of the MLS. The place where the CaravanStops are originally input. The legal name of the company."
+          "value": "The name of the originating record provider. Most commonly the name of the MLS. The place where the CaravanStop was originally inputted. The legal name of the company."
         }
       ]
     },
@@ -33728,29 +33728,29 @@
         },
         {
           "term": "Core.Description",
-          "value": "The name of the CaravanStops record provider. The system from which the record was directly received. The legal name of the company."
+          "value": "The name of the CaravanStop record provider. The system from which the record was directly received. The legal name of the company."
         }
       ]
     },
     {
-      "resourceName": "CaravanStops",
-      "fieldName": "CaravanStopsKey",
+      "resourceName": "CaravanStop",
+      "fieldName": "CaravanStopKey",
       "type": "Edm.String",
       "nullable": true,
       "maxLength": 255,
       "annotations": [
         {
           "term": "RESO.OData.Metadata.StandardName",
-          "value": "Caravan Stops Key"
+          "value": "Caravan Stop Key"
         },
         {
           "term": "Core.Description",
-          "value": "A system unique identifier. Specifically, a foreign key referencing the primary key of the Teams Resource."
+          "value": "A system unique identifier. Specifically, a foreign key referencing the primary key of the CaravanStop Resource."
         }
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "CaravanKey",
       "type": "Edm.String",
       "nullable": true,
@@ -33767,10 +33767,10 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "StopResourceName",
-      "type": "org.reso.metadata.enums.CaravanStopsResourceNames",
-      "typeName": "CaravanStopsResourceNames",
+      "type": "org.reso.metadata.enums.CaravanStopResourceNames",
+      "typeName": "CaravanStopResourceNames",
       "nullable": true,
       "annotations": [
         {
@@ -33784,10 +33784,10 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "StopClassName",
-      "type": "org.reso.metadata.enums.CaravanStopsClassName",
-      "typeName": "CaravanStopsClassName",
+      "type": "org.reso.metadata.enums.CaravanStopClassName",
+      "typeName": "CaravanStopClassName",
       "nullable": true,
       "annotations": [
         {
@@ -33801,7 +33801,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "StopKey",
       "type": "Edm.String",
       "nullable": true,
@@ -33813,12 +33813,12 @@
         },
         {
           "term": "Core.Description",
-          "value": "The key of a caravan stop record. This is a foreign key to the CaravanStops Resource. Typical stops are represented by an open house or listing record\u0027s key. A stop might also be another custom/local resource."
+          "value": "The key of a caravan stop record. This is a foreign key to the CaravanStop Resource. Typical stops are represented by an open house or listing record\u0027s key. A stop might also be another custom/local resource."
         }
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "StopId",
       "type": "Edm.String",
       "nullable": true,
@@ -33835,7 +33835,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "StopOrder",
       "type": "Edm.Int64",
       "nullable": true,
@@ -33851,7 +33851,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "StopRemarks",
       "type": "Edm.String",
       "nullable": true,
@@ -33868,7 +33868,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "StopStartTime",
       "type": "Edm.DateTimeOffset",
       "nullable": true,
@@ -33885,7 +33885,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "StopEndTime",
       "type": "Edm.DateTimeOffset",
       "nullable": true,
@@ -33902,7 +33902,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "StopAttendedBy",
       "type": "org.reso.metadata.enums.Attended",
       "typeName": "Attended",
@@ -33919,7 +33919,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "StopDate",
       "type": "Edm.Date",
       "nullable": true,
@@ -33935,7 +33935,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "StopRefreshments",
       "type": "Edm.String",
       "nullable": true,
@@ -33952,7 +33952,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "StopShowingAgentFirstName",
       "type": "Edm.String",
       "nullable": true,
@@ -33969,7 +33969,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "StopShowingAgentKey",
       "type": "Edm.String",
       "nullable": true,
@@ -33986,7 +33986,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "StopShowingAgentLastName",
       "type": "Edm.String",
       "nullable": true,
@@ -34003,7 +34003,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "StopShowingAgentMlsId",
       "type": "Edm.String",
       "nullable": true,
@@ -34020,7 +34020,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "ModificationTimestamp",
       "type": "Edm.DateTimeOffset",
       "nullable": true,
@@ -34037,7 +34037,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "OriginalEntryTimestamp",
       "type": "Edm.DateTimeOffset",
       "nullable": true,
@@ -34054,7 +34054,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "OriginatingSystemId",
       "type": "Edm.String",
       "nullable": true,
@@ -34071,7 +34071,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "OriginatingSystemKey",
       "type": "Edm.String",
       "nullable": true,
@@ -34088,7 +34088,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "OriginatingSystemName",
       "type": "Edm.String",
       "nullable": true,
@@ -34105,7 +34105,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "SourceSystemId",
       "type": "Edm.String",
       "nullable": true,
@@ -34122,7 +34122,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "SourceSystemKey",
       "type": "Edm.String",
       "nullable": true,
@@ -34139,7 +34139,7 @@
       ]
     },
     {
-      "resourceName": "CaravanStops",
+      "resourceName": "CaravanStop",
       "fieldName": "SourceSystemName",
       "type": "Edm.String",
       "nullable": true,
@@ -94283,7 +94283,7 @@
       ]
     },
     {
-      "lookupName": "org.reso.metadata.enums.CaravanStopsResourceNames",
+      "lookupName": "org.reso.metadata.enums.CaravanStopResourceNames",
       "lookupValue": "OpenHouse",
       "type": "Edm.Int32",
       "annotations": [
@@ -94298,7 +94298,7 @@
       ]
     },
     {
-      "lookupName": "org.reso.metadata.enums.CaravanStopsResourceNames",
+      "lookupName": "org.reso.metadata.enums.CaravanStopResourceNames",
       "lookupValue": "Contacts",
       "type": "Edm.Int32",
       "annotations": [
@@ -94313,7 +94313,7 @@
       ]
     },
     {
-      "lookupName": "org.reso.metadata.enums.CaravanStopsResourceNames",
+      "lookupName": "org.reso.metadata.enums.CaravanStopResourceNames",
       "lookupValue": "Member",
       "type": "Edm.Int32",
       "annotations": [
@@ -94328,7 +94328,7 @@
       ]
     },
     {
-      "lookupName": "org.reso.metadata.enums.CaravanStopsResourceNames",
+      "lookupName": "org.reso.metadata.enums.CaravanStopResourceNames",
       "lookupValue": "Office",
       "type": "Edm.Int32",
       "annotations": [
@@ -94343,7 +94343,7 @@
       ]
     },
     {
-      "lookupName": "org.reso.metadata.enums.CaravanStopsResourceNames",
+      "lookupName": "org.reso.metadata.enums.CaravanStopResourceNames",
       "lookupValue": "Property",
       "type": "Edm.Int32",
       "annotations": [
@@ -94358,8 +94358,8 @@
       ]
     },
     {
-      "lookupName": "org.reso.metadata.enums.CaravanStopsClassName",
-      "lookupValue": "SampleCaravanStopsClassNameEnumValue",
+      "lookupName": "org.reso.metadata.enums.CaravanStopClassName",
+      "lookupValue": "SampleCaravanStopClassNameEnumValue",
       "type": "Edm.Int32"
     },
     {
