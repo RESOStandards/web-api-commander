@@ -9,7 +9,6 @@ import org.reso.commander.common.Utils;
 import java.lang.reflect.Type;
 import java.util.Date;
 
-import static org.reso.commander.Commander.NOT_OK;
 import static org.reso.commander.Commander.REPORT_DIVIDER;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
@@ -18,15 +17,15 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
   private static final Logger LOG = LogManager.getLogger(MetadataReport.class);
 
   private Edm metadata;
-  private String ddVersion;
+  private String version;
 
   private MetadataReport() {
     //private default constructor
   }
 
-  public MetadataReport(Edm metadata, String ddVersion) {
+  public MetadataReport(Edm metadata, String version) {
     this.metadata = metadata;
-    this.ddVersion = ddVersion;
+    this.version = version;
   }
 
   @Override
@@ -50,7 +49,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
   public JsonElement serialize(MetadataReport src, Type typeOfSrc, JsonSerializationContext context) {
     final String
         DESCRIPTION_KEY = "description", DESCRIPTION = "RESO Data Dictionary Metadata Report",
-        VERSION_KEY = "version", VERSION = ddVersion,
+        VERSION_KEY = "version", VERSION = version,
         GENERATED_ON_KEY = "generatedOn",
         FIELDS_KEY = "fields",
         LOOKUPS_KEY = "lookups";
@@ -73,7 +72,7 @@ public class MetadataReport implements JsonSerializer<MetadataReport> {
             fields.add(fieldJson.serialize(fieldJson, FieldJson.class, null));
           } catch (Exception ex) {
             LOG.warn("WARNING! Could not process expansion '{}'. Exception: {}", navigationPropertyTypeName, ex);
-            if (ddVersion.compareTo("1.7") == 0) {
+            if (version.compareTo("1.7") == 0) {
               LOG.warn("WARNING! This will fail in Data Dictionary 2.0 and later!\n");
             } else {
               failAndExitWithErrorMessage("Expanded types MUST be resolvable for Data Dictionary 2.0 and later!", LOG);

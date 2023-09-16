@@ -1,6 +1,6 @@
 Feature: Payloads Sampling (Web API)
   All Scenarios passing means the given Web API Server has completed data availability testing
-  # SEE: https://docs.google.com/document/d/1btCduOpWWzeadeMcSviA8M9dclIz23P-bPUGKwcD0NY/edit?usp=sharing
+  # SEE: https://transport.reso.org
 
   Background:
     Given a RESOScript file was provided

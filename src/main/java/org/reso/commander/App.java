@@ -48,7 +48,7 @@ public class App {
   public static void main(String[] params) {
     // create the command line parser
     CommandLineParser parser = new org.apache.commons.cli.DefaultParser();
-    String ddVersion;
+    String version;
 
     //available Commander variables
     String inputFilename, outputFile, uri;
@@ -69,7 +69,7 @@ public class App {
       inputFilename = cmd.getOptionValue(APP_OPTIONS.INPUT_FILE, null);
       outputFile = cmd.getOptionValue(APP_OPTIONS.OUTPUT_FILE, null);
       uri = cmd.getOptionValue(APP_OPTIONS.URI, null);
-      ddVersion = cmd.getOptionValue(APP_OPTIONS.DD_VERSION, DEFAULT_DD_VERSION);
+      version = cmd.getOptionValue(APP_OPTIONS.DD_VERSION, DEFAULT_DD_VERSION);
 
       // using the edmEnabledClient requires the serviceRoot for schema validation, which is performed
       // against the payload each time the request is made when enabled.
@@ -202,9 +202,9 @@ public class App {
             commander.saveGetRequest(requestUri, outputFile);
           }
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT)) {
-          LOG.info("Generating Data Dictionary {} Metadata Report...", ddVersion);
+          LOG.info("Generating Data Dictionary {} Metadata Report...", version);
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT);
-          generateMetadataReport(deserializeEdmFromPath(inputFilename, commander.getClient()), ddVersion, inputFilename);
+          generateMetadataReport(deserializeEdmFromPath(inputFilename, commander.getClient()), version, inputFilename);
           LOG.info("Metadata report generated!");
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.VALIDATE_METADATA)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.VALIDATE_METADATA);
@@ -217,7 +217,7 @@ public class App {
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS);
           try {
-            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new BDDProcessor(ddVersion));
+            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new BDDProcessor(version));
             generator.processWorksheets();
           } catch (Exception ex) {
             LOG.error(getDefaultErrorMessage(ex));
@@ -225,7 +225,7 @@ public class App {
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_EDMX)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_EDMX);
           try {
-            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new EDMXProcessor(ddVersion));
+            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new EDMXProcessor(version));
             generator.processWorksheets();
           } catch (Exception ex) {
             LOG.error(getDefaultErrorMessage(ex));
@@ -393,7 +393,7 @@ public class App {
     static final String USE_KEY_NUMERIC = "useKeyNumeric";
     static final String CONTENT_TYPE = "contentType";
     static final String HELP = "help";
-    static final String DD_VERSION = "ddVersion";
+    static final String DD_VERSION = "version";
 
     /**
      * Validates options for the various actions exposed in App.
@@ -523,7 +523,7 @@ public class App {
           .desc("print help")
           .build();
 
-      Option ddVersion = Option.builder()
+      Option version = Option.builder()
           .argName("v").longOpt(DD_VERSION).hasArg(true)
           .desc("Data Dictionary or Web API version, e.g. 1.7, 2.0.0")
           .build();
@@ -563,7 +563,7 @@ public class App {
           .addOption(useKeyNumeric)
           .addOption(uriOption)
           .addOption(contentType)
-          .addOption(ddVersion)
+          .addOption(version)
           .addOptionGroup(actions);
     }
 

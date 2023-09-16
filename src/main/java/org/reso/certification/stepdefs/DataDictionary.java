@@ -74,11 +74,11 @@ public class DataDictionary {
   protected static final String PATH_TO_METADATA_ARG = "pathToMetadata";
   protected static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final String LOOKUP_VALUE = "lookupValue";
-  private static final String DD_VERSION_ARG = "ddVersion";
+  private static final String DD_VERSION_ARG = "version";
 
   //extract any params here
   private final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES_ARG));
-  private final String ddVersion = System.getProperty(DD_VERSION_ARG, DEFAULT_DATA_DICTIONARY_VERSION);
+  private final String version = System.getProperty(DD_VERSION_ARG, DEFAULT_DATA_DICTIONARY_VERSION);
 
   //strict mode is enabled by default
   private final boolean strictMode = System.getProperty(USE_STRICT_MODE_ARG) == null || Boolean.parseBoolean(System.getProperty(USE_STRICT_MODE_ARG));
@@ -103,7 +103,7 @@ public class DataDictionary {
       container.initialize();
       container.setShowResponses(showResponses);
     }
-    container.setDataDictionaryVersion(ddVersion);
+    container.setDataDictionaryVersion(version);
   }
 
   @And("a test container was successfully created from the given metadata file")

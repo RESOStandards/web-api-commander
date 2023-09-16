@@ -61,9 +61,9 @@ public class WebAPIServerCore implements En {
       USE_COLLECTIONS_ARG = "useCollections",
       PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript",
       USE_STRING_ENUMS_ARG = "useStringEnums",
-      DD_VERSION_ARG = "ddVersion";
+      DD_VERSION_ARG = "version";
 
-  private final String ddVersion = System.getProperty(DD_VERSION_ARG, DEFAULT_DATA_DICTIONARY_VERSION);
+  private final String version = System.getProperty(DD_VERSION_ARG, DEFAULT_DATA_DICTIONARY_VERSION);
 
   private static Scenario scenario;
 
@@ -97,7 +97,7 @@ public class WebAPIServerCore implements En {
       container.get().initialize();
     }
 
-    container.get().setDataDictionaryVersion(ddVersion);
+    container.get().setDataDictionaryVersion(version);
   }
 
   /**
