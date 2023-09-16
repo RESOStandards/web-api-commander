@@ -120,7 +120,7 @@ final String buildDir = "build",
 
 // check to see if a deprecated task is being used
 project.gradle.startParameter.taskNames.each { taskName ->
-  Boolean skipLegacyMessage = false
+  Boolean throwLegacyTaskError = false
   String useAlternateTaskMessage = "Task '${taskName}' is deprecated! Please use: "
 
   switch (taskName) {
@@ -134,11 +134,11 @@ project.gradle.startParameter.taskNames.each { taskName ->
       useAlternateTaskMessage += WEB_API_CORE_TEST_NAME
       break
     default:
-      skipLegacyMessage = true
+      throwLegacyTaskError = true
       break
   }
 
-  if (!skipLegacyMessage) {
+  if (!throwLegacyTaskError) {
     throw new GradleException(useAlternateTaskMessage)
   }
 }
@@ -264,8 +264,6 @@ tasks.register(DATA_AVAILABILITY_TEST_NAME) {
           "\n\nSupported Parameters:" +
           "\n  • ${ARG_VERSION}: Default is ${DEFAULT_DD_VERSION}. Valid versions are ${SUPPORTED_DD_VERSIONS}" +
           "\n  • ${ARG_RESOSCRIPT_PATH}: Path to config file in Data Dictionary format \n"
-
-
 
   description = "Data Availability Tests" +
       "\n[Report location: ${certReportsDir}]" +
