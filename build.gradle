@@ -52,7 +52,7 @@ configurations {
 
 
 final String MAIN_CLASS_NAME = "org.reso.commander.App",
-             TEST_CLASS_NAME = "io.cucumber.core.cli.Main"
+             CUCUMBER_MAIN_CLASS_NAME = "io.cucumber.core.cli.Main"
 
 
 final String DEFAULT_WEB_API_VERSION = "2.0.0",
@@ -204,7 +204,7 @@ tasks.register(DATA_DICTIONARY_TEST_NAME) {
 
   doLast {
     javaexec {
-      mainClass = TEST_CLASS_NAME
+      mainClass = CUCUMBER_MAIN_CLASS_NAME
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       System.setProperty(ARG_VERSION, version)
 
@@ -291,7 +291,7 @@ tasks.register(DATA_AVAILABILITY_TEST_NAME) {
   dependsOn jar
   doLast {
     javaexec {
-      mainClass = TEST_CLASS_NAME
+      mainClass = CUCUMBER_MAIN_CLASS_NAME
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
 
@@ -360,7 +360,7 @@ tasks.register(WEB_API_CORE_TEST_NAME) {
 
   doLast {
     javaexec {
-      mainClass = TEST_CLASS_NAME
+      mainClass = CUCUMBER_MAIN_CLASS_NAME
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       systemProperties = System.getProperties()
 
@@ -388,7 +388,7 @@ tasks.register("testDataDictionaryReferenceMetadata") {
   SUPPORTED_DD_VERSIONS.each { supportedVersion ->
     doLast {
       javaexec {
-        mainClass = "io.cucumber.core.cli.Main"
+        mainClass = CUCUMBER_MAIN_CLASS_NAME
         classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
         System.setProperty("pathToMetadata", "src/main/resources/RESODataDictionary-${supportedVersion}.xml")
         System.setProperty("version", supportedVersion)
@@ -419,7 +419,7 @@ test {
   dependsOn assemble, compileTestJava, testDataDictionaryReferenceMetadata
   doLast {
     javaexec {
-      mainClass = "io.cucumber.core.cli.Main"
+      mainClass = CUCUMBER_MAIN_CLASS_NAME
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       args = ["--plugin",
               "pretty",
