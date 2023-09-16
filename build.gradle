@@ -6,6 +6,11 @@ plugins {
   id 'application'
 }
 
+String DEFAULT_WEB_API_VERSION = '2.0.0'
+String DEFAULT_DD_VERSION = '1.7'
+ArrayList<String> SUPPORTED_WEB_API_VERSIONS = [DEFAULT_WEB_API_VERSION]
+ArrayList<String> SUPPORTED_DATA_DICTIONARY_VERSIONS = [DEFAULT_DD_VERSION, '2.0']
+
 // Define the main class for the application
 mainClassName = 'org.reso.commander.App'
 sourceCompatibility = 1.8
@@ -103,20 +108,40 @@ tasks.register('prepareCertificationEnvironment') {
   }
 }
 
-tasks.register('testWebApiCore_2_0_0') {
-  group = 'RESO Certification'
-  description = 'Web API Core 2.0.0 Acceptance Tests' +
-      '\nExample: ' +
-      '\n  ./gradlew testWebApiCore_2_0_0 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript -DshowResponses=true' +
-      '\n\nNote: by default the Web API tests assume Collection(Edm.EnumType).' +
-      '\nPass -DuseStringEnums=true if using string enumerations and the Lookup Resource.' +
-      '\nPass -DuseCollections=false if using OData IsFlags.' +
-      '\n\n[Report location: ' + certReportsDir + ']' +
-      '\n\n'
-
-  String reportName = 'web-api-server.core.2.0.0'
-
+tasks.register('testWebApiCore') {
   dependsOn jar, prepareCertificationEnvironment
+  group = 'RESO Certification'
+
+  String reportName = 'web-api-server.core.${version}'
+
+  String usageInfo = '\n\nExample: ' +
+      '\n  ./gradlew testWebApiCore -Dversion=' + DEFAULT_WEB_API_VERSION + ' -DpathToRESOScript=/path/to/web-api-core-' \
+          + DEFAULT_WEB_API_VERSION + '.resoscript -DshowResponses=true' +
+      '\n\nNote: Web API Core tests assume Collection(Edm.EnumType) by default:' +
+      '\n  • Pass -DuseStringEnums=true if using string enumerations and the Lookup Resource' +
+      '\n  • Pass -DuseCollections=false if using OData IsFlags\n'
+
+  description = 'Web API Core Acceptance Tests' +
+      '\n[Report location: ' + certReportsDir + ']'+
+      usageInfo + '\n'
+
+  ArrayList<String> errors = []
+
+  String version = System.getProperty('version', DEFAULT_WEB_API_VERSION)
+
+  if (!(version in SUPPORTED_WEB_API_VERSIONS)) {
+    errors.push("Invalid Web API Core Version: " + version)
+  }
+
+  if (System.getProperty('pathToRESOScript') == null) {
+    errors.push('Required Parameter: -DpathToRESOScript=/path/to/your.resoscript')
+  }
+
+  if (errors.size() > 0) {
+    println('Usage: ' + usageInfo)
+    throw new GradleException('ERRORS:\n' + errors.join('\n'))
+  }
+
   doLast {
     javaexec {
       mainClass = "io.cucumber.core.cli.Main"
@@ -132,9 +157,7 @@ tasks.register('testWebApiCore_2_0_0') {
           'html:' + certReportsDir + '/' + reportName + '.html',
           '--glue',
           'org.reso.certification.stepdefs#WebAPIServerCore',
-          'src/main/java/org/reso/certification/features/web-api',
-          '--tags',
-          '@core-endorsement'
+          'src/main/java/org/reso/certification/features/web-api/v' + version + '/web-api-server.core.feature'
       ]
     }
   }
