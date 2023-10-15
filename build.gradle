@@ -244,7 +244,7 @@ tasks.register(DATA_DICTIONARY_TEST_NAME) {
         argsArray.add(System.getProperty(ARG_CUCUMBER_TAGS))
       }
 
-      args = argsArray.toArray()
+      args = argsArray
     }
   }
 }
@@ -312,7 +312,7 @@ tasks.register(DATA_AVAILABILITY_TEST_NAME) {
         argsArray.add("pretty")
       }
 
-      args = argsArray.toArray()
+      args = argsArray
     }
   }
 }
