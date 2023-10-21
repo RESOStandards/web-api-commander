@@ -372,6 +372,8 @@ public class DataDictionary {
         TypeMappings.ODataTypes.DOUBLE
     }).anyMatch(foundTypeName::contentEquals);
 
+    final boolean isCollection = container.getFieldMap().get(currentResourceName.get()).get(fieldName).isCollection();
+
     //TODO: make functions
     switch (assertedTypeName) {
       case TypeMappings.DataDictionaryTypes.STRING:
@@ -403,6 +405,7 @@ public class DataDictionary {
             foundTypeName.contentEquals(TypeMappings.ODataTypes.BOOLEAN));
         break;
       case TypeMappings.DataDictionaryTypes.SINGLE_ENUM:
+        assertFalse(getDefaultErrorMessage("Single enumerations cannot be collections!"), isCollection);
         if (foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING)) {
           LOG.info("Found data type of Edm.String for field: " + fieldName);
         } else {
@@ -430,7 +433,6 @@ public class DataDictionary {
 
         break;
       case TypeMappings.DataDictionaryTypes.MULTI_ENUM:
-        final boolean isCollection = container.getFieldMap().get(currentResourceName.get()).get(fieldName).isCollection();
 
         if (foundTypeName.contentEquals(TypeMappings.ODataTypes.STRING)) {
           if (!isCollection) {

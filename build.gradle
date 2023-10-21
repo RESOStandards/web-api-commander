@@ -191,8 +191,8 @@ tasks.register(DATA_DICTIONARY_TEST_NAME) {
     errors.push("Invalid Data Dictionary Version: ${version}. Supported Versions: ${SUPPORTED_DD_VERSIONS}" as String)
   }
 
-  if (System.getProperty("pathToRESOScript") == null) {
-    errors.push("Required Parameter: -D${ARG_RESOSCRIPT_PATH}=/path/to/your.resoscript" as String)
+  if (System.getProperty("pathToRESOScript") == null && System.getProperty("pathToMetadata") == null) {
+    errors.push("Either -D${ARG_RESOSCRIPT_PATH}=/path/to/your.resoscript or -D${ARG_METADATA_PATH}=/path/to/metadata.xml must be present!" as String)
   }
 
   if (isTaskActive && errors.size() > 0) {
