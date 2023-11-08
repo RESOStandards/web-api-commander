@@ -1,33 +1,18 @@
 package org.reso.commander.common;
 
-import com.google.common.base.Functions;
-import com.google.gson.*;
-import io.cucumber.gherkin.internal.com.eclipsesource.json.Json;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.olingo.client.api.ODataClient;
-import org.apache.olingo.client.api.domain.ClientEntity;
-import org.apache.olingo.client.api.serialization.ODataSerializerException;
-import org.apache.olingo.client.core.edm.xml.ClientCsdlAnnotation;
-import org.apache.olingo.client.core.serialization.JsonSerializer;
-import org.apache.olingo.commons.api.edm.Edm;
-import org.apache.olingo.commons.api.edm.EdmAnnotation;
-import org.apache.olingo.commons.api.edm.EdmElement;
-import org.apache.olingo.commons.api.format.ContentType;
-import org.apache.olingo.commons.core.edm.EdmAnnotationImpl;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.StringWriter;
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Utils {
@@ -60,13 +45,13 @@ public class Utils {
    * @param fileName      the name of the file to create
    * @param content       the content to write to the file
    */
-  public static File createFile(String directoryName, String fileName, String content) {
-    if (directoryName == null || fileName == null) return null;
+  public static void createFile(String directoryName, String fileName, String content) {
+    if (directoryName == null || fileName == null) return;
     String outputPath = directoryName.contains(System.getProperty("user.dir")) ? directoryName
         : System.getProperty("user.dir") + File.separator + directoryName;
     File baseDirectory = new File(outputPath);
     FileWriter writer;
-    File outputFile = null;
+    File outputFile;
 
     try {
       if (!baseDirectory.exists()) {
@@ -79,57 +64,6 @@ public class Utils {
     } catch (Exception ex) {
       LOG.error("Filename: " + fileName + ". Could not create file: " + ex);
     }
-    return outputFile;
-  }
-
-  /**
-   * Creates a file in the given directory with the given content
-   *
-   * @param content the content to write to the file
-   */
-  public static File createFile(String outputPath, String content) {
-    if (outputPath == null) return null;
-    File outputFile = new File(outputPath);
-    try {
-      FileWriter writer;
-
-      if (!outputFile.exists()) {
-        if (!outputFile.mkdirs()) throw new Exception("ERROR: could not create directory: " + outputFile);
-      }
-      writer = new FileWriter(outputFile);
-      writer.write(new String(content.getBytes(StandardCharsets.UTF_8)));
-      writer.flush();
-    } catch (Exception ex) {
-      LOG.error("Filename: " + outputPath + ". Could not create file: " + ex);
-    }
-    return outputFile;
-  }
-
-  /**
-   * Removes a directory at the given pathToDirectory.
-   * <p>
-   * If current user has write access then directory creation will result in True being returned.
-   * Otherwise will return false if the directory couldn't be created for some reason.
-   *
-   * @param pathToDirectory
-   * @return
-   */
-  public static Boolean removeDirectory(String pathToDirectory) {
-    if (pathToDirectory == null) return null;
-    File outputDirectory = new File(pathToDirectory);
-
-    if (outputDirectory.exists()) {
-      if (outputDirectory.canWrite()) {
-        if (outputDirectory.listFiles() != null) {
-          Arrays.stream(Objects.requireNonNull(outputDirectory.listFiles())).forEach(File::delete);
-        }
-        return outputDirectory.delete();
-      } else {
-        LOG.error("Tried deleting directory " + outputDirectory.getPath() + " but didn't have sufficient access.");
-        return false;
-      }
-    }
-    return true;
   }
 
   public static String pluralize(int lengthAttribute) {
@@ -157,10 +91,6 @@ public class Utils {
 
   public static String getIsoTimestamp() {
     return OffsetDateTime.now().format(DateTimeFormatter.ISO_INSTANT);
-  }
-
-  public static String getIsoTimestamp(OffsetDateTime fromDate) {
-    return OffsetDateTime.from(fromDate.toInstant()).format(DateTimeFormatter.ISO_INSTANT);
   }
 
   /**

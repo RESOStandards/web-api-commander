@@ -121,12 +121,12 @@ public abstract class WorksheetProcessor {
     List<String> value = new ArrayList<>();
     try {
       cellValue = formatter.formatCellValue(row.getCell(index));
-      if (cellValue != null && cellValue.length() > 0) {
+      if (cellValue != null && !cellValue.isEmpty()) {
         //LOG.info("Cell index is: " + index + ", cell value is: " + cellValue);
         value = Arrays.stream(cellValue
                 .replace(" ", "").split(","))
             .map(String::trim)
-            .filter(item -> item.length() > 0)
+            .filter(item -> !item.isEmpty())
             .collect(Collectors.toList());
       }
     } catch (Exception ex) {

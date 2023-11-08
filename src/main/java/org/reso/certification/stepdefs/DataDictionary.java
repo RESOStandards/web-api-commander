@@ -42,50 +42,41 @@ import static org.reso.commander.common.Utils.pluralize;
 import static org.reso.commander.common.Utils.wrapColumns;
 
 public class DataDictionary {
+  protected static final String PATH_TO_METADATA_ARG = "pathToMetadata";
+  protected static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final Logger LOG = LogManager.getLogger(DataDictionary.class);
-  private static Scenario scenario;
-
-  @Before
-  public void beforeStep(Scenario scenario) {
-    DataDictionary.scenario = scenario;
-  }
-
-  @Inject
-  WebAPITestContainer container;
-
   //local variables
   private static final AtomicReference<String> currentResourceName = new AtomicReference<>();
   private static final AtomicReference<Map<String, EdmMember>> foundMembers = new AtomicReference<>(new LinkedHashMap<>());
   private static final AtomicReference<Set<EdmMember>> foundStandardMembers = new AtomicReference<>(new LinkedHashSet<>());
   private static final AtomicReference<Map<String, String>> currentLookups = new AtomicReference<>(new LinkedHashMap<>());
-
-  private static XMLMetadata referenceMetadata = null;
-  private static boolean isMetadataValid = false;
-
   //named args
   private static final String SHOW_RESPONSES_ARG = "showResponses";
   private static final String USE_STRICT_MODE_ARG = "strict";
-  protected static final String PATH_TO_METADATA_ARG = "pathToMetadata";
-  protected static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
   private static final String LOOKUP_VALUE = "lookupValue";
   private static final String DD_VERSION_ARG = "version";
-
   //extract any params here
   private static final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES_ARG));
   private static final String version = System.getProperty(DD_VERSION_ARG, DEFAULT_DATA_DICTIONARY_VERSION);
-
   public static final String REFERENCE_METADATA = "RESODataDictionary-" + version + ".xml";
-
   //strict mode is enabled by default
   private static final boolean strictMode = System.getProperty(USE_STRICT_MODE_ARG) == null
       || Boolean.parseBoolean(System.getProperty(USE_STRICT_MODE_ARG));
-
+  private static Scenario scenario;
+  private static XMLMetadata referenceMetadata = null;
+  private static boolean isMetadataValid = false;
   private final String pathToMetadata = System.getProperty(PATH_TO_METADATA_ARG);
   private final String pathToRESOScript = System.getProperty(PATH_TO_RESOSCRIPT_ARG);
-
   //derived variables
   private final boolean isUsingRESOScript = pathToRESOScript != null;
   private final boolean isUsingMetadata = pathToMetadata != null;
+  @Inject
+  WebAPITestContainer container;
+
+  @Before
+  public void beforeStep(Scenario scenario) {
+    DataDictionary.scenario = scenario;
+  }
 
   @Given("a RESOScript or Metadata file are provided")
   public void aRESOScriptOrMetadataFileAreProvided() {
@@ -148,7 +139,7 @@ public class DataDictionary {
 
       if (!(container.getCommander().isAuthTokenClient()
           || (container.getCommander().isOAuth2Client() && container.getCommander().hasValidAuthConfig()))) {
-          failAndExitWithErrorMessage("Commander must either have a valid Authorization Code or Client Credentials configuration!", scenario);
+        failAndExitWithErrorMessage("Commander must either have a valid Authorization Code or Client Credentials configuration!", scenario);
       }
     }
   }
@@ -202,38 +193,45 @@ public class DataDictionary {
 
   @And("valid metadata were retrieved from the server")
   public void validMetadataWereRetrievedFromTheServer() {
-    if (isUsingRESOScript && container.getShouldValidateMetadata()) {
-      //request metadata from server using service root in RESOScript file
-      TestUtils.assertXMLMetadataAreRequestedFromTheServer(container, scenario);
+    try {
+      if (isUsingRESOScript && container.getShouldValidateMetadata()) {
+        //request metadata from server using service root in RESOScript file
+        TestUtils.assertXMLMetadataAreRequestedFromTheServer(container, scenario);
 
-      if (container.getResponseCode() != HttpStatus.SC_OK) {
-        failAndExitWithErrorMessage("Could not retrieve metadata from " + container.getServiceRoot() + "/$metadata", scenario);
+        if (container.getResponseCode() != HttpStatus.SC_OK) {
+          failAndExitWithErrorMessage("Could not retrieve metadata from " + container.getServiceRoot() + "/$metadata", scenario);
+        }
+
+        //metadata validation tests
+        TestUtils.assertValidXMLMetadata(container, scenario);
+        TestUtils.assertXmlMetadataContainsEdm(container, scenario);
+        TestUtils.assertXMLMetadataHasValidServiceDocument(container, scenario);
+
+        //build field map and ensure it's not null
+        assertNotNull(container.getFieldMap());
+
+        //everything succeeded, mark validation successful
+        container.setShouldValidateMetadata(false);
+
+        //if we have gotten to this point without exceptions, then metadata are valid
+        isMetadataValid = container.hasValidMetadata();
+
+        if (!isMetadataValid) {
+          failAndExitWithErrorMessage("OData XML Metadata MUST be valid!", scenario);
+        }
+
+        //save metadata locally
+        Utils.createFile("build" + File.separator + "certification" + File.separator + "results",
+            "metadata.xml", container.getXMLResponseData());
+
+        //create metadata report
+        final String metadataReport = Commander.generateMetadataReport(container.getEdm(), container.getDataDictionaryVersion());
+        if (metadataReport == null || metadataReport.isEmpty()) {
+          failAndExitWithErrorMessage("Could not create metadata-report.json!", LOG);
+        }
       }
-
-      //metadata validation tests
-      TestUtils.assertValidXMLMetadata(container, scenario);
-      TestUtils.assertXmlMetadataContainsEdm(container, scenario);
-      TestUtils.assertXMLMetadataHasValidServiceDocument(container, scenario);
-
-      //build field map and ensure it's not null
-      assertNotNull(container.getFieldMap());
-
-      //everything succeeded, mark validation successful
-      container.setShouldValidateMetadata(false);
-
-      //if we have gotten to this point without exceptions, then metadata are valid
-      isMetadataValid = container.hasValidMetadata();
-
-      if (!isMetadataValid) {
-        failAndExitWithErrorMessage("OData XML Metadata MUST be valid!", scenario);
-      }
-
-      //save metadata locally
-      Utils.createFile("build" + File.separator + "certification" + File.separator + "results",
-          "metadata.xml", container.getXMLResponseData());
-
-      //create metadata report
-      Commander.generateMetadataReport(container.getEdm(), container.getDataDictionaryVersion());
+    } catch (Exception ex) {
+      failAndExitWithErrorMessage(getDefaultErrorMessage(ex), scenario);
     }
   }
 
@@ -294,6 +292,7 @@ public class DataDictionary {
 
   /**
    * Gets the set of found enumeration members for the given field
+   *
    * @param fieldName the field name of the field whose enumeration to get
    * @return a map of lookup value and lookup display name
    */
@@ -315,7 +314,8 @@ public class DataDictionary {
 
   /**
    * Gets the set of found RESO Standard member names in a given found members Map
-   * @param members a map of the enumeration members that was found in the metadata for a given field
+   *
+   * @param members   a map of the enumeration members that was found in the metadata for a given field
    * @param dataTable data table of standard lookup value and lookup display name items
    * @return a set of EdmMembers from the Lookup metadata that contains the standard items in the data table
    */
@@ -347,10 +347,11 @@ public class DataDictionary {
   /**
    * Determines whether the given field name has the correct data type, according to the mappings in the
    * Data Dictionary specification and RCP-031.
-   * @apiNote SEE: <a href="https://docs.google.com/document/d/15DFf9kDX_mlGCJVOch2fztl8W5h-yd18N0_03Sb4HwM/edit#heading=h.dw8owdmv988f">...</a>
-   * @param fieldName the field name of the field to assert the mapping for
+   *
+   * @param fieldName        the field name of the field to assert the mapping for
    * @param assertedTypeName the asserted type name (from the BDD tests, usually)
-   * @param foundTypeName the type name that was found in the metadata
+   * @param foundTypeName    the type name that was found in the metadata
+   * @apiNote SEE: <a href="https://docs.google.com/document/d/15DFf9kDX_mlGCJVOch2fztl8W5h-yd18N0_03Sb4HwM/edit#heading=h.dw8owdmv988f">...</a>
    */
   protected final void assertDataTypeMapping(String fieldName, String assertedTypeName, String foundTypeName) {
     assertNotNull(getDefaultErrorMessage("you must specify a Data Dictionary type name to check!"), assertedTypeName);
@@ -358,7 +359,7 @@ public class DataDictionary {
     EdmEnumType enumType;
     boolean isIntegerType;
 
-    final boolean isPrimitiveType = Arrays.stream(new String[] {
+    final boolean isPrimitiveType = Arrays.stream(new String[]{
         TypeMappings.ODataTypes.INT16,
         TypeMappings.ODataTypes.INT32,
         TypeMappings.ODataTypes.INT64,
@@ -384,7 +385,7 @@ public class DataDictionary {
         break;
       case TypeMappings.DataDictionaryTypes.DECIMAL:
         assertTrue(wrapColumns(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.DECIMAL, "OR",
-            TypeMappings.ODataTypes.DOUBLE, "but found", foundTypeName)),
+                TypeMappings.ODataTypes.DOUBLE, "but found", foundTypeName)),
             foundTypeName.contentEquals(TypeMappings.ODataTypes.DECIMAL)
                 || foundTypeName.contentEquals(TypeMappings.ODataTypes.DOUBLE));
         break;
@@ -394,8 +395,8 @@ public class DataDictionary {
             || foundTypeName.contentEquals(TypeMappings.ODataTypes.INT64);
 
         assertTrue(wrapColumns(getDefaultErrorMessage(fieldName, "MUST map to", TypeMappings.ODataTypes.INT64,
-            "OR", TypeMappings.ODataTypes.INT32,
-            "OR", TypeMappings.ODataTypes.INT16, "but found", foundTypeName)),
+                "OR", TypeMappings.ODataTypes.INT32,
+                "OR", TypeMappings.ODataTypes.INT16, "but found", foundTypeName)),
             isIntegerType);
         break;
       case TypeMappings.DataDictionaryTypes.BOOLEAN:
@@ -408,7 +409,7 @@ public class DataDictionary {
           LOG.info("Found data type of Edm.String for field: " + fieldName);
         } else {
           assertFalse(getDefaultErrorMessage("Enumerated data types MUST declare a unique nominal (lookup) type.",
-              "\nFound primitive type of", foundTypeName)
+                  "\nFound primitive type of", foundTypeName)
                   + "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565",
               isPrimitiveType);
 
@@ -420,7 +421,7 @@ public class DataDictionary {
               || enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString().contentEquals(TypeMappings.ODataTypes.INT64);
 
           assertTrue(wrapColumns(getDefaultErrorMessage("Enumerated Types MUST use an underlying type of",
-              TypeMappings.ODataTypes.INT16, "OR", TypeMappings.ODataTypes.INT32,  "OR", TypeMappings.ODataTypes.INT64)), isIntegerType);
+              TypeMappings.ODataTypes.INT16, "OR", TypeMappings.ODataTypes.INT32, "OR", TypeMappings.ODataTypes.INT64)), isIntegerType);
 
           assertNotNull(wrapColumns(getDefaultErrorMessage(
               "could not find a definition for", foundTypeName, "in the Entity Data Model!")), enumType);
@@ -440,8 +441,8 @@ public class DataDictionary {
           }
         } else {
           assertFalse(wrapColumns(getDefaultErrorMessage("Enumerated data type MUST declare a unique nominal type.",
-              "Found primitive type of", foundTypeName,
-              "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565")),
+                  "Found primitive type of", foundTypeName,
+                  "\nSee: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_Toc453752565")),
               isPrimitiveType);
 
           //check for enum type by FQDN in the Edm cached in the container
@@ -449,11 +450,11 @@ public class DataDictionary {
 
           final String underlyingTypeName = enumType.getUnderlyingType().getFullQualifiedName().getFullQualifiedNameAsString();
           isIntegerType = TypeMappings.ODataTypes.INT16.contentEquals(underlyingTypeName)
-                  || TypeMappings.ODataTypes.INT32.contentEquals(underlyingTypeName)
-                  || TypeMappings.ODataTypes.INT64.contentEquals(underlyingTypeName);
+              || TypeMappings.ODataTypes.INT32.contentEquals(underlyingTypeName)
+              || TypeMappings.ODataTypes.INT64.contentEquals(underlyingTypeName);
 
           assertTrue(wrapColumns(getDefaultErrorMessage("Enumerated Types MUST use an underlying type of",
-              TypeMappings.ODataTypes.INT16, "OR", TypeMappings.ODataTypes.INT32,  "OR", TypeMappings.ODataTypes.INT64)),
+                  TypeMappings.ODataTypes.INT16, "OR", TypeMappings.ODataTypes.INT32, "OR", TypeMappings.ODataTypes.INT64)),
               isIntegerType);
 
           assertNotNull(wrapColumns(getDefaultErrorMessage(
@@ -483,10 +484,10 @@ public class DataDictionary {
         ? container.getFieldMap(currentResourceName.get()).get(fieldName).getPrecision() : null;
 
     if (!Objects.equals(precision, suggestedPrecision)) {
-      scenario.log("Precision for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Precision of " + suggestedPrecision
+      scenario.log("Precision for field " + fieldName + " SHOULD be equal to the RESO Suggested Max Precision of " + suggestedPrecision
           + " but was " + precision);
     } else {
-      scenario.log("Precision for field " + fieldName +  " is equal to the RESO Suggested Max Scale of " + suggestedPrecision);
+      scenario.log("Precision for field " + fieldName + " is equal to the RESO Suggested Max Scale of " + suggestedPrecision);
     }
   }
 
@@ -497,10 +498,10 @@ public class DataDictionary {
         ? container.getFieldMap(currentResourceName.get()).get(fieldName).getScale() : null;
 
     if (!Objects.equals(scale, suggestedMaxScale)) {
-      scenario.log("Scale for field " + fieldName +  " SHOULD be equal to the RESO Suggested Max Scale of " + suggestedMaxScale
+      scenario.log("Scale for field " + fieldName + " SHOULD be equal to the RESO Suggested Max Scale of " + suggestedMaxScale
           + " but was " + scale);
     } else {
-      scenario.log("Scale for field " + fieldName +  " is equal to the RESO Suggested Max Scale of " + suggestedMaxScale);
+      scenario.log("Scale for field " + fieldName + " is equal to the RESO Suggested Max Scale of " + suggestedMaxScale);
     }
   }
 
@@ -514,7 +515,7 @@ public class DataDictionary {
       scenario.log("Length for field " + fieldName + " SHOULD be equal to the RESO Suggested Max Length of " + suggestedMaxLength
           + " but was " + length);
     } else {
-      scenario.log("Length for field " + fieldName +  " is equal to the RESO Suggested Max Length of " + length);
+      scenario.log("Length for field " + fieldName + " is equal to the RESO Suggested Max Length of " + length);
     }
   }
 
@@ -530,7 +531,7 @@ public class DataDictionary {
         .collect(Collectors.toCollection(LinkedHashSet::new));
 
     assertTrue("\n" + getDefaultErrorMessage("Lookups for field", fieldName, "MUST only contain Standard Enumerations!",
-        "\nFound the following non-standard enumerations:", Utils.wrapColumns("[" + String.join(", ", Sets.difference(foundMembers, standardMembers)) + "]")) + "\n",
+            "\nFound the following non-standard enumerations:", Utils.wrapColumns("[" + String.join(", ", Sets.difference(foundMembers, standardMembers)) + "]")) + "\n",
         standardMembers.containsAll(foundMembers));
 
     LOG.info("PASSED: Field \"" + fieldName + "\" only contains Standard Names!");
@@ -543,7 +544,7 @@ public class DataDictionary {
     } else {
       synonyms.forEach(synonym ->
           assertFalse(wrapColumns(getDefaultErrorMessage("Synonym", "\"" + synonym + "\"", "of fieldName", "\"" + fieldName + "\"", "found in the metadata!",
-              "\nSynonyms are not allowed!")),
+                  "\nSynonyms are not allowed!")),
               container.getFieldMap(resourceName).containsKey(synonym)));
     }
   }

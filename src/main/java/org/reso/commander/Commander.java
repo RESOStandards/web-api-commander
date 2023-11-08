@@ -2,16 +2,12 @@ package org.reso.commander;
 
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
-import org.apache.olingo.client.api.communication.request.retrieve.EdmMetadataRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataRawRequest;
-import org.apache.olingo.client.api.communication.request.retrieve.XMLMetadataRequest;
-import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.client.core.ODataClientFactory;
 import org.apache.olingo.commons.api.edm.Edm;
@@ -21,7 +17,6 @@ import org.reso.auth.TokenHttpClientFactory;
 import org.reso.commander.common.TestUtils;
 import org.reso.commander.jsonSerializers.MetadataReport;
 import org.reso.models.ODataTransportWrapper;
-import org.reso.models.Request;
 import org.xml.sax.*;
 
 import javax.xml.XMLConstants;
@@ -36,7 +31,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.reso.certification.containers.WebAPITestContainer.EMPTY_STRING;
@@ -54,30 +48,20 @@ public class Commander {
   public static final String AMPERSAND = "&";
   //TODO: find the corresponding query params constant for this
   public static final String EQUALS = "=";
-  public static final Integer DEFAULT_PAGE_SIZE = 10;
-  public static final Integer DEFAULT_PAGE_LIMIT = 1;
   public static final String REPORT_DIVIDER = "==============================================================";
   public static final String REPORT_DIVIDER_SMALL = "===========================";
   public static final String RESOSCRIPT_EXTENSION = ".resoscript";
-  public static final String EDMX_EXTENSION = ".xml";
+  public static final String METADATA_PATH = "/$metadata";
   private static final Logger LOG = LogManager.getLogger(Commander.class);
   private static final String EDM_4_0_3_XSD = "edm.4.0.errata03.xsd", EDMX_4_0_3_XSD = "edmx.4.0.errata03.xsd";
-  public static final String METADATA_PATH = "/$metadata";
-
   private static String bearerToken;
   private static String clientId;
   private static String clientSecret;
-  private static String authorizationUri;
+
   private static String tokenUri;
-  private static String redirectUri;
-  private static String scope;
   private static boolean isTokenClient, isOAuthClient;
   private static ODataClient client;
-  private static boolean useEdmEnabledClient;
   private static String serviceRoot;
-  private static Edm edm;
-  private static XMLMetadata xmlMetadata;
-  private Integer lastResponseCode = null;
 
   private Commander() {
     //private constructor, should not be used. Use Builder instead.
@@ -138,43 +122,9 @@ public class Commander {
       if (url.getPort() >= 0) uriBuilder.setPort(url.getPort());
       return uriBuilder.build();
     } catch (Exception ex) {
-      LOG.error("ERROR in prepareURI: " + ex.toString());
+      LOG.error("ERROR in prepareURI: " + ex);
     }
     return null;
-  }
-
-  /**
-   * Translates supported string formats into those of ContentType.
-   * <p>
-   * See: https://olingo.apache.org/javadoc/odata4/org/apache/olingo/commons/api/format/ContentType.html#TEXT_HTML
-   *
-   * @param contentType the string representation of the requested content type.
-   * @return one of ContentType if a match is found, or ContentType.JSON if no other format is available.
-   */
-  public static ContentType getContentType(String contentType) {
-    final String
-        JSON = "JSON",
-        JSON_NO_METADATA = "JSON_NO_METADATA",
-        JSON_FULL_METADATA = "JSON_FULL_METADATA",
-        XML = "XML";
-
-    ContentType type = ContentType.JSON;
-
-    if (contentType == null) {
-      return type;
-    }
-
-    if (contentType.matches(JSON)) {
-      type = ContentType.JSON;
-    } else if (contentType.matches(JSON_NO_METADATA)) {
-      type = ContentType.JSON_NO_METADATA;
-    } else if (contentType.matches(JSON_FULL_METADATA)) {
-      type = ContentType.JSON_FULL_METADATA;
-    } else if (contentType.matches(XML)) {
-      type = ContentType.APPLICATION_XML;
-    }
-
-    return type;
   }
 
   /**
@@ -193,7 +143,7 @@ public class Commander {
       File targetReportFile;
 
       if (fileName != null) {
-        targetReportFile = new File(fileName.replaceAll(".edmx|.xml", EMPTY_STRING)  + ".metadata-report.json");
+        targetReportFile = new File(fileName.replaceAll(".edmx|.xml", EMPTY_STRING) + ".metadata-report.json");
       } else {
         //place unnamed files in the build directory
         targetReportFile = new File("build" + File.separator + "certification" + File.separator + "results", DEFAULT_FILENAME);
@@ -227,17 +177,6 @@ public class Commander {
   }
 
   /**
-   * Deserializes metadata from a given path
-   * @param pathToMetadata the path to the metadata
-   * @param client an instance of a Commander client
-   * @return the XMLMetadata for the given item
-   */
-  public static XMLMetadata deserializeXMLMetadataFromPath(String pathToMetadata, ODataClient client) {
-    //deserialize response into XML Metadata - will throw an exception if metadata are invalid
-    return Commander.deserializeXMLMetadata(Objects.requireNonNull(deserializeFileFromPath(pathToMetadata)).toString(), client);
-  }
-
-  /**
    * Deserializes Edm from XML Metadata
    *
    * @param xmlMetadataString a string containing XML metadata
@@ -255,7 +194,7 @@ public class Commander {
    * Deserializes Edm from XML Metadata
    *
    * @param pathToMetadataFile a string containing the path to the raw XML Metadata file
-   * @param client            an instance of an OData Client
+   * @param client             an instance of an OData Client
    * @return the Edm contained within the xmlMetadataString
    * <p>
    * TODO: rewrite the separate Edm request in the Web API server test code to only make one request and convert
@@ -276,103 +215,8 @@ public class Commander {
 
   public static String convertInputStreamToString(InputStream inputStream) {
     return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
-      .lines()
-      .collect(Collectors.joining("\n"));
-  }
-
-  /**
-   * OData client getter
-   *
-   * @return the OData client for the current Commander instance
-   */
-  public ODataClient getClient() {
-    return client;
-  }
-
-  /**
-   * OData client setter
-   *
-   * @param client sets the current Commander instance to use the given client
-   */
-  public void setClient(ODataClient client) {
-    Commander.client = client;
-  }
-
-  /**
-   * Token URI getter
-   *
-   * @return the tokenUri used by the current Commander instance, or null
-   */
-  public String getTokenUri() {
-    return tokenUri;
-  }
-
-  /**
-   * Service Root getter
-   *
-   * @return the serviceRoot used by the current Commander instance, or null
-   */
-  public String getServiceRoot() {
-    return serviceRoot;
-  }
-
-  /**
-   * Determines whether the given authorization configuration is valid.
-   *
-   * @return true if the auth config is valid, false otherwise.
-   */
-  public boolean hasValidAuthConfig() {
-    if (isAuthTokenClient()) {
-      return bearerToken != null && bearerToken.length() > 0;
-    }
-
-    if (isOAuth2Client()) {
-      return getTokenUri() != null && getTokenUri().length() > 0
-          && clientId != null && clientId.length() > 0
-          && clientSecret != null && clientSecret.length() > 0;
-    }
-    return false;
-  }
-
-  /**
-   * Prepares an Edm Metadata request
-   *
-   * @return a prepared Edm metadata request
-   */
-  public EdmMetadataRequest prepareEdmMetadataRequest() {
-    EdmMetadataRequest request = getClient().getRetrieveRequestFactory().getMetadataRequest(getServiceRoot());
-    request.addCustomHeader(HttpHeaders.CONTENT_TYPE, null);
-    request.addCustomHeader(HttpHeaders.ACCEPT, null);
-    return request;
-  }
-
-  /**
-   * Prepares an XML Metadata request
-   *
-   * @return a prepared XML Metadata request
-   */
-  public XMLMetadataRequest prepareXMLMetadataRequest() {
-    XMLMetadataRequest request = getClient().getRetrieveRequestFactory().getXMLMetadataRequest(getServiceRoot());
-    request.addCustomHeader(HttpHeaders.CONTENT_TYPE, null);
-    request.addCustomHeader(HttpHeaders.ACCEPT, null);
-    return request;
-  }
-
-  /**
-   * Prepares an OData raw request with the given requestUri
-   * @param requestUri the URI to use for the request
-   * @return an ODataRawRequest for the given URI or null if one couldn't be created
-   */
-  public ODataRawRequest prepareODataRawMetadataRequest(String requestUri) {
-    try {
-      ODataRawRequest request = getClient().getRetrieveRequestFactory().getRawRequest(new URI(requestUri));
-      request.setAccept(ContentType.APPLICATION_XML.toContentTypeString());
-      request.setContentType(ContentType.APPLICATION_XML.toContentTypeString());
-      return request;
-    } catch (URISyntaxException uriSyntaxException) {
-      LOG.error(getDefaultErrorMessage("Invalid Service Root URI:", getServiceRoot(), "\n" + uriSyntaxException.getMessage()));
-    }
-    return null;
+        .lines()
+        .collect(Collectors.joining("\n"));
   }
 
   /**
@@ -428,6 +272,78 @@ public class Commander {
   }
 
   /**
+   * OData client getter
+   *
+   * @return the OData client for the current Commander instance
+   */
+  public ODataClient getClient() {
+    return client;
+  }
+
+  /**
+   * OData client setter
+   *
+   * @param client sets the current Commander instance to use the given client
+   */
+  public void setClient(ODataClient client) {
+    Commander.client = client;
+  }
+
+  /**
+   * Token URI getter
+   *
+   * @return the tokenUri used by the current Commander instance, or null
+   */
+  public String getTokenUri() {
+    return tokenUri;
+  }
+
+  /**
+   * Service Root getter
+   *
+   * @return the serviceRoot used by the current Commander instance, or null
+   */
+  public String getServiceRoot() {
+    return serviceRoot;
+  }
+
+  /**
+   * Determines whether the given authorization configuration is valid.
+   *
+   * @return true if the auth config is valid, false otherwise.
+   */
+  public boolean hasValidAuthConfig() {
+    if (isAuthTokenClient()) {
+      return bearerToken != null && !bearerToken.isEmpty();
+    }
+
+    if (isOAuth2Client()) {
+      return getTokenUri() != null && !getTokenUri().isEmpty()
+          && clientId != null && !clientId.isEmpty()
+          && clientSecret != null && !clientSecret.isEmpty();
+    }
+    return false;
+  }
+
+  /**
+   * Prepares an OData raw request with the given requestUri
+   *
+   * @param requestUri the URI to use for the request
+   * @return an ODataRawRequest for the given URI or null if one couldn't be created
+   */
+  public ODataRawRequest prepareODataRawMetadataRequest(String requestUri) {
+    try {
+      ODataRawRequest request = getClient().getRetrieveRequestFactory().getRawRequest(new URI(requestUri));
+      request.setAccept(ContentType.APPLICATION_XML.toContentTypeString());
+      request.setContentType(ContentType.APPLICATION_XML.toContentTypeString());
+      return request;
+    } catch (URISyntaxException uriSyntaxException) {
+      LOG.error(getDefaultErrorMessage("Invalid Service Root URI:", getServiceRoot(), "\n" + uriSyntaxException.getMessage()));
+    }
+    return null;
+  }
+
+  /**
    * Validates given XMLMetadata
    *
    * @param metadata the XMLMetadata to be validated
@@ -463,7 +379,7 @@ public class Commander {
       if (validateXML(xmlString)) {
         // deserialize metadata from given file
         XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML)
-                .toMetadata(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
+            .toMetadata(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
         if (metadata != null) {
           return validateMetadata(metadata);
         } else {
@@ -472,7 +388,7 @@ public class Commander {
         }
       }
     } catch (Exception ex) {
-      LOG.error("ERROR in validateMetadata! " + ex.toString());
+      LOG.error("ERROR in validateMetadata! " + ex);
     }
     return false;
   }
@@ -485,7 +401,7 @@ public class Commander {
    */
   public boolean validateMetadata(String pathToEdmx) {
     try {
-      return validateMetadata(new FileInputStream(pathToEdmx));
+      return validateMetadata(Files.newInputStream(Paths.get(pathToEdmx)));
     } catch (Exception ex) {
       LOG.error("ERROR: could not validate metadata.\nPath was:" + pathToEdmx);
       LOG.error(ex.getMessage());
@@ -545,11 +461,12 @@ public class Commander {
 
   /**
    * Constructs a metadata path if not present already
+   *
    * @param requestUri string URI to build the path with
    * @return a URI with the metadata path included
    */
   public URI getPathToMetadata(String requestUri) {
-    if (requestUri == null || requestUri.length() == 0) {
+    if (requestUri == null || requestUri.isEmpty()) {
       TestUtils.failAndExitWithErrorMessage("OData service root is missing!", LOG);
     } else {
       try {
@@ -567,6 +484,7 @@ public class Commander {
 
   /**
    * Executes an OData GET Request with the current Commander instance
+   *
    * @param wrapper the OData transport wrapper to use for the request
    * @return and OData transport wrapper with the response, or exception if one was thrown
    */
@@ -595,47 +513,8 @@ public class Commander {
     return wrapper;
   }
 
-  public ODataTransportWrapper executeODataGetRequest(Request request) {
-    return executeODataGetRequest(new ODataTransportWrapper(request));
-  }
-
   public ODataTransportWrapper executeODataGetRequest(String requestUri) {
     return executeODataGetRequest(new ODataTransportWrapper(requestUri));
-  }
-
-  /**
-   * Writes an Entity Set to the given outputFilePath.
-   *
-   * @param entitySet      - the ClientEntitySet to serialize.
-   * @param outputFilePath - the path to write the file to.
-   * @param contentType    - the OData content type to write with. Currently supported options are
-   *                       JSON, JSON_NO_METADATA, JSON_FULL_METADATA, and XML.
-   */
-  public void serializeEntitySet(ClientEntitySet entitySet, String outputFilePath, ContentType contentType) {
-    try {
-      LOG.info("Saving " + entitySet.getEntities().size() + " item(s) to " + outputFilePath);
-      client.getSerializer(contentType).write(new FileWriter(outputFilePath), client.getBinder().getEntitySet(entitySet));
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-      System.exit(NOT_OK);
-    }
-  }
-
-  /**
-   * Writes the given entitySet to the given outputFilePath.
-   * Writes in JSON format.
-   *
-   * @param entitySet      the ClientEntitySet to serialize.
-   * @param outputFilePath the outputFilePath used to write to.
-   */
-  public void serializeEntitySet(ClientEntitySet entitySet, String outputFilePath) {
-    //JSON is the default format, though other formats like JSON_FULL_METADATA and XML are supported as well
-    serializeEntitySet(entitySet, outputFilePath, ContentType.JSON);
-  }
-
-  public Commander setServiceRoot(String serviceRootUri) {
-    serviceRoot = serviceRootUri;
-    return this;
   }
 
   /**
@@ -661,7 +540,12 @@ public class Commander {
    * Builder pattern for creating Commander instances.
    */
   public static class Builder {
-    String serviceRoot, bearerToken, clientId, clientSecret, authorizationUri, tokenUri, redirectUri, scope;
+    String serviceRoot;
+    String bearerToken;
+    String clientId;
+    String clientSecret;
+    String tokenUri;
+    String scope;
     boolean useEdmEnabledClient;
 
     /**
@@ -760,19 +644,15 @@ public class Commander {
       Commander.bearerToken = this.bearerToken;
       Commander.clientId = this.clientId;
       Commander.clientSecret = this.clientSecret;
-      Commander.authorizationUri = this.authorizationUri;
       Commander.tokenUri = this.tokenUri;
-      Commander.redirectUri = this.redirectUri;
-      Commander.scope = this.scope;
-      Commander.useEdmEnabledClient = this.useEdmEnabledClient;
 
       //items required for OAuth client
-      isOAuthClient = clientId != null && clientId.length() > 0
-          && clientSecret != null && clientSecret.length() > 0
-          && tokenUri != null && tokenUri.length() > 0;
+      isOAuthClient = clientId != null && !clientId.isEmpty()
+          && clientSecret != null && !clientSecret.isEmpty()
+          && tokenUri != null && !tokenUri.isEmpty();
 
       //items required for token client
-      isTokenClient = bearerToken != null && bearerToken.length() > 0;
+      isTokenClient = bearerToken != null && !bearerToken.isEmpty();
 
       LOG.debug("\nUsing EdmEnabledClient: " + useEdmEnabledClient + "...");
       if (useEdmEnabledClient) {

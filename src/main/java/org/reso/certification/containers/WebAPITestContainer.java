@@ -54,7 +54,13 @@ public final class WebAPITestContainer implements TestContainer {
   public static final String DATA_SYSTEM_JSON_4_SCHEMA = "jsonschema/misc/datasystem.schema.4.json";
   public static final String PRETTY_FIELD_SEPARATOR = FIELD_SEPARATOR + SINGLE_SPACE;
   private static final Logger LOG = LogManager.getLogger(WebAPITestContainer.class);
-
+  private static final String WEB_API_CORE_REFERENCE_REQUESTS = "reference-web-api-core-requests.xml";
+  private static final Set<String> SUPPORTED_DD_VERSIONS = new HashSet<String>() {{
+    add("1.7");
+    add("2.0");
+  }};
+  //singleton variables
+  private static final AtomicReference<Map<String, Map<String, CsdlProperty>>> fieldMap = new AtomicReference<>();
   private final AtomicReference<Commander> commander = new AtomicReference<>();
   private final AtomicReference<XMLMetadata> xmlMetadata = new AtomicReference<>();
   private final AtomicReference<Edm> edm = new AtomicReference<>();
@@ -73,7 +79,6 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicBoolean showResponses = new AtomicBoolean(false);
   private final AtomicBoolean shouldValidateMetadata = new AtomicBoolean(true);
   private final AtomicBoolean isInitialized = new AtomicBoolean(false);
-
   // Metadata and DataSystem state variables
   private final AtomicBoolean isValidXMLMetadata = new AtomicBoolean(false);
   private final AtomicBoolean isValidEdm = new AtomicBoolean(false);
@@ -83,7 +88,6 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicReference<Set<ValidationMessage>> schemaValidationErrors = new AtomicReference<>();
   private final AtomicBoolean isUsingMetadataFile = new AtomicBoolean(false);
   private final AtomicBoolean useEdmEnabledClient = new AtomicBoolean(true);
-
   // request instance variables - these get resetMarkupBuffer with every request
   //TODO: refactor underlying response properties to use a ODataTransportWrapper (or any TransportWrapper)
   //      and create the test container with the appropriate response of the transport wrapper
@@ -104,16 +108,6 @@ public final class WebAPITestContainer implements TestContainer {
   private final AtomicReference<ClientEntitySet> clientEntitySet = new AtomicReference<>();
   private final AtomicReference<DDCacheProcessor> ddCacheProcessor = new AtomicReference<>();
   private final AtomicReference<String> dataDictionaryVersion = new AtomicReference<>();
-
-  private static final String WEB_API_CORE_REFERENCE_REQUESTS = "reference-web-api-core-requests.xml";
-
-  private static final Set<String> SUPPORTED_DD_VERSIONS = new HashSet<String>(){{
-    add("1.7");
-    add("2.0");
-  }};
-
-  //singleton variables
-  private static final AtomicReference<Map<String, Map<String, CsdlProperty>>> fieldMap = new AtomicReference<>();
 
   /**
    * Initializes the container with a singleton instance of the RESO Commander
@@ -136,7 +130,7 @@ public final class WebAPITestContainer implements TestContainer {
 
       //TODO: add base64 un-encode when applicable
       setBearerToken(getSettings().getClientSettings().get(ClientSettings.BEARER_TOKEN));
-      if (getAuthToken() != null && getAuthToken().length() > 0) {
+      if (getAuthToken() != null && !getAuthToken().isEmpty()) {
         LOG.info("Bearer token loaded... first 4 characters: " + getAuthToken().substring(0, 4));
       }
 
@@ -254,7 +248,7 @@ public final class WebAPITestContainer implements TestContainer {
           });
         }
       });
-      assertTrue("ERROR: No fields were found in the server's metadata!", fieldMap.get().size() > 0);
+      assertFalse("ERROR: No fields were found in the server's metadata!", fieldMap.get().isEmpty());
       LOG.debug("Metadata Field Map created!");
 
     } catch (Exception ex) {
@@ -678,10 +672,6 @@ public final class WebAPITestContainer implements TestContainer {
     this.scope.set(scope);
   }
 
-  public String getPathToMetadata() {
-    return pathToMetadata.get();
-  }
-
   public void setPathToMetadata(String path) {
     this.pathToMetadata.set(path);
   }
@@ -773,13 +763,13 @@ public final class WebAPITestContainer implements TestContainer {
     return isDataSystemValid.get();
   }
 
-  public final boolean hasValidMetadata() {
+  public boolean hasValidMetadata() {
     return xmlMetadata.get() != null && getIsValidXMLMetadata()
         && xmlResponseData.get() != null && getIsValidXMLMetadataXML()
         && edm.get() != null && getIsValidEdm();
   }
 
-  public WebAPITestContainer validateMetadata() {
+  public void validateMetadata() {
     try {
       if (!haveMetadataBeenRequested.get()) fetchXMLMetadata();
       assertNotNull(getDefaultErrorMessage("no XML response data found!"), getXMLResponseData());
@@ -791,12 +781,10 @@ public final class WebAPITestContainer implements TestContainer {
       setEdm(Commander.deserializeEdm(getXMLResponseData(), getCommander().getClient()));
       validateEdm();
 
-      return this;
     } catch (Exception ex) {
       LOG.error(getDefaultErrorMessage(ex.toString()));
       System.exit(NOT_OK);
     }
-    return this;
   }
 
   public WebAPITestContainer validateDataSystem() {
@@ -811,10 +799,10 @@ public final class WebAPITestContainer implements TestContainer {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode node = mapper.readTree(getResponseData());
 
-        if (node.findPath(JSON_VALUE_PATH).size() > 0) {
+        if (!node.findPath(JSON_VALUE_PATH).isEmpty()) {
           schemaValidationErrors.set(schema.validate(node));
 
-          if (getSchemaValidationErrors().size() > 0) {
+          if (!getSchemaValidationErrors().isEmpty()) {
             LOG.error("ERROR: JSON Schema validation errors were found!");
             getSchemaValidationErrors().forEach(LOG::error);
           } else {
@@ -836,7 +824,7 @@ public final class WebAPITestContainer implements TestContainer {
       setIsValidEdm(isValid);
       LOG.info("Edm Metadata is " + (isValid ? "valid" : "invalid") + "!");
     } catch (Exception ex) {
-      fail("ERROR: could not validate Edm Metadata!\n" + ex.toString());
+      fail("ERROR: could not validate Edm Metadata!\n" + ex);
     }
   }
 
@@ -848,11 +836,11 @@ public final class WebAPITestContainer implements TestContainer {
       setIsValidXMLMetadata(isValid);
       LOG.info("XML Metadata is " + (isValid ? "valid" : "invalid") + "!");
     } catch (Exception ex) {
-      fail("ERROR: could not validate XML Metadata!\n" + ex.toString());
+      fail("ERROR: could not validate XML Metadata!\n" + ex);
     }
   }
 
-  public WebAPITestContainer validateXMLMetadataXML() {
+  public void validateXMLMetadataXML() {
     LOG.info("Validating XML Metadata response to ensure it's valid XML and matches OASIS OData XSDs...");
     LOG.info("See: https://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/schemas/");
     assertNotNull("XML response data were not found in the test container! Please ensure the XML Metadata request succeeded.",
@@ -865,10 +853,9 @@ public final class WebAPITestContainer implements TestContainer {
     } catch (Exception ex) {
       fail(getDefaultErrorMessage(ex));
     }
-    return this;
   }
 
-  public WebAPITestContainer validateJSON() {
+  public void validateJSON() {
     assertNotNull(getDefaultErrorMessage("JSON response data were not found in the test container! Please ensure your request succeeded.",
         getResponseData()));
 
@@ -881,7 +868,6 @@ public final class WebAPITestContainer implements TestContainer {
     } catch (Exception ex) {
       fail(getDefaultErrorMessage(ex));
     }
-    return this;
   }
 
   public Set<ValidationMessage> getSchemaValidationErrors() {
@@ -898,10 +884,6 @@ public final class WebAPITestContainer implements TestContainer {
 
   public boolean getIsInitialized() {
     return isInitialized.get();
-  }
-
-  public void setIsInitialized(boolean value) {
-    isInitialized.set(value);
   }
 
   public DDCacheProcessor getDDCacheProcessor() {

@@ -1,13 +1,6 @@
 package org.reso.commander.common;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import static org.reso.certification.containers.WebAPITestContainer.EMPTY_STRING;
-
 public class DataDictionaryMetadata {
-  private static final Logger LOG = LogManager.getLogger(DataDictionaryMetadata.class);
-
   public static Boolean isPrimaryKeyField(String resource, String fieldName) {
     return getKeyFieldForResource(resource).contentEquals(fieldName);
   }

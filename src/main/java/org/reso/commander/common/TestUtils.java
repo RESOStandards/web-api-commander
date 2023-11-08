@@ -569,7 +569,7 @@ public final class TestUtils {
   public static String getHeaderData(String key, Collection<Header> headers) {
     return headers.stream()
         .filter(header -> header.getName().toLowerCase().contains(key.toLowerCase()))
-          .findFirst().map(NameValuePair::getValue).orElse(null);
+        .findFirst().map(NameValuePair::getValue).orElse(null);
   }
 
   /**
@@ -849,25 +849,6 @@ public final class TestUtils {
   }
 
   /**
-   * Asserts that valid Metadata have been retrieved. Fetches metadata if not present.
-   *
-   * @param container a test container to validate
-   */
-  public static void assertValidMetadataHaveBeenRetrieved(WebAPITestContainer container) {
-    try {
-      //NOTE: this is here so that tests may be run individually
-      if (!container.getHaveMetadataBeenRequested()) {
-        container.fetchXMLMetadata();
-        container.validateMetadata();
-      }
-      assertTrue(getDefaultErrorMessage("Valid metadata could not be retrieved from the server! Please check the log for more information."),
-          container.hasValidMetadata());
-    } catch (Exception ex) {
-      LOG.error(getDefaultErrorMessage(ex));
-    }
-  }
-
-  /**
    * Validates that the given response data have a valid OData count
    *
    * @param responseData the data to check for a count against
@@ -886,6 +867,36 @@ public final class TestUtils {
     } else {
       return false;
     }
+  }
+
+  public static void failAndExitWithErrorMessage(String msg, Scenario scenario) {
+    if (scenario != null) {
+      scenario.log(getDefaultErrorMessage(msg));
+    } else {
+      System.err.println(getDefaultErrorMessage(msg));
+    }
+    System.exit(NOT_OK);
+  }
+
+  public static void failAndExitWithErrorMessage(String msg, Logger logger) {
+    if (logger != null) {
+      logger.error(getDefaultErrorMessage(msg));
+    }
+    System.exit(NOT_OK);
+  }
+
+  /**
+   * Builds a Data Dictionary Cache
+   *
+   * @return a DDProcessor Cache object
+   */
+  public static DDCacheProcessor buildDataDictionaryCache(String version) {
+    LOG.info("Creating standard field cache...");
+    final DDCacheProcessor cache = new DDCacheProcessor(version);
+    DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(cache);
+    generator.processWorksheets();
+    LOG.info("Standard field cache created! Version: DD {}", version);
+    return cache;
   }
 
   /**
@@ -936,45 +947,16 @@ public final class TestUtils {
 
     public static final class ODataTypes {
       public static final String
-          STRING = "Edm.String",
-          STRING_COLLECTION = "Collection(Edm.String)",
-          DATE = "Edm.Date",
-          DECIMAL = "Edm.Decimal",
-          DOUBLE = "Edm.Double",
-          INT16 = "Edm.Int16",
-          INT32 = "Edm.Int32",
-          INT64 = "Edm.Int64",
-          BOOLEAN = "Edm.Boolean",
-          DATETIME_OFFSET = "Edm.DateTimeOffset";
+          STRING = "Edm.String";
+      public static final String DATE = "Edm.Date";
+      public static final String DECIMAL = "Edm.Decimal";
+      public static final String DOUBLE = "Edm.Double";
+      public static final String INT16 = "Edm.Int16";
+      public static final String INT32 = "Edm.Int32";
+      public static final String INT64 = "Edm.Int64";
+      public static final String BOOLEAN = "Edm.Boolean";
+      public static final String DATETIME_OFFSET = "Edm.DateTimeOffset";
     }
-  }
-
-  public static void failAndExitWithErrorMessage(String msg, Scenario scenario) {
-    if (scenario != null) {
-      scenario.log(getDefaultErrorMessage(msg));
-    }
-    System.exit(NOT_OK);
-  }
-
-  public static void failAndExitWithErrorMessage(String msg, Logger logger) {
-    if (logger != null) {
-      logger.error(getDefaultErrorMessage(msg));
-    }
-    System.exit(NOT_OK);
-  }
-
-  /**
-   * Builds a Data Dictionary Cache
-   *
-   * @return a DDProcessor Cache object
-   */
-  public static DDCacheProcessor buildDataDictionaryCache(String version) {
-    LOG.info("Creating standard field cache...");
-    final DDCacheProcessor cache = new DDCacheProcessor(version);
-    DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(cache);
-    generator.processWorksheets();
-    LOG.info("Standard field cache created! Version: DD {}", version);
-    return cache;
   }
 }
 
