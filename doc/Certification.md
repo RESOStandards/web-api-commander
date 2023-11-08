@@ -13,14 +13,16 @@ The RESO Commander is the basis for automated Data Dictionary, Payloads, and Web
 ## Java and the JDK
 To run the Commander as an _automated testing tool_, a Java 64-bit JDK must be installed.
 
-The Commander has been tested with JDK 1.8 and 10 at this point. 
+The Commander has been tested with JDK 1.8, 10, and 11 at this point. JDK 11 is preferred. 
 
 Those using JDK 11+, please [report issues](https://github.com/RESOStandards/web-api-commander/issues) if they arise.
 
 To see whether you have the JDK installed, type the following using your local command line environment:
+
 ```
 $ java -version
 ```
+
 If you have a Java JDK installed, your output will look something like:
 ```
 $ java -version
@@ -28,21 +30,30 @@ openjdk version "1.8.0_275"
 OpenJDK Runtime Environment (build 1.8.0_275-8u275-b01-0ubuntu1~20.10-b01)
 OpenJDK 64-Bit Server VM (build 25.275-b01, mixed mode)
 ```
+
 If you don't see something like this, you need to install the JDK:
 * [OpenJDK 8, 10, or 11 are recommended](https://openjdk.java.net/install/index.html).
 * [Oracle's SE Development kit may also be used](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html), but there may be additional licensing terms to accept.
 
-**Note**: there are known issues with Java/JDK 14+ and Groovy. The recommended JDK versions are 8 (1.8), 10, or 11. OpenJDK is preferred. If you're using MacOS you can install the JDK [using Homebrew](https://formulae.brew.sh/formula/openjdk@11). There are instructions for Windows and Linux [here](https://jdk.java.net/java-se-ri/11).
+If you're using macOS you can install the JDK [using Homebrew](https://formulae.brew.sh/formula/openjdk@11).
+There are instructions for Windows and Linux [here](https://jdk.java.net/java-se-ri/11).
+
+**Note**: there are known issues with Java/JDK 14+ and Groovy.
 
 
 ## Cloning Commander Repository
-The Commander may be run in automated testing mode using a terminal. Automated testing assumes that you have a Java 1.8+ JDK installed, as mentioned elsewhere in this [`README`](#java-and-the-jdk).
+The Commander may be run in automated testing mode using a terminal. 
+
+Automated testing assumes that you have a Java 1.8+ JDK installed, as mentioned elsewhere in this [README](#java-and-the-jdk).
 
 First, change into the directory you want to work in and clone the Commander repository. 
 
-You will need to have Git installed. Chances are you already do, to check, open a command line and type `git` and if it's present, it will print some info about the app. If not, [there are installation instructions here](https://git-scm.com/downloads).
+You will need to have Git installed. Chances are you already do.
 
-##### MacOS or Linux
+To check, open a command line and type `git`. If it's present, it will print some info about the app.
+If not, [there are installation instructions here](https://git-scm.com/downloads).
+
+##### Linux or macOS
 ```
 $ git clone https://github.com/RESOStandards/web-api-commander.git
 ```
@@ -52,25 +63,33 @@ $ git clone https://github.com/RESOStandards/web-api-commander.git
 C:\> git clone https://github.com/RESOStandards/web-api-commander.git
 ```
 
-This will clone the repository into a directory called web-api-commander relative to whatever directory you're currently in, which also means you'll have a fresh copy of the latest code to execute. 
+This will clone the repository into a directory called web-api-commander relative to whatever directory you're currently in, 
+which also means you'll have a fresh copy of the latest code to execute. 
 
 To refresh the code after you have downloaded it, issue the command `$ git pull` in the root of the directory that was just created. 
 
 ## Cucumber Feature Specifications
 
-[Cucumber](https://cucumber.io) is being used to describe acceptance criteria in a higher-level DSL rather than encapsulating all of the test logic code. Cucumber's DSL is called [Gherkin](https://cucumber.io/docs/gherkin/) and essentially allows backing test code to be organized in a logical manner that makes sense to analysts as well as programmers.
+[Cucumber](https://cucumber.io) is being used to describe acceptance criteria in a higher-level DSL rather than
+encapsulating all the test logic code. Cucumber's DSL is called [Gherkin](https://cucumber.io/docs/gherkin/) and
+essentially allows backing test code to be organized in a logical manner that makes sense to analysts as well as programmers.
 
 ## Testing Environment
 
-Under the hood, [Gradle](https://gradle.org/) is being used for automation. It works across multiple platforms and is friendly with both Docker and Cucumber so that tests may be automated on CI/CD platforms such as Jenkins, Circle CI, Travis, or similar, and emit standard system codes during regression testing. 
+Under the hood, [Gradle](https://gradle.org/) is being used for automation. It works across multiple platforms and is friendly with
+both Docker and Cucumber so that tests may be automated on CI/CD platforms such as Jenkins, Circle CI, Travis, 
+or similar, and emit standard system codes during regression testing. 
 
 ## Gradle Wrapper
 The [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) provides a convenient way to automatically download Gradle when running tests. 
 
-After you have cloned the repository, as shown in [a previous step](#cloning-commander-repository), change into the directory containing the source code from GitHub. Convenience methods have been provided for the various certification tasks. 
+After you have cloned the repository, as shown in [a previous step](#cloning-commander-repository), change into the directory containing the
+source code from GitHub. Convenience methods have been provided for the various certification tasks. 
 
 ## Gradle Tasks
-Once the Gradle Wrapper is set up, you should be able to run the `./gradlew tasks` command in from the root of the Commander source directory in a terminal window and see the list of available tasks. 
+Once the Gradle Wrapper is set up, you should be able to run the `./gradlew tasks` command in from the root of the
+Commander source directory in a terminal window and see the list of available tasks.
+
 ```
 $ ./gradlew tasks
 
@@ -88,41 +107,36 @@ The following section is what's of interest here:
 ```
 RESO Certification tasks
 ------------------------
-testDataAvailability_1_7 - Data Dictionary 1.7 Data Availability Tests
-Example:
-  ./gradlew testDataAvailability_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript
-
+testDataDictionary - RESO Data Dictionary Acceptance Tests
 [Report location: build/certification/reports]
 
+Examples:
 
-testDataDictionary_1_7 - Data Dictionary 1.7 Acceptance Tests
-RESOScript Example:
-  ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true -Dstrict=true
+RESOScript Example (Certification):
+  ./gradlew testDataDictionary -Dversion=1.7 -DpathToRESOScript=/path/to/dd.resoscript -Dstrict=true
 
-Metadata File Example:
-  ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml
+Metadata File Example (Local Testing):
+  ./gradlew testDataDictionary -DpathToMetadata=/path/to/RESODataDictionaryMetadata.xml
 
-To disable strict mode, remove the -Dstrict=true parameter. All applicants MUST pass strict mode tests to be certified!
+Supported Parameters:
+  • version: Default is 1.7. Valid versions are [1.7, 2.0]
+  • pathToRESOScript: Path to config file in Data Dictionary format
+  • pathToMetadata: Local path to metadata file to validate. Not used for Certification
+  • strict: Default is false. Certification applicants MUST pass with -Dstrict=true
 
+
+testWebApiCore - Web API Core Acceptance Tests
 [Report location: build/certification/reports]
 
-
-testIdxPayload_1_7 - Data Dictionary 1.7 Payloads Sampling Tests
-Example:
-  ./gradlew testIdxPayload_1_7 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript
-
-[Report location: build/certification/reports]
-
-
-testWebApiCore_2_0_0 - Web API Core 2.0.0 Acceptance Tests
 Example: 
-  ./gradlew testWebApiCore_2_0_0 -DpathToRESOScript=/path/to/web-api-core-2.0.0.resoscript -DshowResponses=true
+  ./gradlew testWebApiCore -Dversion=2.0.0 -DpathToRESOScript=/path/to/web-api-core.resoscript -DshowResponses=true
 
-Note: by default the Web API tests assume Collection(Edm.EnumType).
-Pass -DuseStringEnums=true if using string enumerations and the Lookup Resource.
-Pass -DuseCollections=false if using OData IsFlags.
+Supported Parameters:
+  • version: Default is 2.0.0. Valid versions are [2.0.0]
+  • useStringEnums: Default false. Use -DuseStringEnums=true if using string enumerations and the Lookup Resource
+  • useCollections: Default true. Use -DuseCollections=false if using OData IsFlags
+  • showResponses: Default false. Use -DshowResponses=true to see output of Web API Core requests
 
-[Report location: build/certification/reports]
 
 ```
  
@@ -137,7 +151,7 @@ For Web API 2.0.0 Server Core Certification, use [this resoscript](https://githu
 For more information regarding Parameters and Client Settings, see the [Web API Walkthrough](https://github.com/RESOStandards/web-api-commander/wiki/Configuring-the-RESO-Commander-for-Automated-Web-API-Core-Testing).
 
 ### Web API Cucumber Acceptance Tests
-The Cucumber BDD acceptance tests for Web API 2.0.0 Core certification are [here](https://github.com/RESOStandards/web-api-commander/blob/main/src/main/java/org/reso/certification/features/web-api/web-api-server.core.feature).  If you have any questions, please [send us an email](mailto:dev@reso.org).
+The Cucumber BDD acceptance tests for Web API 2.0.0 Core certification are [here](https://github.com/RESOStandards/web-api-commander/blob/main/src/main/java/org/reso/certification/features/web-api/web-api-server.core.feature).  If you have any questions, please [email us](mailto:dev@reso.org).
 
 ### Gradle Tasks for Web API 2.0.0 Server Certification
 While you may use tags to filter tests as you choose, explained in the next section, it's convenient
@@ -163,7 +177,8 @@ $ ./gradlew testWebApiCore_2_0_0 -DpathToRESOScript=/path/to/your.web-api-server
 C:\path\to\web-api-commander> gradlew testWebApiCore_2_0_0 -DpathToRESOScript=C:\path\to\your.web-api-server.core.2.0.0.resoscript -DshowResponses=true
 ```
 
-*Note: the first time you run these tasks, they will take some time as the environment must be configured and code is being compiled from the contents of the source directory downloaded in the previous step. 
+*Note: the first time you run these tasks, they will take some time as the environment must be configured and code is
+being compiled from the contents of the source directory downloaded in the previous step. 
 
 ### Web API Program Output
 
@@ -230,44 +245,47 @@ Standard Resource Names requirement met!
 
 1 Scenarios (1 passed)
 15 Steps (15 passed)
-0m4.093s       
+0m4.093s
 ```
 
 Detailed information will be added to a local `commander.log` file at runtime.
 
 ---
+
 ## Automated RESO Data Dictionary Testing
-The Commander provides automated Data Dictionary 1.7 acceptance testing for RESO Certification. The DD 1.7 testing specification is available [here](https://docs.google.com/document/d/15DFf9kDX_mlGCJVOch2fztl8W5h-yd18N0_03Sb4HwM/edit?usp=sharing).
+The Commander provides automated Data Dictionary acceptance testing for RESO Certification. The Data Dictionary testing
+specification is available [here](https://github.com/RESOStandards/transport/blob/main/data-dictionary.md).
 
 * [Data Dictionary RESOScript Template](#data-dictionary-resoscript-template)
 * [Data Dictionary Acceptance Tests](#data-dictionary-acceptance-tests)
 * [Gradle Tasks for Data Dictionary Certification](#gradle-tasks-for-data-dictionary-certification)
-  * [Test Data Dictionary](#test-data-dictionary)
-  * [Generate Data Dictionary Certification Report](#generate-data-dictionary-certification-report)
-
-To use the RESO Commander for Data Dictionary testing, you must have the JDK installed and a local copy of the Commander repository. See [RESO Certification](#reso-certification) before proceeding.
+  
+To use the RESO Commander for Data Dictionary testing, you must have the JDK installed and a local copy of the Commander
+repository. See [RESO Certification](#reso-certification) before proceeding.
 
 ### Data Dictionary RESOScript Template
 To use the Commander for automated Data Dictionary testing, you need a RESOScript.
 
-For Data Dictionary 1.7 Certification, use [this resoscript](https://github.com/RESOStandards/web-api-commander/blob/main/sample-data-dictionary.1.7.0.resoscript) as a template. 
+For Data Dictionary Certification, use [this resoscript](https://github.com/RESOStandards/web-api-commander/blob/main/sample-data-dictionary.1.7.0.resoscript) as a template. 
 
 ### Data Dictionary Acceptance Tests
-RESO Data Dictionary Certification is driven off of the official Data Dictionary spreadsheet for each version of the dictionary, [currently DD 1.7](https://docs.google.com/spreadsheets/d/1SZ0b6T4_lz6ti6qB2Je7NSz_9iNOaV_v9dbfhPwWgXA/edit?usp=sharing). 
+RESO Data Dictionary Certification is driven off of the official Data Dictionary spreadsheet for each version of the 
+dictionary, [currently DD 1.7](https://docs.google.com/spreadsheets/d/1SZ0b6T4_lz6ti6qB2Je7NSz_9iNOaV_v9dbfhPwWgXA/edit?usp=sharing). 
 
-Cucumber BDD acceptance tests are [automatically generated](#generating-reso-data-dictionary-acceptance-tests) from the [local copy of the approved spreadsheet](https://github.com/RESOStandards/web-api-commander/blob/main/src/main/resources/RESODataDictionary-1.7.xlsx). 
+Cucumber BDD acceptance tests are [automatically generated](Codegen.md#generating-reso-data-dictionary-acceptance-tests) from
+the [local copy of the approved spreadsheet](https://github.com/RESOStandards/web-api-commander/blob/main/src/main/resources/RESODataDictionary-1.7.xlsx). 
 
-The generated Data Dictionary 1.7 Cucumber BDD tests are [located in this directory](https://github.com/RESOStandards/web-api-commander/tree/main/src/main/java/org/reso/certification/features/data-dictionary/v1-7-0).  See the [property.feature file](https://github.com/RESOStandards/web-api-commander/blob/main/src/main/java/org/reso/certification/features/data-dictionary/v1-7-0/property.feature), for example, for the RESO Property Resource acceptance tests.
+The generated Data Dictionary Cucumber BDD tests are [located in this directory](../src/main/java/org/reso/certification/features).  
+See the [property.feature file](https://github.com/RESOStandards/web-api-commander/blob/main/src/main/java/org/reso/certification/features/data-dictionary/v1-7-0/property.feature), for example, for the RESO Property Resource acceptance tests.
 
-If you have any questions, please [send us an email](mailto:dev@reso.org).
+If you have any questions, please [email us](mailto:dev@reso.org).
 
 ### Gradle Tasks for Data Dictionary Certification
-There are predefined tasks for automated RESO Data Dictionary Certification using the Commander. These can be displayed using [Gradle Tasks](#gradle-tasks) as well.
+There are predefined tasks for automated RESO Data Dictionary Certification using the Commander. These can be displayed
+using [Gradle Tasks](#gradle-tasks) as well. See: [test Data Dictionary](#test-data-dictionary)
 
-* [Test Data Dictionary 1.7](#test-data-dictionary)
-* [Generate Data Dictionary 1.7 Certification Report](#generate-data-dictionary-certification-report)
-
-_Note: the first time you run these tasks, they will take some time as the environment must be configured and code is being compiled from the contents of the source directory downloaded in the previous step._
+_Note: the first time you run these tasks, they will take some time as the environment must be configured and code is
+being compiled from the contents of the source directory downloaded in the previous step._
 
 #### Test Data Dictionary
 This task tests for Data Dictionary compliance and generates a raw report in a timestamped local directory.
@@ -276,41 +294,50 @@ There are two ways to run automated testing to check for RESO compliant Web API 
 * using a local metadata file
 * using a RESOScript file to fetch metadata from a given server
 
-While RESOScript files and the use of strict mode are required for RESO Certification. In both cases, metadata are validated and then processed for RESO compliance. 
+While RESOScript files and the use of strict mode are required for RESO Certification. In both cases, metadata are 
+validated and then processed for RESO compliance. 
 
 ##### Data Dictionary Testing using Local Metadata
-The Commander allows for a local metadata file to be specified. Not only is this used for internal acceptance testing, but is useful for developers to troubleshoot metadata locally while working on compliance. 
+The Commander allows for a local metadata file to be specified. Not only is this used for internal acceptance testing,
+but is useful for developers to troubleshoot metadata locally while working on compliance. 
 
 The Gradle task to validate local metadata can be run using the following command:
 
 ```
-$ ./gradlew testDataDictionary_1_7 -DpathToMetadata=/path/to/RESODataDictionary-1.7.xml
+$ ./gradlew testDataDictionary -Dversion=1.7 -DpathToMetadata=/path/to/RESODataDictionary.xml
 ```
 You may also pass a `-Dstrict=true` flag to see whether the given metadata file would pass Certification. 
 
 A raw report will be generated in a timestamped directory, and a `commander.log` will be generated during runtime. 
 
 ##### Data Dictionary Testing using a Data Dictionary RESOScript
-During Certification, metadata are retrieved directly from an applicant's Web API server using either OAuth2 Bearer Tokens or Client Credentials. Either authentication option is currently available for RESO Certification, depending on configuration, and the applicant will provide working RESOScripts when they apply for certification.
+During Certification, metadata are retrieved directly from an applicant's Web API server using either OAuth2 Bearer 
+Tokens or Client Credentials. Either authentication option is currently available for RESO Certification, depending on 
+configuration, and the applicant will provide working RESOScripts when they apply for certification.
 
-An example Data Dictionary RESOScript template can be found [here](https://github.com/RESOStandards/web-api-commander/blob/main/sample-data-dictionary.1.7.0.resoscript).
+An example Data Dictionary RESOScript template can be found [here](https://github.com/RESOStandards/web-api-commander/blob/main/sample-data-dictionary.resoscript).
 
 Once a RESOScript file has been created, it may be used with the following command:
 
 ```
-$ ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/dd17.resoscript -DshowResponses=true
+$ ./gradlew testDataDictionary -Dversion=1.7 -DpathToRESOScript=/path/to/dd.resoscript -DshowResponses=true
 ```
 You may also pass a `-Dstrict=true` flag to see whether the given metadata file would pass Certification. 
 
 A raw report will be generated in a timestamped directory, and a `commander.log` will be generated during runtime. 
 
 ### Data Dictionary Testing Output
-To see examples of Data Dictionary testing output, you may use the `./gradlew testDataDictionaryReferenceMetadata_1_7` command to run the Data Dictionary acceptance tests on the RESO reference metadata. 
+To see examples of Data Dictionary testing output, you may use the `./gradlew testDataDictionaryReferenceMetadata`
+command to run the Data Dictionary acceptance tests on the RESO reference metadata. 
 
-There is additional documentation about how Data Dictionary testing works, including sample output, in the [RESO Data Dictionary 1.7 Specification](https://github.com/RESOStandards/transport/blob/main/data-dictionary.md).
+There is additional documentation about how Data Dictionary testing works, including sample output,
+in the [RESO Data Dictionary Specification](https://github.com/RESOStandards/transport/blob/main/data-dictionary.md).
 
 ## Advanced feature: Tag Filtering 
-You may filter by tags in any of the Web API or Data Dictionary tests. These are the items in the Cucumber .feature files prefixed by an `@` symbol. Expressions may also be used with tags. This README doen't cover how to use tags, but the Commander supports them. For more information, see the [Cucumber Documentation](https://cucumber.io/docs/cucumber/api/#tags).
+You may filter by tags in any of the Web API or Data Dictionary tests. These are the items in the Cucumber .feature
+files prefixed by an `@` symbol. Expressions may also be used with tags.
+
+This README doesn't cover how to use tags, but the Commander supports them. For more information, see the [Cucumber Documentation](https://cucumber.io/docs/cucumber/api/#tags).
 
 #### Examples
 
@@ -321,5 +348,5 @@ $ gradle testWebApiCore_2_0_0 -DpathToRESOScript=/path/to/your.web-api-server.co
 
 **Run Data Dictionary Tests on IDX Fields Only**
 ```
-$ ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/your/dd1.7.resoscript -DshowResponses=true -Dcucumber.filter.tags="@IDX"
+$ ./gradlew testDataDictionary_1_7 -DpathToRESOScript=/path/to/your/dd.resoscript -DshowResponses=true -Dcucumber.filter.tags="@IDX"
 ```

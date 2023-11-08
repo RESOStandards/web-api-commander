@@ -167,7 +167,7 @@ public class ODataFetchApi {
    * @param container      the test container.
    * @param resourceName   the name of the resource to replicate from.
    * @param timestampField the name of the timestamp field to use for comparisons.
-   * @param strategy       the replication strantegy, either asc or desc.
+   * @param strategy       the replication strategy, either asc or desc.
    * @return a list of ClientEntity items that were replicated.
    * @throws Exception exceptions are thrown so that their messages can be used to fail or continue. Implementations
    *                   should bubble any relevant errors up.
@@ -197,12 +197,12 @@ public class ODataFetchApi {
           throw new Exception("Unsupported WebApiReplicationStrategy: " + strategy);
         }
 
-        LOG.info("Fetching " + resourceName + " Resource data from URL: " + requestUri.toString());
+        LOG.info("Fetching " + resourceName + " Resource data from URL: " + requestUri);
         final ODataRetrieveResponse<ClientEntitySet> response = client.getRetrieveRequestFactory().getEntitySetRequest(requestUri).execute();
         final List<ClientEntity> currentPage = response.getBody().getEntities();
 
-        if (currentPage.size() == 0) {
-          LOG.error("Page contained no records, exiting! Request URI: " + requestUri.toString());
+        if (currentPage.isEmpty()) {
+          LOG.error("Page contained no records, exiting! Request URI: " + requestUri);
           break;
         } else {
           for (ClientEntity clientEntity : currentPage) {

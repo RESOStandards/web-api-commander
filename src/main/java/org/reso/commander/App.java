@@ -3,9 +3,10 @@ package org.reso.commander;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.olingo.commons.api.edm.Edm;
-import org.apache.olingo.commons.api.format.ContentType;
-import org.reso.certification.codegen.*;
+import org.reso.certification.codegen.BDDProcessor;
+import org.reso.certification.codegen.DDLProcessor;
+import org.reso.certification.codegen.DataDictionaryCodeGenerator;
+import org.reso.certification.codegen.EDMXProcessor;
 import org.reso.models.ClientSettings;
 import org.reso.models.ODataTransportWrapper;
 import org.reso.models.Request;
@@ -14,12 +15,10 @@ import org.reso.models.Settings;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Map;
 
 import static org.reso.commander.Commander.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.Utils.getTimestamp;
-import static org.reso.commander.common.XMLMetadataToJSONSchemaSerializer.convertEdmToJsonSchemaDocuments;
 
 /**
  * Entry point of the RESO Web API Commander, which is a command line OData client that uses the Java Olingo
@@ -29,7 +28,7 @@ import static org.reso.commander.common.XMLMetadataToJSONSchemaSerializer.conver
  * - Bearer Tokens
  * - Client Credentials (in-progress)
  * <p>
- * Exposes several different actions for working with OData-based WebAPI servers.
+ * Exposes several actions for working with OData-based WebAPI servers.
  * This application is structured so that the App class is an OData WebAPI consumer
  * using the Commander class, which contains the actual methods for working with OData.
  * <p>
@@ -43,17 +42,16 @@ public class App {
 
   private static final String OUTPUT_DIR = "user.dir";
 
+  private static final String DEFAULT_DD_VERSION = "1.7";
+
   public static void main(String[] params) {
     // create the command line parser
     CommandLineParser parser = new org.apache.commons.cli.DefaultParser();
-    String metadata = null;
+    String version;
 
     //available Commander variables
-    String serviceRoot = null, bearerToken = null, clientId = null, clientSecret = null,
-        authorizationUri = null, tokenUri = null, redirectUri = null, scope = null;
     String inputFilename, outputFile, uri;
-    boolean useEdmEnabledClient = false, useKeyNumeric = false;
-    int pageLimit, pageSize;
+    boolean useEdmEnabledClient;
 
     //created with the commanderBuilder throughout the initialization body
     Commander commander;
@@ -67,11 +65,10 @@ public class App {
 
       // pre-load command line options for later use //
       useEdmEnabledClient = cmd.hasOption(APP_OPTIONS.USE_EDM_ENABLED_CLIENT);
-      useKeyNumeric = cmd.hasOption(APP_OPTIONS.USE_KEY_NUMERIC);
       inputFilename = cmd.getOptionValue(APP_OPTIONS.INPUT_FILE, null);
       outputFile = cmd.getOptionValue(APP_OPTIONS.OUTPUT_FILE, null);
       uri = cmd.getOptionValue(APP_OPTIONS.URI, null);
-      ContentType contentType = Commander.getContentType(cmd.getOptionValue(APP_OPTIONS.CONTENT_TYPE, null));
+      version = cmd.getOptionValue(APP_OPTIONS.DD_VERSION, DEFAULT_DD_VERSION);
 
       // using the edmEnabledClient requires the serviceRoot for schema validation, which is performed
       // against the payload each time the request is made when enabled.
@@ -80,7 +77,7 @@ public class App {
       }
 
       //if we're running a batch, initialize variables from the settings file rather than from command line options
-      Settings settings = null;
+      Settings settings;
 
       LOG.debug("Service Root is: " + commanderBuilder.serviceRoot);
 
@@ -94,7 +91,7 @@ public class App {
 
         //TODO: add base64 un-encode when applicable
         commanderBuilder.bearerToken(settings.getClientSettings().get(ClientSettings.BEARER_TOKEN));
-        if (commanderBuilder.bearerToken != null && commanderBuilder.bearerToken.length() > 0) {
+        if (commanderBuilder.bearerToken != null && !commanderBuilder.bearerToken.isEmpty()) {
           LOG.debug("Bearer token loaded... first 4 characters:"
               + commanderBuilder.bearerToken.substring(0, Math.max(commanderBuilder.bearerToken.length(), 4)));
         }
@@ -124,15 +121,10 @@ public class App {
                 .substring(inputFilename.contains(File.separator) ? inputFilename.lastIndexOf(File.separator) : 0)
                 .replace(RESOSCRIPT_EXTENSION, "") + "-" + getTimestamp(new Date());
 
-        String resolvedUrl = null;
-
-        Request request = null;
-
-        //this is an integer so it can be nullable in cases where we don't care about the response code assertion
-        Integer responseCode = null;
-
+        String resolvedUrl;
+        Request request;
         String outputFilePath;
-        ODataTransportWrapper wrapper = null;
+        ODataTransportWrapper wrapper;
 
         for (int i = 0; i < numRequests; i++) {
           try {
@@ -143,7 +135,7 @@ public class App {
             LOG.info("Request: #" + (i + 1));
             LOG.info(REPORT_DIVIDER_SMALL);
 
-            if (request.getRequestId() != null && request.getRequestId().length() > 0) {
+            if (request.getRequestId() != null && !request.getRequestId().isEmpty()) {
               LOG.info("Request Id: " + request.getRequestId());
             }
 
@@ -151,7 +143,7 @@ public class App {
             LOG.info("Resolved URL: " + resolvedUrl);
 
             //only run tests if they have URLs that resolve
-            if (resolvedUrl != null && resolvedUrl.length() > 0 && request.getOutputFile() != null && request.getOutputFile().length() > 0) {
+            if (resolvedUrl != null && !resolvedUrl.isEmpty() && request.getOutputFile() != null && !request.getOutputFile().isEmpty()) {
 
               outputFilePath = directoryName + outputPath + File.separator + request.getOutputFile();
               LOG.info("Output File: " + outputFilePath);
@@ -170,7 +162,7 @@ public class App {
               LOG.info("Request " + request.getRequestId() + " has an empty URL. Skipping...");
             }
           } catch (Exception ex) {
-            LOG.error("Exception thrown in RUN_RESOSCRIPT Action. Exception is: \n" + ex.toString());
+            LOG.error("Exception thrown in RUN_RESOSCRIPT Action. Exception is: \n" + ex);
             LOG.error("Stack trace:");
             Arrays.stream(ex.getStackTrace()).forEach(stackTraceElement -> LOG.error(stackTraceElement.toString()));
           }
@@ -204,8 +196,15 @@ public class App {
             commander.saveGetRequest(requestUri, outputFile);
           }
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT)) {
+          LOG.info("Generating Data Dictionary {} Metadata Report...", version);
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT);
-          LOG.info(generateMetadataReport(deserializeEdmFromPath(inputFilename, commander.getClient()), inputFilename));
+          final String metadataReport = generateMetadataReport(deserializeEdmFromPath(inputFilename, commander.getClient()), version, inputFilename);
+          if (metadataReport == null || metadataReport.isEmpty()) {
+            LOG.info("Could not generate metadata report!");
+          } else {
+            LOG.info("Metadata report generated!");
+          }
+
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.VALIDATE_METADATA)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.VALIDATE_METADATA);
 
@@ -217,15 +216,7 @@ public class App {
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS);
           try {
-            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new BDDProcessor());
-            generator.processWorksheets();
-          } catch (Exception ex) {
-            LOG.error(getDefaultErrorMessage(ex));
-          }
-        } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_RESOURCE_INFO_MODELS)) {
-          APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_RESOURCE_INFO_MODELS);
-          try {
-            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new ResourceInfoProcessor());
+            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new BDDProcessor(version));
             generator.processWorksheets();
           } catch (Exception ex) {
             LOG.error(getDefaultErrorMessage(ex));
@@ -233,23 +224,15 @@ public class App {
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_EDMX)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_EDMX);
           try {
-            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new EDMXProcessor());
+            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new EDMXProcessor(version));
             generator.processWorksheets();
           } catch (Exception ex) {
             LOG.error(getDefaultErrorMessage(ex));
           }
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_REFERENCE_DDL)) {
           try {
-            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new DDLProcessor(useKeyNumeric));
+            DataDictionaryCodeGenerator generator = new DataDictionaryCodeGenerator(new DDLProcessor());
             generator.processWorksheets();
-          } catch (Exception ex) {
-            LOG.error(getDefaultErrorMessage(ex));
-          }
-        } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_JSON_SCHEMAS_FROM_XML_METADATA)) {
-          try {
-            Edm edm = deserializeEdmFromPath(inputFilename, commander.getClient());
-            final Map<String, String> jsonSchemaMap = convertEdmToJsonSchemaDocuments(edm);
-            //jsonSchemaMap.forEach((model, jsonSchema) -> LOG.info("Model is: " + model + "\nSchema is: " + jsonSchema));
           } catch (Exception ex) {
             LOG.error(getDefaultErrorMessage(ex));
           }
@@ -270,8 +253,8 @@ public class App {
           LOG.info("RESOScript: " + inputFilename);
           LOG.info(REPORT_DIVIDER + "\n\n");
 
-          String resolvedUrl = null;
-          Request request = null;
+          String resolvedUrl;
+          Request request;
           for (int i = 0; i < numRequests; i++) {
             try {
               request = settings.getRequestsAsList().get(i);
@@ -281,7 +264,7 @@ public class App {
               LOG.info("Request: #" + (i + 1));
               LOG.info(REPORT_DIVIDER_SMALL);
 
-              if (request.getRequestId() != null && request.getRequestId().length() > 0) {
+              if (request.getRequestId() != null && !request.getRequestId().isEmpty()) {
                 LOG.info("Request Id: " + request.getRequestId());
               }
 
@@ -289,11 +272,11 @@ public class App {
               LOG.info("Resolved URL: " + resolvedUrl);
 
               //only run tests if they have URLs that resolve
-              if (!(resolvedUrl != null && resolvedUrl.length() > 0 && request.getOutputFile() != null && request.getOutputFile().length() > 0)) {
+              if (!(resolvedUrl != null && !resolvedUrl.isEmpty() && request.getOutputFile() != null && !request.getOutputFile().isEmpty())) {
                 LOG.info("Request " + request.getRequestId() + " has an empty URL. Skipping...");
               }
             } catch (Exception ex) {
-              LOG.error("Exception thrown in RUN_RESOSCRIPT Action. Exception is: \n" + ex.toString());
+              LOG.error("Exception thrown in RUN_RESOSCRIPT Action. Exception is: \n" + ex);
               LOG.error("Stack trace:");
               Arrays.stream(ex.getStackTrace()).forEach(stackTraceElement -> LOG.error(stackTraceElement.toString()));
             }
@@ -319,7 +302,7 @@ public class App {
       return false;
     }
 
-    /**
+    /*
      * Validates the metadata in inputFilename in the following ways:
      *    - de-serializes it into a native Edm object, which will fail if given metadata isn't valid
      *    - verifies whether the given EDMX file is a valid service document
@@ -362,28 +345,6 @@ public class App {
   }
 
   /**
-   * Generates totals report from aggregates.
-   *
-   * @param totalRequestCount total request count
-   * @param numSucceeded      num requests succeeded
-   * @param numFailed         num requests failed
-   * @param numSkipped        num requests skipped
-   * @param numIncomplete     num requests incomplete
-   * @return a string containing the report.
-   */
-  private static String generateTotalsReport(int totalRequestCount, int numSucceeded, int numFailed, int numSkipped, int numIncomplete) {
-    return "\n\tTotal:            " + String.format("%1$4s", totalRequestCount) +
-        "\n\tSucceeded:        " + String.format("%1$4s", numSucceeded) +
-        (totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numSucceeded) / totalRequestCount) + "%)" : "") +
-        "\n\tFailed:           " + String.format("%1$4s", numFailed) +
-        (totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numFailed) / totalRequestCount) + "%)" : "") +
-        "\n\tSkipped:          " + String.format("%1$4s", numSkipped) +
-        (totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numSkipped) / totalRequestCount) + "%)" : "") +
-        "\n\tIncomplete:       " + String.format("%1$4s", numIncomplete) +
-        (totalRequestCount > 0 ? " (" + String.format("%.2f", (100.0 * numIncomplete) / totalRequestCount) + "%)" : "");
-  }
-
-  /**
    * Helps with various app options used by the main application when processing input from the command line.
    */
   private static class APP_OPTIONS {
@@ -401,6 +362,7 @@ public class App {
     static final String USE_KEY_NUMERIC = "useKeyNumeric";
     static final String CONTENT_TYPE = "contentType";
     static final String HELP = "help";
+    static final String DD_VERSION = "version";
 
     /**
      * Validates options for the various actions exposed in App.
@@ -530,15 +492,16 @@ public class App {
           .desc("print help")
           .build();
 
+      Option version = Option.builder()
+          .argName("v").longOpt(DD_VERSION).hasArg(true)
+          .desc("Data Dictionary or Web API version, e.g. 1.7, 2.0.0")
+          .build();
+
       OptionGroup actions = new OptionGroup()
           .addOption(Option.builder().argName("r").longOpt(ACTIONS.RUN_RESOSCRIPT)
               .desc("Runs commands in RESOScript file given as <inputFile>.").build())
           .addOption(Option.builder().argName("t").longOpt(ACTIONS.GENERATE_DD_ACCEPTANCE_TESTS)
               .desc("Generates acceptance tests in the current directory.").build())
-          .addOption(Option.builder().argName("j").longOpt(ACTIONS.GENERATE_JSON_SCHEMAS_FROM_XML_METADATA)
-              .desc("Generates JSON Schema documents from the given XML metadata.").build())
-          .addOption(Option.builder().argName("i").longOpt(ACTIONS.GENERATE_RESOURCE_INFO_MODELS)
-              .desc("Generates Java Models for the Web API Reference Server in the current directory.").build())
           .addOption(Option.builder().argName("r").longOpt(ACTIONS.GENERATE_REFERENCE_EDMX)
               .desc("Generates reference metadata in EDMX format.").build())
           .addOption(Option.builder().argName("k").longOpt(ACTIONS.GENERATE_REFERENCE_DDL)
@@ -567,6 +530,7 @@ public class App {
           .addOption(useKeyNumeric)
           .addOption(uriOption)
           .addOption(contentType)
+          .addOption(version)
           .addOptionGroup(actions);
     }
 
@@ -582,7 +546,6 @@ public class App {
       public static final String VALIDATE_METADATA = "validateMetadata";
       public static final String SAVE_GET_REQUEST = "saveGetRequest";
       public static final String GENERATE_METADATA_REPORT = "generateMetadataReport";
-      public static final String GENERATE_RESOURCE_INFO_MODELS = "generateResourceInfoModels";
     }
   }
 }

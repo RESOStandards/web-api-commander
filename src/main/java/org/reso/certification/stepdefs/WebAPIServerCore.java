@@ -41,6 +41,7 @@ import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
+import static org.reso.certification.codegen.WorksheetProcessor.DEFAULT_DATA_DICTIONARY_VERSION;
 import static org.reso.certification.containers.WebAPITestContainer.*;
 import static org.reso.commander.Commander.*;
 import static org.reso.commander.common.ErrorMsg.getAssertResponseCodeErrorMessage;
@@ -56,19 +57,23 @@ import static org.reso.commander.common.TestUtils.Operators.*;
 public class WebAPIServerCore implements En {
   private static final Logger LOG = LogManager.getLogger(WebAPIServerCore.class);
   private static final String
-      SHOW_RESPONSES_PARAM = "showResponses",
-      USE_STRING_ENUMS_PARAM = "useStringEnums",
-      USE_COLLECTIONS_PARAM = "useCollections";
+      SHOW_RESPONSES_ARG = "showResponses",
+      USE_COLLECTIONS_ARG = "useCollections",
+      PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript",
+      USE_STRING_ENUMS_ARG = "useStringEnums",
+      DD_VERSION_ARG = "version";
 
-  private static final String PATH_TO_RESOSCRIPT_KEY = "pathToRESOScript";
+  private final String version = System.getProperty(DD_VERSION_ARG, DEFAULT_DATA_DICTIONARY_VERSION);
+
   private static Scenario scenario;
 
   //extract any params here
-  private static final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES_PARAM));
+  private static final boolean showResponses = Boolean.parseBoolean(System.getProperty(SHOW_RESPONSES_ARG));
   // boolean used for indicating whether Web API tests are using collections of enums or not
   // defaults to useCollections=true since IsFlags is being deprecated
-  private static final boolean useCollections = Boolean.parseBoolean(System.getProperty(USE_COLLECTIONS_PARAM, "true"));
-  private static final boolean useStringEnums = Boolean.parseBoolean(System.getProperty(USE_STRING_ENUMS_PARAM, "false"));
+  private static final boolean useCollections = Boolean.parseBoolean(System.getProperty(USE_COLLECTIONS_ARG, "true"));
+  private static final boolean useStringEnums = Boolean.parseBoolean(System.getProperty(USE_STRING_ENUMS_ARG, "false"));
+
 
   /*
    * Used to store a static instance of the WebAPITestContainer class
@@ -81,16 +86,18 @@ public class WebAPIServerCore implements En {
 
   @Before
   public void beforeStep(Scenario scenario) {
-    final String pathToRESOScript = System.getProperty(PATH_TO_RESOSCRIPT_KEY, null);
+    final String pathToRESOScript = System.getProperty(PATH_TO_RESOSCRIPT_ARG, null);
 
     if (pathToRESOScript == null) return;
 
     WebAPIServerCore.scenario = scenario;
 
     if (!container.get().getIsInitialized()) {
-      container.get().setSettings(Settings.loadFromRESOScript(new File(System.getProperty(PATH_TO_RESOSCRIPT_KEY))));
+      container.get().setSettings(Settings.loadFromRESOScript(new File(System.getProperty(PATH_TO_RESOSCRIPT_ARG))));
       container.get().initialize();
     }
+
+    container.get().setDataDictionaryVersion(version);
   }
 
   /**

@@ -1,16 +1,17 @@
 package org.reso.certification.stepdefs;
 
-import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
 import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.domain.ClientEntity;
-import org.apache.olingo.commons.api.edm.*;
+import org.apache.olingo.commons.api.edm.EdmElement;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.common.ODataFetchApi;
 import org.reso.commander.common.ODataUtils;
@@ -26,7 +27,6 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
-import static org.reso.certification.stepdefs.DataAvailability.CERTIFICATION_RESULTS_PATH;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.ODataUtils.*;
 import static org.reso.commander.common.TestUtils.failAndExitWithErrorMessage;
@@ -40,8 +40,8 @@ public class LookupResource {
   private static final AtomicReference<Map<String, List<ClientEntity>>> lookupResourceCache = new AtomicReference<>(new LinkedHashMap<>());
   private static final String LOOKUP_RESOURCE_LOOKUP_METADATA_FILE_NAME = "lookup-resource-lookup-metadata.json";
 
-  //TODO: only output file in DEBUG mode
-  //private static final String LOOKUP_RESOURCE_FIELD_METADATA_FILE_NAME = "lookup-resource-field-metadata.json";
+  private static final String BUILD_DIRECTORY_PATH = "build";
+  public static final String CERTIFICATION_RESULTS_PATH = BUILD_DIRECTORY_PATH + File.separator + "certification" + File.separator + "results";
 
   private static final String LOOKUP_NAME_FIELD = "LookupName";
 
@@ -76,7 +76,7 @@ public class LookupResource {
         final List<ClientEntity> results = ODataFetchApi.replicateDataFromResource(container.get(), resourceName,
             ODataFetchApi.WebApiReplicationStrategy.TopAndSkip);
 
-        if (results.size() == 0) {
+        if (results.isEmpty()) {
           failAndExitWithErrorMessage("Could not replicate data from the " + resourceName + " resource!", scenario);
         }
 
@@ -151,11 +151,11 @@ public class LookupResource {
     final ArrayList<String> fieldsWithMissingAnnotations = new ArrayList<>();
     lookupFields.forEach(referenceStandardField -> {
       LOG.debug("Standard Field: { "
-          + "resourceName: \"" + referenceStandardField.getParentResourceName() + "\""
+          + "resourceName: \"" + referenceStandardField.getResourceName() + "\""
           + ", standardName: \"" + referenceStandardField.getStandardName() + "\""
           + ", lookupName: \"" + referenceStandardField.getLookupName() + "\" }");
 
-      EdmElement foundElement = getEdmElement(container.get().getEdm(), referenceStandardField.getParentResourceName(), referenceStandardField.getStandardName());
+      EdmElement foundElement = getEdmElement(container.get().getEdm(), referenceStandardField.getResourceName(), referenceStandardField.getStandardName());
       final boolean isStringDataType = foundElement != null &&
           foundElement.getType().getFullQualifiedName().toString().contentEquals(EdmPrimitiveTypeKind.String.getFullQualifiedName().toString());
 
@@ -165,7 +165,7 @@ public class LookupResource {
       }
     });
 
-    if (fieldsWithMissingAnnotations.size() > 0) {
+    if (!fieldsWithMissingAnnotations.isEmpty()) {
       final String msg = "The following fields are missing the required '" + annotationTerm + "' annotation: "
           + wrapColumns(String.join(", ", fieldsWithMissingAnnotations)) + "\n";
 
@@ -192,7 +192,7 @@ public class LookupResource {
 
     final Set<String> missingLookupNames = Utils.getDifference(annotatedLookupNames, lookupNamesFromLookupData);
 
-    if (missingLookupNames.size() > 0) {
+    if (!missingLookupNames.isEmpty()) {
       final String msg = "The following fields have LookupName annotations but are missing from the Lookup Resource: "
           + wrapColumns(String.join(", ", missingLookupNames)) + "\n";
 
@@ -201,6 +201,22 @@ public class LookupResource {
     } else {
       scenario.log("Found all annotated LookupName elements in the Lookup data. Unique count: " + annotatedLookupNames.size());
       scenario.log("LookupNames: " + wrapColumns(String.join(", ", annotatedLookupNames)));
+    }
+  }
+
+  @Given("that metadata have been retrieved from the server and validated")
+  public void thatValidMetadataHaveBeenRetrievedFromTheServerAndValidated() {
+    try {
+      if (!container.get().hasValidMetadata()) {
+        failAndExitWithErrorMessage("Valid metadata was not retrieved from the server. Exiting!", scenario);
+      }
+
+      if (container.get().getDDCacheProcessor() == null) {
+        failAndExitWithErrorMessage("Could not initialize standard field cache!", scenario);
+      }
+
+    } catch (Exception ex) {
+      failAndExitWithErrorMessage(ex.toString(), scenario);
     }
   }
 }

@@ -119,37 +119,6 @@ public class ODataUtils {
     return metadataReport;
   }
 
-  //TODO: Only output the field metadata in DEBUG mode
-  public static JsonObject serializeFieldMetadataForLookupFields(Map<String, Set<EdmElement>> resourceFieldMap) {
-    //TODO: migrate to test file
-    final String LOOKUP_ANNOTATION_TERM = "RESO.OData.Metadata.LookupName";
-
-    final String
-        DESCRIPTION_KEY = "description", DESCRIPTION = "Data Dictionary Lookup Resource Annotated Fields Metadata",
-        VERSION_KEY = "version", VERSION = "1.7",
-        GENERATED_ON_KEY = "generatedOn",
-        FIELDS_KEY = "fields";
-
-    JsonObject metadataReport = new JsonObject();
-    metadataReport.addProperty(DESCRIPTION_KEY, DESCRIPTION);
-    metadataReport.addProperty(VERSION_KEY, VERSION);
-    metadataReport.addProperty(GENERATED_ON_KEY, Utils.getIsoTimestamp());
-
-    JsonArray fieldsArray = new JsonArray();
-    resourceFieldMap.forEach((resourceName, fieldElements) -> fieldElements.forEach(
-        fieldElement -> {
-          JsonObject fieldObject = new JsonObject();
-          fieldObject.addProperty("resourceName", resourceName);
-          fieldObject.addProperty("fieldName:", fieldElement.getName());
-          fieldObject.addProperty("type", getAnnotationValue(fieldElement, LOOKUP_ANNOTATION_TERM));
-          fieldsArray.add(fieldObject);
-        }
-    ));
-
-    metadataReport.add(FIELDS_KEY, fieldsArray);
-    return metadataReport;
-  }
-
   /**
    * Returns a Map of EntityDataModel (Edm) elements and annotation value with the given annotation term.
    */
@@ -194,7 +163,6 @@ public class ODataUtils {
 
       } catch (Exception ex) {
         LOG.error(ex);
-        ex.printStackTrace();
       }
     }
 

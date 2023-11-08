@@ -9,9 +9,13 @@ public class DDCacheProcessor extends WorksheetProcessor {
   final AtomicReference<Map<String, Map<String, ReferenceStandardField>>> standardFieldCache =
       new AtomicReference<>(Collections.synchronizedMap(new LinkedHashMap<>()));
 
+  public DDCacheProcessor(String version) {
+    super(version);
+  }
+
   private void addToFieldCache(ReferenceStandardField field) {
-    standardFieldCache.get().putIfAbsent(field.getParentResourceName(), new LinkedHashMap<>());
-    standardFieldCache.get().get(field.getParentResourceName()).put(field.getStandardName(), field);
+    standardFieldCache.get().putIfAbsent(field.getResourceName(), new LinkedHashMap<>());
+    standardFieldCache.get().get(field.getResourceName()).put(field.getStandardName(), field);
   }
 
   public Map<String, Map<String, ReferenceStandardField>> getStandardFieldCache() {
@@ -54,8 +58,8 @@ public class DDCacheProcessor extends WorksheetProcessor {
   }
 
   @Override
-  void processCollection(ReferenceStandardField field) {
-    addToFieldCache(field);
+  void processExpansion(ReferenceStandardField field) {
+    //TODO: DD 2.0
   }
 
   @Override

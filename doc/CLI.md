@@ -61,9 +61,6 @@ usage: java -jar web-api-commander
                                    using numeric keys.
     --generateReferenceEDMX        Generates reference metadata in EDMX
                                    format.
-    --generateResourceInfoModels   Generates Java Models for the Web API
-                                   Reference Server in the current
-                                   directory.
     --getMetadata                  Fetches metadata from <serviceRoot>
                                    using <bearerToken> and saves results
                                    in <outputFile>.
@@ -195,6 +192,6 @@ Results will be saved to the filenames specified in the given RESOScript, and er
 
 **RESOScript File Format**
 For examples of files using the RESOScript format, see:
-* [Data Dictionary 1.7 RESOScript Template](sample-data-dictionary.1.7.0.resoscript)
-* [Web API Core 2.0.0 RESOScript Template](sample-web-api-server.core.2.0.0.resoscript)
+* [Data Dictionary RESOScript Template](../sample-data-dictionary.resoscript)
+* [Web API Core RESOScript Template](../sample-web-api-server.core.resoscript)
 

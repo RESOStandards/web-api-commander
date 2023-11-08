@@ -4,6 +4,7 @@ import io.cucumber.java8.En;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.reso.certification.codegen.WorksheetProcessor;
 import org.reso.certification.containers.WebAPITestContainer;
 import org.reso.commander.Commander;
 import org.reso.commander.common.TestUtils;
@@ -20,6 +21,7 @@ import static org.reso.commander.common.TestUtils.*;
 public class TestWebAPICoreTestContainer implements En {
   private static final AtomicReference<WebAPITestContainer> testContainer = new AtomicReference<>();
   private static final Logger LOG = LogManager.getLogger(TestWebAPICoreTestContainer.class);
+  private static final String REFERENCE_METADATA_TEMPLATE = "RESODataDictionary-%s.xml";
 
   public TestWebAPICoreTestContainer() {
 
