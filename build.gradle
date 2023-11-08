@@ -65,8 +65,8 @@ final String WEB_API_CORE_TEST_NAME = "testWebApiCore",
              LEGACY_WEB_API_CORE_TEST_NAME = "testWebApiCore_2_0_0",
              DATA_DICTIONARY_TEST_NAME = "testDataDictionary",
              LEGACY_DATA_DICTIONARY_TEST_NAME = "testDataDictionary_1_7",
-             DATA_AVAILABILITY_TEST_NAME = "testDataAvailability",
-             LEGACY_DATA_AVAILABILITY_TEST_NAME = "testDataAvailability_1_7"
+             LEGACY_DATA_AVAILABILITY_TEST_NAME = "testDataAvailability_1_7",
+             PREPARE_CERTIFICATION_ENVIRONMENT_TASK_NAME = "prepareCertificationEnvironment"
 
 final String ARG_CUCUMBER_TAGS = "cucumber.filter.tags",
              ARG_PRETTY_PRINT = "pretty",
@@ -125,7 +125,7 @@ project.gradle.startParameter.taskNames.each { taskName ->
 
   switch (taskName) {
     case LEGACY_DATA_AVAILABILITY_TEST_NAME:
-      useAlternateTaskMessage += DATA_AVAILABILITY_TEST_NAME
+      useAlternateTaskMessage += "https://github.com/RESOStandards/reso-certification-utils"
       break
     case LEGACY_DATA_DICTIONARY_TEST_NAME:
       useAlternateTaskMessage += DATA_DICTIONARY_TEST_NAME
@@ -143,7 +143,7 @@ project.gradle.startParameter.taskNames.each { taskName ->
   }
 }
 
-tasks.register("prepareCertificationEnvironment") {
+tasks.register(PREPARE_CERTIFICATION_ENVIRONMENT_TASK_NAME) {
   doLast {
     def folder = new File(certOutputDir)
     if (folder.exists()) {
@@ -170,7 +170,7 @@ tasks.register(DATA_DICTIONARY_TEST_NAME) {
   String usageInfo =
       "\nExamples:" +
           "\n\nRESOScript Example (Certification):" +
-          "\n  ./gradlew testDataDictionary -D${ARG_VERSION}=${DEFAULT_DD_VERSION} -D${ARG_RESOSCRIPT_PATH}=/path/to/dd-${DEFAULT_DD_VERSION}.resoscript -D${ARG_STRICT_MODE}=true" +
+          "\n  ./gradlew testDataDictionary -D${ARG_VERSION}=${DEFAULT_DD_VERSION} -D${ARG_RESOSCRIPT_PATH}=/path/to/dd.resoscript -D${ARG_STRICT_MODE}=true" +
           "\n\nMetadata File Example (Local Testing):" +
           "\n  ./gradlew testDataDictionary -D${ARG_METADATA_PATH}=/path/to/RESODataDictionaryMetadata.xml" +
           "\n\nSupported Parameters:" +
@@ -220,7 +220,7 @@ tasks.register(DATA_DICTIONARY_TEST_NAME) {
         certFileName = pathToRESOScript
             .substring(Math.max(pathToRESOScript.lastIndexOf(File.separator) + 1, 0), pathToRESOScript.lastIndexOf("."))
       } else {
-        throw new GradleException("One of ${ARG_RESOSCRIPT_PATH} or ${ARG_METADATA_PATH} is required!");
+        throw new GradleException("One of ${ARG_RESOSCRIPT_PATH} or ${ARG_METADATA_PATH} is required!")
       }
 
       ArrayList<String> argsArray = [
@@ -250,74 +250,6 @@ tasks.register(DATA_DICTIONARY_TEST_NAME) {
 }
 
 /**
- * Data Availability Acceptance Tests
- */
-tasks.register(DATA_AVAILABILITY_TEST_NAME) {
-  group = "RESO Certification"
-
-  //needed to detect whether to error out when the test is run without required parameters
-  Boolean isTaskActive = project.gradle.startParameter.taskNames.contains(DATA_DICTIONARY_TEST_NAME)
-
-  String usageInfo =
-      "\nExample:" +
-          "\n  ./gradlew testDataAvailability -D${ARG_VERSION}=${DEFAULT_DD_VERSION} -D${ARG_RESOSCRIPT_PATH}=/path/to/dd-${DEFAULT_DD_VERSION}.resoscript}" +
-          "\n\nSupported Parameters:" +
-          "\n  • ${ARG_VERSION}: Default is ${DEFAULT_DD_VERSION}. Valid versions are ${SUPPORTED_DD_VERSIONS}" +
-          "\n  • ${ARG_RESOSCRIPT_PATH}: Path to config file in Data Dictionary format \n"
-
-  description = "Data Availability Tests" +
-      "\n[Report location: ${certReportsDir}]" +
-      "\n${usageInfo}\n"
-
-  ArrayList<String> errors = []
-
-  String version = System.getProperty(ARG_VERSION, DEFAULT_DD_VERSION)
-
-  if (!(version in SUPPORTED_DD_VERSIONS)) {
-    errors.push("Invalid Data Dictionary Version: ${version}. Supported Versions: ${SUPPORTED_DD_VERSIONS}" as String)
-  }
-
-  if (System.getProperty("pathToRESOScript") == null) {
-    errors.push("Required Parameter: -D${ARG_RESOSCRIPT_PATH}=/path/to/your.resoscript" as String)
-  }
-
-  if (isTaskActive && errors.size() > 0) {
-    println("Usage: " + usageInfo)
-    throw new GradleException("ERRORS:\n  * ${errors.join("\n  * ")}\n")
-  }
-
-  String reportName = "data-availability.dd-${version}"
-
-  dependsOn jar
-  doLast {
-    javaexec {
-      mainClass = CUCUMBER_MAIN_CLASS_NAME
-      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-      systemProperties = System.getProperties()
-
-      ArrayList<String> argsArray = [
-          "--plugin",
-          "json:${cucumberJsonPath}/${reportName}.json",
-          "--plugin",
-          "html:${certReportsDir}/${reportName}.html",
-          "--glue",
-          "org.reso.certification.stepdefs#DataAvailability",
-          "src/main/java/org/reso/certification/features/payloads/v${version}/data-availability.feature"
-      ]
-
-      Boolean usePrettyPrint = Boolean.parseBoolean(System.getProperty("pretty", "false"))
-
-      if (usePrettyPrint) {
-        argsArray.add("--plugin")
-        argsArray.add("pretty")
-      }
-
-      args = argsArray
-    }
-  }
-}
-
-/**
  * Web API Core Acceptance Tests
  */
 tasks.register(WEB_API_CORE_TEST_NAME) {
@@ -330,8 +262,7 @@ tasks.register(WEB_API_CORE_TEST_NAME) {
   String reportName = "web-api-server.core.${version}"
 
   String usageInfo = "\nExample: " +
-      "\n  ./gradlew testWebApiCore -D${ARG_VERSION}=${DEFAULT_WEB_API_VERSION} -D${ARG_RESOSCRIPT_PATH}=/path/to/web-api-core-" +
-      "${DEFAULT_WEB_API_VERSION}.resoscript -D${ARG_SHOW_RESPONSES}=true" +
+      "\n  ./gradlew testWebApiCore -D${ARG_VERSION}=${DEFAULT_WEB_API_VERSION} -D${ARG_RESOSCRIPT_PATH}=/path/to/web-api-core.resoscript -D${ARG_SHOW_RESPONSES}=true" +
       "\n\nSupported Parameters:" +
       "\n  • ${ARG_VERSION}: Default is ${DEFAULT_WEB_API_VERSION}. Valid versions are ${SUPPORTED_WEB_API_VERSIONS}" +
       "\n  • ${ARG_USE_STRING_ENUMS}: Default false. Use -D${ARG_USE_STRING_ENUMS}=true if using string enumerations and the Lookup Resource" +

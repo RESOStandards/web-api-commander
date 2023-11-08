@@ -13,9 +13,8 @@ To begin using the RESO Commander, choose one of the following topics:
 One of the Commander's primary uses is as an automated testing tool. This section
 explains how to run the following tests:
 
-* Data Dictionary 1.7
-* Data Dictionary Availability Report
-* Web API Core 2.0.0
+* Data Dictionary
+* Web API Core
 
 ## [Command-Line OData Web API Tools](/doc/CLI.md)
 The RESO Commander contains command line tools for working with OData Web APIs. 
