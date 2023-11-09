@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reso.commander.common.Utils;
 import org.reso.models.ReferenceStandardField;
-import org.reso.models.ReferenceStandardLookup;
 import org.w3c.dom.Document;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.DOMImplementationLS;
@@ -20,7 +19,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.reso.commander.common.DataDictionaryMetadata.getKeyFieldForResource;
-import static org.reso.commander.common.Utils.wrapColumns;
 
 //TODO: switch to build an XML document rather than creating it as a string
 public class EDMXProcessor extends WorksheetProcessor {
@@ -115,7 +113,8 @@ public class EDMXProcessor extends WorksheetProcessor {
 
     content.append(EDMXTemplates.buildDisplayNameAnnotation(field.getDisplayName()))
         .append(EDMXTemplates.buildDDWikiUrlAnnotation(field.getWikiPageUrl()))
-        .append(EDMXTemplates.buildDescriptionAnnotation(field.getDefinition()));
+        .append(EDMXTemplates.buildDescriptionAnnotation(field.getDefinition()))
+        .append(EDMXTemplates.buildPayloadsAnnotation(String.join(",", field.getPayloads())));
 
     content.append("</NavigationProperty>");
 
@@ -276,38 +275,43 @@ public class EDMXProcessor extends WorksheetProcessor {
 
   public static final class EDMXTemplates {
     public static String buildDisplayNameAnnotation(String content) {
-      if (content == null || content.length() == 0) return EMPTY_STRING;
+      if (content == null || content.isEmpty()) return EMPTY_STRING;
       return String.format("<Annotation Term=\"RESO.OData.Metadata.StandardName\" String=\"%1$s\" />", sanitizeXml(content));
+    }
+
+    public static String buildPayloadsAnnotation(String content) {
+      if (content == null || content.isEmpty()) return EMPTY_STRING;
+      return String.format("<Annotation Term=\"RESO.OData.Metadata.Payloads\" String=\"%1$s\" />", sanitizeXml(content));
     }
 
     //wrapColumns(referenceStandardField.getDefinition().replaceAll("--", "-"), "   ")
     public static String buildDescriptionAnnotation(String content) {
-      if (content == null || content.length() == 0) return EMPTY_STRING;
+      if (content == null || content.isEmpty()) return EMPTY_STRING;
       return String.format("<Annotation Term=\"Core.Description\" String=\"%1$s\" />", sanitizeXml(content));
     }
 
     public static String buildDDWikiUrlAnnotation(String content) {
-      if (content == null || content.length() == 0) return EMPTY_STRING;
+      if (content == null || content.isEmpty()) return EMPTY_STRING;
       return String.format("<Annotation Term=\"RESO.DDWikiUrl\" String=\"%1$s\" />", sanitizeXml(content));
     }
 
     public static String buildBooleanMember(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
-      return ""
-          + "<Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.Boolean\" >"
+      return "<Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.Boolean\" >"
           + buildDisplayNameAnnotation(field.getDisplayName())
           + buildDDWikiUrlAnnotation(field.getWikiPageUrl())
           + buildDescriptionAnnotation(field.getDefinition())
+          + buildPayloadsAnnotation(String.join(",", field.getPayloads()))
           + "</Property>";
     }
 
     public static String buildDateMember(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
-      return ""
-          + "<Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.Date\" >"
+      return "<Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.Date\" >"
           + buildDisplayNameAnnotation(field.getDisplayName())
           + buildDDWikiUrlAnnotation(field.getWikiPageUrl())
           + buildDescriptionAnnotation(field.getDefinition())
+          + buildPayloadsAnnotation(String.join(",", field.getPayloads()))
           + "</Property>";
     }
 
@@ -319,8 +323,7 @@ public class EDMXProcessor extends WorksheetProcessor {
 
     public static String buildDecimalMember(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
-      String template = ""
-          + "<Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.Decimal\"";
+      String template = "<Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.Decimal\"";
 
       //DD uses length as precision in this case
       if (field.getSuggestedMaxLength() != null) template += " Precision=\"" + field.getSuggestedMaxLength() + "\"";
@@ -332,6 +335,7 @@ public class EDMXProcessor extends WorksheetProcessor {
           + buildDisplayNameAnnotation(field.getDisplayName())
           + buildDDWikiUrlAnnotation(field.getWikiPageUrl())
           + buildDescriptionAnnotation(field.getDefinition())
+          + buildPayloadsAnnotation(String.join(",", field.getPayloads()))
           + "</Property>";
 
       return template;
@@ -339,17 +343,17 @@ public class EDMXProcessor extends WorksheetProcessor {
 
     public static String buildIntegerMember(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
-      return ""
-          + "<Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.Int64\" >"
+      return "<Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.Int64\" >"
           + buildDisplayNameAnnotation(field.getDisplayName())
           + buildDDWikiUrlAnnotation(field.getWikiPageUrl())
           + buildDescriptionAnnotation(field.getDefinition())
+          + buildPayloadsAnnotation(String.join(",", field.getPayloads()))
           + "</Property>";
     }
 
     public static String buildEnumTypeSingleMember(ReferenceStandardField field) {
       if (field == null || field.getLookupName() == null) return EMPTY_STRING;
-      if (field.getLookupName().trim().length() == 0) return EMPTY_STRING;
+      if (field.getLookupName().trim().isEmpty()) return EMPTY_STRING;
 
       return
           "<Property Name=\"" + field.getStandardName()
@@ -357,12 +361,13 @@ public class EDMXProcessor extends WorksheetProcessor {
               + buildDisplayNameAnnotation(field.getDisplayName())
               + buildDDWikiUrlAnnotation(field.getWikiPageUrl())
               + buildDescriptionAnnotation(field.getDefinition())
+              + buildPayloadsAnnotation(String.join(",", field.getPayloads()))
               + "</Property>";
     }
 
     public static String buildEnumTypeMultiMember(ReferenceStandardField field) {
       if (field == null || field.getLookupName() == null) return EMPTY_STRING;
-      if (field.getLookupName().trim().length() == 0) return EMPTY_STRING;
+      if (field.getLookupName().trim().isEmpty()) return EMPTY_STRING;
 
       return
           "<Property Name=\"" + field.getStandardName()
@@ -370,14 +375,14 @@ public class EDMXProcessor extends WorksheetProcessor {
               + buildDisplayNameAnnotation(field.getDisplayName())
               + buildDDWikiUrlAnnotation(field.getWikiPageUrl())
               + buildDescriptionAnnotation(field.getDefinition())
+              + buildPayloadsAnnotation(String.join(",", field.getPayloads()))
               + "</Property>";
 
     }
 
     public static String buildStringMember(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
-      String template = ""
-          + "<Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.String\"";
+      String template = "<Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.String\"";
 
       if (field.getSuggestedMaxLength() != null) template += " MaxLength=\"" + field.getSuggestedMaxLength() + "\"";
       template += " >";
@@ -386,6 +391,7 @@ public class EDMXProcessor extends WorksheetProcessor {
           buildDisplayNameAnnotation(field.getDisplayName())
               + buildDDWikiUrlAnnotation(field.getWikiPageUrl())
               + buildDescriptionAnnotation(field.getDefinition())
+              + buildPayloadsAnnotation(String.join(",", field.getPayloads()))
               + "</Property>";
 
       return template;
@@ -393,8 +399,7 @@ public class EDMXProcessor extends WorksheetProcessor {
 
     public static String buildDateTimeWithOffsetMember(ReferenceStandardField field) {
       if (field == null) return EMPTY_STRING;
-      String template = ""
-          + "<Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.DateTimeOffset\"";
+      String template = "<Property Name=\"" + field.getStandardName() + "\" Type=\"Edm.DateTimeOffset\"";
 
       if (field.getSuggestedMaxLength() != null) template += " Precision=\"" + field.getSuggestedMaxLength() + "\"";
       template += " >";
@@ -403,28 +408,10 @@ public class EDMXProcessor extends WorksheetProcessor {
           buildDisplayNameAnnotation(field.getDisplayName())
               + buildDDWikiUrlAnnotation(field.getWikiPageUrl())
               + buildDescriptionAnnotation(field.getDefinition())
+              + buildPayloadsAnnotation(String.join(",", field.getPayloads()))
               + "</Property>";
       return template;
     }
 
-    public static String buildComments(ReferenceStandardField referenceStandardField) {
-      if (referenceStandardField == null || referenceStandardField.getDefinition() == null || referenceStandardField.getDefinition().length() == 0)
-        return EMPTY_STRING;
-
-      //break every COLUMN_WIDTH characters only at word boundaries
-      return (referenceStandardField.getWikiPageUrl() != null && referenceStandardField.getWikiPageUrl().length() > 0 ?
-          " <!-- " + referenceStandardField.getWikiPageUrl() : "")
-          + " -->";
-    }
-
-    public static String buildComments(ReferenceStandardLookup referenceStandardLookup) {
-      if (referenceStandardLookup == null || referenceStandardLookup.getDefinition() == null || referenceStandardLookup.getDefinition().length() == 0)
-        return EMPTY_STRING;
-
-      //break every COLUMN_WIDTH characters only at word boundaries
-      return (referenceStandardLookup.getWikiPageUrl() != null && referenceStandardLookup.getWikiPageUrl().length() > 0 ? " <!-- " + referenceStandardLookup.getWikiPageUrl() : "") +
-          wrapColumns(referenceStandardLookup.getDefinition().replaceAll("--", "-"), "   ")
-          + " -->";
-    }
   }
 }
