@@ -11,6 +11,7 @@ import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.serialization.ODataSerializerException;
 import org.apache.olingo.client.core.edm.xml.ClientCsdlAnnotation;
 import org.apache.olingo.client.core.serialization.JsonSerializer;
+import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.core.edm.EdmAnnotationImpl;
@@ -84,7 +85,7 @@ public class ODataUtils {
    * @param client  OData client to use as serializer
    * @return a JsonArray of results
    */
-  public static JsonObject serializeLookupMetadata(ODataClient client, List<ClientEntity> lookups) {
+  public static JsonObject serializeLookupMetadata(ODataClient client, List<Entity> lookups) {
     final String
         DESCRIPTION_KEY = "description", DESCRIPTION = "Data Dictionary Lookup Resource Metadata",
         VERSION_KEY = "version", VERSION = "1.7",
@@ -101,10 +102,10 @@ public class ODataUtils {
     try {
       final Gson gson = new Gson();
       final JsonSerializer jsonSerializer = new JsonSerializer(false, ContentType.APPLICATION_JSON);
-      lookups.forEach(clientEntity -> {
+      lookups.forEach(entity -> {
         try {
           StringWriter writer = new StringWriter();
-          jsonSerializer.write(writer, client.getBinder().getEntity(clientEntity));
+          jsonSerializer.write(writer, entity);
           Optional<JsonElement> element = Optional.ofNullable(gson.fromJson(writer.toString(), JsonElement.class));
           element.ifPresent(lookupsArray::add);
         } catch (ODataSerializerException e) {
