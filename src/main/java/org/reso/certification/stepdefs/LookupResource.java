@@ -10,6 +10,7 @@ import io.cucumber.java.en.When;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.domain.ClientEntity;
+import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.EdmElement;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.reso.certification.containers.WebAPITestContainer;
@@ -37,7 +38,7 @@ public class LookupResource {
   private static Scenario scenario;
   private final static AtomicReference<WebAPITestContainer> container = new AtomicReference<>();
   private static final String PATH_TO_RESOSCRIPT_ARG = "pathToRESOScript";
-  private static final AtomicReference<Map<String, List<ClientEntity>>> lookupResourceCache = new AtomicReference<>(new LinkedHashMap<>());
+  private static final AtomicReference<Map<String, List<Entity>>> lookupResourceCache = new AtomicReference<>(new LinkedHashMap<>());
   private static final String LOOKUP_RESOURCE_LOOKUP_METADATA_FILE_NAME = "lookup-resource-lookup-metadata.json";
 
   private static final String BUILD_DIRECTORY_PATH = "build";
@@ -73,7 +74,7 @@ public class LookupResource {
     if (!lookupResourceCache.get().containsKey(resourceName)) {
       lookupResourceCache.get().put(resourceName, new ArrayList<>());
       try {
-        final List<ClientEntity> results = ODataFetchApi.replicateDataFromResource(container.get(), resourceName,
+        final List<Entity> results = ODataFetchApi.replicateDataFromResource(container.get(), resourceName,
             ODataFetchApi.WebApiReplicationStrategy.TopAndSkip);
 
         if (results.isEmpty()) {
@@ -108,9 +109,9 @@ public class LookupResource {
 
     //check resource data cache
     scenario.log("Ensuring mandatory fields " + mandatoryFields + " are present in " + resourceName + " Resource data");
-    lookupResourceCache.get().get(resourceName).forEach(clientEntity -> fields.forEach(fieldName -> {
-      if (clientEntity.getProperty(fieldName) == null || clientEntity.getProperty(fieldName).getValue() == null) {
-        failAndExitWithErrorMessage("Missing required field in the " + resourceName + " Resource!", scenario);
+    lookupResourceCache.get().get(resourceName).forEach(entity -> fields.forEach(fieldName -> {
+      if (entity.getProperty(fieldName) == null || entity.getProperty(fieldName).getValue() == null) {
+        failAndExitWithErrorMessage("Missing required field in the " + resourceName + " Resource! Field Name: " + fieldName, LOG);
       }
     }));
     scenario.log("All mandatory fields present!");
@@ -169,8 +170,7 @@ public class LookupResource {
       final String msg = "The following fields are missing the required '" + annotationTerm + "' annotation: "
           + wrapColumns(String.join(", ", fieldsWithMissingAnnotations)) + "\n";
 
-      LOG.error(getDefaultErrorMessage(msg));
-      fail(msg);
+      failAndExitWithErrorMessage(msg, LOG);
     }
   }
 
@@ -196,8 +196,7 @@ public class LookupResource {
       final String msg = "The following fields have LookupName annotations but are missing from the Lookup Resource: "
           + wrapColumns(String.join(", ", missingLookupNames)) + "\n";
 
-      LOG.error(getDefaultErrorMessage(msg));
-      fail(msg);
+      failAndExitWithErrorMessage(msg, LOG);
     } else {
       scenario.log("Found all annotated LookupName elements in the Lookup data. Unique count: " + annotatedLookupNames.size());
       scenario.log("LookupNames: " + wrapColumns(String.join(", ", annotatedLookupNames)));
