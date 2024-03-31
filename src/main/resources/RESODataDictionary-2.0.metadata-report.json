@@ -1,7 +1,7 @@
 {
   "description": "RESO Data Dictionary Metadata Report",
   "version": "2.0",
-  "generatedOn": "2023-12-14T17:07:39.445224Z",
+  "generatedOn": "2024-03-31T21:49:11.335575Z",
   "fields": [
     {
       "resourceName": "Property",
@@ -14330,7 +14330,7 @@
       "resourceName": "Property",
       "fieldName": "SourceSystem",
       "isExpansion": true,
-      "isCollection": true,
+      "isCollection": false,
       "type": "org.reso.metadata.OUID",
       "typeName": "OUID",
       "annotations": [
@@ -22033,6 +22033,23 @@
     },
     {
       "resourceName": "LockOrBox",
+      "fieldName": "ModificationTimestamp",
+      "type": "Edm.DateTimeOffset",
+      "nullable": true,
+      "precision": 27,
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Modification Timestamp"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The date/time the LockOrBox record was last modified."
+        }
+      ]
+    },
+    {
+      "resourceName": "LockOrBox",
       "fieldName": "Notes",
       "type": "Edm.String",
       "nullable": true,
@@ -23053,10 +23070,10 @@
     },
     {
       "resourceName": "Media",
-      "fieldName": "OriginatingSystemResourceRecordId",
+      "fieldName": "OriginatingSystemResourceRecordID",
       "type": "Edm.String",
       "nullable": true,
-      "maxLength": 25,
+      "maxLength": 255,
       "annotations": [
         {
           "term": "RESO.OData.Metadata.StandardName",
@@ -23095,7 +23112,7 @@
     },
     {
       "resourceName": "Media",
-      "fieldName": "OriginatingSystemResourceRecordSystemId",
+      "fieldName": "OriginatingSystemResourceRecordSystemID",
       "type": "Edm.String",
       "nullable": true,
       "maxLength": 25,
@@ -23110,7 +23127,7 @@
         },
         {
           "term": "Core.Description",
-          "value": "The system ID of the resource record from the originating system is used when the resource record is originated from a different system than the media. This is the system ID of the OriginatingSystemResourceRecordId and/or the OriginatingSystemResourceRecordKey when they are from a different system than the OriginatingSystemId and/or OriginatingSystemName."
+          "value": "The system ID of the resource record from the originating system is used when the resource record is originated from a different system than the media. This is the system ID of the OriginatingSystemResourceRecordID and/or the OriginatingSystemResourceRecordKey when they are from a different system than the OriginatingSystemID and/or OriginatingSystemName."
         }
       ]
     },
@@ -23329,10 +23346,10 @@
     },
     {
       "resourceName": "Media",
-      "fieldName": "SourceSystemResourceRecordId",
+      "fieldName": "SourceSystemResourceRecordID",
       "type": "Edm.String",
       "nullable": true,
-      "maxLength": 25,
+      "maxLength": 255,
       "annotations": [
         {
           "term": "RESO.OData.Metadata.StandardName",
@@ -23371,7 +23388,7 @@
     },
     {
       "resourceName": "Media",
-      "fieldName": "SourceSystemResourceRecordSystemId",
+      "fieldName": "SourceSystemResourceRecordSystemID",
       "type": "Edm.String",
       "nullable": true,
       "maxLength": 25,
@@ -30370,7 +30387,7 @@
       ]
     },
     {
-      "resourceName": "PowerStorage",
+      "resourceName": "PropertyPowerStorage",
       "fieldName": "DateOfInstallation",
       "type": "Edm.Date",
       "nullable": true,
@@ -30390,7 +30407,7 @@
       ]
     },
     {
-      "resourceName": "PowerStorage",
+      "resourceName": "PropertyPowerStorage",
       "fieldName": "InformationSource",
       "type": "Edm.String",
       "nullable": true,
@@ -30411,7 +30428,7 @@
       ]
     },
     {
-      "resourceName": "PowerStorage",
+      "resourceName": "PropertyPowerStorage",
       "fieldName": "ModificationTimestamp",
       "type": "Edm.DateTimeOffset",
       "nullable": true,
@@ -30427,12 +30444,12 @@
         },
         {
           "term": "Core.Description",
-          "value": "The transactional timestamp automatically recorded by the system representing the date/time the PowerStorage record was last modified."
+          "value": "The transactional timestamp automatically recorded by the system representing the date/time the PropertyPowerStorage record was last modified."
         }
       ]
     },
     {
-      "resourceName": "PowerStorage",
+      "resourceName": "PropertyPowerStorage",
       "fieldName": "NameplateCapacity",
       "type": "Edm.Decimal",
       "nullable": true,
@@ -30454,7 +30471,7 @@
       ]
     },
     {
-      "resourceName": "PowerStorage",
+      "resourceName": "PropertyPowerStorage",
       "fieldName": "PowerStorageKey",
       "type": "Edm.String",
       "nullable": true,
@@ -30475,7 +30492,7 @@
       ]
     },
     {
-      "resourceName": "PowerStorage",
+      "resourceName": "PropertyPowerStorage",
       "fieldName": "PowerStorageType",
       "type": "org.reso.metadata.enums.PowerStorageType",
       "typeName": "PowerStorageType",
@@ -37314,6 +37331,23 @@
         {
           "term": "Core.Description",
           "value": "A list of types of transactions (e.g., Listing for Sale, Listing for Lease, Other)."
+        }
+      ]
+    },
+    {
+      "resourceName": "TransactionManagement",
+      "fieldName": "ModificationTimestamp",
+      "type": "Edm.DateTimeOffset",
+      "nullable": true,
+      "precision": 27,
+      "annotations": [
+        {
+          "term": "RESO.OData.Metadata.StandardName",
+          "value": "Modification Timestamp"
+        },
+        {
+          "term": "Core.Description",
+          "value": "The date/time the TransactionManagement record was last modified."
         }
       ]
     }
@@ -64852,7 +64886,7 @@
         },
         {
           "term": "Core.Description",
-          "value": "The seller will carry points."
+          "value": "The seller will carry the mortgage note."
         }
       ]
     },
@@ -89779,7 +89813,7 @@
     },
     {
       "lookupName": "org.reso.metadata.enums.EventSource",
-      "lookupValue": "Gps",
+      "lookupValue": "GPS",
       "type": "Edm.Int32",
       "annotations": [
         {

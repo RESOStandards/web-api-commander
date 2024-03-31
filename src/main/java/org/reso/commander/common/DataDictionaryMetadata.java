@@ -7,9 +7,9 @@ public class DataDictionaryMetadata {
 
   private static String keyifyResourceName(String resourceName) {
     if (resourceName == null || resourceName.trim().isEmpty()) {
-      return resourceName;
+      return "<Undefined Resource Name>";
     }
-    return resourceName + "Key";
+    return resourceName.trim() + "Key";
   }
 
   public static String getKeyFieldForResource(String resourceName) {
@@ -35,15 +35,9 @@ public class DataDictionaryMetadata {
         return "UnitTypeKey";
       case "EntityEvent":
         return "EntityEventSequence";
-      case "LockOrBox":
-        return "LockOrBoxKey";
       case "MemberAssociation":
       case "OfficeAssociation":
         return "AssociationKey";
-      case "MemberStateLicense":
-        return "MemberStateLicenseKey";
-      case "OfficeCorporateLicense":
-        return "OfficeCorporateLicenseKey";
       case "TransactionManagement":
         return "TransactionKey";
       case "Rules":
@@ -54,6 +48,8 @@ public class DataDictionaryMetadata {
         return "TeamMemberKey";
       case "PropertyPowerProduction":
         return "PowerProductionKey";
+      case "PropertyPowerStorage":
+        return "PowerStorageKey";
       default:
         return keyifyResourceName(resourceName);
     }

@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-  implementation "com.google.guava:guava:31.1-jre"
+  implementation 'com.google.guava:guava:33.0.0-jre'
   implementation "com.google.inject:guice:5.1.0"
   implementation "commons-cli:commons-cli:1.5.0"
 
@@ -20,12 +20,13 @@ dependencies {
   implementation "org.apache.logging.log4j:log4j-1.2-api:2.20.0"
   implementation "org.apache.logging.log4j:log4j-core:2.20.0"
 
-  implementation "org.apache.olingo:odata-client-api:4.9.0"
-  implementation "org.apache.olingo:odata-commons-core:4.9.0"
-  implementation "org.apache.olingo:odata-client-core:4.9.0"
+  implementation "org.apache.olingo:odata-client-api:4.10.0"
+  implementation "org.apache.olingo:odata-commons-core:4.10.0"
+  implementation "org.apache.olingo:odata-client-core:4.10.0"
 
-  implementation "org.apache.poi:poi:5.2.2"
-  implementation "org.apache.poi:poi-ooxml:5.2.2"
+  // 5.2.5 (Nov 25, 2023) is latest version as of March 2024
+  implementation "org.apache.poi:poi:5.2.5"
+  implementation "org.apache.poi:poi-ooxml:5.2.5"
 
   implementation "io.rest-assured:rest-assured:5.1.1"
   implementation "io.rest-assured:json-path:5.1.1"
