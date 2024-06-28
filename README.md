@@ -16,6 +16,8 @@ explains how to run the following tests:
 * Data Dictionary
 * Web API Core
 
+**Note**: Data Dictionary testing is now handled by the [**RESO Certification Utils**](https://github.com/RESOStandards/reso-certification-utils) command-line utility. The Commander still works for metadata validation, but will be retired in the near future and the new tools merged into this repository. 
+
 ## [Command-Line OData Web API Tools](/doc/CLI.md)
 The RESO Commander contains command line tools for working with OData Web APIs. 
 This section covers how to validate metadata, make requests, and generate sample requests for testing. 
