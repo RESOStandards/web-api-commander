@@ -1,2 +1,5 @@
-theme: jekyll-theme-slate
+# theme: jekyll-theme-slate
+
 title: RESO Commander
+description: Client tools and libraries to work with and test RESO Web APIs.
+
