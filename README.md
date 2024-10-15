@@ -3,6 +3,8 @@
 
 [![CodeFactor](https://www.codefactor.io/repository/github/resostandards/web-api-commander/badge)](https://www.codefactor.io/repository/github/resostandards/web-api-commander)  ![Java CI with Gradle](https://github.com/RESOStandards/web-api-commander/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=main)
 
+[**VIEW ON GITHUB**](https://github.com/RESOStandards/web-api-commander)
+
 The RESO Commander is an OData client Java library and command-line client, 
 as well as an automated RESO Certification testing tool.
 
