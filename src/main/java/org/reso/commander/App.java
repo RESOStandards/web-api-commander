@@ -16,7 +16,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 
-import static org.reso.commander.Commander.*;
 import static org.reso.commander.common.ErrorMsg.getDefaultErrorMessage;
 import static org.reso.commander.common.Utils.getTimestamp;
 
@@ -65,9 +64,9 @@ public class App {
 
       // pre-load command line options for later use //
       useEdmEnabledClient = cmd.hasOption(APP_OPTIONS.USE_EDM_ENABLED_CLIENT);
-      inputFilename = cmd.getOptionValue(APP_OPTIONS.INPUT_FILE, null);
-      outputFile = cmd.getOptionValue(APP_OPTIONS.OUTPUT_FILE, null);
-      uri = cmd.getOptionValue(APP_OPTIONS.URI, null);
+      inputFilename = cmd.getOptionValue(APP_OPTIONS.INPUT_FILE, (String) null);
+      outputFile = cmd.getOptionValue(APP_OPTIONS.OUTPUT_FILE, (String) null);
+      uri = cmd.getOptionValue(APP_OPTIONS.URI, (String) null);
       version = cmd.getOptionValue(APP_OPTIONS.DD_VERSION, DEFAULT_DD_VERSION);
 
       // using the edmEnabledClient requires the serviceRoot for schema validation, which is performed
@@ -83,7 +82,7 @@ public class App {
 
       //If the RESOScript option was passed, then the correct commander instance should exist at this point
       if (cmd.hasOption(APP_OPTIONS.ACTIONS.RUN_RESOSCRIPT)) {
-        LOG.debug("Loading RESOScript: " + inputFilename);
+        LOG.debug(String.format("Loading RESOScript: %s", inputFilename));
         settings = Settings.loadFromRESOScript(new File(inputFilename));
         LOG.debug("RESOScript loaded successfully!");
 
@@ -92,8 +91,7 @@ public class App {
         //TODO: add base64 un-encode when applicable
         commanderBuilder.bearerToken(settings.getClientSettings().get(ClientSettings.BEARER_TOKEN));
         if (commanderBuilder.bearerToken != null && !commanderBuilder.bearerToken.isEmpty()) {
-          LOG.debug("Bearer token loaded... first 4 characters:"
-              + commanderBuilder.bearerToken.substring(0, Math.max(commanderBuilder.bearerToken.length(), 4)));
+          LOG.debug("Bearer token loaded... first 4 characters:{}", commanderBuilder.bearerToken.substring(0, Math.max(commanderBuilder.bearerToken.length(), 4)));
         }
 
         commanderBuilder.clientId(settings.getClientSettings().get(ClientSettings.CLIENT_IDENTIFICATION));
@@ -107,19 +105,19 @@ public class App {
 
         int numRequests = settings.getRequests().size();
 
-        LOG.info(REPORT_DIVIDER);
+        LOG.info(Commander.REPORT_DIVIDER);
         LOG.info("Web API Commander Starting... Press <ctrl+c> at any time to exit.");
-        LOG.info(REPORT_DIVIDER);
+        LOG.info(Commander.REPORT_DIVIDER);
 
         LOG.info("Running " + numRequests + " Request(s)");
         LOG.info("RESOScript: " + inputFilename);
-        LOG.info(REPORT_DIVIDER + "\n\n");
+        LOG.info(Commander.REPORT_DIVIDER + "\n\n");
 
         //put in local directory rather than relative to where the input file is
         String directoryName = System.getProperty(OUTPUT_DIR),
             outputPath = inputFilename
                 .substring(inputFilename.contains(File.separator) ? inputFilename.lastIndexOf(File.separator) : 0)
-                .replace(RESOSCRIPT_EXTENSION, "") + "-" + getTimestamp(new Date());
+                .replace(Commander.RESOSCRIPT_EXTENSION, "") + "-" + getTimestamp(new Date());
 
         String resolvedUrl;
         Request request;
@@ -131,9 +129,9 @@ public class App {
             request = settings.getRequestsAsList().get(i);
 
             //TODO: create dynamic JUnit (or similar) test runner
-            LOG.info(REPORT_DIVIDER_SMALL);
+            LOG.info(Commander.REPORT_DIVIDER_SMALL);
             LOG.info("Request: #" + (i + 1));
-            LOG.info(REPORT_DIVIDER_SMALL);
+            LOG.info(Commander.REPORT_DIVIDER_SMALL);
 
             if (request.getRequestId() != null && !request.getRequestId().isEmpty()) {
               LOG.info("Request Id: " + request.getRequestId());
@@ -169,21 +167,21 @@ public class App {
           LOG.info("\n  ");
         }
 
-        LOG.info(REPORT_DIVIDER);
+        LOG.info(Commander.REPORT_DIVIDER);
         LOG.info("RESOScript Complete!");
-        LOG.info(REPORT_DIVIDER + "\n");
+        LOG.info(Commander.REPORT_DIVIDER + "\n");
 
-        System.exit(OK); //terminate the program after the batch completes
+        System.exit(Commander.OK); //terminate the program after the batch completes
       } else {
         /* otherwise, not a batch request...
          proceed with the selected command-line option */
 
-        commanderBuilder.serviceRoot(cmd.getOptionValue(APP_OPTIONS.SERVICE_ROOT, null));
-        commanderBuilder.bearerToken(cmd.getOptionValue(APP_OPTIONS.BEARER_TOKEN, null));
-        commanderBuilder.clientId(cmd.getOptionValue(APP_OPTIONS.CLIENT_ID, null));
-        commanderBuilder.clientSecret(cmd.getOptionValue(APP_OPTIONS.CLIENT_SECRET, null));
-        commanderBuilder.tokenUri(cmd.getOptionValue(ClientSettings.TOKEN_URI, null));
-        commanderBuilder.scope(cmd.getOptionValue(ClientSettings.CLIENT_SCOPE, null));
+        commanderBuilder.serviceRoot(cmd.getOptionValue(APP_OPTIONS.SERVICE_ROOT, (String) null));
+        commanderBuilder.bearerToken(cmd.getOptionValue(APP_OPTIONS.BEARER_TOKEN, (String) null));
+        commanderBuilder.clientId(cmd.getOptionValue(APP_OPTIONS.CLIENT_ID, (String) null));
+        commanderBuilder.clientSecret(cmd.getOptionValue(APP_OPTIONS.CLIENT_SECRET, (String) null));
+        commanderBuilder.tokenUri(cmd.getOptionValue(ClientSettings.TOKEN_URI, (String) null));
+        commanderBuilder.scope(cmd.getOptionValue(ClientSettings.CLIENT_SCOPE, (String) null));
         commanderBuilder.useEdmEnabledClient(cmd.hasOption(APP_OPTIONS.USE_EDM_ENABLED_CLIENT));
 
         //create Commander instance
@@ -192,13 +190,13 @@ public class App {
         if (cmd.hasOption(APP_OPTIONS.ACTIONS.GET_METADATA)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GET_METADATA);
           if (commander.getServiceRoot() != null) {
-            final String requestUri = commander.getServiceRoot() + METADATA_PATH;
+            final String requestUri = commander.getServiceRoot() + Commander.METADATA_PATH;
             commander.saveGetRequest(requestUri, outputFile);
           }
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT)) {
           LOG.info("Generating Data Dictionary {} Metadata Report...", version);
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_METADATA_REPORT);
-          final String metadataReport = generateMetadataReport(deserializeEdmFromPath(inputFilename, commander.getClient()), version, inputFilename);
+          final String metadataReport = Commander.generateMetadataReport(Commander.deserializeEdmFromPath(inputFilename, commander.getClient()), version, inputFilename);
           if (metadataReport == null || metadataReport.isEmpty()) {
             LOG.info("Could not generate metadata report!");
           } else {
@@ -208,7 +206,7 @@ public class App {
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.VALIDATE_METADATA)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.VALIDATE_METADATA);
 
-          System.exit(validateMetadata(commander, inputFilename) ? OK : NOT_OK);
+          System.exit(validateMetadata(commander, inputFilename) ? Commander.OK : Commander.NOT_OK);
 
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.SAVE_GET_REQUEST)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.SAVE_GET_REQUEST);
@@ -239,19 +237,19 @@ public class App {
         } else if (cmd.hasOption(APP_OPTIONS.ACTIONS.GENERATE_QUERIES)) {
           APP_OPTIONS.validateAction(cmd, APP_OPTIONS.ACTIONS.GENERATE_QUERIES);
 
-          LOG.debug("Loading RESOScript: " + inputFilename);
+          LOG.debug("Loading RESOScript: {}", inputFilename);
           settings = Settings.loadFromRESOScript(new File(inputFilename));
           LOG.debug("RESOScript loaded successfully!");
 
           int numRequests = settings.getRequests().size();
 
-          LOG.info(REPORT_DIVIDER);
+          LOG.info(Commander.REPORT_DIVIDER);
           LOG.info("Web API Commander Starting... Press <ctrl+c> at any time to exit.");
-          LOG.info(REPORT_DIVIDER);
+          LOG.info(Commander.REPORT_DIVIDER);
 
           LOG.info("Displaying " + numRequests + " Request(s)");
           LOG.info("RESOScript: " + inputFilename);
-          LOG.info(REPORT_DIVIDER + "\n\n");
+          LOG.info(Commander.REPORT_DIVIDER + "\n\n");
 
           String resolvedUrl;
           Request request;
@@ -260,9 +258,9 @@ public class App {
               request = settings.getRequestsAsList().get(i);
 
               //TODO: create dynamic JUnit (or similar) test runner
-              LOG.info(REPORT_DIVIDER_SMALL);
+              LOG.info(Commander.REPORT_DIVIDER_SMALL);
               LOG.info("Request: #" + (i + 1));
-              LOG.info(REPORT_DIVIDER_SMALL);
+              LOG.info(Commander.REPORT_DIVIDER_SMALL);
 
               if (request.getRequestId() != null && !request.getRequestId().isEmpty()) {
                 LOG.info("Request Id: " + request.getRequestId());
@@ -283,7 +281,7 @@ public class App {
             LOG.info("\n  ");
           }
 
-          System.exit(OK); //terminate the program after the batch completes
+          System.exit(Commander.OK); //terminate the program after the batch completes
 
         } else {
           printHelp(APP_OPTIONS.getOptions());
@@ -291,7 +289,7 @@ public class App {
       }
     } catch (ParseException exp) {
       LOG.error("\nERROR: Parse Exception, Commander cannot continue! " + exp.getMessage());
-      System.exit(NOT_OK);
+      System.exit(Commander.NOT_OK);
     }
   }
 
@@ -332,7 +330,7 @@ public class App {
   private static void printErrorMsgAndExit(String msg) {
     LOG.error("\n\n" + msg + "\n");
     printHelp(APP_OPTIONS.getOptions());
-    System.exit(NOT_OK);
+    System.exit(Commander.NOT_OK);
   }
 
   /**
