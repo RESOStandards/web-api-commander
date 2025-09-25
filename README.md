@@ -11,30 +11,40 @@ as well as an automated RESO Certification testing tool.
 # Getting Started
 To begin using the RESO Commander, choose one of the following topics:
 
-## [RESO Certification](/doc/Certification.md)
-One of the Commander's primary uses is as an automated testing tool. This section
-explains how to run the following tests:
+## RESO Certification
+The RESO Commander is only used for Web API Core testing and will be deprecated in the future in favor of the RESO SDK. 
 
-* Data Dictionary
-* Web API Core
+[**MORE INFO**](/doc/Certification.md)
 
-**Note**: Data Dictionary testing is now handled by the [**RESO Certification Utils**](https://github.com/RESOStandards/reso-certification-utils) command-line utility. The Commander still works for metadata validation, but will be retired in the near future and the new tools merged into this repository. 
+_For Data Dictionary certification, see [**RESO Certification Utils**](https://github.com/RESOStandards/reso-certification-utils?tab=readme-ov-file#reso-data-dictionary-certification)._
 
-## [Command-Line OData Web API Tools](/doc/CLI.md)
+## Command-Line OData Web API Tools
 The RESO Commander contains command line tools for working with OData Web APIs. 
 This section covers how to validate metadata, make requests, and generate sample requests for testing. 
 
-## [Web API Client Library](/doc/ODataClient.md)
+[**MORE INFO**](/doc/CLI.md)
+
+## Web API Client Library
 The RESO Commander offers a convenient wrapper around the Apache Olingo Java client for OData, 
 with added support for OAuth2 Bearer Tokens and Client Credentials. 
 
 The client library can be used to fetch and validate metadata, fetch data, and perform other 
 OData client tasks. 
 
-## [Docker](/doc/Docker.md)
+[**MORE INFO**]((/doc/ODataClient.md))
+
+## Docker
 For those who prefer Docker, both the Command Line and Automated Testing Tools can be 
 run in a Docker container. 
 
-## [Codegen](/doc/Codegen.md)
+[**MORE INFO**](/doc/Docker.md)
+
+## Codegen
 The RESO Commander may also be used to generate reference XML Metadata, DDL, database seeds,
 automated acceptance tests, reference server models, and to convert XML Metadata to Open API 3 format.
+
+[**MORE INFO**](/doc/Codegen.md)
+
+---
+
+[**Questions? Contact RESO**](mailto:dev@reso.org)
