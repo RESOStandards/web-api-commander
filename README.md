@@ -1,4 +1,4 @@
-<img width="1010" height="305" alt="image" src="https://github.com/user-attachments/assets/4fc04bbc-6e73-4168-8a68-97faa9e47281" />
+<img width="500" height="151" alt="image" src="https://github.com/user-attachments/assets/4fc04bbc-6e73-4168-8a68-97faa9e47281" />
 
 # RESO Commander
 
