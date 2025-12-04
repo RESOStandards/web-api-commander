@@ -146,12 +146,12 @@ To use the automated RESO testing tools, you must have a [JDK installed](#java-a
 ### Web API Core RESOScript Template
 To use the Commander for automated Web API Core testing, you need a RESOScript.
 
-For Web API 2.0.0 Server Core Certification, use [this resoscript](https://github.com/RESOStandards/web-api-commander/blob/main/sample-web-api-server.core.2.0.0.resoscript) as a template. 
+For Web API 2.0.0 Server Core Certification, use [this resoscript](https://github.com/RESOStandards/web-api-commander/blob/main/sample-web-api-server.core.resoscript) as a template.
 
 For more information regarding Parameters and Client Settings, see the [Web API Walkthrough](https://github.com/RESOStandards/web-api-commander/wiki/Configuring-the-RESO-Commander-for-Automated-Web-API-Core-Testing).
 
 ### Web API Cucumber Acceptance Tests
-The Cucumber BDD acceptance tests for Web API 2.0.0 Core certification are [here](https://github.com/RESOStandards/web-api-commander/blob/main/src/main/java/org/reso/certification/features/web-api/web-api-server.core.feature).  If you have any questions, please [email us](mailto:dev@reso.org).
+The Cucumber BDD acceptance tests for Web API 2.0.0 Core certification are [here](https://github.com/RESOStandards/web-api-commander/blob/main/src/main/java/org/reso/certification/features/web-api/v2.0.0/web-api-server.core.feature).  If you have any questions, please [email us](mailto:dev@reso.org).
 
 ### Gradle Tasks for Web API 2.0.0 Server Certification
 While you may use tags to filter tests as you choose, explained in the next section, it's convenient
@@ -266,7 +266,7 @@ repository. See [RESO Certification](#reso-certification) before proceeding.
 ### Data Dictionary RESOScript Template
 To use the Commander for automated Data Dictionary testing, you need a RESOScript.
 
-For Data Dictionary Certification, use [this resoscript](https://github.com/RESOStandards/web-api-commander/blob/main/sample-data-dictionary.1.7.0.resoscript) as a template. 
+For Data Dictionary Certification, use [this resoscript](https://github.com/RESOStandards/web-api-commander/blob/main/sample-data-dictionary.resoscript) as a template.
 
 ### Data Dictionary Acceptance Tests
 RESO Data Dictionary Certification is driven off of the official Data Dictionary spreadsheet for each version of the 
