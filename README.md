@@ -1,6 +1,6 @@
 <img width="500" height="151" alt="image" src="https://github.com/user-attachments/assets/4fc04bbc-6e73-4168-8a68-97faa9e47281" />
 
-# THE COMMANDER HAS RETIRED. THIS REPO IS NO LONGER BEING MAINTAINED. SEE https://tools.reso.org FOR CERTIFICATION
+# THE COMMANDER HAS RETIRED. THIS REPO IS NO LONGER BEING MAINTAINED. SEE [**https://tools.reso.org**](https://tools.reso.org) FOR CERTIFICATION
 
 # RESO Commander
 
