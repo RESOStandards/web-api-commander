@@ -1,5 +1,7 @@
 <img width="500" height="151" alt="image" src="https://github.com/user-attachments/assets/4fc04bbc-6e73-4168-8a68-97faa9e47281" />
 
+# THE COMMANDER HAS RETIRED. THIS REPO IS NO LONGER BEING MAINTAINED. SEE https://tools.reso.org FOR CERTIFICATION
+
 # RESO Commander
 
 [![CodeFactor](https://www.codefactor.io/repository/github/resostandards/web-api-commander/badge)](https://www.codefactor.io/repository/github/resostandards/web-api-commander)  ![Java CI with Gradle](https://github.com/RESOStandards/web-api-commander/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=main)
