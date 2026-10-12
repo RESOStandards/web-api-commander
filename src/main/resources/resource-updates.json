@@ -1,0 +1,206 @@
+[
+  {
+    "resourceName": "Property",
+    "payloads": ["idx", "om"],
+    "definition": "The Property Resource includes fields commonly used in a Multiple Listing Service (MLS) listing. The pages within the Property Resource include the following:"
+  },
+  {
+    "resourceName": "Association",
+    "payloads": ["idx", "ams", "om"],
+    "definition": "The Association Resource provides a series of fields pertaining to the local real estate trade association. The pages within the Association Resource include the following:"
+  },
+  {
+    "resourceName": "Caravan",
+    "payloads": [],
+    "definition": "The Caravan Resource includes fields and lookups explaining the date, time, location and other particulars about caravan events. A relationship to the organizer, such as an association of REALTORS® or a brokerage is also likely. The pages within the Caravan Resource include the following:"
+  },
+  {
+    "resourceName": "CaravanStop",
+    "payloads": [],
+    "definition": "The CaravanStop Resource represents the stops along a caravan tour of a collection of listings. Its job is mostly to connect records from the Caravan Resource to the Open House Resource. The pages within the CaravanStop Resource include the following:"
+  },
+  {
+    "resourceName": "ContactListingNotes",
+    "payloads": [],
+    "definition": "Adding notes about a given listing are a common interaction between the contact and member within a consumer portal. ContactListingNotes is a 'subtable' to the ContactListings Resource. This subtable allows for multiple notes from the contact or member to be stored around a given listing. The pages within the ContactListingNotes Resource include the following:"
+  },
+  {
+    "resourceName": "ContactListings",
+    "payloads": [],
+    "definition": "Consumer portals are a common place where contacts and members interact around listings. The ContactListings Resource is used to maintain that relationship. This resource connects the Contacts Resource and Property Resource, and it provides other information used to maintain the details about client and member interaction around a given listing. The pages within the ContactListings Resource include the following:"
+  },
+  {
+    "resourceName": "Contacts",
+    "payloads": ["om"],
+    "definition": "The Contacts Resource contains information on client and other contacts of the member. The pages within the Contacts Resource include the following:"
+  },
+  {
+    "resourceName": "EntityEvent",
+    "payloads": ["ams", "om"],
+    "definition": "The EntityEvent Resource offers an alternative to timestamps with an event log, providing an OData-compliant logical timestamp methodology on top of events and any resources or entities that the events affected. The logical timestamp is an event identifier that denotes that a business event occurred (e.g., listing price change, listing status change, phone number change, deletion of a photo). The pages within the EntityEvent Resource include the following:"
+  },
+  {
+    "resourceName": "Field",
+    "payloads": [],
+    "definition": "The Field Resource can be used to advertise metadata about the available fields on a given server in a way that is predictable and user friendly. The pages within the Field Resource include the following:"
+  },
+  {
+    "resourceName": "HistoryTransactional",
+    "definition": "The HistoryTransactional Resource is a transactional history of the listing. A separate record is generated showing the before and after value of any change to each field. The pages within the HistoryTransactional Resource include the following:"
+  },
+  {
+    "resourceName": "InternetTracking",
+    "payloads": ["ams", "om"],
+    "definition": "The InternetTracking Resource provides a standard data set for the recording and transfer of event-related information of real estate products. This allows the participant to monitor and review their real estate data on a grander scale, quickly and efficiently (i.e., listing views from multiple products). The pages within the InternetTracking Resource include the following:"
+  },
+  {
+    "resourceName": "InternetTrackingSummary",
+    "payloads": ["ams", "om"],
+    "definition": "The InternetTrackingSummary Resource includes fields that are the sum of specific tracking events over a period of time (e.g., listings viewed, listings shared). The fields act as a basic template that should be provided from real estate data applications and services, and they are one-to-one tracking totals. The pages within the InternetTrackingSummary Resource include the following:"
+  },
+  {
+    "resourceName": "LockOrBox",
+    "payloads": ["ams"],
+    "definition": "The LockOrBox Resource communicates lockbox, smart lock and showing agent information. The pages within the LockOrBox Resource include the following:"
+  },
+  {
+    "resourceName": "Lookup",
+    "payloads": [],
+    "definition": "The Lookup Resource can be used to convey metadata about lookups (aka enumerations) available on a given server, providing a streamlined way to deliver enumeration metadata to the consumer. The pages within the Lookup Resource include the following:"
+  },
+  {
+    "resourceName": "Media",
+    "payloads": ["idx"],
+    "definition": "The Media Resource is a database and informational representation of media, such as photos, virtual tours, documents/supplements, etc. The pages within the Media Resource include the following:"
+  },
+  {
+    "resourceName": "MemberAssociation",
+    "payloads": [],
+    "definition": "The MemberAssociaton Resource provides the joining information to relate the Member Resource and the Association Resource to each other. The pages within the MemberAssociation Resource include the following:"
+  },
+  {
+    "resourceName": "Member",
+    "payloads": ["idx", "ams", "om"],
+    "definition": "The Member Resource includes information on the roster of agents, brokers, appraisers, assistants, affiliates., etc. who are members of the MLS and/or association of REALTORS®. The pages within the Member Resource include the following:"
+  },
+  {
+    "resourceName": "MemberStateLicense",
+    "payloads": [],
+    "definition": "The MemberStateLicense Resource supports the handling of members that hold multiple state licenses. The pages within the MemberStateLicense Resource include the following:"
+  },
+  {
+    "resourceName": "OfficeAssociation",
+    "payloads": ["ams"],
+    "definition": "The OfficeAssociation Resource provides the joining information to relate the Office Resource and the Association Resource to each other. The pages within the OfficeAssociation Resource include the following:"
+  },
+  {
+    "resourceName": "OfficeCorporateLicense",
+    "payloads": ["ams"],
+    "definition": "The OfficeCorporateLicense Resource supports the handling of offices that hold multiple state licenses. The pages within the OfficeCorporateLicense Resource include the following:"
+  },
+  {
+    "resourceName": "Office",
+    "payloads": ["idx", "ams"],
+    "definition": "The Office Resource includes the roster of offices who are members of the MLS and/or association of REALTORS®. The pages within the Office Resource include the following:"
+  },
+  {
+    "resourceName": "OpenHouse",
+    "payloads": ["idx"],
+    "definition": "The OpenHouse Resource is a collection of fields commonly used to record an open house event. The pages within the OpenHouse Resource include the following:"
+  },
+  {
+    "resourceName": "OtherPhone",
+    "payloads": [],
+    "definition": "Some systems may allow the input of more than one 'other' phone for a given contact or member. In those cases, a collection may be used for any number of other phone numbers with information about what type of number is included. The pages within the OtherPhone Resource include the following:"
+  },
+  {
+    "resourceName": "OUID",
+    "payloads": [],
+    "definition": "The Organization Unique Identifier (OUID) - now known as the Unique Organization Identifier (UOI) - provides a common ID system for organizations that exchange data in the real estate space. The pages within the OUID Resource include the following:"
+  },
+  {
+    "resourceName": "PropertyGreenVerification",
+    "payloads": ["idx"],
+    "definition": "Properties can have different performance ratings applied to them. The PropertyGreenVerification Resource allows the relation of multiple ratings to the given individual listing. The pages within the PropertyGreenVerification Resource include the following:"
+  },
+  {
+    "resourceName": "PropertyPowerProduction",
+    "payloads": [],
+    "definition": "A property might have different means of producing power, whether different systems, like a solar and wind system, or more than one of a given system, like two different solar systems. The PropertyPowerProduction Resource allows for the relation of multiple power production systems to a single property. The pages within the PropertyPowerProduction Resource include the following:"
+  },
+  {
+    "resourceName": "PropertyPowerStorage",
+    "payloads": ["idx"],
+    "definition": "A property might have different means of storing power. The PropertyPowerStorage Resource allows for the relation of power storage details to a single property. The pages within the PropertyPowerStorage Resource include the following:"
+  },
+  {
+    "resourceName": "PropertyRooms",
+    "payloads": [],
+    "definition": "In cases where detailed information about separate rooms in a property are collected, this data is commonly stored in a relational table. This prevents an overly wide property table and also allows for an unlimited number of rooms that can be detailed. The pages within the PropertyRooms Resource include the following:"
+  },
+  {
+    "resourceName": "PropertyUnitTypes",
+    "payloads": [],
+    "definition": "With residential income (aka multifamily properties), each type of unit can have a number of describing fields. In cases where the number of unit types grows, a relational structure is important. The pages within the PropertyUnitTypes Resource include the following:"
+  },
+  {
+    "resourceName": "Prospecting",
+    "payloads": [],
+    "definition": "Also known as automatic email, the Prospecting Resource contains the fields supporting a connection between the Contacts Resource and SavedSearch Resource, along with the other fields used to send email to the client when the related saved search criteria locates results in the data being queried by the saved search criteria. The pages within the Prospecting Resource include the following:"
+  },
+  {
+    "resourceName": "Queue",
+    "payloads": [],
+    "definition": "The Queue Resource is used to represent events that have occurred with records that exist in other resources. A common use case is the deletion or 'kill' of a listing record. This resource can be used to show the identity of the deleted record and when it was deleted, as well as for other events such as record additions or modifications. The pages within the Queue Resource include the following:"
+  },
+  {
+    "resourceName": "Rules",
+    "payloads": [],
+    "definition": "This is a flexible resource that can be used to transmit business and system rules from host to client application. These rules may be meant for human consumption (e.g., Real Estate Business Rules (REBR)), in which case, the client may be a tool allowing a person to review the business rules. The rules may also be meant for machine consumption (e.g., RETS validation), where the rules are structured to be consumed and executed upon by the client application without human intervention. The pages within the Rules Resource include the following:"
+  },
+  {
+    "resourceName": "SavedSearch",
+    "payloads": [],
+    "definition": "The SavedSearch Resource is a means to communicate the saved search criteria and other relative data as it relates to saved searches. The pages within the SavedSearch Resource include the following:"
+  },
+  {
+    "resourceName": "ShowingAppointment",
+    "payloads": [],
+    "definition": "The ShowingAppointment Resource represents a set of fields associated with showing appointments, including available showing method (in person, virtual, etc.), date, time and more. The pages within the ShowingAppointment Resource include the following:"
+  },
+  {
+    "resourceName": "ShowingAvailability",
+    "payloads": [],
+    "definition": "The ShowingAvailability Resource represents a set of fields associated with the availability of a property to accommodate showings, including showing method (in person, virtual, etc.), dates and duration. The pages within the ShowingAvailability Resource include the following:"
+  },
+  {
+    "resourceName": "ShowingRequest",
+    "payloads": [],
+    "definition": "The ShowingRequest Resource represents a set of fields associated with showing requests, including requested showing method (in person, virtual, etc.), date, time and more. The pages within the ShowingRequest Resource include the following:"
+  },
+  {
+    "resourceName": "Showing",
+    "payloads": [],
+    "definition": "The Showing Resource is a set of fields that facilitate the passing of scheduled showing events. This resource connects the listing to the member who requested the showing and provides the date and time of the showing. The pages within the Showing Resource include the following:"
+  },
+  {
+    "resourceName": "SocialMedia",
+    "payloads": ["ams"],
+    "definition": "Some systems may allow for the input of more than one type of social media for a given member, office, contact, etc. In those cases, a collection of social media records may be related to the member, office, etc. The pages within the SocialMedia Resource include the following:"
+  },
+  {
+    "resourceName": "TeamMembers",
+    "payloads": ["ams", "om"],
+    "definition": "The TeamMembers Resource accounts for key fields that tie records from the Member Resource to the related records in the Teams Resource. The pages within the TeamMembers Resource include the following:"
+  },
+  {
+    "resourceName": "Teams",
+    "payloads": ["ams", "om"],
+    "definition": "The Teams Resource covers the name and other information about teams of members who work together. The pages within the Teams Resource include the following:"
+  },
+  {
+    "resourceName": "TransactionManagement",
+    "payloads": ["om"],
+    "definition": "The TransactionManagement Resource represents a way to track different types of transactions (e.g., listing for sale, listing for lease). The pages within the TransactionManagement Resource include the following:"
+  }
+]
